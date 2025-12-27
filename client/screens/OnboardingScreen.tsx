@@ -161,7 +161,7 @@ function Page1Content() {
         entering={FadeIn.delay(600)}
         style={[styles.notificationBadge, { backgroundColor: isDark ? "rgba(50,50,50,0.8)" : "rgba(255,255,255,0.9)" }]}
       >
-        <Feather name="bell" size={20} color={colors.text} />
+        <Feather name="calendar" size={20} color={colors.text} />
       </Animated.View>
 
       <Animated.View 
@@ -254,16 +254,16 @@ function Page3Content() {
       >
         <BlurView intensity={isDark ? 30 : 50} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
         <View style={styles.notificationContent}>
-          <Text style={[styles.notificationLabel, { color: colors.textSecondary }]}>NOTIFICATION</Text>
+          <Text style={[styles.notificationLabel, { color: colors.textSecondary }]}>UPCOMING BOOKING</Text>
           <View style={styles.notificationRow}>
             <View style={styles.notificationCheck}>
               <Feather name="check" size={16} color="#FFFFFF" />
             </View>
             <View style={styles.notificationInfo}>
-              <Text style={[styles.notificationTitle, { color: colors.text }]}>Booking Confirmed</Text>
-              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary }]}>Consultation with Sarah J.</Text>
+              <Text style={[styles.notificationTitle, { color: colors.text }]}>Sarah J. - Consultation</Text>
+              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary }]}>Friday, 2:00 PM</Text>
             </View>
-            <Text style={[styles.notificationTime, { color: colors.textTertiary }]}>Now</Text>
+            <Text style={[styles.notificationTime, { color: colors.textTertiary }]}>Today</Text>
           </View>
         </View>
       </Animated.View>
