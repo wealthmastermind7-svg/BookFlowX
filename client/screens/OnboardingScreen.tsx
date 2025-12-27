@@ -389,9 +389,11 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
       <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
         <View style={styles.brandContainer}>
-          <View style={[styles.brandIcon, { backgroundColor: colors.text }]}>
-            <Feather name="calendar" size={14} color={colors.backgroundRoot} />
-          </View>
+          <Image
+            source={require("../assets/app-icon.png")}
+            style={styles.brandIcon}
+            contentFit="contain"
+          />
           <Text style={[styles.brandText, { color: colors.text }]}>BookFlow</Text>
         </View>
 
@@ -460,11 +462,8 @@ const styles = StyleSheet.create({
     gap: Spacing.sm,
   },
   brandIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 8,
-    alignItems: "center",
-    justifyContent: "center",
+    width: 32,
+    height: 32,
   },
   brandText: {
     fontSize: 16,
