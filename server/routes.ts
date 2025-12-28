@@ -740,11 +740,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Helper function to generate Open Graph meta tags
-  function generateOpenGraphMeta(business: any, service?: any): string {
+  function generateOpenGraphMeta(business: any, service?: any, req?: Request): string {
+    // Determine the base URL - use env domain if set, otherwise use request host
+    let baseUrl = '';
     const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
-    const baseUrl = domain && !domain.includes('localhost') 
-      ? `https://${domain.replace(/^https?:\/\//, '')}`
-      : 'https://bookflowx.cerolauto.store';
+    
+    if (domain) {
+      // Clean up the domain and add https
+      const cleanDomain = domain.replace(/^https?:\/\//, '');
+      baseUrl = `https://${cleanDomain}`;
+    } else if (req) {
+      // Fallback to request host
+      const host = req.get('host') || 'localhost:5000';
+      const protocol = req.protocol || 'https';
+      baseUrl = `${protocol}://${host}`;
+    } else {
+      baseUrl = 'https://localhost:5000';
+    }
     
     const title = service ? `${service.name} - ${business.name}` : `Book with ${business.name}`;
     const description = service 
@@ -784,7 +796,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const services = await storage.getServices(business.id);
       const firstService = services && services.length > 0 ? services[0] : undefined;
       
-      const ogMeta = generateOpenGraphMeta(business, firstService);
+      const ogMeta = generateOpenGraphMeta(business, firstService, req);
       
       // Insert Open Graph meta tags into the HTML before the closing </head> tag
       const htmlWithMeta = bookingHtmlContent.replace(
@@ -817,7 +829,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const services = await storage.getServices(business.id);
       const firstService = services && services.length > 0 ? services[0] : undefined;
       
-      const ogMeta = generateOpenGraphMeta(business, firstService);
+      const ogMeta = generateOpenGraphMeta(business, firstService, req);
       
       // Insert Open Graph meta tags into the HTML before the closing </head> tag
       const htmlWithMeta = bookingHtmlContent.replace(
