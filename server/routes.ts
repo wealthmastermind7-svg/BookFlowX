@@ -723,20 +723,116 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === PUBLIC BOOKING PAGE ===
   
+  // Serve OG image (simple placeholder)
+  app.get("/og-image.png", (req: Request, res: Response) => {
+    // Return a simple SVG image as PNG fallback
+    const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+      <rect width="1200" height="630" fill="#000000"/>
+      <text x="600" y="315" font-size="72" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#FFFFFF" font-family="Arial">
+        BookFlow
+      </text>
+      <text x="600" y="400" font-size="36" text-anchor="middle" fill="#9E9E9E" font-family="Arial">
+        Book Your Appointment
+      </text>
+    </svg>`;
+    
+    res.type("image/svg+xml").send(svg);
+  });
+  
+  // Helper function to generate Open Graph meta tags
+  function generateOpenGraphMeta(business: any, service?: any): string {
+    const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
+    const baseUrl = domain && !domain.includes('localhost') 
+      ? `https://${domain.replace(/^https?:\/\//, '')}`
+      : 'https://bookflowx.cerolauto.store';
+    
+    const title = service ? `${service.name} - ${business.name}` : `Book with ${business.name}`;
+    const description = service 
+      ? `Schedule your ${service.name} appointment. Duration: ${service.durationMinutes}min. Price: $${(service.price || 0).toFixed(2)}`
+      : `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
+    
+    // Use OG image endpoint
+    const ogImage = `${baseUrl}/og-image.png`;
+    
+    return `
+    <meta property="og:title" content="${title}" />
+    <meta property="og:description" content="${description}" />
+    <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="${baseUrl}/book/${business.slug}" />
+    <meta property="og:site_name" content="BookFlow" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="${title}" />
+    <meta name="twitter:description" content="${description}" />
+    <meta name="twitter:image" content="${ogImage}" />`;
+  }
+  
   // Serve public booking page (client-side routing)
-  app.get("/book/:slug", (req: Request, res: Response) => {
-    if (bookingHtmlContent) {
-      res.type("text/html").send(bookingHtmlContent);
-    } else {
-      res.status(500).json({ error: "Booking page not available" });
+  app.get("/book/:slug", async (req: Request, res: Response) => {
+    try {
+      if (!bookingHtmlContent) {
+        return res.status(500).json({ error: "Booking page not available" });
+      }
+      
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      
+      const services = await storage.getServices(business.id);
+      const firstService = services && services.length > 0 ? services[0] : undefined;
+      
+      const ogMeta = generateOpenGraphMeta(business, firstService);
+      
+      // Insert Open Graph meta tags into the HTML before the closing </head> tag
+      const htmlWithMeta = bookingHtmlContent.replace(
+        '</head>',
+        `${ogMeta}\n  </head>`
+      );
+      
+      res.type("text/html").send(htmlWithMeta);
+    } catch (error) {
+      console.error("Error serving booking page:", error);
+      if (bookingHtmlContent) {
+        res.type("text/html").send(bookingHtmlContent);
+      } else {
+        res.status(500).json({ error: "Booking page not available" });
+      }
     }
   });
   
-  app.get("/book/:slug/*", (req: Request, res: Response) => {
-    if (bookingHtmlContent) {
-      res.type("text/html").send(bookingHtmlContent);
-    } else {
-      res.status(500).json({ error: "Booking page not available" });
+  app.get("/book/:slug/*", async (req: Request, res: Response) => {
+    try {
+      if (!bookingHtmlContent) {
+        return res.status(500).json({ error: "Booking page not available" });
+      }
+      
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      
+      const services = await storage.getServices(business.id);
+      const firstService = services && services.length > 0 ? services[0] : undefined;
+      
+      const ogMeta = generateOpenGraphMeta(business, firstService);
+      
+      // Insert Open Graph meta tags into the HTML before the closing </head> tag
+      const htmlWithMeta = bookingHtmlContent.replace(
+        '</head>',
+        `${ogMeta}\n  </head>`
+      );
+      
+      res.type("text/html").send(htmlWithMeta);
+    } catch (error) {
+      console.error("Error serving booking page:", error);
+      if (bookingHtmlContent) {
+        res.type("text/html").send(bookingHtmlContent);
+      } else {
+        res.status(500).json({ error: "Booking page not available" });
+      }
     }
   });
 
