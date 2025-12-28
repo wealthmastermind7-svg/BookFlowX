@@ -3,6 +3,7 @@ import { View, FlatList, StyleSheet, Alert, Share, Platform, Modal, Pressable, A
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
@@ -17,6 +18,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { getApiUrl } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
+import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 
@@ -24,7 +26,7 @@ export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>();
   const { checkAndIncrementShare, checkAndIncrementQr, checkEmbedAccess, remainingShares, remainingQrCodes, isPremium } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
@@ -144,6 +146,18 @@ export default function SettingsScreen() {
   const handleShowDemoTypeModal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setDemoTypeModalVisible(true);
+  };
+
+  const handleOpenSharePreview = () => {
+    if (!business) return;
+    
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+    navigation.navigate("SharePreview", {
+      businessName: business.name,
+      bookingUrl: bookingLink,
+      slug: business.slug,
+    });
   };
 
   const handleShareBookingLink = async () => {
@@ -371,7 +385,7 @@ export default function SettingsScreen() {
           icon: "link" as const,
           title: "Share Booking Link",
           subtitle: business?.bookingUrl || (business?.slug ? `${getBookingDomain()}/book/${business.slug}` : "Loading..."),
-          onPress: handleShareBookingLink,
+          onPress: handleOpenSharePreview,
           showChevron: true,
         },
         {
