@@ -30,9 +30,27 @@ import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
+const SELECTED_DEMO_TYPE_KEY = "@bookflow_selected_demo_type";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
+}
+
+const DEMO_BUSINESS_TYPES = [
+  { id: "salon", label: "Salon", icon: "heart" },
+  { id: "autodetailing", label: "Auto Detail", icon: "truck" },
+  { id: "coaching", label: "Coaching", icon: "target" },
+  { id: "fitness", label: "Fitness", icon: "activity" },
+];
+
+function getBackgroundImageForType(demoType: string) {
+  const imageMap: Record<string, any> = {
+    salon: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    autodetailing: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    coaching: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    fitness: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  };
+  return imageMap[demoType] || imageMap.salon;
 }
 
 const PAGES = [
@@ -175,70 +193,48 @@ function Page1Content() {
   );
 }
 
-function Page2Content() {
+function Page2Content({ selectedDemoType, onSelectDemoType }: { selectedDemoType: string; onSelectDemoType: (type: string) => void }) {
   const { theme: colors, isDark } = useTheme();
 
   return (
     <View style={styles.page2Content}>
-      <Animated.View
-        entering={FadeIn.delay(300).springify()}
-        style={[
-          styles.industryChip,
-          { 
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 80,
-            left: 20,
-          },
-        ]}
-      >
-        <Feather name="heart" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Wellness & Salon</Text>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeIn.delay(450).springify()}
-        style={[
-          styles.industryChip,
-          { 
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 130,
-            right: 60,
-          },
-        ]}
-      >
-        <Feather name="activity" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Clinics</Text>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeIn.delay(600).springify()}
-        style={[
-          styles.industryChip,
-          { 
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 180,
-            right: 30,
-          },
-        ]}
-      >
-        <Feather name="target" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Fitness Coaches</Text>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeIn.delay(750).springify()}
-        style={[
-          styles.industryChip,
-          { 
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 280,
-            left: 30,
-          },
-        ]}
-      >
-        <Feather name="truck" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Auto Detailing</Text>
-      </Animated.View>
+      <View style={styles.demoTypeGrid}>
+        {DEMO_BUSINESS_TYPES.map((type, index) => (
+          <Animated.View
+            key={type.id}
+            entering={FadeIn.delay(300 + index * 150).springify()}
+          >
+            <Pressable
+              onPress={() => onSelectDemoType(type.id)}
+              style={[
+                styles.demoTypeCard,
+                {
+                  backgroundColor: selectedDemoType === type.id
+                    ? colors.text
+                    : isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+                  borderColor: selectedDemoType === type.id ? colors.text : "transparent",
+                },
+              ]}
+            >
+              <Feather
+                name={type.icon as any}
+                size={24}
+                color={selectedDemoType === type.id ? colors.backgroundRoot : colors.text}
+              />
+              <Text
+                style={[
+                  styles.demoTypeLabel,
+                  {
+                    color: selectedDemoType === type.id ? colors.backgroundRoot : colors.text,
+                  },
+                ]}
+              >
+                {type.label}
+              </Text>
+            </Pressable>
+          </Animated.View>
+        ))}
+      </View>
     </View>
   );
 }
@@ -284,6 +280,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedDemoType, setSelectedDemoType] = useState("salon");
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -303,28 +300,31 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
     } else {
       await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+      await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
       onComplete();
     }
-  }, [currentIndex, onComplete]);
+  }, [currentIndex, onComplete, selectedDemoType]);
 
   const handleSkip = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, selectedDemoType]);
 
   const handleLogin = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
     onComplete();
-  }, [onComplete]);
+  }, [onComplete, selectedDemoType]);
 
   const renderPage = useCallback(({ item, index }: { item: typeof PAGES[0]; index: number }) => {
     return (
       <View style={[styles.page, { width: SCREEN_WIDTH }]}>
         <View style={styles.illustrationContainer}>
           {index === 0 && <Page1Content />}
-          {index === 1 && <Page2Content />}
+          {index === 1 && <Page2Content selectedDemoType={selectedDemoType} onSelectDemoType={setSelectedDemoType} />}
           {index === 2 && <Page3Content />}
         </View>
 
@@ -349,9 +349,16 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 {item.highlightText}
               </Text>
             </Text>
-            <Text style={[styles.description, { color: colors.textSecondary }]}>
-              {item.description}
-            </Text>
+            {currentIndex === 1 && (
+              <Text style={[styles.description, { color: colors.textSecondary }]}>
+                Select your business type
+              </Text>
+            )}
+            {currentIndex !== 1 && (
+              <Text style={[styles.description, { color: colors.textSecondary }]}>
+                {item.description}
+              </Text>
+            )}
           </View>
 
           <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
@@ -381,7 +388,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <Image
-        source={require("../assets/stock_images/professional_salon_i_c9c033e3.jpg")}
+        source={getBackgroundImageForType(selectedDemoType)}
         style={styles.backgroundImage}
         contentFit="cover"
       />
@@ -706,6 +713,34 @@ const styles = StyleSheet.create({
   industryText: {
     fontSize: 13,
     fontWeight: "500",
+  },
+  demoTypeGrid: {
+    flex: 1,
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.lg,
+    paddingHorizontal: Spacing.xl,
+  },
+  demoTypeCard: {
+    width: SCREEN_WIDTH / 2.5,
+    aspectRatio: 1,
+    borderRadius: BorderRadius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.md,
+    borderWidth: 2,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  demoTypeLabel: {
+    fontSize: 13,
+    fontWeight: "500",
+    textAlign: "center",
   },
   page3Content: {
     flex: 1,
