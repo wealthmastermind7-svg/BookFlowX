@@ -122,7 +122,7 @@ const BUSINESS_TYPES: BusinessType[] = [
   {
     id: "veterinary",
     name: "Veterinary Clinics",
-    icon: "heart-circle",
+    icon: "activity",
     color: "#8B5CF6",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
