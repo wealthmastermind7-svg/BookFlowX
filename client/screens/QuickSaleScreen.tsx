@@ -8,10 +8,12 @@ import {
   Platform,
   Linking,
   Share,
+  Image,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
+import QRCode from "qrcode";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
@@ -38,6 +40,7 @@ export default function QuickSaleScreen() {
   const [connectingStripe, setConnectingStripe] = useState(false);
   const [saleComplete, setSaleComplete] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
+  const [qrCode, setQrCode] = useState<string | null>(null);
 
   useEffect(() => {
     checkStripeStatus();
@@ -122,6 +125,7 @@ export default function QuickSaleScreen() {
     setDescription("");
     setSaleComplete(false);
     setPaymentUrl(null);
+    setQrCode(null);
   };
 
   const handleSharePaymentLink = async () => {
@@ -173,7 +177,25 @@ export default function QuickSaleScreen() {
       
       if (response.ok) {
         const data = await response.json();
-        setPaymentUrl(data.paymentUrl || null);
+        const url = data.paymentUrl || null;
+        setPaymentUrl(url);
+        
+        // Generate QR code
+        if (url) {
+          try {
+            const qrDataUrl = await QRCode.toDataURL(url, {
+              errorCorrectionLevel: "H",
+              type: "image/png",
+              quality: 0.95,
+              margin: 2,
+              width: 300,
+            });
+            setQrCode(qrDataUrl);
+          } catch (qrError) {
+            console.error("Error generating QR code:", qrError);
+          }
+        }
+        
         setSaleComplete(true);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       } else {
@@ -258,45 +280,51 @@ export default function QuickSaleScreen() {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"] }]}>
         <View style={styles.successContainer}>
-          <View style={[styles.successIcon, { backgroundColor: theme.success }]}>
-            <Feather name="check" size={64} color={theme.buttonText} />
-          </View>
-          
           <ThemedText style={styles.successTitle}>
-            Payment Link Ready
+            Ready to Collect Payment
           </ThemedText>
           
           <ThemedText style={styles.successAmount}>
             {formatAmount(amount)}
           </ThemedText>
           
-          <ThemedText style={[styles.successDescription, { color: theme.textSecondary }]}>
-            Share this payment link with your customer. They can pay securely with any card or digital wallet.
-          </ThemedText>
-          
-          {paymentUrl ? (
-            <View style={styles.linkActions}>
-              <Pressable
-                style={[styles.actionButton, { backgroundColor: theme.accent }]}
-                onPress={handleSharePaymentLink}
-              >
-                <Feather name="share-2" size={20} color={theme.buttonText} style={{ marginRight: Spacing.sm }} />
-                <ThemedText style={[styles.actionButtonText, { color: theme.buttonText }]}>
-                  Share Link
-                </ThemedText>
-              </Pressable>
-              
-              <Pressable
-                style={[styles.actionButton, { backgroundColor: theme.backgroundSecondary, marginTop: Spacing.md }]}
-                onPress={handleCopyPaymentLink}
-              >
-                <Feather name="copy" size={20} color={theme.text} style={{ marginRight: Spacing.sm }} />
-                <ThemedText style={[styles.actionButtonText, { color: theme.text }]}>
-                  Copy Link
-                </ThemedText>
-              </Pressable>
+          {qrCode ? (
+            <View style={[styles.qrContainer, { backgroundColor: theme.backgroundSecondary, borderColor: theme.borderLight }]}>
+              <Image
+                source={{ uri: qrCode }}
+                style={styles.qrCode}
+              />
+              <ThemedText style={[styles.qrInstructions, { color: theme.textSecondary }]}>
+                Ask customer to scan with their phone
+              </ThemedText>
             </View>
-          ) : null}
+          ) : (
+            <View style={[styles.qrPlaceholder, { backgroundColor: theme.backgroundSecondary }]}>
+              <ActivityIndicator size="large" color={theme.accent} />
+            </View>
+          )}
+          
+          <View style={styles.linkActions}>
+            <Pressable
+              style={[styles.actionButton, { backgroundColor: theme.backgroundSecondary }]}
+              onPress={handleCopyPaymentLink}
+            >
+              <Feather name="copy" size={20} color={theme.text} style={{ marginRight: Spacing.sm }} />
+              <ThemedText style={[styles.actionButtonText, { color: theme.text }]}>
+                Copy Payment Link
+              </ThemedText>
+            </Pressable>
+            
+            <Pressable
+              style={[styles.actionButton, { backgroundColor: theme.accent, marginTop: Spacing.md }]}
+              onPress={handleSharePaymentLink}
+            >
+              <Feather name="share-2" size={20} color={theme.buttonText} style={{ marginRight: Spacing.sm }} />
+              <ThemedText style={[styles.actionButtonText, { color: theme.buttonText }]}>
+                Share Payment Link
+              </ThemedText>
+            </Pressable>
+          </View>
           
           <Pressable
             style={[styles.newSaleButton, { backgroundColor: theme.backgroundTertiary }]}
@@ -574,5 +602,30 @@ const styles = StyleSheet.create({
   actionButtonText: {
     ...Typography.body,
     fontWeight: "600",
+  },
+  qrContainer: {
+    width: "100%",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    alignItems: "center",
+    marginVertical: Spacing.lg,
+  },
+  qrCode: {
+    width: 280,
+    height: 280,
+  },
+  qrInstructions: {
+    ...Typography.body,
+    marginTop: Spacing.md,
+    textAlign: "center",
+  },
+  qrPlaceholder: {
+    width: "100%",
+    height: 320,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+    marginVertical: Spacing.lg,
   },
 });
