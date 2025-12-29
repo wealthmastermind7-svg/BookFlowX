@@ -180,8 +180,17 @@ function CircularMeter() {
   );
 }
 
-function BusinessTypeSelector({ selectedType, onSelect }: { selectedType: string; onSelect: (id: string) => void }) {
-  const { theme: colors, isDark } = useTheme();
+function BusinessTypeSelector({ 
+  selectedType, 
+  onSelect,
+  isDark,
+  colors
+}: { 
+  selectedType: string; 
+  onSelect: (id: string) => void;
+  isDark: boolean;
+  colors: any;
+}) {
   const scrollRef = useRef<ScrollView>(null);
 
   return (
@@ -200,8 +209,8 @@ function BusinessTypeSelector({ selectedType, onSelect }: { selectedType: string
         {BUSINESS_TYPES.map((type) => (
           <Pressable
             key={type.id}
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            onPress={async () => {
+              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onSelect(type.id);
             }}
             style={[
@@ -240,13 +249,14 @@ function BusinessTypeSelector({ selectedType, onSelect }: { selectedType: string
   );
 }
 
-function Page1Content({ selectedBusinessType }: { selectedBusinessType: string }) {
+function Page1Content({ 
+  selectedBusinessType,
+  onBusinessTypeChange,
+}: { 
+  selectedBusinessType: string;
+  onBusinessTypeChange: (typeId: string) => void;
+}) {
   const { theme: colors, isDark } = useTheme();
-  const [selectedType, setSelectedType] = useState(selectedBusinessType);
-
-  const handleBusinessSelect = (typeId: string) => {
-    setSelectedType(typeId);
-  };
 
   return (
     <View style={styles.page1Container}>
@@ -309,7 +319,12 @@ function Page1Content({ selectedBusinessType }: { selectedBusinessType: string }
       </View>
 
       <Animated.View entering={FadeInUp.delay(400)}>
-        <BusinessTypeSelector selectedType={selectedType} onSelect={handleBusinessSelect} />
+        <BusinessTypeSelector 
+          selectedType={selectedBusinessType} 
+          onSelect={onBusinessTypeChange}
+          isDark={isDark}
+          colors={colors}
+        />
       </Animated.View>
     </View>
   );
@@ -460,12 +475,21 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     onComplete();
   }, [onComplete]);
 
+  const handleBusinessTypeChange = useCallback((typeId: string) => {
+    setSelectedBusinessType(typeId);
+  }, []);
+
   const renderPage = useCallback(
     ({ item, index }: { item: (typeof PAGES)[0]; index: number }) => {
       return (
         <View style={[styles.page, { width: SCREEN_WIDTH }]}>
           <View style={styles.illustrationContainer}>
-            {index === 0 && <Page1Content selectedBusinessType={selectedBusinessType} />}
+            {index === 0 && (
+              <Page1Content 
+                selectedBusinessType={selectedBusinessType} 
+                onBusinessTypeChange={handleBusinessTypeChange}
+              />
+            )}
             {index === 1 && <Page2Content />}
             {index === 2 && <Page3Content />}
           </View>
@@ -519,7 +543,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </View>
       );
     },
-    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType]
+    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange]
   );
 
   return (
