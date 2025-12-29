@@ -30,77 +30,9 @@ import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
-const SELECTED_DEMO_TYPE_KEY = "@bookflow_selected_demo_type";
 
 interface OnboardingScreenProps {
   onComplete: () => void;
-}
-
-const INDUSTRIES = [
-  { id: "hvac", label: "HVAC" },
-  { id: "plumbing", label: "Plumbing" },
-  { id: "electrical", label: "Electrical" },
-  { id: "roofing", label: "Roofing" },
-  { id: "construction", label: "Construction" },
-  { id: "handyman", label: "Handyman" },
-  { id: "appliance-repair", label: "Appliance Repair" },
-  { id: "painting", label: "Painting" },
-  { id: "renovations", label: "Renovations" },
-  { id: "flooring", label: "Flooring" },
-  { id: "residential-cleaning", label: "Residential Cleaning" },
-  { id: "commercial-cleaning", label: "Commercial Cleaning" },
-  { id: "window-cleaning", label: "Window Cleaning" },
-  { id: "pressure-washing", label: "Pressure Washing" },
-  { id: "carpet-cleaning", label: "Carpet Cleaning" },
-  { id: "landscaping", label: "Landscaping" },
-  { id: "lawn-care", label: "Lawn Care" },
-  { id: "tree-care", label: "Tree Care" },
-  { id: "pool-service", label: "Pool Service" },
-  { id: "auto-detailing", label: "Auto Detailing" },
-  { id: "mobile-car-wash", label: "Mobile Car Wash" },
-  { id: "mechanics", label: "Mechanics" },
-  { id: "hair-salon", label: "Hair Salon" },
-  { id: "barbershop", label: "Barbershop" },
-  { id: "nail-salon", label: "Nail Salon" },
-  { id: "lash-brow", label: "Lash & Brow" },
-  { id: "spa", label: "Spa" },
-  { id: "massage", label: "Massage" },
-  { id: "tattoo", label: "Tattoo" },
-  { id: "personal-trainer", label: "Personal Trainer" },
-  { id: "fitness-studio", label: "Fitness Studio" },
-  { id: "yoga-studio", label: "Yoga Studio" },
-  { id: "pilates", label: "Pilates" },
-  { id: "crossfit", label: "CrossFit" },
-  { id: "dance-studio", label: "Dance Studio" },
-  { id: "martial-arts", label: "Martial Arts" },
-  { id: "boxing", label: "Boxing" },
-  { id: "sports-coaching", label: "Sports Coaching" },
-  { id: "physiotherapy", label: "Physiotherapy" },
-  { id: "chiropractic", label: "Chiropractic" },
-  { id: "acupuncture", label: "Acupuncture" },
-  { id: "psychology", label: "Psychology" },
-  { id: "counseling", label: "Counseling" },
-  { id: "speech-therapy", label: "Speech Therapy" },
-  { id: "nutritionist", label: "Nutritionist" },
-  { id: "business-consulting", label: "Business Consulting" },
-  { id: "financial-advisor", label: "Financial Advisor" },
-  { id: "accountant", label: "Accountant" },
-  { id: "lawyer", label: "Lawyer" },
-  { id: "private-tutor", label: "Private Tutor" },
-  { id: "language-teacher", label: "Language Teacher" },
-  { id: "music-teacher", label: "Music Teacher" },
-  { id: "photography", label: "Photography" },
-  { id: "videography", label: "Videography" },
-  { id: "graphic-design", label: "Graphic Design" },
-  { id: "event-planning", label: "Event Planning" },
-  { id: "wedding-planning", label: "Wedding Planning" },
-  { id: "pet-grooming", label: "Pet Grooming" },
-  { id: "dog-training", label: "Dog Training" },
-  { id: "veterinary", label: "Veterinary" },
-];
-
-function getBackgroundImageForType(industryId: string) {
-  return require("../assets/stock_images/professional_salon_i_c9c033e3.jpg");
 }
 
 const PAGES = [
@@ -179,26 +111,8 @@ function CircularMeter() {
   );
 }
 
-function Page1Content({ selectedIndustry, onSelectIndustry }: { selectedIndustry: string; onSelectIndustry: (id: string) => void }) {
+function Page1Content() {
   const { theme: colors, isDark } = useTheme();
-  const scrollViewRef = useRef<ScrollView>(null);
-  const lastScrollXRef = useRef(0);
-
-  const handleScroll = useCallback(
-    (event: any) => {
-      const contentOffsetX = event.nativeEvent.contentOffset.x;
-      const itemWidth = 110;
-      const currentIndex = Math.round(contentOffsetX / itemWidth);
-      const selectedItem = INDUSTRIES[currentIndex];
-      
-      if (selectedItem && selectedItem.id !== selectedIndustry && Math.abs(contentOffsetX - lastScrollXRef.current) > 50) {
-        onSelectIndustry(selectedItem.id);
-        lastScrollXRef.current = contentOffsetX;
-        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      }
-    },
-    [selectedIndustry, onSelectIndustry]
-  );
 
   return (
     <View style={styles.page1Content}>
@@ -257,52 +171,6 @@ function Page1Content({ selectedIndustry, onSelectIndustry }: { selectedIndustry
         <View style={styles.greenDot} />
         <Text style={[styles.newClientText, { color: colors.text }]}>New Client</Text>
       </Animated.View>
-
-      <Animated.View 
-        entering={FadeInUp.delay(900)}
-        style={[styles.industrySelector, { backgroundColor: isDark ? "rgba(20,20,20,0.95)" : "rgba(255,255,255,0.95)" }]}
-      >
-        <ScrollView
-          ref={scrollViewRef}
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          onScroll={handleScroll}
-          scrollEventThrottle={16}
-          decelerationRate="fast"
-          snapToInterval={110}
-          contentContainerStyle={styles.industryList}
-        >
-          {INDUSTRIES.map((industry) => (
-            <Pressable
-              key={industry.id}
-              onPress={() => {
-                onSelectIndustry(industry.id);
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-              }}
-              style={[
-                styles.industryChip,
-                {
-                  backgroundColor: selectedIndustry === industry.id
-                    ? colors.text
-                    : isDark ? "rgba(50,50,50,0.6)" : "rgba(0,0,0,0.05)",
-                  borderColor: selectedIndustry === industry.id ? colors.text : "transparent",
-                },
-              ]}
-            >
-              <Text
-                style={[
-                  styles.industryChipText,
-                  {
-                    color: selectedIndustry === industry.id ? colors.backgroundRoot : colors.text,
-                  },
-                ]}
-              >
-                {industry.label}
-              </Text>
-            </Pressable>
-          ))}
-        </ScrollView>
-      </Animated.View>
     </View>
   );
 }
@@ -315,7 +183,7 @@ function Page2Content() {
       <Animated.View
         entering={FadeIn.delay(300).springify()}
         style={[
-          styles.decorativeChip,
+          styles.industryChip,
           { 
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 80,
@@ -330,7 +198,7 @@ function Page2Content() {
       <Animated.View
         entering={FadeIn.delay(450).springify()}
         style={[
-          styles.decorativeChip,
+          styles.industryChip,
           { 
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 130,
@@ -345,7 +213,7 @@ function Page2Content() {
       <Animated.View
         entering={FadeIn.delay(600).springify()}
         style={[
-          styles.decorativeChip,
+          styles.industryChip,
           { 
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 180,
@@ -360,7 +228,7 @@ function Page2Content() {
       <Animated.View
         entering={FadeIn.delay(750).springify()}
         style={[
-          styles.decorativeChip,
+          styles.industryChip,
           { 
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 280,
@@ -416,7 +284,6 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedIndustry, setSelectedIndustry] = useState("hair-salon");
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -436,30 +303,27 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
     } else {
       await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-      await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
       onComplete();
     }
-  }, [currentIndex, onComplete, selectedIndustry]);
+  }, [currentIndex, onComplete]);
 
   const handleSkip = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
     onComplete();
-  }, [onComplete, selectedIndustry]);
+  }, [onComplete]);
 
   const handleLogin = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
     onComplete();
-  }, [onComplete, selectedIndustry]);
+  }, [onComplete]);
 
   const renderPage = useCallback(({ item, index }: { item: typeof PAGES[0]; index: number }) => {
     return (
       <View style={[styles.page, { width: SCREEN_WIDTH }]}>
         <View style={styles.illustrationContainer}>
-          {index === 0 && <Page1Content selectedIndustry={selectedIndustry} onSelectIndustry={setSelectedIndustry} />}
+          {index === 0 && <Page1Content />}
           {index === 1 && <Page2Content />}
           {index === 2 && <Page3Content />}
         </View>
@@ -517,7 +381,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <Image
-        source={getBackgroundImageForType(selectedIndustry)}
+        source={require("../assets/stock_images/professional_salon_i_c9c033e3.jpg")}
         style={styles.backgroundImage}
         contentFit="cover"
       />
@@ -842,54 +706,6 @@ const styles = StyleSheet.create({
   industryText: {
     fontSize: 13,
     fontWeight: "500",
-  },
-  decorativeChip: {
-    position: "absolute",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.sm + 2,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  industrySelector: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    borderTopLeftRadius: BorderRadius.xl,
-    borderTopRightRadius: BorderRadius.xl,
-    maxHeight: 100,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.md,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: -2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 5,
-  },
-  industryList: {
-    paddingHorizontal: Spacing.lg,
-    gap: Spacing.md,
-  },
-  industryChip: {
-    paddingVertical: Spacing.sm + 2,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 20,
-    borderWidth: 1,
-    minWidth: 100,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  industryChipText: {
-    fontSize: 13,
-    fontWeight: "500",
-    textAlign: "center",
   },
   page3Content: {
     flex: 1,
