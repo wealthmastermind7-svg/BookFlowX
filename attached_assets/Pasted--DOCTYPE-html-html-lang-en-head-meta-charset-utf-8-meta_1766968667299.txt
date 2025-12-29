@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>BookFlow Onboarding</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&amp;family=Manrope:wght@300;400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#111111", // Deep charcoal/black for primary actions
+                        "background-light": "#F9FAFB",
+                        "background-dark": "#050505",
+                        "surface-light": "rgba(255, 255, 255, 0.6)",
+                        "surface-dark": "rgba(20, 20, 20, 0.6)",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Manrope", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        '3xl': "24px",
+                    },
+                    animation: {
+                        'fill-meter': 'fillMeter 2s ease-out forwards',
+                        'fade-in-up': 'fadeInUp 1s ease-out forwards',
+                        'pulse-slow': 'pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+                    },
+                    keyframes: {
+                        fillMeter: {
+                            '0%': { strokeDashoffset: '251' },
+                            '100%': { strokeDashoffset: '0' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(20px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        }
+                    }
+                },
+            },
+        };
+    </script>
+<style>
+.bg-grain {
+    background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuDk1WzIwU1I38syLB7Aokoeygl0u71hYYA7PSVGFKR2oADWWaEkchFEVmnYk9wd9pWSUXI2DlyoMHsvS7j7aG6Ggw6MT_pUtlJoKra8YkGRFpq6lQf3DW0BlMYboiyZ_WqJKOo7idqh3KZfmwo0qwtHpBWziwppUuANemyCzEqtPy_zJbzPIYvD0m2uYkBCEwC1vo1dvKcLZ6cfHtRmF88mV_ABc9NLpK7VpltjJ_dg-xrH8Zv8JK-qWFuiNTF_PERbtd-REQacuY0)
+}
+.ken-burns {
+    animation: kenBurns 20s ease-in-out infinite alternate
+}
+@keyframes kenBurns {
+    0% { transform: scale(1); } 
+    100% { transform: scale(1.1); }
+}
+.glass-panel {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px)
+}.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}.scrollbar-hide {
+    -ms-overflow-style: none;scrollbar-width: none;}
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-gray-900 dark:text-white antialiased overflow-hidden h-screen w-full transition-colors duration-500">
+<div class="fixed inset-0 z-0 overflow-hidden">
+<img alt="Cinematic workspace showing effortless productivity" class="absolute inset-0 w-full h-full object-cover grayscale opacity-90 dark:opacity-60 ken-burns" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaOUbDLj3uTYBnQ0T2LChZC2AyPJ-5F3QNsBTSyEGPezylxAY3B7sV0ydgXZGDpWOkg3UVv32B7jNCZqZn7i-JBH9IE5gQt5iyFKU8y7H7vuFyNIz-8zz_cGtQZ0vx5JaCgq85-AscjggIE9NMfJOAQn4hLvY547Z7RIO7I7_B7BvwjRAhc2iOROW74i8aNJyfRgrASHXhoIchxzcSRw4Dhqfex4Ka0i6UQZK6VRsQeFvGcoHfi2lwpv4pKeRScV1gsb9HpdEGxKw"/>
+<div class="absolute inset-0 bg-grain mix-blend-overlay opacity-40 z-10 pointer-events-none"></div>
+<div class="absolute inset-0 bg-gradient-to-b from-white/40 via-transparent to-background-light/95 dark:from-black/40 dark:via-transparent dark:to-background-dark/95 z-10"></div>
+</div>
+<div class="relative z-20 h-full flex flex-col justify-between px-6 pt-12 pb-6 max-w-md mx-auto">
+<div class="flex justify-center items-center space-x-2 animate-fade-in-up" style="animation-delay: 0.1s;">
+<div class="w-8 h-8 bg-primary text-white dark:bg-white dark:text-black rounded-lg flex items-center justify-center shadow-lg">
+<span class="material-icons text-sm">calendar_today</span>
+</div>
+<span class="text-lg font-bold tracking-tight text-gray-900 dark:text-white">BookFlow</span>
+</div>
+<div class="flex-1 flex flex-col justify-center items-center relative py-4">
+<div class="absolute w-64 h-80 bg-white/20 dark:bg-black/20 rounded-3xl rotate-[-6deg] blur-sm transform translate-y-4 scale-90 border border-white/10 dark:border-white/5 opacity-60"></div>
+<div class="relative w-72 bg-surface-light dark:bg-surface-dark glass-panel border border-white/40 dark:border-white/10 rounded-3xl p-6 shadow-2xl transform transition-transform duration-700 hover:scale-105 animate-fade-in-up" style="animation-delay: 0.3s;">
+<div class="flex flex-col items-center">
+<div class="w-full flex justify-between items-center mb-6 opacity-70">
+<span class="text-xs font-semibold uppercase tracking-wider text-gray-800 dark:text-gray-200">Daily Goal</span>
+<span class="material-icons text-sm text-gray-800 dark:text-gray-200">more_horiz</span>
+</div>
+<div class="relative w-40 h-40 mb-4">
+<svg class="w-full h-full transform -rotate-90">
+<circle class="text-gray-300 dark:text-gray-700 opacity-30" cx="80" cy="80" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+<circle class="text-gray-900 dark:text-white animate-fill-meter" cx="80" cy="80" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="251" stroke-linecap="round" stroke-width="8"></circle>
+</svg>
+<div class="absolute inset-0 flex flex-col items-center justify-center">
+<span class="text-3xl font-display font-semibold text-gray-900 dark:text-white">100%</span>
+<span class="text-[10px] text-gray-600 dark:text-gray-300 uppercase tracking-wide mt-1">Booked</span>
+</div>
+</div>
+<div class="w-full space-y-3 mt-2">
+<div class="flex items-center space-x-3">
+<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBmLbW3f3zs4WvEVyhgIJ23neItZw0i0HMwPHmBypr0Rjk4Wll1Dl10dmAqK7L4FANqkWNqXaNtyflNplA-nyy6IwfHrvZ50u-XnPtQnxLtbr3qilB9ApgJhQHzxlO7gpvPT0OkB4tRXEw5ztAKyFGGO5MEzkaNIUGUrekBvWV9qwyEutuVJLGRs7t1H46f9vxlPZm-T5fBSGYrTOnv_i3eCbb6aWYhWS8Cfkl08kMHWjM-ru2CsZ80KwfbQd9NMe_v3-vE_qFALGc"/>
+</div>
+<div class="flex-1">
+<div class="h-2 w-24 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+<div class="h-1.5 w-16 bg-gray-200 dark:bg-gray-700 rounded-full mt-1.5"></div>
+</div>
+<div class="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+<span class="material-icons text-[10px] text-white">check</span>
+</div>
+</div>
+<div class="flex items-center space-x-3 opacity-60">
+<div class="w-8 h-8 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center overflow-hidden">
+<img alt="Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCfILIs2RZaQnVWUxiEXUpHWoOr3xHLx1KfdZShr2pMWO8WyXAVBIZ5upQCqCoZKAFyJ0iNQpX4YoFQLpT1yDpKJGxCFD7HyI-Y3G94KX80uETPx1-_WDjMPICo1Ida6O3XhZA1b940j9lVzeYDW5sJmz6kONfY6YLqi8MEyc0CVh0K-Kr0tFTPK3cEon5FEb5vHZMJUmbzay9BhH8z9d1VCQ-nqT1M0U1yLXpMPLkJGIJrL-BfrTUmA4Ywb73e2uDy3MhMrJdIPOo"/>
+</div>
+<div class="flex-1">
+<div class="h-2 w-20 bg-gray-300 dark:bg-gray-600 rounded-full"></div>
+<div class="h-1.5 w-12 bg-gray-200 dark:bg-gray-700 rounded-full mt-1.5"></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute -right-4 top-1/4 w-12 h-12 bg-white dark:bg-gray-800 rounded-xl shadow-lg flex items-center justify-center animate-pulse-slow glass-panel border border-white/20">
+<span class="material-icons text-primary dark:text-white">notifications_active</span>
+</div>
+<div class="absolute -left-2 bottom-1/4 w-auto px-3 py-2 bg-white dark:bg-gray-800 rounded-lg shadow-lg flex items-center gap-2 glass-panel border border-white/20 animate-fade-in-up" style="animation-delay: 0.8s;">
+<div class="w-2 h-2 bg-green-500 rounded-full"></div>
+<span class="text-xs font-medium text-gray-800 dark:text-gray-200">New Client</span>
+</div>
+</div>
+<div class="flex flex-col items-center text-center space-y-6 animate-fade-in-up" style="animation-delay: 0.5s;">
+<div class="space-y-3">
+<h1 class="text-4xl md:text-5xl font-display font-medium text-gray-900 dark:text-white leading-tight">
+                Booking Made <br/><i class="font-serif italic text-gray-600 dark:text-gray-300">Effortless</i>
+</h1>
+<p class="text-base text-gray-600 dark:text-gray-400 max-w-xs mx-auto leading-relaxed">
+                Beautiful appointment scheduling for every business type. No accounts. No waiting.
+            </p>
+</div>
+<div class="flex justify-center space-x-2">
+<div class="w-8 h-1.5 bg-gray-900 dark:bg-white rounded-full transition-all duration-300"></div>
+<div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+<div class="w-1.5 h-1.5 bg-gray-400 dark:bg-gray-600 rounded-full"></div>
+</div>
+<div class="w-full space-y-5">
+<button class="w-full py-4 px-6 bg-primary text-white text-lg font-medium rounded-full shadow-xl hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex items-center justify-center group relative overflow-hidden">
+<span class="relative z-10 flex items-center gap-2">
+                    Get Started
+                    <span class="material-icons text-sm group-hover:translate-x-1 transition-transform">arrow_forward</span>
+</span>
+<div class="absolute inset-0 bg-white/10 translate-y-full group-hover:translate-y-0 transition-transform duration-300"></div>
+</button>
+<div class="w-full relative">
+<div class="absolute left-0 top-0 bottom-0 w-6 bg-gradient-to-r from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none"></div>
+<div class="absolute right-0 top-0 bottom-0 w-6 bg-gradient-to-l from-background-light dark:from-background-dark to-transparent z-10 pointer-events-none"></div>
+<div class="flex items-center space-x-3 overflow-x-auto pb-2 -mx-6 px-6 scrollbar-hide snap-x pt-1">
+<button class="snap-center shrink-0 px-4 py-3 rounded-2xl bg-white/80 dark:bg-white/10 backdrop-blur-md border border-gray-200 dark:border-white/30 text-gray-900 dark:text-white font-semibold text-sm shadow-md ring-1 ring-black/5 dark:ring-white/10 transition-all transform active:scale-95 flex items-center gap-2">
+<span class="material-icons text-base text-pink-500 dark:text-pink-300">spa</span>
+                        Salons &amp; Beauty
+                    </button>
+<button class="snap-center shrink-0 px-4 py-3 rounded-2xl bg-gray-100/50 dark:bg-white/5 backdrop-blur-sm border border-transparent text-gray-500 dark:text-gray-400 font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-icons text-base">medical_services</span>
+                        Dentists &amp; Medical
+                    </button>
+<button class="snap-center shrink-0 px-4 py-3 rounded-2xl bg-gray-100/50 dark:bg-white/5 backdrop-blur-sm border border-transparent text-gray-500 dark:text-gray-400 font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-icons text-base">directions_car</span>
+                        Car Detailers
+                    </button>
+<button class="snap-center shrink-0 px-4 py-3 rounded-2xl bg-gray-100/50 dark:bg-white/5 backdrop-blur-sm border border-transparent text-gray-500 dark:text-gray-400 font-medium text-sm hover:bg-gray-200 dark:hover:bg-white/10 transition-all active:scale-95 flex items-center gap-2">
+<span class="material-icons text-base">fitness_center</span>
+                        Fitness Trainers
+                    </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<button class="fixed top-4 right-4 z-50 p-2 rounded-full bg-white/20 backdrop-blur-md border border-white/20 text-gray-900 dark:text-white hover:bg-white/30 transition-colors" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons block dark:hidden">dark_mode</span>
+<span class="material-icons hidden dark:block">light_mode</span>
+</button>
+
+</body></html>
