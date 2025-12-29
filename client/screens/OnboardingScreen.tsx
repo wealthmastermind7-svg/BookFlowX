@@ -181,10 +181,10 @@ function CircularMeter() {
 
 function Page1Content({ selectedIndustry, onSelectIndustry }: { selectedIndustry: string; onSelectIndustry: (id: string) => void }) {
   const { theme: colors, isDark } = useTheme();
-  const scrollViewRef = React.useRef<ScrollView>(null);
-  const lastScrollXRef = React.useRef(0);
+  const scrollViewRef = useRef<ScrollView>(null);
+  const lastScrollXRef = useRef(0);
 
-  const handleScroll = React.useCallback(
+  const handleScroll = useCallback(
     (event: any) => {
       const contentOffsetX = event.nativeEvent.contentOffset.x;
       const itemWidth = 110;
