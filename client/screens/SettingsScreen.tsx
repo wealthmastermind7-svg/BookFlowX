@@ -37,7 +37,7 @@ export default function SettingsScreen() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [bookingUrl, setBookingUrl] = useState<string>("");
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingField, setEditingField] = useState<"name" | "website" | "phone" | null>(null);
+  const [editingField, setEditingField] = useState<"name" | "website" | "phone" | "slug" | null>(null);
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
@@ -309,7 +309,7 @@ export default function SettingsScreen() {
     }
   };
 
-  const handleEditBusinessField = (field: "name" | "website" | "phone") => {
+  const handleEditBusinessField = (field: "name" | "website" | "phone" | "slug") => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setEditingField(field);
     const currentValue = business?.[field as keyof Business];
@@ -317,8 +317,27 @@ export default function SettingsScreen() {
     setEditModalVisible(true);
   };
 
+  const validateSlug = (slug: string): string | null => {
+    if (!slug.trim()) return "Slug cannot be empty";
+    if (!/^[a-z0-9-]+$/.test(slug)) return "Slug can only contain lowercase letters, numbers, and hyphens";
+    if (slug.length < 3) return "Slug must be at least 3 characters";
+    if (slug.length > 50) return "Slug must be at most 50 characters";
+    if (slug.startsWith("-") || slug.endsWith("-")) return "Slug cannot start or end with a hyphen";
+    return null;
+  };
+
   const handleSaveBusinessField = async () => {
     if (!business || !editingField) return;
+    
+    // Validate slug format
+    if (editingField === "slug") {
+      const slugError = validateSlug(editValue);
+      if (slugError) {
+        Alert.alert("Invalid Slug", slugError);
+        return;
+      }
+    }
+    
     setEditLoading(true);
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -342,7 +361,11 @@ export default function SettingsScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     } catch (error) {
       console.error("Error updating business:", error);
-      Alert.alert("Error", `Failed to save ${editingField}. Please try again.`);
+      if (editingField === "slug" && error instanceof Error && error.message.includes("409")) {
+        Alert.alert("Slug Taken", "This booking link is already in use. Please choose another.");
+      } else {
+        Alert.alert("Error", `Failed to save ${editingField}. Please try again.`);
+      }
     } finally {
       setEditLoading(false);
     }
@@ -381,6 +404,14 @@ export default function SettingsScreen() {
     {
       section: "Booking Link",
       items: [
+        {
+          icon: "link-2" as const,
+          title: "Booking URL Slug",
+          subtitle: "Tap to edit",
+          value: business?.slug || "demo-business",
+          onPress: () => handleEditBusinessField("slug"),
+          showChevron: true,
+        },
         {
           icon: "link" as const,
           title: "Share Booking Link",
@@ -485,20 +516,29 @@ export default function SettingsScreen() {
                 {editingField === "name" && "Business Name"}
                 {editingField === "website" && "Website"}
                 {editingField === "phone" && "Phone"}
+                {editingField === "slug" && "Booking URL Slug"}
               </ThemedText>
               <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeButton}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
+            {editingField === "slug" && (
+              <ThemedText type="small" style={styles.slugHelper}>
+                URL: {getBookingDomain()}/book/{editValue || "your-slug"}
+              </ThemedText>
+            )}
             <TextInput
               value={editValue}
               onChangeText={setEditValue}
-              placeholder={editingField === "name" ? "Business name" : editingField === "website" ? "Website URL" : "Phone number"}
+              placeholder={editingField === "name" ? "Business name" : editingField === "website" ? "Website URL" : editingField === "phone" ? "Phone number" : "my-booking-link"}
+              autoCapitalize={editingField === "slug" ? "none" : "words"}
+              keyboardType={editingField === "phone" ? "phone-pad" : editingField === "website" ? "url" : "default"}
               style={[
                 styles.editInput,
                 { backgroundColor: theme.backgroundSecondary, color: theme.text, borderColor: theme.backgroundTertiary }
               ]}
               placeholderTextColor={theme.textSecondary}
+              editable={!editLoading}
             />
             <View style={styles.modalActions}>
               <Button onPress={handleSaveBusinessField} disabled={editLoading || !editValue.trim()}>
@@ -780,6 +820,10 @@ const styles = StyleSheet.create({
     padding: Spacing.md,
     marginBottom: Spacing.lg,
     fontSize: 16,
+  },
+  slugHelper: {
+    marginBottom: Spacing.md,
+    opacity: 0.7,
   },
   demoTypeGrid: {
     gap: Spacing.md,
