@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { 
   View, 
   StyleSheet, 
@@ -9,12 +9,15 @@ import {
   Linking,
   Share,
   Image,
+  Animated,
+  ScrollView,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import QRCode from "qrcode";
 import { Feather } from "@expo/vector-icons";
+import Svg, { Circle, Path, G } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
@@ -42,9 +45,32 @@ export default function QuickSaleScreen() {
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
 
+  const animationScale = useRef(new Animated.Value(0.5)).current;
+  const animationOpacity = useRef(new Animated.Value(0)).current;
+
   useEffect(() => {
     checkStripeStatus();
   }, []);
+
+  useEffect(() => {
+    if (saleComplete) {
+      Animated.parallel([
+        Animated.timing(animationScale, {
+          toValue: 1,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(animationOpacity, {
+          toValue: 1,
+          duration: 600,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      animationScale.setValue(0.5);
+      animationOpacity.setValue(0);
+    }
+  }, [saleComplete]);
 
   const checkStripeStatus = async () => {
     setCheckingStatus(true);
@@ -279,14 +305,33 @@ export default function QuickSaleScreen() {
   if (saleComplete) {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"] }]}>
-        <View style={styles.successContainer}>
+        <ScrollView contentContainerStyle={styles.successContainer} showsVerticalScrollIndicator={false}>
           <ThemedText style={styles.successTitle}>
-            Ready to Collect Payment
+            Ready to Collect
           </ThemedText>
           
           <ThemedText style={styles.successAmount}>
             {formatAmount(amount)}
           </ThemedText>
+          
+          <Animated.View style={[
+            styles.nfcIconContainer,
+            {
+              transform: [{ scale: animationScale }],
+              opacity: animationOpacity,
+            },
+          ]}>
+            <View style={[styles.nfcIcon, { backgroundColor: theme.accent }]}>
+              <Svg width={120} height={120} viewBox="0 0 120 120">
+                <Circle cx={60} cy={60} r={50} fill="none" stroke="white" strokeWidth={2} />
+                <Circle cx={60} cy={60} r={40} fill="none" stroke="white" strokeWidth={1.5} />
+                <G transform="translate(50, 45)">
+                  <Path d="M 10 10 Q 8 8 6 8 Q 4 8 2 10 Q 0 12 0 14 L 0 16" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" />
+                  <Path d="M 16 10 Q 18 8 20 8 Q 22 8 24 10 Q 26 12 26 14 L 26 16" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" />
+                </G>
+              </Svg>
+            </View>
+          </Animated.View>
           
           {qrCode ? (
             <View style={[styles.qrContainer, { backgroundColor: theme.backgroundSecondary, borderColor: theme.borderLight }]}>
@@ -298,11 +343,7 @@ export default function QuickSaleScreen() {
                 Ask customer to scan with their phone
               </ThemedText>
             </View>
-          ) : (
-            <View style={[styles.qrPlaceholder, { backgroundColor: theme.backgroundSecondary }]}>
-              <ActivityIndicator size="large" color={theme.accent} />
-            </View>
-          )}
+          ) : null}
           
           <View style={styles.linkActions}>
             <Pressable
@@ -311,7 +352,7 @@ export default function QuickSaleScreen() {
             >
               <Feather name="copy" size={20} color={theme.text} style={{ marginRight: Spacing.sm }} />
               <ThemedText style={[styles.actionButtonText, { color: theme.text }]}>
-                Copy Payment Link
+                Copy Link
               </ThemedText>
             </Pressable>
             
@@ -321,7 +362,7 @@ export default function QuickSaleScreen() {
             >
               <Feather name="share-2" size={20} color={theme.buttonText} style={{ marginRight: Spacing.sm }} />
               <ThemedText style={[styles.actionButtonText, { color: theme.buttonText }]}>
-                Share Payment Link
+                Share
               </ThemedText>
             </Pressable>
           </View>
@@ -334,7 +375,7 @@ export default function QuickSaleScreen() {
               New Sale
             </ThemedText>
           </Pressable>
-        </View>
+        </ScrollView>
       </ThemedView>
     );
   }
@@ -627,5 +668,21 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     marginVertical: Spacing.lg,
+  },
+  nfcIconContainer: {
+    alignItems: "center",
+    marginVertical: Spacing["3xl"],
+  },
+  nfcIcon: {
+    width: 180,
+    height: 180,
+    borderRadius: BorderRadius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 20 },
+    shadowOpacity: 0.25,
+    shadowRadius: 30,
+    elevation: 15,
   },
 });
