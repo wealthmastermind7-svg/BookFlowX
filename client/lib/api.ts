@@ -424,6 +424,14 @@ class ApiClient {
       return null;
     }
   }
+
+  getBaseUrl(): string {
+    return getApiBase();
+  }
+
+  async getOwnerToken(): Promise<string | null> {
+    return getSecureToken();
+  }
 }
 
 export interface EmbedCode {

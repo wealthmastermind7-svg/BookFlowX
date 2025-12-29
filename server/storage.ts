@@ -6,6 +6,7 @@ import {
   bookings,
   availability,
   pushTokens,
+  quickSales,
   type User,
   type InsertUser,
   type Business,
@@ -20,6 +21,8 @@ import {
   type InsertAvailability,
   type PushToken,
   type InsertPushToken,
+  type QuickSale,
+  type InsertQuickSale,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -73,6 +76,12 @@ export interface IStorage {
   updatePushToken(id: string, updates: Partial<InsertPushToken>): Promise<PushToken | undefined>;
   deletePushToken(token: string, businessId: string): Promise<void>;
   deactivatePushToken(token: string): Promise<void>;
+  
+  // Quick Sales
+  getQuickSales(businessId: string): Promise<QuickSale[]>;
+  getQuickSale(id: string): Promise<QuickSale | undefined>;
+  createQuickSale(quickSale: InsertQuickSale): Promise<QuickSale>;
+  updateQuickSale(id: string, updates: Partial<InsertQuickSale>): Promise<QuickSale | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -592,6 +601,34 @@ export class DatabaseStorage implements IStorage {
       console.error("Error in initializeDemoData:", error);
       throw error;
     }
+  }
+
+  // Quick Sales
+  async getQuickSales(businessId: string): Promise<QuickSale[]> {
+    return db
+      .select()
+      .from(quickSales)
+      .where(eq(quickSales.businessId, businessId))
+      .orderBy(desc(quickSales.createdAt));
+  }
+
+  async getQuickSale(id: string): Promise<QuickSale | undefined> {
+    const [quickSale] = await db.select().from(quickSales).where(eq(quickSales.id, id));
+    return quickSale || undefined;
+  }
+
+  async createQuickSale(quickSale: InsertQuickSale): Promise<QuickSale> {
+    const [created] = await db.insert(quickSales).values(quickSale).returning();
+    return created;
+  }
+
+  async updateQuickSale(id: string, updates: Partial<InsertQuickSale>): Promise<QuickSale | undefined> {
+    const [updated] = await db
+      .update(quickSales)
+      .set(updates)
+      .where(eq(quickSales.id, id))
+      .returning();
+    return updated || undefined;
   }
 }
 

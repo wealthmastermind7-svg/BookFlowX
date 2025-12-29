@@ -34,6 +34,10 @@ export const businesses = pgTable("businesses", {
   weeklyShareCount: integer("weekly_share_count").default(0),
   weeklyQrCount: integer("weekly_qr_count").default(0),
   weeklyResetAt: timestamp("weekly_reset_at").defaultNow(),
+  stripeAccountId: text("stripe_account_id"),
+  stripeAccountStatus: text("stripe_account_status").default("not_connected"),
+  stripePayoutsEnabled: boolean("stripe_payouts_enabled").default(false),
+  stripeChargesEnabled: boolean("stripe_charges_enabled").default(false),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -88,8 +92,26 @@ export const bookings = pgTable("bookings", {
   status: text("status").notNull().default("pending"),
   totalPrice: integer("total_price").notNull(),
   notes: text("notes"),
+  paymentStatus: text("payment_status").default("unpaid"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  stripeCheckoutSessionId: text("stripe_checkout_session_id"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Quick Sales table (for contactless tap-to-pay)
+export const quickSales = pgTable("quick_sales", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  amount: integer("amount").notNull(),
+  description: text("description"),
+  status: text("status").notNull().default("pending"),
+  stripePaymentIntentId: text("stripe_payment_intent_id"),
+  createdAt: timestamp("created_at").defaultNow(),
 });
 
 // Availability table (business hours/slots)
@@ -130,6 +152,14 @@ export const businessesRelations = relations(businesses, ({ many }) => ({
   bookings: many(bookings),
   availability: many(availability),
   pushTokens: many(pushTokens),
+  quickSales: many(quickSales),
+}));
+
+export const quickSalesRelations = relations(quickSales, ({ one }) => ({
+  business: one(businesses, {
+    fields: [quickSales.businessId],
+    references: [businesses.id],
+  }),
 }));
 
 export const usersRelations = relations(users, ({ one }) => ({
@@ -223,6 +253,11 @@ export const insertPushTokenSchema = createInsertSchema(pushTokens).omit({
   updatedAt: true,
 });
 
+export const insertQuickSaleSchema = createInsertSchema(quickSales).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -240,5 +275,14 @@ export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
 export type PushToken = typeof pushTokens.$inferSelect;
 export type InsertPushToken = z.infer<typeof insertPushTokenSchema>;
 
+export type QuickSale = typeof quickSales.$inferSelect;
+export type InsertQuickSale = z.infer<typeof insertQuickSaleSchema>;
+
 // Booking status type
 export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+
+// Payment status type
+export type PaymentStatus = "unpaid" | "pending" | "paid" | "failed" | "refunded";
+
+// Stripe account status type
+export type StripeAccountStatus = "not_connected" | "pending" | "active" | "restricted";

@@ -3,6 +3,7 @@ import { createNativeStackNavigator, NativeStackScreenProps } from "@react-navig
 import MainTabNavigator from "@/navigation/MainTabNavigator";
 import BookingFlowNavigator from "@/navigation/BookingFlowNavigator";
 import ServiceEditorScreen from "@/screens/ServiceEditorScreen";
+import QuickSaleScreen from "@/screens/QuickSaleScreen";
 import OnboardingScreen, { checkOnboardingComplete } from "@/screens/OnboardingScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { HeaderButton } from "@react-navigation/elements";
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   Main: undefined;
   BookingFlow: undefined;
   ServiceEditor: { serviceId?: string };
+  QuickSale: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -94,6 +96,20 @@ export default function RootStackNavigator() {
               tintColor={theme.accent}
             >
               Save
+            </HeaderButton>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="QuickSale"
+        component={QuickSaleScreen}
+        options={({ navigation }) => ({
+          ...opaqueScreenOptions,
+          presentation: "modal",
+          headerTitle: "Quick Sale",
+          headerLeft: () => (
+            <HeaderButton onPress={() => navigation.goBack()}>
+              Close
             </HeaderButton>
           ),
         })}

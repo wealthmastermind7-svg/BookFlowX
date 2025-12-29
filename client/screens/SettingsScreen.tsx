@@ -19,14 +19,17 @@ import { Button } from "@/components/Button";
 import { getApiUrl } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
+
+type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
-  const navigation = useNavigation<NativeStackNavigationProp<SettingsStackParamList>>();
+  const navigation = useNavigation<CombinedNavigation>();
   const { checkAndIncrementShare, checkAndIncrementQr, checkEmbedAccess, remainingShares, remainingQrCodes, isPremium } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
@@ -416,6 +419,21 @@ export default function SettingsScreen() {
           subtitle: "Tap to edit",
           value: business?.phone || "Not set",
           onPress: () => handleEditBusinessField("phone"),
+          showChevron: true,
+        },
+      ],
+    },
+    {
+      section: "Payments",
+      items: [
+        {
+          icon: "credit-card" as const,
+          title: "Quick Sale",
+          subtitle: "Accept contactless tap-to-pay payments",
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+            navigation.navigate("QuickSale");
+          },
           showChevron: true,
         },
       ],
