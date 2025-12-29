@@ -41,13 +41,13 @@ const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
 // Map onboarding business types to demo data business types
 const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
   salon: "salon",
-  medical: "salon", // Not available in demo, use salon
+  medical: "medical",
   automotive: "autodetailing",
   fitness: "fitness",
-  veterinary: "salon", // Not available in demo, use salon
+  veterinary: "veterinary",
   education: "coaching",
-  photography: "salon", // Not available in demo, use salon
-  consulting: "salon", // Not available in demo, use salon
+  photography: "photography",
+  consulting: "consulting",
 };
 
 interface OnboardingScreenProps {
