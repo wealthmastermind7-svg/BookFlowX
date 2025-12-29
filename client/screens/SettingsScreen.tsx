@@ -317,6 +317,17 @@ export default function SettingsScreen() {
     setEditModalVisible(true);
   };
 
+  const generateSlugFromName = (name: string): string => {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
+      .replace(/\s+/g, "-") // Replace spaces with hyphens
+      .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
+      .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
+      .slice(0, 50); // Truncate to 50 chars max
+  };
+
   const validateSlug = (slug: string): string | null => {
     if (!slug.trim()) return "Slug cannot be empty";
     if (!/^[a-z0-9-]+$/.test(slug)) return "Slug can only contain lowercase letters, numbers, and hyphens";
@@ -349,6 +360,14 @@ export default function SettingsScreen() {
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const updates: Partial<Business> = { [editingField]: editValue };
+      
+      // Auto-generate slug from business name when saving name
+      if (editingField === "name" && editValue.trim()) {
+        const generatedSlug = generateSlugFromName(editValue);
+        updates.slug = generatedSlug;
+        console.log("Auto-generated slug from name:", generatedSlug);
+      }
+      
       console.log("Saving field:", editingField, "with value:", editValue);
       const updated = await api.updateBusiness(updates);
       console.log("Save successful:", updated);
@@ -525,6 +544,11 @@ export default function SettingsScreen() {
             {editingField === "slug" && (
               <ThemedText type="small" style={styles.slugHelper}>
                 URL: {getBookingDomain()}/book/{editValue || "your-slug"}
+              </ThemedText>
+            )}
+            {editingField === "name" && (
+              <ThemedText type="small" style={styles.slugHelper}>
+                Booking URL slug will be auto-generated: "{generateSlugFromName(editValue)}"
               </ThemedText>
             )}
             <TextInput
