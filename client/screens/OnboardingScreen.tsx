@@ -528,10 +528,16 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       const businessName = BUSINESS_TYPES.find(t => t.id === typeId)?.name || "this business";
       Alert.alert("Success", `Demo data for ${businessName} has been loaded`, [
         {
-          text: "Start Using",
+          text: "Continue",
           onPress: async () => {
-            await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-            onComplete();
+            // Continue to next page instead of completing onboarding
+            if (currentIndex < PAGES.length - 1) {
+              flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
+            } else {
+              // Only complete onboarding after viewing all pages
+              await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+              onComplete();
+            }
           },
         },
       ]);
@@ -542,7 +548,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     } finally {
       setIsLoadingDemo(false);
     }
-  }, [onComplete]);
+  }, [onComplete, currentIndex]);
 
   const renderPage = useCallback(
     ({ item, index }: { item: (typeof PAGES)[0]; index: number }) => {

@@ -1,0 +1,289 @@
+Understood. Below is the same Washos-level, package-driven demo data, rewritten cleanly as human-readable lists, with no JSON, ready to be copied into docs, seed notes, or directly mirrored in your UI.
+
+⸻
+
+GLOBAL BOOKFLOW DEMO CONTEXT (ALL NICHES)
+	•	Daily goal: 8 bookings
+	•	Status: 100 percent booked
+	•	Badges shown: New Client, Fully Booked
+	•	Average weekly utilisation: 87 percent
+	•	Repeat clients: 41 percent
+	•	Average rating: 4.9 stars
+	•	Primary CTA: Get Started
+	•	Secondary CTA: View Packages
+
+⸻
+
+1. SALONS & BEAUTY
+
+Premium, Washos-style tiering with a clear “most popular” option.
+
+Packages
+
+Express Glow
+	•	Duration: 30 minutes
+	•	Price: $45
+	•	Description: Quick refresh for hair or skin
+	•	Includes:
+	•	Consultation
+	•	Wash or cleanse
+	•	Style touch-up
+	•	Weekly booked: 78 percent
+
+Signature Beauty (Most Popular)
+	•	Duration: 60 minutes
+	•	Price: $95
+	•	Description: Our most popular beauty session
+	•	Includes:
+	•	Full service treatment
+	•	Styling or facial
+	•	Product finish
+	•	Weekly booked: 92 percent
+
+Luxury Experience
+	•	Duration: 120 minutes
+	•	Price: $180
+	•	Description: Premium, unhurried beauty care
+	•	Includes:
+	•	Extended consultation
+	•	Advanced treatment
+	•	Relaxation add-ons
+	•	Weekly booked: 64 percent
+
+Add-ons
+	•	Deep Conditioning, $25
+	•	Scalp Treatment, $30
+	•	Express Makeup, $40
+
+⸻
+
+2. DENTISTS & MEDICAL
+
+Clean, professional, trust-driven packages.
+
+Packages
+
+Initial Consultation
+	•	Duration: 30 minutes
+	•	Price: $90
+	•	Description: First-time patient assessment
+	•	Includes:
+	•	Health review
+	•	Examination
+	•	Treatment plan
+	•	Weekly booked: 88 percent
+
+Standard Treatment
+	•	Duration: 60 minutes
+	•	Price: $150
+	•	Description: Routine medical or dental procedure
+	•	Includes:
+	•	Procedure
+	•	Aftercare guidance
+	•	Follow-up notes
+	•	Weekly booked: 76 percent
+
+Comprehensive Care
+	•	Duration: 90 minutes
+	•	Price: $240
+	•	Description: Extended care session
+	•	Includes:
+	•	Advanced diagnostics
+	•	Treatment
+	•	Recovery planning
+	•	Weekly booked: 52 percent
+
+⸻
+
+3. CAR DETAILERS
+
+Directly inspired by Washos package logic.
+
+Packages
+
+Express Exterior
+	•	Duration: 40 minutes
+	•	Price: $49
+	•	Description: Fast exterior refresh
+	•	Includes:
+	•	Exterior wash
+	•	Tire and rim clean
+	•	Window wipe-down
+	•	Weekly booked: 81 percent
+
+Gold Detail (Most Popular)
+	•	Duration: 75 minutes
+	•	Price: $89
+	•	Description: Interior and exterior clean
+	•	Includes:
+	•	Hand wash
+	•	Interior vacuum
+	•	Dashboard wipe-down
+	•	Weekly booked: 93 percent
+
+Platinum Detail
+	•	Duration: 120 minutes
+	•	Price: $149
+	•	Description: Deep detail with protection
+	•	Includes:
+	•	Wax finish
+	•	Interior shampoo
+	•	Leather conditioning
+	•	Weekly booked: 67 percent
+
+Add-ons
+	•	Pet Hair Removal, $40
+	•	Engine Bay Clean, $60
+	•	Headlight Restoration, $65
+
+⸻
+
+4. FITNESS TRAINERS
+
+Clear upgrade path from single session to commitment.
+
+Packages
+
+Single Training Session
+	•	Duration: 60 minutes
+	•	Price: $75
+	•	Description: One-on-one personal training
+	•	Weekly booked: 69 percent
+
+Transformation Pack (Best Value)
+	•	Duration: 60 minutes per session
+	•	Price: $65 per session (5-session bundle)
+	•	Description: Best value training package
+	•	Weekly booked: 91 percent
+
+Elite Coaching
+	•	Duration: 90 minutes
+	•	Price: $120
+	•	Description: Advanced performance coaching
+	•	Weekly booked: 48 percent
+
+⸻
+
+5. TUTORING & COACHING
+
+Academic and professional credibility.
+
+Packages
+
+Quick Help Session
+	•	Duration: 30 minutes
+	•	Price: $40
+	•	Description: Targeted help on one topic
+	•	Weekly booked: 74 percent
+
+Standard Coaching (Most Popular)
+	•	Duration: 60 minutes
+	•	Price: $70
+	•	Description: Structured learning session
+	•	Weekly booked: 86 percent
+
+Exam Prep Intensive
+	•	Duration: 90 minutes
+	•	Price: $110
+	•	Description: High-impact exam preparation
+	•	Weekly booked: 58 percent
+
+⸻
+
+6. PHOTOGRAPHY STUDIOS
+
+Premium creative positioning.
+
+Packages
+
+Mini Shoot
+	•	Duration: 30 minutes
+	•	Price: $99
+	•	Description: Quick professional photo session
+	•	Weekly booked: 71 percent
+
+Standard Studio Session (Most Popular)
+	•	Duration: 60 minutes
+	•	Price: $180
+	•	Description: Portrait or branding shoot
+	•	Weekly booked: 89 percent
+
+Premium Creative Session
+	•	Duration: 120 minutes
+	•	Price: $320
+	•	Description: Styled, high-end photo experience
+	•	Weekly booked: 55 percent
+
+⸻
+
+7. CONSULTING & SERVICES
+
+High-trust, high-value progression.
+
+Packages
+
+Discovery Call
+	•	Duration: 30 minutes
+	•	Price: $60
+	•	Description: Initial consultation
+	•	Weekly booked: 83 percent
+
+Strategy Session (Most Popular)
+	•	Duration: 60 minutes
+	•	Price: $120
+	•	Description: Deep-dive business session
+	•	Weekly booked: 91 percent
+
+Implementation Workshop
+	•	Duration: 120 minutes
+	•	Price: $240
+	•	Description: Hands-on execution support
+	•	Weekly booked: 47 percent
+
+⸻
+
+8. VETERINARY CLINICS
+
+Warm, professional, and reassuring.
+
+Packages
+
+General Check-Up
+	•	Duration: 30 minutes
+	•	Price: $85
+	•	Description: Routine health examination
+	•	Weekly booked: 88 percent
+
+Vaccination Visit
+	•	Duration: 20 minutes
+	•	Price: $65
+	•	Description: Scheduled vaccinations
+	•	Weekly booked: 79 percent
+
+Comprehensive Wellness Exam
+	•	Duration: 60 minutes
+	•	Price: $160
+	•	Description: Full pet health assessment
+	•	Weekly booked: 61 percent
+
+⸻
+
+IMPORTANT UX COPY (USE THIS INSTEAD OF ERROR)
+
+Replace:
+“Failed to load demo data”
+
+With:
+“You’re viewing demo data. Connect your account to start accepting real bookings.”
+
+This is App Store-safe, premium, and aligned with SaaS best practice.
+
+⸻
+
+If you want next, I can:
+	•	Map each niche to its background imagery
+	•	Create 7 days of realistic calendar bookings
+	•	Write App Store screenshot captions per niche
+	•	Design paywall copy tied to package upgrades
+
+Just tell me what you want to tackle next.

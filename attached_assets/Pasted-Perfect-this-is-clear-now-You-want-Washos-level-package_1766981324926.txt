@@ -1,0 +1,378 @@
+Perfect, this is clear now. You want Washos-level, package-driven, premium demo data, but adapted to the niches visible in your BookFlow UI:
+
+From the images, the active niches are:
+	•	Salons & Beauty
+	•	Dentists & Medical
+	•	Car Detailers
+	•	Fitness Trainers
+	•	Tutoring & Coaching
+	•	Photography Studios
+	•	Consulting & Services
+	•	Veterinary Clinics
+
+Below is comprehensive, realistic, conversion-focused demo data for each niche, structured exactly like Washos style packages: tiered services, durations, pricing, inclusions, add-ons, and support copy. This can be dropped straight into JSON, Supabase, or local seed data.
+
+I will keep naming, pricing, and structure credible for App Store review and visually aligned with your premium UI.
+
+⸻
+
+GLOBAL BOOKFLOW DEMO METADATA (ALL NICHES)
+
+{
+  "dailyGoal": {
+    "target": 8,
+    "completed": 8,
+    "percentage": 100
+  },
+  "badges": ["New Client", "Fully Booked"],
+  "weeklyStats": {
+    "avgUtilization": 87,
+    "repeatClients": 41,
+    "avgRating": 4.9
+  },
+  "cta": {
+    "primary": "Get Started",
+    "secondary": "View Packages"
+  }
+}
+
+
+⸻
+
+1. SALONS & BEAUTY (Inspired by Washos tiering)
+
+Packages
+
+[
+  {
+    "name": "Express Glow",
+    "duration": 30,
+    "price": 45,
+    "description": "Quick refresh for hair or skin",
+    "includes": [
+      "Consultation",
+      "Wash or cleanse",
+      "Style touch-up"
+    ],
+    "weeklyBooked": 78
+  },
+  {
+    "name": "Signature Beauty",
+    "duration": 60,
+    "price": 95,
+    "description": "Our most popular beauty session",
+    "includes": [
+      "Full service treatment",
+      "Styling or facial",
+      "Product finish"
+    ],
+    "weeklyBooked": 92,
+    "recommended": true
+  },
+  {
+    "name": "Luxury Experience",
+    "duration": 120,
+    "price": 180,
+    "description": "Premium, unhurried beauty care",
+    "includes": [
+      "Extended consultation",
+      "Advanced treatment",
+      "Relaxation add-ons"
+    ],
+    "weeklyBooked": 64
+  }
+]
+
+Add-ons
+
+[
+  { "name": "Deep Conditioning", "price": 25 },
+  { "name": "Scalp Treatment", "price": 30 },
+  { "name": "Express Makeup", "price": 40 }
+]
+
+
+⸻
+
+2. DENTISTS & MEDICAL
+
+Packages
+
+[
+  {
+    "name": "Initial Consultation",
+    "duration": 30,
+    "price": 90,
+    "description": "First-time patient assessment",
+    "includes": [
+      "Health review",
+      "Examination",
+      "Treatment plan"
+    ],
+    "weeklyBooked": 88
+  },
+  {
+    "name": "Standard Treatment",
+    "duration": 60,
+    "price": 150,
+    "description": "Routine medical or dental procedure",
+    "includes": [
+      "Procedure",
+      "Aftercare guidance",
+      "Follow-up notes"
+    ],
+    "weeklyBooked": 76
+  },
+  {
+    "name": "Comprehensive Care",
+    "duration": 90,
+    "price": 240,
+    "description": "Extended care session",
+    "includes": [
+      "Advanced diagnostics",
+      "Treatment",
+      "Recovery planning"
+    ],
+    "weeklyBooked": 52
+  }
+]
+
+
+⸻
+
+3. CAR DETAILERS (Direct Washos-style)
+
+Packages
+
+[
+  {
+    "name": "Express Exterior",
+    "duration": 40,
+    "price": 49,
+    "description": "Fast exterior refresh",
+    "includes": [
+      "Exterior wash",
+      "Tire & rim clean",
+      "Window wipe-down"
+    ],
+    "weeklyBooked": 81
+  },
+  {
+    "name": "Gold Detail",
+    "duration": 75,
+    "price": 89,
+    "description": "Interior + exterior clean",
+    "includes": [
+      "Hand wash",
+      "Interior vacuum",
+      "Dashboard wipe-down"
+    ],
+    "weeklyBooked": 93,
+    "recommended": true
+  },
+  {
+    "name": "Platinum Detail",
+    "duration": 120,
+    "price": 149,
+    "description": "Deep detail with protection",
+    "includes": [
+      "Wax finish",
+      "Interior shampoo",
+      "Leather conditioning"
+    ],
+    "weeklyBooked": 67
+  }
+]
+
+Add-ons
+
+[
+  { "name": "Pet Hair Removal", "price": 40 },
+  { "name": "Engine Bay Clean", "price": 60 },
+  { "name": "Headlight Restoration", "price": 65 }
+]
+
+
+⸻
+
+4. FITNESS TRAINERS
+
+Packages
+
+[
+  {
+    "name": "Single Training Session",
+    "duration": 60,
+    "price": 75,
+    "description": "One-on-one personal training",
+    "weeklyBooked": 69
+  },
+  {
+    "name": "Transformation Pack",
+    "duration": 60,
+    "price": 65,
+    "bundle": "5 sessions",
+    "description": "Best value training package",
+    "weeklyBooked": 91,
+    "recommended": true
+  },
+  {
+    "name": "Elite Coaching",
+    "duration": 90,
+    "price": 120,
+    "description": "Advanced performance coaching",
+    "weeklyBooked": 48
+  }
+]
+
+
+⸻
+
+5. TUTORING & COACHING
+
+Packages
+
+[
+  {
+    "name": "Quick Help Session",
+    "duration": 30,
+    "price": 40,
+    "description": "Targeted help on one topic",
+    "weeklyBooked": 74
+  },
+  {
+    "name": "Standard Coaching",
+    "duration": 60,
+    "price": 70,
+    "description": "Structured learning session",
+    "weeklyBooked": 86,
+    "recommended": true
+  },
+  {
+    "name": "Exam Prep Intensive",
+    "duration": 90,
+    "price": 110,
+    "description": "High-impact exam preparation",
+    "weeklyBooked": 58
+  }
+]
+
+
+⸻
+
+6. PHOTOGRAPHY STUDIOS
+
+Packages
+
+[
+  {
+    "name": "Mini Shoot",
+    "duration": 30,
+    "price": 99,
+    "description": "Quick professional photo session",
+    "weeklyBooked": 71
+  },
+  {
+    "name": "Standard Studio Session",
+    "duration": 60,
+    "price": 180,
+    "description": "Portrait or branding shoot",
+    "weeklyBooked": 89,
+    "recommended": true
+  },
+  {
+    "name": "Premium Creative Session",
+    "duration": 120,
+    "price": 320,
+    "description": "Styled, high-end photo experience",
+    "weeklyBooked": 55
+  }
+]
+
+
+⸻
+
+7. CONSULTING & SERVICES
+
+Packages
+
+[
+  {
+    "name": "Discovery Call",
+    "duration": 30,
+    "price": 60,
+    "description": "Initial consultation",
+    "weeklyBooked": 83
+  },
+  {
+    "name": "Strategy Session",
+    "duration": 60,
+    "price": 120,
+    "description": "Deep-dive business session",
+    "weeklyBooked": 91,
+    "recommended": true
+  },
+  {
+    "name": "Implementation Workshop",
+    "duration": 120,
+    "price": 240,
+    "description": "Hands-on execution support",
+    "weeklyBooked": 47
+  }
+]
+
+
+⸻
+
+8. VETERINARY CLINICS
+
+Packages
+
+[
+  {
+    "name": "General Check-Up",
+    "duration": 30,
+    "price": 85,
+    "description": "Routine health examination",
+    "weeklyBooked": 88
+  },
+  {
+    "name": "Vaccination Visit",
+    "duration": 20,
+    "price": 65,
+    "description": "Scheduled vaccinations",
+    "weeklyBooked": 79
+  },
+  {
+    "name": "Comprehensive Wellness Exam",
+    "duration": 60,
+    "price": 160,
+    "description": "Full pet health assessment",
+    "weeklyBooked": 61
+  }
+]
+
+
+⸻
+
+IMPORTANT UX NOTE (Highly Recommended)
+
+Replace “Failed to load demo data” with:
+
+“You’re viewing demo data. Connect your account to start accepting real bookings.”
+
+This is App Store–safe, professional, and matches premium SaaS expectations.
+
+⸻
+
+NEXT STEPS I CAN DO FOR YOU
+
+If you want, I can immediately:
+	1.	Deliver one unified JSON file with all niches + switch logic
+	2.	Generate Supabase seed SQL
+	3.	Map background visuals per niche
+	4.	Create calendar bookings for 7 days
+	5.	Add fake revenue analytics
+	6.	Create App Store screenshot copy per niche
+
+Just tell me which one you want next and where this data is currently loaded from (local JSON, Supabase, Firebase).
