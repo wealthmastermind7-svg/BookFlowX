@@ -8,11 +8,13 @@ import {
   Platform,
   FlatList,
   ViewToken,
+  ScrollView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { Feather } from "@expo/vector-icons";
+import { MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
   FadeIn,
@@ -60,6 +62,73 @@ const PAGES = [
     buttonText: "Get Started",
     showSkip: true,
     showLogin: true,
+  },
+];
+
+interface BusinessType {
+  id: string;
+  name: string;
+  icon: keyof typeof MaterialIcons.glyphMap;
+  color: string;
+  backgroundImage: any;
+}
+
+const BUSINESS_TYPES: BusinessType[] = [
+  {
+    id: "salon",
+    name: "Salons & Beauty",
+    icon: "spa",
+    color: "#EC4899",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "medical",
+    name: "Dentists & Medical",
+    icon: "medical_services",
+    color: "#3B82F6",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "automotive",
+    name: "Car Detailers",
+    icon: "directions_car",
+    color: "#F59E0B",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "fitness",
+    name: "Fitness Trainers",
+    icon: "fitness_center",
+    color: "#10B981",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "veterinary",
+    name: "Veterinary Clinics",
+    icon: "pets",
+    color: "#8B5CF6",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "education",
+    name: "Tutoring & Coaching",
+    icon: "school",
+    color: "#06B6D4",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "photography",
+    name: "Photography Studios",
+    icon: "photo_camera",
+    color: "#6366F1",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+  },
+  {
+    id: "consulting",
+    name: "Consulting & Services",
+    icon: "handshake",
+    color: "#14B8A6",
+    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
 ];
 
@@ -111,65 +180,136 @@ function CircularMeter() {
   );
 }
 
-function Page1Content() {
+function BusinessTypeSelector({ selectedType, onSelect }: { selectedType: string; onSelect: (id: string) => void }) {
   const { theme: colors, isDark } = useTheme();
+  const scrollRef = useRef<ScrollView>(null);
 
   return (
-    <View style={styles.page1Content}>
-      <View style={[styles.shadowCard, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.2)" }]} />
-      
-      <Animated.View 
-        entering={FadeInDown.delay(300).springify()}
-        style={[styles.glassCard, { backgroundColor: isDark ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.7)" }]}
+    <View style={styles.selectorContainer}>
+      <View style={styles.selectorGradient} />
+      <ScrollView
+        ref={scrollRef}
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        scrollEventThrottle={16}
+        snapToInterval={140}
+        decelerationRate="fast"
+        style={styles.selectorScroll}
+        contentContainerStyle={styles.selectorContent}
       >
-        <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-        <View style={styles.glassCardContent}>
-          <View style={styles.cardHeader}>
-            <Text style={[styles.cardHeaderText, { color: colors.text }]}>DAILY GOAL</Text>
-            <Feather name="more-horizontal" size={16} color={colors.textSecondary} />
-          </View>
-          
-          <CircularMeter />
-          
-          <View style={styles.clientList}>
-            <View style={styles.clientRow}>
-              <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
-                <Feather name="user" size={14} color={colors.textSecondary} />
+        {BUSINESS_TYPES.map((type) => (
+          <Pressable
+            key={type.id}
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+              onSelect(type.id);
+            }}
+            style={[
+              styles.businessButton,
+              selectedType === type.id && styles.businessButtonActive,
+              {
+                backgroundColor:
+                  selectedType === type.id
+                    ? isDark
+                      ? "rgba(255,255,255,0.15)"
+                      : "rgba(255,255,255,0.95)"
+                    : isDark
+                    ? "rgba(255,255,255,0.05)"
+                    : "rgba(255,255,255,0.5)",
+              },
+            ]}
+          >
+            <MaterialIcons name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
+            <Text
+              style={[
+                styles.businessButtonText,
+                {
+                  color: selectedType === type.id ? colors.text : colors.textSecondary,
+                  fontWeight: selectedType === type.id ? "600" : "500",
+                },
+              ]}
+              numberOfLines={2}
+            >
+              {type.name}
+            </Text>
+          </Pressable>
+        ))}
+      </ScrollView>
+      <View style={[styles.selectorGradientRight, { backgroundColor: isDark ? "rgba(5,5,5,0.8)" : "rgba(250,250,250,0.8)" }]} />
+    </View>
+  );
+}
+
+function Page1Content({ selectedBusinessType }: { selectedBusinessType: string }) {
+  const { theme: colors, isDark } = useTheme();
+  const [selectedType, setSelectedType] = useState(selectedBusinessType);
+
+  const handleBusinessSelect = (typeId: string) => {
+    setSelectedType(typeId);
+  };
+
+  return (
+    <View style={styles.page1Container}>
+      <View style={styles.page1Content}>
+        <View style={[styles.shadowCard, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.2)" }]} />
+
+        <Animated.View
+          entering={FadeInDown.delay(300).springify()}
+          style={[styles.glassCard, { backgroundColor: isDark ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.7)" }]}
+        >
+          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
+          <View style={styles.glassCardContent}>
+            <View style={styles.cardHeader}>
+              <Text style={[styles.cardHeaderText, { color: colors.text }]}>DAILY GOAL</Text>
+              <Feather name="more-horizontal" size={16} color={colors.textSecondary} />
+            </View>
+
+            <CircularMeter />
+
+            <View style={styles.clientList}>
+              <View style={styles.clientRow}>
+                <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Feather name="user" size={14} color={colors.textSecondary} />
+                </View>
+                <View style={styles.clientInfo}>
+                  <View style={[styles.skeletonLine, { width: 80, backgroundColor: colors.backgroundSecondary }]} />
+                  <View style={[styles.skeletonLineSmall, { width: 60, backgroundColor: colors.backgroundTertiary }]} />
+                </View>
+                <View style={styles.checkBadge}>
+                  <Feather name="check" size={10} color="#FFFFFF" />
+                </View>
               </View>
-              <View style={styles.clientInfo}>
-                <View style={[styles.skeletonLine, { width: 80, backgroundColor: colors.backgroundSecondary }]} />
-                <View style={[styles.skeletonLineSmall, { width: 60, backgroundColor: colors.backgroundTertiary }]} />
-              </View>
-              <View style={styles.checkBadge}>
-                <Feather name="check" size={10} color="#FFFFFF" />
+              <View style={[styles.clientRow, { opacity: 0.5 }]}>
+                <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
+                  <Feather name="user" size={14} color={colors.textSecondary} />
+                </View>
+                <View style={styles.clientInfo}>
+                  <View style={[styles.skeletonLine, { width: 60, backgroundColor: colors.backgroundSecondary }]} />
+                  <View style={[styles.skeletonLineSmall, { width: 40, backgroundColor: colors.backgroundTertiary }]} />
+                </View>
               </View>
             </View>
-            <View style={[styles.clientRow, { opacity: 0.5 }]}>
-              <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
-                <Feather name="user" size={14} color={colors.textSecondary} />
-              </View>
-              <View style={styles.clientInfo}>
-                <View style={[styles.skeletonLine, { width: 60, backgroundColor: colors.backgroundSecondary }]} />
-                <View style={[styles.skeletonLineSmall, { width: 40, backgroundColor: colors.backgroundTertiary }]} />
-              </View>
-            </View>
           </View>
-        </View>
-      </Animated.View>
+        </Animated.View>
 
-      <Animated.View 
-        entering={FadeIn.delay(600)}
-        style={[styles.notificationBadge, { backgroundColor: isDark ? "rgba(50,50,50,0.8)" : "rgba(255,255,255,0.9)" }]}
-      >
-        <Feather name="calendar" size={20} color={colors.text} />
-      </Animated.View>
+        <Animated.View
+          entering={FadeIn.delay(600)}
+          style={[styles.notificationBadge, { backgroundColor: isDark ? "rgba(50,50,50,0.8)" : "rgba(255,255,255,0.9)" }]}
+        >
+          <Feather name="calendar" size={20} color={colors.text} />
+        </Animated.View>
 
-      <Animated.View 
-        entering={FadeInUp.delay(800)}
-        style={[styles.newClientChip, { backgroundColor: isDark ? "rgba(50,50,50,0.9)" : "rgba(255,255,255,0.95)" }]}
-      >
-        <View style={styles.greenDot} />
-        <Text style={[styles.newClientText, { color: colors.text }]}>New Client</Text>
+        <Animated.View
+          entering={FadeInUp.delay(800)}
+          style={[styles.newClientChip, { backgroundColor: isDark ? "rgba(50,50,50,0.9)" : "rgba(255,255,255,0.95)" }]}
+        >
+          <View style={styles.greenDot} />
+          <Text style={[styles.newClientText, { color: colors.text }]}>New Client</Text>
+        </Animated.View>
+      </View>
+
+      <Animated.View entering={FadeInUp.delay(400)}>
+        <BusinessTypeSelector selectedType={selectedType} onSelect={handleBusinessSelect} />
       </Animated.View>
     </View>
   );
@@ -184,7 +324,7 @@ function Page2Content() {
         entering={FadeIn.delay(300).springify()}
         style={[
           styles.industryChip,
-          { 
+          {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 80,
             left: 20,
@@ -199,7 +339,7 @@ function Page2Content() {
         entering={FadeIn.delay(450).springify()}
         style={[
           styles.industryChip,
-          { 
+          {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 130,
             right: 60,
@@ -214,7 +354,7 @@ function Page2Content() {
         entering={FadeIn.delay(600).springify()}
         style={[
           styles.industryChip,
-          { 
+          {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 180,
             right: 30,
@@ -229,7 +369,7 @@ function Page2Content() {
         entering={FadeIn.delay(750).springify()}
         style={[
           styles.industryChip,
-          { 
+          {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
             top: 280,
             left: 30,
@@ -248,7 +388,7 @@ function Page3Content() {
 
   return (
     <View style={styles.page3Content}>
-      <Animated.View 
+      <Animated.View
         entering={FadeInDown.delay(300).springify()}
         style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)" }]}
       >
@@ -268,7 +408,7 @@ function Page3Content() {
         </View>
       </Animated.View>
 
-      <Animated.View 
+      <Animated.View
         entering={FadeIn.delay(500)}
         style={[styles.calendarChip, { backgroundColor: "#3B82F6" }]}
       >
@@ -284,6 +424,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [selectedBusinessType, setSelectedBusinessType] = useState("salon");
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -298,7 +439,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   const handleNext = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    
+
     if (currentIndex < PAGES.length - 1) {
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
     } else {
@@ -319,64 +460,67 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     onComplete();
   }, [onComplete]);
 
-  const renderPage = useCallback(({ item, index }: { item: typeof PAGES[0]; index: number }) => {
-    return (
-      <View style={[styles.page, { width: SCREEN_WIDTH }]}>
-        <View style={styles.illustrationContainer}>
-          {index === 0 && <Page1Content />}
-          {index === 1 && <Page2Content />}
-          {index === 2 && <Page3Content />}
-        </View>
-
-        <View style={[styles.contentPanel, { backgroundColor: isDark ? colors.backgroundRoot : "#FAFAFA" }]}>
-          <View style={styles.paginationDots}>
-            {PAGES.map((_, i) => (
-              <View
-                key={i}
-                style={[
-                  styles.dot,
-                  i === currentIndex ? styles.dotActive : styles.dotInactive,
-                  { backgroundColor: i === currentIndex ? colors.text : colors.backgroundSecondary },
-                ]}
-              />
-            ))}
+  const renderPage = useCallback(
+    ({ item, index }: { item: (typeof PAGES)[0]; index: number }) => {
+      return (
+        <View style={[styles.page, { width: SCREEN_WIDTH }]}>
+          <View style={styles.illustrationContainer}>
+            {index === 0 && <Page1Content selectedBusinessType={selectedBusinessType} />}
+            {index === 1 && <Page2Content />}
+            {index === 2 && <Page3Content />}
           </View>
 
-          <View style={styles.textContent}>
-            <Text style={[styles.headline, { color: colors.text }]}>
-              {item.headline}{" "}
-              <Text style={[styles.highlightText, { color: isDark ? "#6B7280" : "#4B5563" }]}>
-                {item.highlightText}
-              </Text>
-            </Text>
-            <Text style={[styles.description, { color: colors.textSecondary }]}>
-              {item.description}
-            </Text>
-          </View>
+          <View style={[styles.contentPanel, { backgroundColor: isDark ? colors.backgroundRoot : "#FAFAFA" }]}>
+            <View style={styles.paginationDots}>
+              {PAGES.map((_, i) => (
+                <View
+                  key={i}
+                  style={[
+                    styles.dot,
+                    i === currentIndex ? styles.dotActive : styles.dotInactive,
+                    { backgroundColor: i === currentIndex ? colors.text : colors.backgroundSecondary },
+                  ]}
+                />
+              ))}
+            </View>
 
-          <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
-            <Pressable
-              style={[styles.primaryButton, { backgroundColor: colors.text }]}
-              onPress={handleNext}
-            >
-              <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>
-                {item.buttonText}
-              </Text>
-              <Feather name="arrow-right" size={18} color={colors.backgroundRoot} />
-            </Pressable>
-
-            {item.showLogin && (
-              <Pressable style={styles.loginButton} onPress={handleLogin}>
-                <Text style={[styles.loginButtonText, { color: "#3B82F6" }]}>
-                  Log in to existing account
+            <View style={styles.textContent}>
+              <Text style={[styles.headline, { color: colors.text }]}>
+                {item.headline}{" "}
+                <Text style={[styles.highlightText, { color: isDark ? "#6B7280" : "#4B5563" }]}>
+                  {item.highlightText}
                 </Text>
+              </Text>
+              <Text style={[styles.description, { color: colors.textSecondary }]}>
+                {item.description}
+              </Text>
+            </View>
+
+            <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
+              <Pressable
+                style={[styles.primaryButton, { backgroundColor: colors.text }]}
+                onPress={handleNext}
+              >
+                <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>
+                  {item.buttonText}
+                </Text>
+                <Feather name="arrow-right" size={18} color={colors.backgroundRoot} />
               </Pressable>
-            )}
+
+              {item.showLogin && (
+                <Pressable style={styles.loginButton} onPress={handleLogin}>
+                  <Text style={[styles.loginButtonText, { color: "#3B82F6" }]}>
+                    Log in to existing account
+                  </Text>
+                </Pressable>
+              )}
+            </View>
           </View>
         </View>
-      </View>
-    );
-  }, [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom]);
+      );
+    },
+    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType]
+  );
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
@@ -552,6 +696,11 @@ const styles = StyleSheet.create({
   loginButtonText: {
     fontSize: 15,
     fontWeight: "500",
+  },
+  page1Container: {
+    flex: 1,
+    justifyContent: "space-between",
+    paddingBottom: Spacing.lg,
   },
   page1Content: {
     flex: 1,
@@ -771,5 +920,55 @@ const styles = StyleSheet.create({
     width: 60,
     height: 6,
     borderRadius: 3,
+  },
+  selectorContainer: {
+    position: "relative",
+    height: 120,
+    marginHorizontal: -Spacing.xl,
+    paddingHorizontal: Spacing.xl,
+  },
+  selectorGradient: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
+    zIndex: 10,
+    backgroundColor: "rgba(250,250,250,0.8)",
+  },
+  selectorGradientRight: {
+    position: "absolute",
+    right: 0,
+    top: 0,
+    bottom: 0,
+    width: 20,
+    zIndex: 10,
+  },
+  selectorScroll: {
+    flex: 1,
+  },
+  selectorContent: {
+    gap: Spacing.sm,
+    paddingVertical: Spacing.md,
+  },
+  businessButton: {
+    width: 120,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.sm,
+    borderRadius: BorderRadius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    gap: Spacing.xs,
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+  },
+  businessButtonActive: {
+    borderWidth: 2,
+    borderColor: "rgba(0,0,0,0.2)",
+  },
+  businessButtonText: {
+    fontSize: 12,
+    textAlign: "center",
+    lineHeight: 14,
   },
 });
