@@ -85,7 +85,7 @@ const PAGES = [
 interface BusinessType {
   id: string;
   name: string;
-  icon: keyof typeof MaterialIcons.glyphMap;
+  icon: keyof typeof Feather.glyphMap;
   color: string;
   backgroundImage: any;
 }
@@ -94,56 +94,56 @@ const BUSINESS_TYPES: BusinessType[] = [
   {
     id: "salon",
     name: "Salons & Beauty",
-    icon: "spa",
+    icon: "scissors",
     color: "#EC4899",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "medical",
     name: "Dentists & Medical",
-    icon: "medical_services",
+    icon: "heart",
     color: "#3B82F6",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "automotive",
     name: "Car Detailers",
-    icon: "directions_car",
+    icon: "truck",
     color: "#F59E0B",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "fitness",
     name: "Fitness Trainers",
-    icon: "fitness_center",
+    icon: "zap",
     color: "#10B981",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "veterinary",
     name: "Veterinary Clinics",
-    icon: "pets",
+    icon: "heart-circle",
     color: "#8B5CF6",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "education",
     name: "Tutoring & Coaching",
-    icon: "school",
+    icon: "book",
     color: "#06B6D4",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "photography",
     name: "Photography Studios",
-    icon: "photo_camera",
+    icon: "camera",
     color: "#6366F1",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
   {
     id: "consulting",
     name: "Consulting & Services",
-    icon: "handshake",
+    icon: "briefcase",
     color: "#14B8A6",
     backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
   },
@@ -256,7 +256,7 @@ function BusinessTypeSelector({
               <ActivityIndicator size="small" color={colors.text} />
             ) : (
               <>
-                <MaterialIcons name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
+                <Feather name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
                 <Text
                   style={[
                     styles.businessButtonText,
