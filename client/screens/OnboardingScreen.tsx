@@ -9,10 +9,14 @@ import {
   FlatList,
   ViewToken,
   ScrollView,
+  Alert,
+  ActivityIndicator,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
 import { MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
@@ -29,9 +33,22 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { api } from "@/lib/api";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
+
+// Map onboarding business types to demo data business types
+const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
+  salon: "salon",
+  medical: "salon", // Not available in demo, use salon
+  automotive: "autodetailing",
+  fitness: "fitness",
+  veterinary: "salon", // Not available in demo, use salon
+  education: "coaching",
+  photography: "salon", // Not available in demo, use salon
+  consulting: "salon", // Not available in demo, use salon
+};
 
 interface OnboardingScreenProps {
   onComplete: () => void;
@@ -183,13 +200,17 @@ function CircularMeter() {
 function BusinessTypeSelector({ 
   selectedType, 
   onSelect,
+  onLoadDemoData,
   isDark,
-  colors
+  colors,
+  isLoading = false,
 }: { 
   selectedType: string; 
   onSelect: (id: string) => void;
+  onLoadDemoData: (id: string) => Promise<void>;
   isDark: boolean;
   colors: any;
+  isLoading?: boolean;
 }) {
   const scrollRef = useRef<ScrollView>(null);
 
@@ -212,10 +233,13 @@ function BusinessTypeSelector({
             onPress={async () => {
               await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
               onSelect(type.id);
+              await onLoadDemoData(type.id);
             }}
+            disabled={isLoading}
             style={[
               styles.businessButton,
               selectedType === type.id && styles.businessButtonActive,
+              isLoading && styles.businessButtonDisabled,
               {
                 backgroundColor:
                   selectedType === type.id
@@ -228,19 +252,25 @@ function BusinessTypeSelector({
               },
             ]}
           >
-            <MaterialIcons name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
-            <Text
-              style={[
-                styles.businessButtonText,
-                {
-                  color: selectedType === type.id ? colors.text : colors.textSecondary,
-                  fontWeight: selectedType === type.id ? "600" : "500",
-                },
-              ]}
-              numberOfLines={2}
-            >
-              {type.name}
-            </Text>
+            {isLoading && selectedType === type.id ? (
+              <ActivityIndicator size="small" color={colors.text} />
+            ) : (
+              <>
+                <MaterialIcons name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
+                <Text
+                  style={[
+                    styles.businessButtonText,
+                    {
+                      color: selectedType === type.id ? colors.text : colors.textSecondary,
+                      fontWeight: selectedType === type.id ? "600" : "500",
+                    },
+                  ]}
+                  numberOfLines={2}
+                >
+                  {type.name}
+                </Text>
+              </>
+            )}
           </Pressable>
         ))}
       </ScrollView>
@@ -252,9 +282,13 @@ function BusinessTypeSelector({
 function Page1Content({ 
   selectedBusinessType,
   onBusinessTypeChange,
+  onLoadDemoData,
+  isLoadingDemo = false,
 }: { 
   selectedBusinessType: string;
   onBusinessTypeChange: (typeId: string) => void;
+  onLoadDemoData: (typeId: string) => Promise<void>;
+  isLoadingDemo?: boolean;
 }) {
   const { theme: colors, isDark } = useTheme();
 
@@ -322,8 +356,10 @@ function Page1Content({
         <BusinessTypeSelector 
           selectedType={selectedBusinessType} 
           onSelect={onBusinessTypeChange}
+          onLoadDemoData={onLoadDemoData}
           isDark={isDark}
           colors={colors}
+          isLoading={isLoadingDemo}
         />
       </Animated.View>
     </View>
@@ -440,6 +476,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [selectedBusinessType, setSelectedBusinessType] = useState("salon");
+  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -479,6 +516,31 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     setSelectedBusinessType(typeId);
   }, []);
 
+  const handleLoadDemoData = useCallback(async (typeId: string) => {
+    setIsLoadingDemo(true);
+    try {
+      const demoType = BUSINESS_TYPE_DEMO_MAP[typeId] || "salon";
+      await api.initializeDemoData(demoType);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      const businessName = BUSINESS_TYPES.find(t => t.id === typeId)?.name || "this business";
+      Alert.alert("Success", `Demo data for ${businessName} has been loaded`, [
+        {
+          text: "Start Using",
+          onPress: async () => {
+            await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+            onComplete();
+          },
+        },
+      ]);
+    } catch (error) {
+      console.error("Error initializing demo data:", error);
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
+      Alert.alert("Error", "Failed to load demo data. Please try again.");
+    } finally {
+      setIsLoadingDemo(false);
+    }
+  }, [onComplete]);
+
   const renderPage = useCallback(
     ({ item, index }: { item: (typeof PAGES)[0]; index: number }) => {
       return (
@@ -488,6 +550,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               <Page1Content 
                 selectedBusinessType={selectedBusinessType} 
                 onBusinessTypeChange={handleBusinessTypeChange}
+                onLoadDemoData={handleLoadDemoData}
+                isLoadingDemo={isLoadingDemo}
               />
             )}
             {index === 1 && <Page2Content />}
@@ -543,7 +607,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </View>
       );
     },
-    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange]
+    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
   );
 
   return (
@@ -989,6 +1053,9 @@ const styles = StyleSheet.create({
   businessButtonActive: {
     borderWidth: 2,
     borderColor: "rgba(0,0,0,0.2)",
+  },
+  businessButtonDisabled: {
+    opacity: 0.6,
   },
   businessButtonText: {
     fontSize: 12,
