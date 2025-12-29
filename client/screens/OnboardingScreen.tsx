@@ -519,6 +519,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const handleLoadDemoData = useCallback(async (typeId: string) => {
     setIsLoadingDemo(true);
     try {
+      // Ensure business exists before loading demo data
+      await api.getOrCreateBusiness();
+      
       const demoType = BUSINESS_TYPE_DEMO_MAP[typeId] || "salon";
       await api.initializeDemoData(demoType);
       await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
