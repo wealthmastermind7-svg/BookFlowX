@@ -760,7 +760,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     
     const title = service ? `${service.name} - ${business.name}` : `Book with ${business.name}`;
     const description = service 
-      ? `Schedule your ${service.name} appointment. Duration: ${service.durationMinutes}min. Price: $${(service.price || 0).toFixed(2)}`
+      ? `Schedule your ${service.name} appointment instantly. No calls required.`
       : `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
     
     // Use OG image from assets
@@ -778,7 +778,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
-    <meta name="twitter:image" content="${ogImage}" />`;
+    <meta name="twitter:image" content="${ogImage}" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-title" content="BookFlow" />`;
   }
   
   // Serve public booking page (client-side routing)
