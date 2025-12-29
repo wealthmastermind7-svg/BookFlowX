@@ -96,56 +96,56 @@ const BUSINESS_TYPES: BusinessType[] = [
     name: "Salons & Beauty",
     icon: "scissors",
     color: "#EC4899",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/elegant_salon_and_beauty_background.png"),
   },
   {
     id: "medical",
     name: "Dentists & Medical",
     icon: "heart",
     color: "#3B82F6",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_medical_clinic_background.png"),
   },
   {
     id: "automotive",
     name: "Car Detailers",
     icon: "truck",
     color: "#F59E0B",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_car_detailing_background.png"),
   },
   {
     id: "fitness",
     name: "Fitness Trainers",
     icon: "zap",
     color: "#10B981",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_fitness_studio_background.png"),
   },
   {
     id: "veterinary",
     name: "Veterinary Clinics",
     icon: "activity",
     color: "#8B5CF6",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_veterinary_clinic_background.png"),
   },
   {
     id: "education",
     name: "Tutoring & Coaching",
     icon: "book",
     color: "#06B6D4",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_tutoring_studio_background.png"),
   },
   {
     id: "photography",
     name: "Photography Studios",
     icon: "camera",
     color: "#6366F1",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_photography_studio_background.png"),
   },
   {
     id: "consulting",
     name: "Consulting & Services",
     icon: "briefcase",
     color: "#14B8A6",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
+    backgroundImage: require("../assets/stock_images/professional_consulting_office_background.png"),
   },
 ];
 
@@ -610,10 +610,13 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
   );
 
+  const selectedBusinessTypeData = BUSINESS_TYPES.find(t => t.id === selectedBusinessType);
+  const backgroundImage = selectedBusinessTypeData?.backgroundImage || require("../assets/stock_images/professional_salon_i_c9c033e3.jpg");
+
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <Image
-        source={require("../assets/stock_images/professional_salon_i_c9c033e3.jpg")}
+        source={backgroundImage}
         style={styles.backgroundImage}
         contentFit="cover"
       />
