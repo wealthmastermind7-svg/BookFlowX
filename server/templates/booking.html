@@ -346,10 +346,62 @@
     .not-found p {
       color: var(--smoke);
     }
+
+    .cta-section {
+      text-align: center;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, var(--black) 0%, var(--charcoal) 100%);
+      border-radius: 16px;
+      margin-bottom: 32px;
+      color: var(--white);
+    }
+
+    .cta-section h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .cta-section p {
+      font-size: 16px;
+      margin-bottom: 24px;
+      opacity: 0.9;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background: var(--white);
+      color: var(--black);
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
+    .loading {
+      text-align: center;
+      padding: 40px;
+      color: var(--smoke);
+    }
   </style>
 </head>
 <body>
   <div class="container">
+    <div id="loading-cta" class="cta-section">
+      <h2>Book Your Appointment</h2>
+      <p>Schedule instantly. No calls required.</p>
+      <button class="cta-button" onclick="document.getElementById('app').scrollIntoView({behavior: 'smooth'})">Book Now</button>
+    </div>
+
     <div id="loading" class="loading">
       <p>Loading...</p>
     </div>
@@ -492,12 +544,19 @@
         const res = await fetch(`/api/businesses/${businessSlug}`);
         if (!res.ok) {
           document.getElementById('loading').style.display = 'none';
+          document.getElementById('loading-cta').style.display = 'none';
           document.getElementById('not-found').style.display = 'block';
           return;
         }
         
         business = await res.json();
         document.getElementById('business-name').textContent = business.name;
+        
+        // Update CTA with business name
+        const ctaHeading = document.querySelector('#loading-cta h2');
+        if (ctaHeading) {
+          ctaHeading.textContent = `Book with ${business.name}`;
+        }
         
         // Fetch services
         const servicesRes = await fetch(`/api/businesses/${business.id}/services`);
