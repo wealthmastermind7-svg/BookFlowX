@@ -11,6 +11,7 @@ import {
   Image,
   Animated,
   ScrollView,
+  Alert,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import * as Haptics from "expo-haptics";
@@ -123,12 +124,14 @@ export default function QuickSaleScreen() {
       const businessId = api.getBusinessId();
       if (!businessId) {
         console.error("No business ID found");
+        Alert.alert("Error", "Please set up your business first.");
         return;
       }
       
       const token = await api.getOwnerToken();
       if (!token) {
         console.error("No auth token found");
+        Alert.alert("Error", "Please log in to your business account.");
         return;
       }
       
@@ -143,7 +146,14 @@ export default function QuickSaleScreen() {
         }
       );
       
-      const data = await response.json();
+      let data;
+      try {
+        data = await response.json();
+      } catch (parseError) {
+        console.error("Failed to parse response:", parseError);
+        Alert.alert("Error", "Unable to connect to payment service. Please try again.");
+        return;
+      }
       
       if (response.ok && data.url) {
         if (Platform.OS === "web") {
@@ -151,11 +161,18 @@ export default function QuickSaleScreen() {
         } else {
           await Linking.openURL(data.url);
         }
+      } else if (data.details?.includes("signed up for Connect")) {
+        Alert.alert(
+          "Stripe Connect Required",
+          "Stripe Connect needs to be enabled on your account. Please visit dashboard.stripe.com and enable Connect in the sidebar."
+        );
       } else {
         console.error("Stripe Connect error:", data);
+        Alert.alert("Error", data.error || "Failed to connect Stripe. Please try again.");
       }
     } catch (error) {
       console.error("Error connecting Stripe:", error);
+      Alert.alert("Error", "Unable to connect to payment service. Please check your connection.");
     } finally {
       setConnectingStripe(false);
     }
