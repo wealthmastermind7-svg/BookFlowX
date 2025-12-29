@@ -387,6 +387,58 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.3);
     }
 
+    .cta-buttons-group {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    .cta-button-whatsapp {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: #25D366;
+      color: var(--white);
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-button-whatsapp:hover {
+      background: #1ea952;
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(37, 211, 102, 0.3);
+    }
+
+    .cta-button-primary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      background: var(--white);
+      color: var(--black);
+      padding: 16px 32px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 16px;
+      transition: all 0.3s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .cta-button-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+    }
+
     .loading {
       text-align: center;
       padding: 40px;
@@ -399,7 +451,12 @@
     <div id="loading-cta" class="cta-section">
       <h2>Book Your Appointment</h2>
       <p>Schedule instantly. No calls required.</p>
-      <button class="cta-button" onclick="document.getElementById('app').scrollIntoView({behavior: 'smooth'})">Book Now</button>
+      <div class="cta-buttons-group">
+        <button class="cta-button-whatsapp" id="whatsapp-btn" onclick="shareViaWhatsApp(event)" style="display: none;">
+          <span>Share on WhatsApp</span>
+        </button>
+        <button class="cta-button-primary" onclick="document.getElementById('app').scrollIntoView({behavior: 'smooth'})">Book Now</button>
+      </div>
     </div>
 
     <div id="loading" class="loading">
@@ -563,6 +620,14 @@
         services = await servicesRes.json();
         
         renderServices();
+        
+        // Show WhatsApp button
+        const currentUrl = window.location.href;
+        const whatsappBtn = document.getElementById('whatsapp-btn');
+        if (whatsappBtn) {
+          whatsappBtn.style.display = 'inline-flex';
+          whatsappBtn.dataset.bookingUrl = currentUrl;
+        }
         
         // Set min date to today
         const today = new Date().toISOString().split('T')[0];
@@ -748,6 +813,17 @@
       
       // Set initial date
       selectedDate = document.getElementById('date-input').value;
+    }
+
+    function shareViaWhatsApp(event) {
+      event.preventDefault();
+      const whatsappBtn = document.getElementById('whatsapp-btn');
+      const bookingUrl = whatsappBtn.dataset.bookingUrl;
+      const businessName = business?.name || 'Our Business';
+      const message = `Hi! I'd like to book an appointment with ${businessName}. Check out this link: ${bookingUrl}`;
+      const encodedMessage = encodeURIComponent(message);
+      const whatsappUrl = `https://api.whatsapp.com/send?text=${encodedMessage}`;
+      window.open(whatsappUrl, '_blank');
     }
     
     // Start
