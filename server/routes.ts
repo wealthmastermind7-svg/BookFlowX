@@ -763,8 +763,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ? `Schedule your ${service.name} appointment. Duration: ${service.durationMinutes}min. Price: $${(service.price || 0).toFixed(2)}`
       : `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
     
-    // Use OG image endpoint
-    const ogImage = `${baseUrl}/og-image.png`;
+    // Use OG image from assets
+    const ogImage = `${baseUrl}/assets/og/booking-preview.png`;
     
     return `
     <meta property="og:title" content="${title}" />
