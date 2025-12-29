@@ -68,6 +68,7 @@ export interface IStorage {
   
   // Demo Data
   initializeDemoData(businessId: string): Promise<void>;
+  clearAllData(businessId: string): Promise<void>;
   
   // Push Tokens
   getPushTokens(businessId: string): Promise<PushToken[]>;
@@ -629,6 +630,30 @@ export class DatabaseStorage implements IStorage {
       .where(eq(quickSales.id, id))
       .returning();
     return updated || undefined;
+  }
+
+  // Clear All Data
+  async clearAllData(businessId: string): Promise<void> {
+    try {
+      // Delete in proper order due to foreign key constraints
+      // 1. Delete all bookings first
+      await db.delete(bookings).where(eq(bookings.businessId, businessId));
+
+      // 2. Delete all customers
+      await db.delete(customers).where(eq(customers.businessId, businessId));
+
+      // 3. Delete all services
+      await db.delete(services).where(eq(services.businessId, businessId));
+
+      // 4. Delete all availability
+      await db.delete(availability).where(eq(availability.businessId, businessId));
+
+      // 5. Delete all quick sales
+      await db.delete(quickSales).where(eq(quickSales.businessId, businessId));
+    } catch (error) {
+      console.error("Error clearing all data:", error);
+      throw error;
+    }
   }
 }
 

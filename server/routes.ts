@@ -557,6 +557,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Clear all data for a business (PROTECTED)
+  app.delete("/api/businesses/:businessId/data", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      await storage.clearAllData(req.params.businessId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error clearing all data:", error);
+      res.status(500).json({ error: "Failed to clear data" });
+    }
+  });
+
   // === STATS API ===
   
   // Get dashboard stats for a business
