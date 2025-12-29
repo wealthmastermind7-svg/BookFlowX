@@ -17,7 +17,6 @@ import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import QRCode from "qrcode";
 import { Feather } from "@expo/vector-icons";
-import Svg, { Circle, Path, G } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
@@ -322,14 +321,7 @@ export default function QuickSaleScreen() {
             },
           ]}>
             <View style={[styles.nfcIcon, { backgroundColor: theme.accent }]}>
-              <Svg width={120} height={120} viewBox="0 0 120 120">
-                <Circle cx={60} cy={60} r={50} fill="none" stroke="white" strokeWidth={2} />
-                <Circle cx={60} cy={60} r={40} fill="none" stroke="white" strokeWidth={1.5} />
-                <G transform="translate(50, 45)">
-                  <Path d="M 10 10 Q 8 8 6 8 Q 4 8 2 10 Q 0 12 0 14 L 0 16" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" />
-                  <Path d="M 16 10 Q 18 8 20 8 Q 22 8 24 10 Q 26 12 26 14 L 26 16" fill="none" stroke="white" strokeWidth={2} strokeLinecap="round" />
-                </G>
-              </Svg>
+              <Feather name="radio" size={64} color="white" />
             </View>
           </Animated.View>
           
