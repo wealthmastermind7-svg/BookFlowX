@@ -71,6 +71,25 @@ export default function QuickSaleScreen() {
     }
   }, [saleComplete]);
 
+  useEffect(() => {
+    if (!stripeStatus?.connected || !stripeStatus.chargesEnabled) {
+      Animated.loop(
+        Animated.sequence([
+          Animated.timing(animationScale, {
+            toValue: 1.1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+          Animated.timing(animationScale, {
+            toValue: 1,
+            duration: 2000,
+            useNativeDriver: true,
+          }),
+        ])
+      ).start();
+    }
+  }, [stripeStatus]);
+
   const checkStripeStatus = async () => {
     setCheckingStatus(true);
     try {
@@ -261,10 +280,17 @@ export default function QuickSaleScreen() {
   if (!stripeStatus?.connected || !stripeStatus.chargesEnabled) {
     return (
       <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing["3xl"] }]}>
-        <View style={styles.setupContainer}>
-          <View style={[styles.iconContainer, { backgroundColor: theme.backgroundSecondary }]}>
-            <Feather name="credit-card" size={48} color={theme.text} />
-          </View>
+        <ScrollView contentContainerStyle={styles.setupContainer} showsVerticalScrollIndicator={false}>
+          <Animated.View style={[
+            styles.animatedIconWrapper,
+            {
+              transform: [{ scale: animationScale }],
+            },
+          ]}>
+            <View style={[styles.setupIconContainer, { backgroundColor: theme.accent }]}>
+              <Feather name="radio" size={56} color="white" />
+            </View>
+          </Animated.View>
           
           <ThemedText style={styles.setupTitle}>
             Set Up Payments
@@ -296,7 +322,7 @@ export default function QuickSaleScreen() {
               Already connected? Tap to refresh
             </ThemedText>
           </Pressable>
-        </View>
+        </ScrollView>
       </ThemedView>
     );
   }
@@ -676,5 +702,21 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.25,
     shadowRadius: 30,
     elevation: 15,
+  },
+  animatedIconWrapper: {
+    alignItems: "center",
+    marginBottom: Spacing["3xl"],
+  },
+  setupIconContainer: {
+    width: 140,
+    height: 140,
+    borderRadius: BorderRadius.xl,
+    alignItems: "center",
+    justifyContent: "center",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 15 },
+    shadowOpacity: 0.2,
+    shadowRadius: 25,
+    elevation: 12,
   },
 });
