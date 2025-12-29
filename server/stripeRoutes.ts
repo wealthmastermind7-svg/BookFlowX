@@ -20,61 +20,91 @@ export function registerStripeRoutes(app: Express) {
 
   app.post("/api/businesses/:businessId/stripe/connect", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      console.log("Stripe connect request for business:", req.params.businessId);
+      
       const business = await storage.getBusiness(req.params.businessId);
       if (!business) {
+        console.log("Business not found:", req.params.businessId);
         return res.status(404).json({ error: "Business not found" });
       }
 
       if (business.stripeAccountId) {
-        const account = await stripeService.getAccount(business.stripeAccountId);
-        
-        if (account.details_submitted) {
-          return res.json({ 
-            status: "already_connected",
-            accountId: business.stripeAccountId,
-            chargesEnabled: account.charges_enabled,
-            payoutsEnabled: account.payouts_enabled,
-          });
+        console.log("Existing Stripe account found:", business.stripeAccountId);
+        try {
+          const account = await stripeService.getAccount(business.stripeAccountId);
+          
+          if (account.details_submitted) {
+            console.log("Account already has details submitted");
+            return res.json({ 
+              status: "already_connected",
+              accountId: business.stripeAccountId,
+              chargesEnabled: account.charges_enabled,
+              payoutsEnabled: account.payouts_enabled,
+            });
+          }
+        } catch (getAccountError) {
+          console.error("Error getting existing account:", getAccountError);
         }
         
         const protocol = req.protocol;
         const host = req.get("host") || "localhost:5000";
         const baseUrl = `${protocol}://${host}`;
         
+        try {
+          const accountLink = await stripeService.createAccountLink(
+            business.stripeAccountId,
+            `${baseUrl}/api/businesses/${business.id}/stripe/connect/return`,
+            `${baseUrl}/api/businesses/${business.id}/stripe/connect/refresh`
+          );
+          
+          console.log("Account link created for existing account");
+          return res.json({ url: accountLink.url });
+        } catch (linkError) {
+          console.error("Error creating account link for existing account:", linkError);
+          throw linkError;
+        }
+      }
+
+      console.log("Creating new Stripe Connect account for business:", business.id);
+      
+      try {
+        const account = await stripeService.createConnectAccount(
+          business.id,
+          business.email || "",
+          business.name
+        );
+
+        console.log("Stripe account created:", account.id);
+
+        await storage.updateBusiness(business.id, {
+          stripeAccountId: account.id,
+          stripeAccountStatus: "pending",
+        });
+
+        const protocol = req.protocol;
+        const host = req.get("host") || "localhost:5000";
+        const baseUrl = `${protocol}://${host}`;
+
         const accountLink = await stripeService.createAccountLink(
-          business.stripeAccountId,
+          account.id,
           `${baseUrl}/api/businesses/${business.id}/stripe/connect/return`,
           `${baseUrl}/api/businesses/${business.id}/stripe/connect/refresh`
         );
-        
-        return res.json({ url: accountLink.url });
+
+        console.log("Account link created for new account");
+        res.json({ url: accountLink.url });
+      } catch (stripeError) {
+        console.error("Error creating Stripe account or link:", stripeError);
+        throw stripeError;
       }
-
-      const account = await stripeService.createConnectAccount(
-        business.id,
-        business.email || "",
-        business.name
-      );
-
-      await storage.updateBusiness(business.id, {
-        stripeAccountId: account.id,
-        stripeAccountStatus: "pending",
-      });
-
-      const protocol = req.protocol;
-      const host = req.get("host") || "localhost:5000";
-      const baseUrl = `${protocol}://${host}`;
-
-      const accountLink = await stripeService.createAccountLink(
-        account.id,
-        `${baseUrl}/api/businesses/${business.id}/stripe/connect/return`,
-        `${baseUrl}/api/businesses/${business.id}/stripe/connect/refresh`
-      );
-
-      res.json({ url: accountLink.url });
     } catch (error) {
-      console.error("Error creating Stripe Connect account:", error);
-      res.status(500).json({ error: "Failed to create Stripe Connect account" });
+      console.error("Error in Stripe connect endpoint:", error);
+      if (!res.headersSent) {
+        res.status(500).json({ 
+          error: "Failed to create Stripe Connect account",
+          details: error instanceof Error ? error.message : String(error)
+        });
+      }
     }
   });
 
