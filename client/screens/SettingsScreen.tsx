@@ -429,12 +429,13 @@ export default function SettingsScreen() {
         {
           icon: "credit-card" as const,
           title: "Quick Sale",
-          subtitle: "Accept contactless tap-to-pay payments",
+          subtitle: "Coming Soon",
           onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-            navigation.navigate("QuickSale");
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Alert.alert("Coming Soon", "Quick Sale with Stripe Connect will be available in v1.1");
           },
           showChevron: true,
+          disabled: true,
         },
       ],
     },
