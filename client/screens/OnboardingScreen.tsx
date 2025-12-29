@@ -36,21 +36,71 @@ interface OnboardingScreenProps {
   onComplete: () => void;
 }
 
-const DEMO_BUSINESS_TYPES = [
-  { id: "salon", label: "Salon", icon: "heart" },
-  { id: "autodetailing", label: "Auto Detail", icon: "truck" },
-  { id: "coaching", label: "Coaching", icon: "target" },
-  { id: "fitness", label: "Fitness", icon: "activity" },
+const INDUSTRIES = [
+  { id: "hvac", label: "HVAC" },
+  { id: "plumbing", label: "Plumbing" },
+  { id: "electrical", label: "Electrical" },
+  { id: "roofing", label: "Roofing" },
+  { id: "construction", label: "Construction" },
+  { id: "handyman", label: "Handyman" },
+  { id: "appliance-repair", label: "Appliance Repair" },
+  { id: "painting", label: "Painting" },
+  { id: "renovations", label: "Renovations" },
+  { id: "flooring", label: "Flooring" },
+  { id: "residential-cleaning", label: "Residential Cleaning" },
+  { id: "commercial-cleaning", label: "Commercial Cleaning" },
+  { id: "window-cleaning", label: "Window Cleaning" },
+  { id: "pressure-washing", label: "Pressure Washing" },
+  { id: "carpet-cleaning", label: "Carpet Cleaning" },
+  { id: "landscaping", label: "Landscaping" },
+  { id: "lawn-care", label: "Lawn Care" },
+  { id: "tree-care", label: "Tree Care" },
+  { id: "pool-service", label: "Pool Service" },
+  { id: "auto-detailing", label: "Auto Detailing" },
+  { id: "mobile-car-wash", label: "Mobile Car Wash" },
+  { id: "mechanics", label: "Mechanics" },
+  { id: "hair-salon", label: "Hair Salon" },
+  { id: "barbershop", label: "Barbershop" },
+  { id: "nail-salon", label: "Nail Salon" },
+  { id: "lash-brow", label: "Lash & Brow" },
+  { id: "spa", label: "Spa" },
+  { id: "massage", label: "Massage" },
+  { id: "tattoo", label: "Tattoo" },
+  { id: "personal-trainer", label: "Personal Trainer" },
+  { id: "fitness-studio", label: "Fitness Studio" },
+  { id: "yoga-studio", label: "Yoga Studio" },
+  { id: "pilates", label: "Pilates" },
+  { id: "crossfit", label: "CrossFit" },
+  { id: "dance-studio", label: "Dance Studio" },
+  { id: "martial-arts", label: "Martial Arts" },
+  { id: "boxing", label: "Boxing" },
+  { id: "sports-coaching", label: "Sports Coaching" },
+  { id: "physiotherapy", label: "Physiotherapy" },
+  { id: "chiropractic", label: "Chiropractic" },
+  { id: "acupuncture", label: "Acupuncture" },
+  { id: "psychology", label: "Psychology" },
+  { id: "counseling", label: "Counseling" },
+  { id: "speech-therapy", label: "Speech Therapy" },
+  { id: "nutritionist", label: "Nutritionist" },
+  { id: "business-consulting", label: "Business Consulting" },
+  { id: "financial-advisor", label: "Financial Advisor" },
+  { id: "accountant", label: "Accountant" },
+  { id: "lawyer", label: "Lawyer" },
+  { id: "private-tutor", label: "Private Tutor" },
+  { id: "language-teacher", label: "Language Teacher" },
+  { id: "music-teacher", label: "Music Teacher" },
+  { id: "photography", label: "Photography" },
+  { id: "videography", label: "Videography" },
+  { id: "graphic-design", label: "Graphic Design" },
+  { id: "event-planning", label: "Event Planning" },
+  { id: "wedding-planning", label: "Wedding Planning" },
+  { id: "pet-grooming", label: "Pet Grooming" },
+  { id: "dog-training", label: "Dog Training" },
+  { id: "veterinary", label: "Veterinary" },
 ];
 
-function getBackgroundImageForType(demoType: string) {
-  const imageMap: Record<string, any> = {
-    salon: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
-    autodetailing: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
-    coaching: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
-    fitness: require("../assets/stock_images/professional_salon_i_c9c033e3.jpg"),
-  };
-  return imageMap[demoType] || imageMap.salon;
+function getBackgroundImageForType(industryId: string) {
+  return require("../assets/stock_images/professional_salon_i_c9c033e3.jpg");
 }
 
 const PAGES = [
@@ -129,8 +179,26 @@ function CircularMeter() {
   );
 }
 
-function Page1Content() {
+function Page1Content({ selectedIndustry, onSelectIndustry }: { selectedIndustry: string; onSelectIndustry: (id: string) => void }) {
   const { theme: colors, isDark } = useTheme();
+  const scrollViewRef = React.useRef<ScrollView>(null);
+  const lastScrollXRef = React.useRef(0);
+
+  const handleScroll = React.useCallback(
+    (event: any) => {
+      const contentOffsetX = event.nativeEvent.contentOffset.x;
+      const itemWidth = 110;
+      const currentIndex = Math.round(contentOffsetX / itemWidth);
+      const selectedItem = INDUSTRIES[currentIndex];
+      
+      if (selectedItem && selectedItem.id !== selectedIndustry && Math.abs(contentOffsetX - lastScrollXRef.current) > 50) {
+        onSelectIndustry(selectedItem.id);
+        lastScrollXRef.current = contentOffsetX;
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }
+    },
+    [selectedIndustry, onSelectIndustry]
+  );
 
   return (
     <View style={styles.page1Content}>
@@ -189,52 +257,120 @@ function Page1Content() {
         <View style={styles.greenDot} />
         <Text style={[styles.newClientText, { color: colors.text }]}>New Client</Text>
       </Animated.View>
+
+      <Animated.View 
+        entering={FadeInUp.delay(900)}
+        style={[styles.industrySelector, { backgroundColor: isDark ? "rgba(20,20,20,0.95)" : "rgba(255,255,255,0.95)" }]}
+      >
+        <ScrollView
+          ref={scrollViewRef}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          decelerationRate="fast"
+          snapToInterval={110}
+          contentContainerStyle={styles.industryList}
+        >
+          {INDUSTRIES.map((industry) => (
+            <Pressable
+              key={industry.id}
+              onPress={() => {
+                onSelectIndustry(industry.id);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+              }}
+              style={[
+                styles.industryChip,
+                {
+                  backgroundColor: selectedIndustry === industry.id
+                    ? colors.text
+                    : isDark ? "rgba(50,50,50,0.6)" : "rgba(0,0,0,0.05)",
+                  borderColor: selectedIndustry === industry.id ? colors.text : "transparent",
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.industryChipText,
+                  {
+                    color: selectedIndustry === industry.id ? colors.backgroundRoot : colors.text,
+                  },
+                ]}
+              >
+                {industry.label}
+              </Text>
+            </Pressable>
+          ))}
+        </ScrollView>
+      </Animated.View>
     </View>
   );
 }
 
-function Page2Content({ selectedDemoType, onSelectDemoType }: { selectedDemoType: string; onSelectDemoType: (type: string) => void }) {
+function Page2Content() {
   const { theme: colors, isDark } = useTheme();
 
   return (
     <View style={styles.page2Content}>
-      <View style={styles.demoTypeGrid}>
-        {DEMO_BUSINESS_TYPES.map((type, index) => (
-          <Animated.View
-            key={type.id}
-            entering={FadeIn.delay(300 + index * 150).springify()}
-          >
-            <Pressable
-              onPress={() => onSelectDemoType(type.id)}
-              style={[
-                styles.demoTypeCard,
-                {
-                  backgroundColor: selectedDemoType === type.id
-                    ? colors.text
-                    : isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-                  borderColor: selectedDemoType === type.id ? colors.text : "transparent",
-                },
-              ]}
-            >
-              <Feather
-                name={type.icon as any}
-                size={24}
-                color={selectedDemoType === type.id ? colors.backgroundRoot : colors.text}
-              />
-              <Text
-                style={[
-                  styles.demoTypeLabel,
-                  {
-                    color: selectedDemoType === type.id ? colors.backgroundRoot : colors.text,
-                  },
-                ]}
-              >
-                {type.label}
-              </Text>
-            </Pressable>
-          </Animated.View>
-        ))}
-      </View>
+      <Animated.View
+        entering={FadeIn.delay(300).springify()}
+        style={[
+          styles.decorativeChip,
+          { 
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 80,
+            left: 20,
+          },
+        ]}
+      >
+        <Feather name="heart" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Wellness & Salon</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(450).springify()}
+        style={[
+          styles.decorativeChip,
+          { 
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 130,
+            right: 60,
+          },
+        ]}
+      >
+        <Feather name="activity" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Clinics</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(600).springify()}
+        style={[
+          styles.decorativeChip,
+          { 
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 180,
+            right: 30,
+          },
+        ]}
+      >
+        <Feather name="target" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Fitness Coaches</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(750).springify()}
+        style={[
+          styles.decorativeChip,
+          { 
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 280,
+            left: 30,
+          },
+        ]}
+      >
+        <Feather name="truck" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Auto Detailing</Text>
+      </Animated.View>
     </View>
   );
 }
@@ -280,7 +416,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const insets = useSafeAreaInsets();
   const flatListRef = useRef<FlatList>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [selectedDemoType, setSelectedDemoType] = useState("salon");
+  const [selectedIndustry, setSelectedIndustry] = useState("hair-salon");
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
@@ -300,31 +436,31 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
     } else {
       await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-      await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
+      await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
       onComplete();
     }
-  }, [currentIndex, onComplete, selectedDemoType]);
+  }, [currentIndex, onComplete, selectedIndustry]);
 
   const handleSkip = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
+    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
     onComplete();
-  }, [onComplete, selectedDemoType]);
+  }, [onComplete, selectedIndustry]);
 
   const handleLogin = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedDemoType);
+    await AsyncStorage.setItem(SELECTED_DEMO_TYPE_KEY, selectedIndustry);
     onComplete();
-  }, [onComplete, selectedDemoType]);
+  }, [onComplete, selectedIndustry]);
 
   const renderPage = useCallback(({ item, index }: { item: typeof PAGES[0]; index: number }) => {
     return (
       <View style={[styles.page, { width: SCREEN_WIDTH }]}>
         <View style={styles.illustrationContainer}>
-          {index === 0 && <Page1Content />}
-          {index === 1 && <Page2Content selectedDemoType={selectedDemoType} onSelectDemoType={setSelectedDemoType} />}
+          {index === 0 && <Page1Content selectedIndustry={selectedIndustry} onSelectIndustry={setSelectedIndustry} />}
+          {index === 1 && <Page2Content />}
           {index === 2 && <Page3Content />}
         </View>
 
@@ -349,16 +485,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 {item.highlightText}
               </Text>
             </Text>
-            {currentIndex === 1 && (
-              <Text style={[styles.description, { color: colors.textSecondary }]}>
-                Select your business type
-              </Text>
-            )}
-            {currentIndex !== 1 && (
-              <Text style={[styles.description, { color: colors.textSecondary }]}>
-                {item.description}
-              </Text>
-            )}
+            <Text style={[styles.description, { color: colors.textSecondary }]}>
+              {item.description}
+            </Text>
           </View>
 
           <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
@@ -388,7 +517,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
       <Image
-        source={getBackgroundImageForType(selectedDemoType)}
+        source={getBackgroundImageForType(selectedIndustry)}
         style={styles.backgroundImage}
         contentFit="cover"
       />
@@ -714,30 +843,50 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: "500",
   },
-  demoTypeGrid: {
-    flex: 1,
+  decorativeChip: {
+    position: "absolute",
     flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
     alignItems: "center",
-    gap: Spacing.lg,
-    paddingHorizontal: Spacing.xl,
-  },
-  demoTypeCard: {
-    width: SCREEN_WIDTH / 2.5,
-    aspectRatio: 1,
-    borderRadius: BorderRadius.xl,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.md,
-    borderWidth: 2,
+    gap: Spacing.sm,
+    paddingVertical: Spacing.sm + 2,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 20,
     shadowColor: "#000",
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
     shadowRadius: 4,
     elevation: 2,
   },
-  demoTypeLabel: {
+  industrySelector: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    maxHeight: 100,
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: -2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 5,
+  },
+  industryList: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
+  },
+  industryChip: {
+    paddingVertical: Spacing.sm + 2,
+    paddingHorizontal: Spacing.md,
+    borderRadius: 20,
+    borderWidth: 1,
+    minWidth: 100,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  industryChipText: {
     fontSize: 13,
     fontWeight: "500",
     textAlign: "center",
