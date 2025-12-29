@@ -288,7 +288,7 @@ export default function QuickSaleScreen() {
             },
           ]}>
             <View style={[styles.setupIconContainer, { backgroundColor: theme.accent }]}>
-              <Feather name="radio" size={56} color="white" />
+              <Feather name="wifi" size={56} color="white" />
             </View>
           </Animated.View>
           
@@ -301,7 +301,13 @@ export default function QuickSaleScreen() {
           </ThemedText>
           
           <Pressable
-            style={[styles.connectButton, { backgroundColor: theme.accent }]}
+            style={({ pressed }) => [
+              styles.connectButton, 
+              { 
+                backgroundColor: theme.accent,
+                opacity: pressed ? 0.8 : 1,
+              }
+            ]}
             onPress={handleConnectStripe}
             disabled={connectingStripe}
           >
@@ -347,7 +353,7 @@ export default function QuickSaleScreen() {
             },
           ]}>
             <View style={[styles.nfcIcon, { backgroundColor: theme.accent }]}>
-              <Feather name="radio" size={64} color="white" />
+              <Feather name="wifi" size={64} color="white" />
             </View>
           </Animated.View>
           
