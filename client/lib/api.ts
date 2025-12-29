@@ -202,20 +202,9 @@ class ApiClient {
 
   async getOrCreateBusiness(): Promise<Business> {
     try {
-      const res = await fetch(`${getApiBase()}api/businesses/demo-business`);
-      if (res.ok) {
-        const business = await res.json();
-        await this.setBusinessId(business.id, business.ownerToken);
-        return business;
-      }
-    } catch (error) {
-      console.log("Demo business not found, creating...");
-    }
-
-    try {
       const newBusiness = await makeRequest<Business>("POST", "/api/businesses", {
         name: "My Business",
-        slug: "demo-business",
+        slug: `demo-business-${Date.now()}`,
         description: "Demo business for testing",
         phone: "+1 (555) 123-4567",
         email: "demo@bookflow.app",
@@ -223,14 +212,7 @@ class ApiClient {
       await this.setBusinessId(newBusiness.id, newBusiness.ownerToken);
       return newBusiness;
     } catch (error) {
-      try {
-        const res = await fetch(`${getApiBase()}api/businesses/demo-business`);
-        if (res.ok) {
-          const business = await res.json();
-          await this.setBusinessId(business.id, business.ownerToken);
-          return business;
-        }
-      } catch {}
+      console.error("Error creating business:", error);
       throw error;
     }
   }
