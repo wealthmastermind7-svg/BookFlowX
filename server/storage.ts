@@ -507,21 +507,6 @@ export class DatabaseStorage implements IStorage {
           { name: "Eric Stewart", email: "eric-vet@example.com", phone: "555-0804" },
         ],
       },
-      solar: {
-        name: "SunPower Solutions",
-        services: [
-          { name: "Solar Panel Inspection", duration: 60, price: 15000, description: "Complete system evaluation" },
-          { name: "Installation Consultation", duration: 45, price: 0, description: "Free consultation for new installations" },
-          { name: "System Maintenance", duration: 120, price: 8500, description: "Annual maintenance and cleaning" },
-          { name: "Battery Backup Setup", duration: 180, price: 45000, description: "Battery storage system installation" },
-        ],
-        customers: [
-          { name: "James Thompson", email: "james-solar@example.com", phone: "555-0901" },
-          { name: "Patricia Garcia", email: "patricia-solar@example.com", phone: "555-0902" },
-          { name: "Christopher Lee", email: "chris-solar@example.com", phone: "555-0903" },
-          { name: "Nancy White", email: "nancy-solar@example.com", phone: "555-0904" },
-        ],
-      },
     };
 
     const template = demoDataTemplates[businessType] || demoDataTemplates.salon;
