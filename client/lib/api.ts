@@ -202,9 +202,19 @@ class ApiClient {
 
   async getOrCreateBusiness(): Promise<Business> {
     try {
+      // Check if we already have a business ID saved
+      const existingId = await this.loadBusinessId();
+      if (existingId) {
+        const existingBusiness = await this.getBusiness();
+        if (existingBusiness) {
+          return existingBusiness;
+        }
+      }
+      
+      // Create new business with fixed slug (not timestamped) to avoid duplicates
       const newBusiness = await makeRequest<Business>("POST", "/api/businesses", {
         name: "My Business",
-        slug: `demo-business-${Date.now()}`,
+        slug: "demo-business",
         description: "Demo business for testing",
         phone: "+1 (555) 123-4567",
         email: "demo@bookflow.app",

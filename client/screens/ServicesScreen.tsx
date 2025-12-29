@@ -39,10 +39,6 @@ export default function ServicesScreen() {
   const initializeBusiness = async () => {
     try {
       await api.getOrCreateBusiness();
-      const existingServices = await api.getServices();
-      if (existingServices.length === 0) {
-        await api.initializeDemoData();
-      }
       loadServices();
     } catch (error) {
       console.error("Error initializing business:", error);
