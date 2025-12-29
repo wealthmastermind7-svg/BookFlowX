@@ -209,7 +209,7 @@ export default function SettingsScreen() {
       const fullUrl = `https://${cleanDomain}${qrImageUrl}`;
       await Share.share({
         url: fullUrl,
-        message: `Share this QR code to book appointments with ${business.name}\n\nVanity link: ${cleanDomain}/book/${business.slug}`,
+        message: `Share this QR code to book appointments with ${business.name}`,
         title: `${business.name} - Booking QR Code`,
       });
     } catch (error) {
