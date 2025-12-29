@@ -101,7 +101,7 @@ export default function QuickSaleScreen() {
         {
           headers: {
             "Content-Type": "application/json",
-            "x-owner-token": await api.getOwnerToken() || "",
+            "x-business-token": await api.getOwnerToken() || "",
           },
         }
       );
@@ -121,7 +121,16 @@ export default function QuickSaleScreen() {
     setConnectingStripe(true);
     try {
       const businessId = api.getBusinessId();
-      if (!businessId) return;
+      if (!businessId) {
+        console.error("No business ID found");
+        return;
+      }
+      
+      const token = await api.getOwnerToken();
+      if (!token) {
+        console.error("No auth token found");
+        return;
+      }
       
       const response = await fetch(
         `${api.getBaseUrl()}/api/businesses/${businessId}/stripe/connect`,
@@ -129,20 +138,21 @@ export default function QuickSaleScreen() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            "x-owner-token": await api.getOwnerToken() || "",
+            "x-business-token": token,
           },
         }
       );
       
-      if (response.ok) {
-        const data = await response.json();
-        if (data.url) {
-          if (Platform.OS === "web") {
-            window.open(data.url, "_blank");
-          } else {
-            await Linking.openURL(data.url);
-          }
+      const data = await response.json();
+      
+      if (response.ok && data.url) {
+        if (Platform.OS === "web") {
+          window.open(data.url, "_blank");
+        } else {
+          await Linking.openURL(data.url);
         }
+      } else {
+        console.error("Stripe Connect error:", data);
       }
     } catch (error) {
       console.error("Error connecting Stripe:", error);
