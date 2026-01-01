@@ -36,6 +36,12 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **Public Booking Flow**: A 4-screen process (Service → Time → Checkout → Confirmation) accessible via unique business slugs.
 - **Demo Data**: Multi-business-type demo data (5 verticals).
 - **Utilities**: QR Code Generation for booking links and an embeddable booking widget (Calendly-style).
+- **Future Roadmap**:
+    - **Google Business Profile (GBP)**: Sync leads and manage reviews via Google My Business API.
+    - **Facebook/Instagram**: Meta Graph API integration for social media leads.
+    - **WhatsApp Business**: Real-time customer communication via WhatsApp Cloud API.
+    - **Webchat Widget**: Integrated real-time chat for business websites.
+    - **Workflow Automation**: Automated lead engagement and booking triggers across all integrated platforms.
 
 ### System Design Choices
 - **Multi-Tenancy**: Implemented at API and database levels for data isolation.
