@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+import * as WebBrowser from "expo-web-browser";
 import Animated, {
   FadeIn,
   FadeOut,
@@ -328,6 +329,22 @@ export function PaywallModal({
                 </Text>
               </Pressable>
 
+              <View style={styles.legalLinks}>
+                <Pressable 
+                  onPress={() => WebBrowser.openBrowserAsync("https://luxeweb.cerolauto.store/BookFlowX/terms")}
+                  style={styles.legalLink}
+                >
+                  <Text style={[styles.legalText, { color: colors.textSecondary }]}>Terms of Service</Text>
+                </Pressable>
+                <Text style={[styles.legalSeparator, { color: colors.textTertiary }]}>•</Text>
+                <Pressable 
+                  onPress={() => WebBrowser.openBrowserAsync("https://luxeweb.cerolauto.store/BookFlowX/privacy-policy")}
+                  style={styles.legalLink}
+                >
+                  <Text style={[styles.legalText, { color: colors.textSecondary }]}>Privacy Policy</Text>
+                </Pressable>
+              </View>
+
               <Text style={[styles.disclaimer, { color: colors.textTertiary }]}>
                 Subscription auto-renews unless cancelled 24 hours before the period ends.
               </Text>
@@ -589,5 +606,24 @@ const styles = StyleSheet.create({
     fontSize: 11,
     textAlign: "center",
     lineHeight: 16,
+  },
+  legalLinks: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: Spacing.sm,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.lg,
+  },
+  legalLink: {
+    paddingVertical: 4,
+  },
+  legalText: {
+    fontSize: 12,
+    fontWeight: "500",
+    textDecorationLine: "underline",
+  },
+  legalSeparator: {
+    fontSize: 12,
   },
 });
