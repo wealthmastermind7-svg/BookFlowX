@@ -1,0 +1,10 @@
+{
+  "build": {
+    "production": {
+      "ios": {
+        "autoIncrement": true,
+        "capabilities": {}
+      }
+    }
+  }
+}
