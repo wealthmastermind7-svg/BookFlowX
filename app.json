@@ -10,6 +10,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.cerolauto.bookflowx",
+      "usesAppleSignIn": true,
       "infoPlist": {
         "NSCameraUsageDescription": "Camera access is required for QR code scanning",
         "NSPhotoLibraryUsageDescription": "Photo library access is required for image sharing",
@@ -43,7 +44,8 @@
         }
       ],
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-apple-authentication"
     ],
     "experiments": {
       "reactCompiler": true
