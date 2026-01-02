@@ -46,6 +46,12 @@ BookFlow utilizes a decoupled frontend and backend architecture.
         - **Bot Training**: Ability to train the AI using web crawling (e.g., crawling the business's website) and custom Q&A pairs.
         - **Lead Conversion**: Automated prompts to start free trials or book services within the chat flow.
         - **Intent Configuration**: Customizable conversation paths based on customer intent (General Question, Booking Request, etc.).
+        - **AI Voice Agents**:
+            - **Inbound/Outbound Call Handling**: Dedicated AI agents for handling phone calls with customizable personalities and goals.
+            - **Agent Goals**: Specific objectives for agents, such as gathering contact information (Name, Email, Address, Issue).
+            - **Instructional Scripting**: Advanced prompting for objection handling, assurance of prompt support, and professional call conclusion.
+            - **Pilot Modes**: Toggle between "Off", "Suggestive" (human-in-the-loop), and "Auto Pilot" (fully autonomous) modes.
+            - **Channel Support**: Unified AI deployment across SMS, Instagram, Facebook, and Live Chat.
     - **Workflow Automation**: Automated lead engagement and booking triggers across all integrated platforms.
 
 ### System Design Choices
