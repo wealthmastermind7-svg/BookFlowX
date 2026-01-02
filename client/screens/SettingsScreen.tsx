@@ -503,6 +503,25 @@ export default function SettingsScreen() {
         },
       ],
     },
+    {
+      section: "Legal",
+      items: [
+        {
+          icon: "shield" as const,
+          title: "Privacy Policy",
+          subtitle: "How we handle your data",
+          onPress: () => Linking.openURL("https://luxeweb.cerolauto.store/BookFlowX/privacy-policy"),
+          showChevron: true,
+        },
+        {
+          icon: "file-text" as const,
+          title: "Terms of Use",
+          subtitle: "App terms and conditions",
+          onPress: () => Linking.openURL("https://luxeweb.cerolauto.store/BookFlowX/terms"),
+          showChevron: true,
+        },
+      ],
+    },
   ];
 
   return (
