@@ -86,7 +86,7 @@ export function PaywallModal({
   const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<"monthly" | "yearly">("yearly");
-  const [freeTrialEnabled, setFreeTrialEnabled] = useState(true);
+  const [freeTrialEnabled, setFreeTrialEnabled] = useState(false);
 
   const handleUpgrade = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -204,9 +204,14 @@ export function PaywallModal({
               </View>
 
               <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.backgroundTertiary }]}>
-                <Text style={[styles.trialText, { color: colors.text }]}>
-                  Enable free trial
-                </Text>
+                <View style={styles.trialTextContainer}>
+                  <Text style={[styles.trialText, { color: colors.text }]}>
+                    Not sure yet? Enable free trial (7 days)
+                  </Text>
+                  <Text style={[styles.trialSubtext, { color: colors.textSecondary }]}>
+                    You will not be charged until the trial ends
+                  </Text>
+                </View>
                 <Switch
                   value={freeTrialEnabled}
                   onValueChange={handleTrialToggle}
@@ -461,9 +466,17 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     marginBottom: Spacing["2xl"],
   },
+  trialTextContainer: {
+    flex: 1,
+    marginRight: Spacing.md,
+  },
   trialText: {
     fontSize: 15,
     fontWeight: "600",
+  },
+  trialSubtext: {
+    fontSize: 13,
+    marginTop: 2,
   },
   planSection: {
     marginBottom: Spacing.xl,
