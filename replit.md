@@ -41,6 +41,11 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - **Facebook/Instagram**: Meta Graph API integration for social media leads.
     - **WhatsApp Business**: Real-time customer communication via WhatsApp Cloud API.
     - **Webchat Widget**: Integrated real-time chat for business websites.
+    - **Conversation AI**:
+        - **Automated Chatbot**: AI-driven responses to common customer queries (e.g., "What services do you offer?").
+        - **Bot Training**: Ability to train the AI using web crawling (e.g., crawling the business's website) and custom Q&A pairs.
+        - **Lead Conversion**: Automated prompts to start free trials or book services within the chat flow.
+        - **Intent Configuration**: Customizable conversation paths based on customer intent (General Question, Booking Request, etc.).
     - **Workflow Automation**: Automated lead engagement and booking triggers across all integrated platforms.
 
 ### System Design Choices
