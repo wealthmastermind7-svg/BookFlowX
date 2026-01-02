@@ -30,7 +30,7 @@ export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkAndIncrementShare, checkAndIncrementQr, checkEmbedAccess, remainingShares, remainingQrCodes, isPremium } = usePremium();
+  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -154,6 +154,10 @@ export default function SettingsScreen() {
   const handleOpenSharePreview = () => {
     if (!business) return;
     
+    if (!checkShareAccess()) {
+      return;
+    }
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
     navigation.navigate("SharePreview", {
@@ -166,7 +170,7 @@ export default function SettingsScreen() {
   const handleShareBookingLink = async () => {
     if (!business) return;
     
-    if (!checkAndIncrementShare()) {
+    if (!checkShareAccess()) {
       return;
     }
     
@@ -184,7 +188,7 @@ export default function SettingsScreen() {
   };
 
   const handleShowQRCode = async () => {
-    if (!checkAndIncrementQr()) {
+    if (!checkQrAccess()) {
       return;
     }
     
@@ -206,6 +210,8 @@ export default function SettingsScreen() {
 
   const handleDownloadQRCode = async () => {
     if (!business) return;
+    if (!checkQrAccess()) return;
+    
     try {
       const cleanDomain = getBookingDomain();
       const qrImageUrl = `/api/businesses/${business.id}/qrcode?format=image`;
@@ -276,6 +282,8 @@ export default function SettingsScreen() {
 
   const handleCopyEmbedCode = async () => {
     if (!embedCode) return;
+    if (!checkEmbedAccess()) return;
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     let codeToCopy = "";
     switch (selectedEmbedType) {

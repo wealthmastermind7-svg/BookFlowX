@@ -66,12 +66,17 @@ export default function SharePreviewScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<SharePreviewRouteParams, "SharePreview">>();
   const { theme, isDark } = useTheme();
-  const { checkAndIncrementShare } = usePremium();
+  const { checkShareAccess, isPremium } = usePremium();
   
   const { businessName, bookingUrl, slug } = route.params;
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
+    const hasAccess = checkShareAccess();
+    if (!hasAccess) {
+      return;
+    }
+    
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await Clipboard.setStringAsync(bookingUrl);
     setCopied(true);
@@ -79,7 +84,7 @@ export default function SharePreviewScreen() {
   };
 
   const handleShare = async () => {
-    if (!checkAndIncrementShare()) {
+    if (!checkShareAccess()) {
       return;
     }
     

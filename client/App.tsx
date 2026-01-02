@@ -17,7 +17,7 @@ import { PaywallModal } from "@/components/PaywallModal";
 import { usePremium } from "@/contexts/PremiumContext";
 
 function PaywallContainer() {
-  const { paywallVisible, paywallType, hidePaywall, handleUpgrade, isLoading, offerings } = usePremium();
+  const { paywallVisible, paywallType, hidePaywall, handleUpgrade, isLoading, offerings, restoreSubscription } = usePremium();
   return (
     <PaywallModal
       visible={paywallVisible}
@@ -26,6 +26,7 @@ function PaywallContainer() {
       onUpgrade={handleUpgrade}
       isLoading={isLoading}
       offerings={offerings}
+      onRestore={restoreSubscription}
     />
   );
 }
