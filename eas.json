@@ -2,8 +2,12 @@
   "build": {
     "production": {
       "ios": {
-        "autoIncrement": true
+        "autoIncrement": true,
+        "resourceClass": "m-medium"
       }
     }
+  },
+  "submit": {
+    "production": {}
   }
 }
