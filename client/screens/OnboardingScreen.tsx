@@ -29,7 +29,6 @@ import Animated, {
   withTiming,
   interpolate,
 } from "react-native-reanimated";
-import * as AppleAuthentication from "expo-apple-authentication";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import Svg, { Circle } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
@@ -509,28 +508,8 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   const handleLogin = useCallback(async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    try {
-      const credential = await AppleAuthentication.signInAsync({
-        requestedScopes: [
-          AppleAuthentication.AppleAuthenticationScope.FULL_NAME,
-          AppleAuthentication.AppleAuthenticationScope.EMAIL,
-        ],
-      });
-      
-      if (credential) {
-        // In a real app, we'd verify the token with our backend
-        // For now, we'll simulate a successful login by completing onboarding
-        await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-        onComplete();
-      }
-    } catch (e: any) {
-      if (e.code === "ERR_CANCELED") {
-        // User canceled, do nothing
-      } else {
-        console.error("Apple Sign-In Error:", e);
-        Alert.alert("Login Failed", "There was an error signing in with Apple. Please try again.");
-      }
-    }
+    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    onComplete();
   }, [onComplete]);
 
   const handleBusinessTypeChange = useCallback((typeId: string) => {
