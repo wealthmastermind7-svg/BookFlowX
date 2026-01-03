@@ -505,12 +505,6 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     onComplete();
   }, [onComplete]);
 
-  const handleLogin = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    onComplete();
-  }, [onComplete]);
-
   const handleBusinessTypeChange = useCallback((typeId: string) => {
     setSelectedBusinessType(typeId);
   }, []);
