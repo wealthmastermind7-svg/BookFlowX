@@ -601,7 +601,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         </View>
       );
     },
-    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
+    [colors, isDark, currentIndex, handleNext, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
   );
 
   const selectedBusinessTypeData = BUSINESS_TYPES.find(t => t.id === selectedBusinessType);
