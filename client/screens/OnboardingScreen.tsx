@@ -78,6 +78,7 @@ const PAGES = [
     description: "Instant confirmations, zero back-and-forth. Let your business run itself.",
     buttonText: "Get Started",
     showSkip: true,
+    showLogin: true,
   },
 ];
 
@@ -505,6 +506,12 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     onComplete();
   }, [onComplete]);
 
+  const handleLogin = useCallback(async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    onComplete();
+  }, [onComplete]);
+
   const handleBusinessTypeChange = useCallback((typeId: string) => {
     setSelectedBusinessType(typeId);
   }, []);
@@ -596,12 +603,20 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 </Text>
                 <Feather name="arrow-right" size={18} color={colors.backgroundRoot} />
               </Pressable>
+
+              {item.showLogin && (
+                <Pressable style={styles.loginButton} onPress={handleLogin}>
+                  <Text style={[styles.loginButtonText, { color: "#3B82F6" }]}>
+                    Log in to existing account
+                  </Text>
+                </Pressable>
+              )}
             </View>
           </View>
         </View>
       );
     },
-    [colors, isDark, currentIndex, handleNext, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
+    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
   );
 
   const selectedBusinessTypeData = BUSINESS_TYPES.find(t => t.id === selectedBusinessType);

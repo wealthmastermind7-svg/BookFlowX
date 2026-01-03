@@ -8,7 +8,7 @@
     "scheme": "bookflow",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": false,
+      "supportsTablet": true,
       "bundleIdentifier": "com.cerolauto.bookflowx"
     },
     "android": {

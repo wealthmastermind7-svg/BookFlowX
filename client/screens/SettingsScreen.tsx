@@ -452,8 +452,8 @@ export default function SettingsScreen() {
       items: [
         {
           icon: "link-2" as const,
-          title: "Business Link ID",
-          subtitle: "Used for your booking link",
+          title: "Booking URL Slug",
+          subtitle: "Tap to edit",
           value: business?.slug || "demo-business",
           onPress: () => handleEditBusinessField("slug"),
           showChevron: true,
@@ -581,7 +581,7 @@ export default function SettingsScreen() {
                 {editingField === "name" && "Business Name"}
                 {editingField === "website" && "Website"}
                 {editingField === "phone" && "Phone"}
-                {editingField === "slug" && "Business Link ID"}
+                {editingField === "slug" && "Booking URL Slug"}
               </ThemedText>
               <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeButton}>
                 <Feather name="x" size={24} color={theme.text} />
@@ -589,12 +589,12 @@ export default function SettingsScreen() {
             </View>
             {editingField === "slug" && (
               <ThemedText type="small" style={styles.slugHelper}>
-                URL: {getBookingDomain()}/book/{editValue || "your-link-id"}
+                URL: {getBookingDomain()}/book/{editValue || "your-slug"}
               </ThemedText>
             )}
             {editingField === "name" && (
               <ThemedText type="small" style={styles.slugHelper}>
-                Your link ID will be auto-generated: "{generateSlugFromName(editValue)}"
+                Booking URL slug will be auto-generated: "{generateSlugFromName(editValue)}"
               </ThemedText>
             )}
             <TextInput
