@@ -78,7 +78,6 @@ const PAGES = [
     description: "Instant confirmations, zero back-and-forth. Let your business run itself.",
     buttonText: "Get Started",
     showSkip: true,
-    showLogin: true,
   },
 ];
 
