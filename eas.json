@@ -4,9 +4,7 @@
       "ios": {
         "autoIncrement": true,
         "resourceClass": "m-medium",
-        "enterpriseProvisioning": false,
-        "credentialsSource": "remote",
-        "syncCapabilities": false
+        "credentialsSource": "remote"
       }
     }
   }
