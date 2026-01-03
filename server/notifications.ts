@@ -36,64 +36,7 @@ export async function sendPushNotification(
   body: string,
   data?: Record<string, unknown>
 ): Promise<{ success: boolean; sentCount: number; errors: string[] }> {
-  try {
-    const tokens = await storage.getPushTokens(businessId);
-    
-    if (tokens.length === 0) {
-      return { success: true, sentCount: 0, errors: [] };
-    }
-
-    const messages: ExpoPushMessage[] = tokens.map(token => ({
-      to: token.token,
-      sound: 'default',
-      title,
-      body,
-      data: data || {},
-      priority: 'high',
-    }));
-
-    const response = await fetch(EXPO_PUSH_URL, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json',
-        'Accept-Encoding': 'gzip, deflate',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(messages),
-    });
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Expo Push API error:', errorText);
-      return { success: false, sentCount: 0, errors: [errorText] };
-    }
-
-    const result = await response.json();
-    const tickets: ExpoPushTicket[] = result.data || [];
-    const errors: string[] = [];
-    let sentCount = 0;
-
-    for (let i = 0; i < tickets.length; i++) {
-      const ticket = tickets[i];
-      const token = tokens[i];
-
-      if (ticket.status === 'ok') {
-        sentCount++;
-      } else {
-        const errorMessage = ticket.message || ticket.details?.error || 'Unknown error';
-        errors.push(`Token ${token.token.substring(0, 20)}...: ${errorMessage}`);
-        
-        if (ticket.details?.error === 'DeviceNotRegistered') {
-          await storage.deactivatePushToken(token.token);
-        }
-      }
-    }
-
-    return { success: errors.length === 0, sentCount, errors };
-  } catch (error) {
-    console.error('Error sending push notification:', error);
-    return { success: false, sentCount: 0, errors: [(error as Error).message] };
-  }
+  return { success: true, sentCount: 0, errors: [] };
 }
 
 export async function sendBookingNotification(

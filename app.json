@@ -44,7 +44,10 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiDomain": "bookflowx.cerolauto.store"
+      "apiDomain": "bookflowx.cerolauto.store",
+      "eas": {
+        "projectId": "76babb7b-72bb-4813-ad3a-f1137fc896b1"
+      }
     }
   }
 }
