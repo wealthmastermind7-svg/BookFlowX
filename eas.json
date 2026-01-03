@@ -3,8 +3,7 @@
     "production": {
       "ios": {
         "autoIncrement": true,
-        "resourceClass": "m-medium",
-        "credentialsSource": "remote"
+        "capabilities": {}
       }
     }
   }

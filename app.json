@@ -1,18 +1,15 @@
 {
   "expo": {
-    "name": "BookFlowX",
-    "slug": "bookflowx",
+    "name": "BookFlow",
+    "slug": "bookflow",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bookflow",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "supportsTablet": false,
-      "bundleIdentifier": "com.cerolauto.bookflowx",
-      "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
-      }
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cerolauto.bookflowx"
     },
     "android": {
       "adaptiveIcon": {
@@ -47,11 +44,7 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiDomain": "bookflowx.cerolauto.store",
-      "eas": {
-        "projectId": "cb4181d2-5ab3-4376-9238-e983cbb85e24"
-      }
-    },
-    "owner": "cerolauto"
+      "apiDomain": "bookflowx.cerolauto.store"
+    }
   }
 }
