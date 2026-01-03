@@ -602,14 +602,6 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
                 </Text>
                 <Feather name="arrow-right" size={18} color={colors.backgroundRoot} />
               </Pressable>
-
-              {item.showLogin && (
-                <Pressable style={styles.loginButton} onPress={handleLogin}>
-                  <Text style={[styles.loginButtonText, { color: "#3B82F6" }]}>
-                    Log in to existing account
-                  </Text>
-                </Pressable>
-              )}
             </View>
           </View>
         </View>
