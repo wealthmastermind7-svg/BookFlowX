@@ -409,11 +409,14 @@ export async function initializeIndustryBlueprints(
     };
     
     try {
-      console.log(`[Workflow] Creating workflow: "${workflowData.name}" for industry: "${industry}"`);
+      console.log(`[Workflow] Creating workflow: "${workflowData.name}" for business: ${businessId}`);
       await storage.createWorkflow(workflowData);
-    } catch (err) {
-      console.error(`[Workflow] Failed to create workflow from blueprint "${blueprint.name}":`, err);
+    } catch (err: any) {
+      console.error(`[Workflow] Failed to create workflow "${blueprint.name}":`, err);
+      // Log more details about the error if possible
+      if (err.message) console.error(`[Workflow] Error message: ${err.message}`);
       throw err;
     }
   }
+  console.log(`[Workflow] Successfully initialized all ${blueprints.length} blueprints for industry: "${industry}"`);
 }

@@ -1066,15 +1066,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/businesses/:businessId/workflows/initialize", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { industry } = req.body;
-      if (!industry || !INDUSTRY_BLUEPRINTS[industry as keyof typeof INDUSTRY_BLUEPRINTS]) {
-        return res.status(400).json({ error: "Invalid industry" });
+      if (!industry) {
+        return res.status(400).json({ error: "Industry is required" });
       }
-      await initializeIndustryBlueprints(req.params.businessId, industry);
+
+      console.log(`[Workflow] Initializing blueprints for business: ${req.params.businessId}, industry: "${industry}"`);
+      
+      const normalizedIndustry = industry.toLowerCase().trim();
+      if (!INDUSTRY_BLUEPRINTS[normalizedIndustry as keyof typeof INDUSTRY_BLUEPRINTS]) {
+        console.error(`[Workflow] Invalid industry requested: "${industry}"`);
+        return res.status(400).json({ 
+          error: "Invalid industry template",
+          details: `Industry "${industry}" is not supported.`
+        });
+      }
+
+      await initializeIndustryBlueprints(req.params.businessId, normalizedIndustry);
+      
       const workflows = await storage.getWorkflows(req.params.businessId);
       res.status(201).json(workflows);
     } catch (error) {
-      console.error("Error initializing blueprints:", error);
-      res.status(500).json({ error: "Failed to initialize blueprints" });
+      console.error("[Workflow] Error initializing blueprints:", error);
+      res.status(500).json({ 
+        error: "Failed to initialize blueprints",
+        details: error instanceof Error ? error.message : String(error)
+      });
     }
   });
 
