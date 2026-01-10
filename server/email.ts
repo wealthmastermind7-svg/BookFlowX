@@ -2,9 +2,12 @@ import { Resend } from 'resend';
 
 function getResendClient(): Resend | null {
   const apiKey = process.env.RESEND_API_KEY;
+  console.log('[Resend] Checking API Key configuration...');
   if (!apiKey) {
+    console.error('[Resend] API Key is MISSING from environment variables.');
     return null;
   }
+  console.log('[Resend] API Key found, initializing client.');
   return new Resend(apiKey);
 }
 
@@ -22,10 +25,12 @@ interface BookingConfirmationData {
 export async function sendBookingConfirmation(data: BookingConfirmationData): Promise<boolean> {
   const resend = getResendClient();
   if (!resend) {
-    console.log('RESEND_API_KEY not configured, skipping email');
+    console.log('[Resend] Client not initialized, skipping email');
     return false;
   }
 
+  console.log(`[Resend] Preparing email for ${data.customerEmail} from bookings@confirmbooking.online`);
+  
   try {
     const formattedDate = new Date(data.date).toLocaleDateString('en-US', {
       weekday: 'long',
@@ -34,7 +39,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       day: 'numeric'
     });
 
-    const { error, data: resendData } = await resend.emails.send({
+    const response = await resend.emails.send({
       from: 'BookFlow <bookings@confirmbooking.online>',
       to: data.customerEmail,
       subject: `Booking Confirmed - ${data.businessName}`,
@@ -58,15 +63,15 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       `
     });
 
-    if (error) {
-      console.error('Error sending email:', JSON.stringify(error, null, 2));
+    if (response.error) {
+      console.error('[Resend] API Error:', JSON.stringify(response.error, null, 2));
       return false;
     }
 
-    console.log('Booking confirmation email sent successfully:', JSON.stringify(resendData, null, 2));
+    console.log('[Resend] Success! ID:', response.data?.id);
     return true;
   } catch (error) {
-    console.error('Failed to send booking confirmation:', error);
+    console.error('[Resend] Exception:', error);
     return false;
   }
 }
