@@ -405,6 +405,15 @@ async function initStripe() {
     }
   });
 
+  app.get("/alternatives", (_req: Request, res: Response) => {
+    const templatePath = findTemplate("alternatives.html");
+    if (templatePath) {
+      res.sendFile(templatePath);
+    } else {
+      res.status(404).send("Alternatives page not found");
+    }
+  });
+
   app.get("/privacy-policy", (_req: Request, res: Response) => {
     const templatePath = findTemplate("privacy-policy.html");
     if (templatePath) {
