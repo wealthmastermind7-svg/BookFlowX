@@ -374,23 +374,29 @@ export async function triggerWorkflows(
   }
 }
 
+function getIndustryBlueprints(industry: string) {
+  if (!industry) return [];
+  const normalized = industry.toLowerCase().trim();
+  return INDUSTRY_BLUEPRINTS[normalized as keyof typeof INDUSTRY_BLUEPRINTS] || [];
+}
+
 export async function initializeIndustryBlueprints(
   businessId: string,
   industry: string
 ): Promise<void> {
-  const blueprints = INDUSTRY_BLUEPRINTS[industry as keyof typeof INDUSTRY_BLUEPRINTS];
+  const blueprints = getIndustryBlueprints(industry);
   if (!blueprints || blueprints.length === 0) {
-    console.log(`[Workflow] No blueprints for industry: ${industry}`);
+    console.log(`[Workflow] No blueprints found for industry: "${industry}"`);
     return;
   }
 
-  console.log(`[Workflow] Initializing ${blueprints.length} blueprints for industry: ${industry}`);
+  console.log(`[Workflow] Initializing ${blueprints.length} blueprints for industry: "${industry}" for business: ${businessId}`);
 
   for (const blueprint of blueprints) {
     // Ensure we have correct actionConfig and triggerConditions
     const workflowData = {
       name: blueprint.name,
-      description: blueprint.description,
+      description: blueprint.description || null,
       triggerType: blueprint.triggerType,
       actionType: blueprint.actionType,
       actionConfig: blueprint.actionConfig,
@@ -398,11 +404,19 @@ export async function initializeIndustryBlueprints(
       industryBlueprint: industry,
       isActive: true,
       isPilot: false,
-      // Provide defaults if missing
       triggerConditions: (blueprint as any).triggerConditions || null,
       delayMinutes: blueprint.delayMinutes !== undefined ? blueprint.delayMinutes : 0
     };
     
-    await storage.createWorkflow(workflowData);
+    try {
+      console.log(`[Workflow] Creating workflow: ${workflowData.name}`);
+      await storage.createWorkflow(workflowData);
+    } catch (err) {
+      console.error(`[Workflow] Failed to create workflow from blueprint ${blueprint.name}:`, err);
+      // Re-throw to be caught by the route handler if we want to fail the whole process
+      // or continue if we want partial success. Given the user's error, it seems 
+      // storage.createWorkflow is failing.
+      throw err;
+    }
   }
 }

@@ -243,6 +243,9 @@ export class DatabaseStorage implements IStorage {
         notes: bookings.notes,
         createdAt: bookings.createdAt,
         updatedAt: bookings.updatedAt,
+        paymentStatus: bookings.paymentStatus,
+        stripePaymentIntentId: bookings.stripePaymentIntentId,
+        stripeCheckoutSessionId: bookings.stripeCheckoutSessionId,
         customerName: customers.name,
         serviceName: services.name,
       })
@@ -278,6 +281,9 @@ export class DatabaseStorage implements IStorage {
         notes: bookings.notes,
         createdAt: bookings.createdAt,
         updatedAt: bookings.updatedAt,
+        paymentStatus: bookings.paymentStatus,
+        stripePaymentIntentId: bookings.stripePaymentIntentId,
+        stripeCheckoutSessionId: bookings.stripeCheckoutSessionId,
         customerName: customers.name,
         serviceName: services.name,
       })
