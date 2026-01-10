@@ -17,7 +17,7 @@ export async function verifyBusinessOwnership(
 ) {
   try {
     const businessId = req.params.businessId || req.params.id;
-    const ownerToken = req.get("x-business-token");
+    const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!businessId) {
       return res.status(400).json({ error: "Business ID is required" });
@@ -60,7 +60,7 @@ export async function verifyServiceOwnership(
 ) {
   try {
     const serviceId = req.params.id;
-    const ownerToken = req.get("x-business-token");
+    const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!serviceId) {
       return res.status(400).json({ error: "Service ID is required" });
@@ -107,7 +107,7 @@ export async function verifyBookingOwnership(
 ) {
   try {
     const bookingId = req.params.id;
-    const ownerToken = req.get("x-business-token");
+    const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!bookingId) {
       return res.status(400).json({ error: "Booking ID is required" });
@@ -154,7 +154,7 @@ export async function verifyCustomerOwnership(
 ) {
   try {
     const customerId = req.params.id;
-    const ownerToken = req.get("x-business-token");
+    const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!customerId) {
       return res.status(400).json({ error: "Customer ID is required" });
