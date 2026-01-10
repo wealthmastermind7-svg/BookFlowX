@@ -213,6 +213,7 @@ export default function WorkflowsScreen() {
       const businessId = api.getBusinessId();
       if (!businessId) throw new Error("No business ID");
 
+      console.log("[Workflow] Starting blueprint init for industry:", industry);
       const ownerToken = await api.getOwnerToken();
       const response = await fetch(
         `${getApiUrl()}/api/businesses/${businessId}/workflows/initialize`,
@@ -228,6 +229,7 @@ export default function WorkflowsScreen() {
 
       if (response.ok) {
         const data = await response.json();
+        console.log("[Workflow] Init successful, received", data.length, "workflows");
         setWorkflows(data);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
@@ -235,11 +237,13 @@ export default function WorkflowsScreen() {
           `${INDUSTRY_LABELS[industry]?.label || industry} automation workflows have been set up.`
         );
       } else {
-        throw new Error("Failed to initialize blueprints");
+        const errorData = await response.json().catch(() => ({}));
+        console.error("[Workflow] Server error during init:", errorData);
+        throw new Error(errorData.error || "Failed to initialize blueprints");
       }
-    } catch (error) {
-      console.error("Error initializing blueprints:", error);
-      Alert.alert("Error", "Failed to set up workflows. Please try again.");
+    } catch (error: any) {
+      console.error("Blueprint init failed:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      Alert.alert("Error", `Failed to set up workflows: ${error.message || "Please try again."}`);
     } finally {
       setInitializing(false);
     }

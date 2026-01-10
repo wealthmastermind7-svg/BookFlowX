@@ -409,13 +409,10 @@ export async function initializeIndustryBlueprints(
     };
     
     try {
-      console.log(`[Workflow] Creating workflow: ${workflowData.name}`);
+      console.log(`[Workflow] Creating workflow: "${workflowData.name}" for industry: "${industry}"`);
       await storage.createWorkflow(workflowData);
     } catch (err) {
-      console.error(`[Workflow] Failed to create workflow from blueprint ${blueprint.name}:`, err);
-      // Re-throw to be caught by the route handler if we want to fail the whole process
-      // or continue if we want partial success. Given the user's error, it seems 
-      // storage.createWorkflow is failing.
+      console.error(`[Workflow] Failed to create workflow from blueprint "${blueprint.name}":`, err);
       throw err;
     }
   }
