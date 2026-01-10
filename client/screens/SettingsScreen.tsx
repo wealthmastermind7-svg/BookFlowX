@@ -403,6 +403,18 @@ export default function SettingsScreen() {
 
   const settingsItems = [
     {
+      section: "Premium",
+      items: [
+        {
+          icon: "star" as const,
+          title: "Upgrade to Premium",
+          subtitle: isPremium ? "You are a Premium member" : "Unlock all features",
+          onPress: () => showPaywall("soft_upsell"),
+          showChevron: true,
+        },
+      ],
+    },
+    {
       section: "Business Settings",
       items: [
         {

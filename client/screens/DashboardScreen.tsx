@@ -14,10 +14,13 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PremiumBanner } from "@/components/PremiumBanner";
 
+import { usePremium } from "@/contexts/PremiumContext";
+
 export default function DashboardScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { theme } = useTheme();
+  const { showPaywall } = usePremium();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -132,7 +135,11 @@ export default function DashboardScreen() {
       case 1:
         return <LineGraph data={graphData} title="Revenue This Week" />;
       case 2:
-        return <PremiumBanner />;
+        return (
+          <Pressable onPress={() => showPaywall("soft_upsell")}>
+            <PremiumBanner />
+          </Pressable>
+        );
       case 3:
         return (
           <View style={styles.section}>
