@@ -235,7 +235,6 @@ async function executeEmailAction(
   try {
     await sendBookingConfirmation({
       businessName: context.business.name,
-      businessEmail: context.business.email || undefined,
       customerName: context.customer.name,
       customerEmail: context.customer.email,
       serviceName: context.service.name,
@@ -243,6 +242,7 @@ async function executeEmailAction(
       time: context.booking.time,
       price: context.booking.totalPrice,
       currency: context.business.currency || "USD",
+      confirmationNumber: context.booking.id.split("-")[0].toUpperCase(),
     });
 
     return { success: true, message: "Email sent successfully" };
@@ -376,9 +376,9 @@ export async function triggerWorkflows(
 
 export async function initializeIndustryBlueprints(
   businessId: string,
-  industry: keyof typeof INDUSTRY_BLUEPRINTS
+  industry: string
 ): Promise<void> {
-  const blueprints = INDUSTRY_BLUEPRINTS[industry];
+  const blueprints = INDUSTRY_BLUEPRINTS[industry as keyof typeof INDUSTRY_BLUEPRINTS];
   if (!blueprints || blueprints.length === 0) {
     console.log(`[Workflow] No blueprints for industry: ${industry}`);
     return;
@@ -387,12 +387,22 @@ export async function initializeIndustryBlueprints(
   console.log(`[Workflow] Initializing ${blueprints.length} blueprints for industry: ${industry}`);
 
   for (const blueprint of blueprints) {
-    await storage.createWorkflow({
+    // Ensure we have correct actionConfig and triggerConditions
+    const workflowData = {
+      name: blueprint.name,
+      description: blueprint.description,
+      triggerType: blueprint.triggerType,
+      actionType: blueprint.actionType,
+      actionConfig: blueprint.actionConfig,
       businessId,
-      ...blueprint,
       industryBlueprint: industry,
       isActive: true,
       isPilot: false,
-    });
+      // Provide defaults if missing
+      triggerConditions: (blueprint as any).triggerConditions || null,
+      delayMinutes: blueprint.delayMinutes !== undefined ? blueprint.delayMinutes : 0
+    };
+    
+    await storage.createWorkflow(workflowData);
   }
 }
