@@ -554,6 +554,31 @@ export default function SettingsScreen() {
       ],
     },
     {
+      section: "Automation",
+      items: [
+        {
+          icon: "zap" as const,
+          title: "Workflows",
+          subtitle: "Automate confirmations & reminders",
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            navigation.navigate("Workflows");
+          },
+          showChevron: true,
+        },
+        {
+          icon: "settings" as const,
+          title: "Widget Theming",
+          subtitle: "Customize your booking widget appearance",
+          onPress: () => {
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Alert.alert("Coming Soon", "Theme customization will be available in v1.2");
+          },
+          showChevron: true,
+        },
+      ],
+    },
+    {
       section: "Data Management",
       items: [
         {

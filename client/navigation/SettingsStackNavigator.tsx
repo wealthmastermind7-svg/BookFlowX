@@ -2,6 +2,7 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "@/screens/SettingsScreen";
 import SharePreviewScreen from "@/screens/SharePreviewScreen";
+import WorkflowsScreen from "@/screens/WorkflowsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type SettingsStackParamList = {
@@ -11,6 +12,7 @@ export type SettingsStackParamList = {
     bookingUrl: string;
     slug: string;
   };
+  Workflows: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -32,6 +34,13 @@ export default function SettingsStackNavigator() {
         component={SharePreviewScreen}
         options={{
           headerTitle: "Share Preview",
+        }}
+      />
+      <Stack.Screen
+        name="Workflows"
+        component={WorkflowsScreen}
+        options={{
+          headerTitle: "Workflows",
         }}
       />
     </Stack.Navigator>
