@@ -54,7 +54,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
             <p style="margin: 10px 0 0 0;"><strong>Service:</strong> ${data.serviceName}</p>
             <p style="margin: 5px 0 0 0;"><strong>Date:</strong> ${formattedDate}</p>
             <p style="margin: 5px 0 0 0;"><strong>Time:</strong> ${data.time}</p>
-            <p style="margin: 10px 0 0 0;"><strong>Total Price:</strong> $${data.price}</p>
+            <p style="margin: 10px 0 0 0;"><strong>Total Price:</strong> $${(data.price / 100).toFixed(2)}</p>
           </div>
           
           <p>If you need to make any changes, please contact the business directly.</p>
