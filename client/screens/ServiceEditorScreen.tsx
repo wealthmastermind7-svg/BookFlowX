@@ -30,6 +30,24 @@ type EditScreenNavigationProp = NativeStackNavigationProp<
   "ServiceEditor"
 >;
 
+const CURRENCIES = [
+  { label: "US Dollar ($)", value: "USD", symbol: "$" },
+  { label: "Euro (€)", value: "EUR", symbol: "€" },
+  { label: "British Pound (£)", value: "GBP", symbol: "£" },
+  { label: "Australian Dollar (A$)", value: "AUD", symbol: "A$" },
+  { label: "Canadian Dollar (C$)", value: "CAD", symbol: "C$" },
+  { label: "Japanese Yen (¥)", value: "JPY", symbol: "¥" },
+  { label: "Indian Rupee (₹)", value: "INR", symbol: "₹" },
+  { label: "South African Rand (R)", value: "ZAR", symbol: "R" },
+  { label: "Nigerian Naira (₦)", value: "NGN", symbol: "₦" },
+  { label: "Kenyan Shilling (KSh)", value: "KES", symbol: "KSh" },
+];
+
+export function getCurrencySymbol(currencyCode: string): string {
+  const currency = CURRENCIES.find(c => c.value === currencyCode);
+  return currency?.symbol || "$";
+}
+
 export default function ServiceEditorScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
@@ -47,6 +65,7 @@ export default function ServiceEditorScreen() {
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [businessReady, setBusinessReady] = useState(!!api.getBusinessId());
+  const [currencySymbol, setCurrencySymbol] = useState("$");
 
   const serviceId = (route.params as any)?.serviceId;
 
@@ -67,6 +86,22 @@ export default function ServiceEditorScreen() {
       loadService();
     }
   }, [serviceId, businessReady]);
+
+  useEffect(() => {
+    const loadBusinessCurrency = async () => {
+      try {
+        const business = await api.getBusiness();
+        if (business?.currency) {
+          setCurrencySymbol(getCurrencySymbol(business.currency));
+        }
+      } catch (error) {
+        console.error("Error loading business currency:", error);
+      }
+    };
+    if (businessReady) {
+      loadBusinessCurrency();
+    }
+  }, [businessReady]);
 
   const loadService = async () => {
     setLoading(true);
@@ -266,7 +301,7 @@ export default function ServiceEditorScreen() {
             {/* Price */}
             <View style={styles.section}>
               <ThemedText type="h4" style={styles.sectionTitle}>
-                Price ($)
+                Price ({currencySymbol})
               </ThemedText>
               <TextInput
                 value={String((service.price || 0) / 100)}

@@ -400,7 +400,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           time: data.time,
           price: data.totalPrice,
           confirmationNumber: booking.id.slice(0, 8).toUpperCase(),
-          businessName: business?.name || "Business"
+          businessName: business?.name || "Business",
+          currency: business?.currency || "USD"
         })
         .then(success => {
           if (success) console.log(`[Booking] Email sent successfully to ${customerEmail}`);

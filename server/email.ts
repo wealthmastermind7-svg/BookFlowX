@@ -20,6 +20,24 @@ interface BookingConfirmationData {
   price: number;
   confirmationNumber: string;
   businessName: string;
+  currency?: string;
+}
+
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: "$",
+  EUR: "€",
+  GBP: "£",
+  AUD: "A$",
+  CAD: "C$",
+  JPY: "¥",
+  INR: "₹",
+  ZAR: "R",
+  NGN: "₦",
+  KES: "KSh",
+};
+
+function getCurrencySymbol(currency: string): string {
+  return CURRENCY_SYMBOLS[currency] || "$";
 }
 
 export async function sendBookingConfirmation(data: BookingConfirmationData): Promise<boolean> {
@@ -54,7 +72,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
             <p style="margin: 10px 0 0 0;"><strong>Service:</strong> ${data.serviceName}</p>
             <p style="margin: 5px 0 0 0;"><strong>Date:</strong> ${formattedDate}</p>
             <p style="margin: 5px 0 0 0;"><strong>Time:</strong> ${data.time}</p>
-            <p style="margin: 10px 0 0 0;"><strong>Total Price:</strong> $${(data.price / 100).toFixed(2)}</p>
+            <p style="margin: 10px 0 0 0;"><strong>Total Price:</strong> ${getCurrencySymbol(data.currency || "USD")}${(data.price / 100).toFixed(2)}</p>
           </div>
           
           <p>If you need to make any changes, please contact the business directly.</p>

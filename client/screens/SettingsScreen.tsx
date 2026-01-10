@@ -52,6 +52,21 @@ export default function SettingsScreen() {
   const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
   const [copiedCode, setCopiedCode] = useState(false);
   const copiedTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [currencyLoading, setCurrencyLoading] = useState(false);
+
+  const CURRENCIES = [
+    { id: "USD", label: "US Dollar", symbol: "$" },
+    { id: "EUR", label: "Euro", symbol: "€" },
+    { id: "GBP", label: "British Pound", symbol: "£" },
+    { id: "AUD", label: "Australian Dollar", symbol: "A$" },
+    { id: "CAD", label: "Canadian Dollar", symbol: "C$" },
+    { id: "JPY", label: "Japanese Yen", symbol: "¥" },
+    { id: "INR", label: "Indian Rupee", symbol: "₹" },
+    { id: "ZAR", label: "South African Rand", symbol: "R" },
+    { id: "NGN", label: "Nigerian Naira", symbol: "₦" },
+    { id: "KES", label: "Kenyan Shilling", symbol: "KSh" },
+  ];
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -149,6 +164,32 @@ export default function SettingsScreen() {
   const handleShowDemoTypeModal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setDemoTypeModalVisible(true);
+  };
+
+  const handleShowCurrencyModal = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCurrencyModalVisible(true);
+  };
+
+  const handleSelectCurrency = async (currencyId: string) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCurrencyLoading(true);
+    setCurrencyModalVisible(false);
+    try {
+      const updated = await api.updateBusiness({ currency: currencyId });
+      setBusiness(updated);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    } catch (error) {
+      console.error("Error updating currency:", error);
+      Alert.alert("Error", "Failed to update currency. Please try again.");
+    } finally {
+      setCurrencyLoading(false);
+    }
+  };
+
+  const getCurrentCurrencyLabel = (): string => {
+    const currency = CURRENCIES.find(c => c.id === (business?.currency || "USD"));
+    return currency ? `${currency.symbol} ${currency.label}` : "$ US Dollar";
   };
 
   const handleOpenSharePreview = () => {
@@ -441,6 +482,15 @@ export default function SettingsScreen() {
           onPress: () => handleEditBusinessField("phone"),
           showChevron: true,
         },
+        {
+          icon: "dollar-sign" as const,
+          title: "Currency",
+          subtitle: "Set your business currency",
+          value: getCurrentCurrencyLabel(),
+          onPress: handleShowCurrencyModal,
+          showChevron: true,
+          disabled: currencyLoading,
+        },
       ],
     },
     {
@@ -705,6 +755,53 @@ export default function SettingsScreen() {
                 </Pressable>
               ))}
             </View>
+          </View>
+        </View>
+      </Modal>
+
+      <Modal
+        visible={currencyModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault, maxWidth: 400 }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText type="h3">Select Currency</ThemedText>
+              <Pressable onPress={() => setCurrencyModalVisible(false)} style={styles.closeButton}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+            
+            <ScrollView style={{ maxHeight: 400 }}>
+              <View style={styles.demoTypeGrid}>
+                {CURRENCIES.map((currency) => (
+                  <Pressable
+                    key={currency.id}
+                    onPress={() => handleSelectCurrency(currency.id)}
+                    style={[
+                      styles.demoTypeButton,
+                      { 
+                        backgroundColor: (business?.currency || "USD") === currency.id 
+                          ? theme.text 
+                          : theme.backgroundSecondary 
+                      }
+                    ]}
+                  >
+                    <ThemedText 
+                      type="body" 
+                      style={[
+                        styles.demoTypeLabel,
+                        { color: (business?.currency || "USD") === currency.id ? theme.backgroundDefault : theme.text }
+                      ]}
+                    >
+                      {currency.symbol} {currency.label}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            </ScrollView>
           </View>
         </View>
       </Modal>

@@ -90,6 +90,7 @@ export interface Business {
   notificationsEnabled?: boolean | null;
   bookingUrl?: string | null;
   ownerToken?: string | null;
+  currency?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }
