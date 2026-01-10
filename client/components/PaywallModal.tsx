@@ -331,14 +331,14 @@ export function PaywallModal({
 
               <View style={styles.legalLinks}>
                 <Pressable 
-                  onPress={() => WebBrowser.openBrowserAsync("https://luxeweb.cerolauto.store/BookFlowX/terms")}
+                  onPress={() => WebBrowser.openBrowserAsync(`${process.env.EXPO_PUBLIC_DOMAIN}/terms`)}
                   style={styles.legalLink}
                 >
                   <Text style={[styles.legalText, { color: colors.textSecondary }]}>Terms of Service</Text>
                 </Pressable>
                 <Text style={[styles.legalSeparator, { color: colors.textTertiary }]}>•</Text>
                 <Pressable 
-                  onPress={() => WebBrowser.openBrowserAsync("https://luxeweb.cerolauto.store/BookFlowX/privacy-policy")}
+                  onPress={() => WebBrowser.openBrowserAsync(`${process.env.EXPO_PUBLIC_DOMAIN}/privacy-policy`)}
                   style={styles.legalLink}
                 >
                   <Text style={[styles.legalText, { color: colors.textSecondary }]}>Privacy Policy</Text>
