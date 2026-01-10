@@ -121,11 +121,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Legal routes
   app.get("/privacy-policy", (req: Request, res: Response) => {
-    res.sendFile(path.resolve(__dirname, "templates/privacy-policy.html"));
+    const p = path.resolve(__dirname, "templates/privacy-policy.html");
+    if (fs.existsSync(p)) {
+      res.sendFile(p);
+    } else {
+      res.status(404).send("Privacy Policy not found");
+    }
   });
 
   app.get("/terms", (req: Request, res: Response) => {
-    res.sendFile(path.resolve(__dirname, "templates/terms.html"));
+    const p = path.resolve(__dirname, "templates/terms.html");
+    if (fs.existsSync(p)) {
+      res.sendFile(p);
+    } else {
+      res.status(404).send("Terms of Service not found");
+    }
   });
   
   // === BUSINESSES API ===
