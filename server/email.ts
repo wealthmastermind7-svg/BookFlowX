@@ -40,7 +40,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     });
 
     const response = await resend.emails.send({
-      from: 'BookFlow <bookings@confirmbooking.online>',
+      from: `${data.businessName} <bookings@confirmbooking.online>`,
       to: data.customerEmail,
       subject: `Booking Confirmed - ${data.businessName}`,
       html: `
