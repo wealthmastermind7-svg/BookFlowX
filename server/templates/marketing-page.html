@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html class="scroll-smooth dark" lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BookFlow - The New Standard for Appointments</title>
+    <meta name="description" content="The world's most elegant booking engine for premium service providers. Manage appointments, grow revenue, and delight customers.">
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
+    <link href="https://fonts.googleapis.com" rel="preconnect"/>
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#05070A",
+                        secondary: "#0A1128",
+                        accent: "#C5A059",
+                        charcoal: "#1A1C1E",
+                    },
+                    fontFamily: {
+                        display: ["Cormorant Garamond", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style type="text/tailwindcss">
+        @layer components {
+            .glass-card {
+                @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
+            }
+            .text-gold {
+                @apply bg-gradient-to-tr from-[#C5A059] via-[#EAD196] to-[#C5A059] bg-clip-text text-transparent;
+            }
+            .btn-premium-gold {
+                @apply bg-gradient-to-r from-[#C5A059] via-[#EAD196] to-[#C5A059] text-primary hover:shadow-[0_0_30px_rgba(197,160,89,0.4)] transition-all duration-500;
+            }
+            .hero-mesh {
+                background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(5, 7, 10, 1) 100%);
+            }
+            .iphone-bezel {
+                @apply relative mx-auto border-[8px] border-[#1A1C1E] rounded-[3rem] bg-black shadow-2xl overflow-hidden;
+                width: 280px;
+                height: 580px;
+                box-shadow: 0 0 0 2px #333, 0 50px 100px -20px rgba(0,0,0,0.5);
+            }
+            .iphone-island {
+                @apply absolute top-3 left-1/2 -translate-x-1/2 w-24 h-6 bg-black rounded-full z-50;
+            }
+            .material-symbols-outlined {
+                font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
+            }
+        }
+        @keyframes float {
+            0% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(1deg); }
+            100% { transform: translateY(0px) rotate(0deg); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+        .animate-float-delayed {
+            animation: float 8s ease-in-out infinite -2s;
+        }
+        .perspective-2000 {
+            perspective: 2000px;
+        }
+        @keyframes shimmer {
+            0% { background-position: -200% 0; }
+            100% { background-position: 200% 0; }
+        }
+        .shimmer-text {
+            background: linear-gradient(90deg, #94a3b8 0%, #ffffff 50%, #94a3b8 100%);
+            background-size: 200% auto;
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: shimmer 4s linear infinite;
+        }
+    </style>
+</head>
+<body class="bg-primary text-slate-100 font-sans selection:bg-accent selection:text-primary overflow-x-hidden">
+    <nav class="fixed top-0 w-full z-[100] border-b border-white/5 bg-primary/80 backdrop-blur-lg">
+        <div class="max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 border border-accent/30 rounded flex items-center justify-center">
+                    <span class="material-symbols-outlined text-accent text-2xl">calendar_month</span>
+                </div>
+                <span class="font-display text-2xl font-semibold tracking-tight">BookFlow</span>
+            </div>
+            <div class="hidden lg:flex items-center gap-12">
+                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="#features">Features</a>
+                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="#industries">Industries</a>
+                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="#pricing">Pricing</a>
+            </div>
+            <div class="flex items-center gap-6">
+                <a class="text-xs font-semibold tracking-widest uppercase hidden sm:block hover:text-accent transition-colors" href="/">Open App</a>
+                <a href="#download" class="px-6 py-3 bg-accent text-primary text-xs font-bold uppercase tracking-widest hover:bg-white transition-all rounded">
+                    Download
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="relative">
+        <section class="relative min-h-screen flex flex-col items-center justify-center pt-32 pb-20 px-6 hero-mesh overflow-hidden">
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-1/4 -left-20 w-[600px] h-[600px] bg-accent/5 rounded-full blur-[120px]"></div>
+                <div class="absolute bottom-1/4 -right-20 w-[600px] h-[600px] bg-blue-900/10 rounded-full blur-[120px]"></div>
+            </div>
+
+            <div class="relative z-30 w-full max-w-[1440px] mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-bold tracking-[0.3em] uppercase mb-10">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-accent opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-accent"></span>
+                    </span>
+                    The Multi-Industry Standard
+                </div>
+
+                <h1 class="font-display text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-[9rem] font-light leading-[0.9] tracking-tighter mb-8">
+                    The New Standard <br/>
+                    <span class="italic font-normal text-gold">for Appointments.</span>
+                </h1>
+
+                <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto mb-10 leading-relaxed font-light">
+                    The world's most elegant booking engine, now in the palm of your hand. Designed for premium service providers who demand excellence.
+                </p>
+
+                <div id="download" class="flex flex-col sm:flex-row items-center justify-center gap-6 mb-16">
+                    <a href="https://apps.apple.com/app/id982107779" target="_blank" class="btn-premium-gold flex items-center gap-3 px-8 py-4 rounded-full text-sm font-bold uppercase tracking-widest group">
+                        <span class="material-symbols-outlined text-xl">phone_iphone</span>
+                        Download for iOS
+                    </a>
+                    <div class="flex items-center gap-3 px-6 py-4 rounded-full border border-white/10 bg-white/5 text-slate-400 text-xs font-bold uppercase tracking-widest cursor-default">
+                        <span class="material-symbols-outlined text-lg">android</span>
+                        Coming Soon to Android
+                    </div>
+                </div>
+            </div>
+
+            <div class="relative w-full max-w-6xl mx-auto z-20 mt-8 px-4">
+                <div class="flex flex-col lg:flex-row items-center justify-center gap-8 lg:gap-16 perspective-2000">
+                    <div class="relative group animate-float-delayed lg:-rotate-6 transform-gpu">
+                        <div class="iphone-bezel">
+                            <div class="iphone-island"></div>
+                            <div class="w-full h-full bg-secondary p-4 pt-14">
+                                <div class="space-y-5">
+                                    <div class="flex justify-between items-center px-2">
+                                        <div>
+                                            <p class="text-[10px] text-accent font-bold uppercase tracking-widest">Welcome Back</p>
+                                            <h3 class="font-display text-xl italic text-white">Dashboard</h3>
+                                        </div>
+                                        <div class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-white text-xl">notifications</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card rounded-2xl p-4 border-accent/20">
+                                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Today's Revenue</p>
+                                        <div class="flex items-end gap-2">
+                                            <span class="text-3xl font-display font-bold text-white">$2,450</span>
+                                            <span class="text-green-400 text-xs font-bold mb-1">+12%</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="glass-card rounded-2xl p-4 border-white/5">
+                                        <p class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-3">Upcoming</p>
+                                        <div class="space-y-2">
+                                            <div class="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5">
+                                                <div class="w-1 h-8 bg-accent rounded-full"></div>
+                                                <div>
+                                                    <p class="text-[11px] font-medium text-white">9:30 AM - Haircut</p>
+                                                    <p class="text-[9px] text-slate-500">Sarah M.</p>
+                                                </div>
+                                            </div>
+                                            <div class="flex items-center gap-3 p-2 rounded-xl bg-white/5 border border-white/5">
+                                                <div class="w-1 h-8 bg-blue-400 rounded-full"></div>
+                                                <div>
+                                                    <p class="text-[11px] font-medium text-white">11:00 AM - Consultation</p>
+                                                    <p class="text-[9px] text-slate-500">James K.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="grid grid-cols-2 gap-3 px-2">
+                                        <div class="aspect-square glass-card rounded-2xl flex flex-col items-center justify-center border-accent/10">
+                                            <span class="text-2xl font-display font-bold text-white">98%</span>
+                                            <span class="text-[7px] font-bold text-accent tracking-tighter uppercase">Show Rate</span>
+                                        </div>
+                                        <div class="aspect-square glass-card rounded-2xl flex flex-col items-center justify-center border-white/5">
+                                            <span class="text-2xl font-display font-bold text-white">47</span>
+                                            <span class="text-[7px] font-bold text-slate-500 tracking-tighter uppercase">This Week</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative group animate-float lg:rotate-6 transform-gpu mt-12 lg:mt-0">
+                        <div class="iphone-bezel">
+                            <div class="iphone-island"></div>
+                            <div class="w-full h-full bg-primary p-4 pt-14">
+                                <div class="h-full flex flex-col">
+                                    <div class="flex items-center gap-4 mb-6">
+                                        <div class="w-12 h-12 bg-accent rounded-2xl flex items-center justify-center">
+                                            <span class="material-symbols-outlined text-primary text-2xl">calendar_today</span>
+                                        </div>
+                                        <div>
+                                            <h4 class="font-display text-lg italic text-white">Book Appointment</h4>
+                                            <p class="text-[10px] text-slate-500 tracking-widest uppercase">Premium Booking</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="flex-1 space-y-4">
+                                        <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+                                            <p class="text-[9px] text-slate-500 uppercase font-bold mb-4 tracking-widest">Select Service</p>
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="p-3 rounded-xl bg-accent/20 border border-accent/40 text-accent flex flex-col items-center">
+                                                    <span class="material-symbols-outlined mb-1">content_cut</span>
+                                                    <span class="text-[8px] font-bold uppercase">Haircut</span>
+                                                </div>
+                                                <div class="p-3 rounded-xl bg-white/5 border border-white/5 text-slate-400 flex flex-col items-center">
+                                                    <span class="material-symbols-outlined mb-1">spa</span>
+                                                    <span class="text-[8px] font-bold uppercase">Styling</span>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+                                            <p class="text-[9px] text-slate-500 uppercase font-bold mb-4 tracking-widest">Select Date</p>
+                                            <div class="grid grid-cols-7 gap-1">
+                                                <div class="text-[8px] text-center text-slate-600">S</div>
+                                                <div class="text-[8px] text-center text-slate-600">M</div>
+                                                <div class="text-[8px] text-center text-slate-600">T</div>
+                                                <div class="text-[8px] text-center text-slate-600">W</div>
+                                                <div class="text-[8px] text-center text-slate-600">T</div>
+                                                <div class="text-[8px] text-center text-slate-600">F</div>
+                                                <div class="text-[8px] text-center text-slate-600">S</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-600">12</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-600">13</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-white bg-accent rounded-full">14</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-300">15</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-300">16</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-300">17</div>
+                                                <div class="h-6 flex items-center justify-center text-[10px] text-slate-300">18</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="p-4 rounded-2xl border border-white/5 bg-white/[0.02]">
+                                            <p class="text-[9px] text-slate-500 uppercase font-bold mb-3 tracking-widest">Available Times</p>
+                                            <div class="flex gap-2 flex-wrap">
+                                                <span class="px-3 py-1.5 rounded-lg bg-accent text-primary text-[9px] font-bold">9:00 AM</span>
+                                                <span class="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 text-[9px] font-bold">10:30 AM</span>
+                                                <span class="px-3 py-1.5 rounded-lg bg-white/5 text-slate-400 text-[9px] font-bold">2:00 PM</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <button class="w-full py-4 bg-accent text-primary text-[10px] font-bold uppercase tracking-widest rounded-xl mt-4">
+                                        Confirm Booking
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="absolute -top-8 -right-8 lg:right-0 w-52 glass-card p-5 rounded-2xl animate-float-delayed hidden xl:block border-accent/20 z-50">
+                            <div class="relative flex flex-col items-center">
+                                <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                                    <circle class="text-white/5" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-width="6"></circle>
+                                    <circle class="text-accent" cx="50" cy="50" fill="transparent" r="45" stroke="currentColor" stroke-dasharray="283" stroke-dashoffset="20" stroke-linecap="round" stroke-width="6"></circle>
+                                </svg>
+                                <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                    <span class="text-xl font-display font-bold text-white">98%</span>
+                                    <span class="text-[7px] font-bold text-accent tracking-[0.15em] uppercase">Efficiency</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="features" class="py-24 px-6 bg-charcoal relative border-t border-white/5">
+            <div class="max-w-[1440px] mx-auto">
+                <div class="grid lg:grid-cols-2 gap-16 items-center">
+                    <div class="space-y-10">
+                        <div class="space-y-6">
+                            <h2 class="font-display text-5xl md:text-6xl lg:text-7xl font-light leading-[0.9] tracking-tight">
+                                Built for<br/>
+                                <span class="italic text-gold">Every Industry.</span>
+                            </h2>
+                            <p class="text-slate-400 text-lg max-w-lg leading-relaxed">
+                                We've redefined scheduling by building industry-specific logic into every module. Whether you're managing a luxury spa, a surgical center, or a boutique law firm.
+                            </p>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-6">
+                            <div class="space-y-3">
+                                <div class="w-12 h-12 rounded-xl bg-accent/10 border border-accent/20 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-accent">spa</span>
+                                </div>
+                                <h4 class="font-semibold text-white">Wellness & Beauty</h4>
+                                <p class="text-sm text-slate-500">Sophisticated staff allocation and resource-based booking logic.</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-slate-400">medical_services</span>
+                                </div>
+                                <h4 class="font-semibold text-white">Medical Practices</h4>
+                                <p class="text-sm text-slate-500">HIPAA-compliant workflows with patient intake automation.</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-slate-400">fitness_center</span>
+                                </div>
+                                <h4 class="font-semibold text-white">Fitness & Gyms</h4>
+                                <p class="text-sm text-slate-500">Recurring membership integration and class capacity control.</p>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-slate-400">work</span>
+                                </div>
+                                <h4 class="font-semibold text-white">Professional Services</h4>
+                                <p class="text-sm text-slate-500">Time-tracking and billing connected directly to your calendar.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="relative">
+                        <div class="glass-card rounded-3xl p-8 border-accent/10">
+                            <div class="flex items-center gap-3 mb-6">
+                                <div class="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center">
+                                    <span class="material-symbols-outlined text-accent">bolt</span>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Automated Flows</p>
+                                    <p class="text-sm text-white font-medium">Smart Logic Engine</p>
+                                </div>
+                            </div>
+
+                            <div class="space-y-4">
+                                <div class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                                    <div class="w-10 h-10 rounded-full bg-green-500/20 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-green-400 text-lg">check_circle</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-400 uppercase tracking-wide">Triggered: New Appointment</p>
+                                        <p class="text-sm text-white font-medium">Send SMS Confirmation</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center gap-4 p-4 rounded-xl bg-white/5 border border-white/5">
+                                    <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center">
+                                        <span class="material-symbols-outlined text-blue-400 text-lg">schedule</span>
+                                    </div>
+                                    <div>
+                                        <p class="text-xs text-slate-400 uppercase tracking-wide">Automatic 24h Before</p>
+                                        <p class="text-sm text-white font-medium">Deposit Invoice Generated</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-center py-6">
+                                    <div class="relative">
+                                        <svg class="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+                                            <circle class="text-white/5" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-width="8"></circle>
+                                            <circle class="text-accent" cx="50" cy="50" fill="transparent" r="40" stroke="currentColor" stroke-dasharray="251" stroke-dashoffset="0" stroke-linecap="round" stroke-width="8"></circle>
+                                        </svg>
+                                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                                            <span class="text-lg font-display font-bold text-white">100%</span>
+                                            <span class="text-[8px] font-bold text-accent tracking-wider uppercase">Synced</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-16 px-6 bg-primary border-t border-b border-white/5">
+            <div class="max-w-[1440px] mx-auto">
+                <p class="text-center text-[10px] font-bold text-slate-600 uppercase tracking-[0.3em] mb-10">Empowering Global Industry Leaders</p>
+                <div class="flex flex-wrap items-center justify-center gap-8 md:gap-16">
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Luxe Spa</span>
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Dental Elite</span>
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Maison Noir</span>
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Vital Clinic</span>
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Studio Flow</span>
+                    <span class="font-display text-2xl italic text-slate-600 hover:text-accent transition-colors">Zenith Group</span>
+                </div>
+            </div>
+        </section>
+
+        <section id="pricing" class="py-24 px-6 bg-secondary relative">
+            <div class="max-w-[1440px] mx-auto text-center">
+                <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-bold tracking-[0.3em] uppercase mb-8">
+                    Premium Features
+                </div>
+
+                <h2 class="font-display text-5xl md:text-6xl lg:text-7xl font-light leading-[0.9] tracking-tight mb-6">
+                    Everything You Need<br/>
+                    <span class="italic text-gold">to Grow.</span>
+                </h2>
+
+                <p class="text-slate-400 text-lg max-w-2xl mx-auto mb-16 leading-relaxed">
+                    One powerful platform with all the tools to manage appointments, delight customers, and scale your business.
+                </p>
+
+                <div class="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">calendar_month</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">Smart Scheduling</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Intelligent booking with buffer times, resource management, and real-time availability sync.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">mail</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">Email Confirmations</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Branded email confirmations with your business name, currency, and professional formatting.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">qr_code</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">QR Code Booking</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Generate shareable QR codes and embed widgets for seamless customer booking anywhere.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">analytics</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">Revenue Analytics</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Track daily revenue, booking trends, and customer insights with beautiful dashboards.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">currency_exchange</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">Multi-Currency</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Support for 10+ international currencies including USD, EUR, GBP, JPY, and more.</p>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-8 text-left border-white/5 hover:border-accent/30 transition-colors">
+                        <span class="material-symbols-outlined text-3xl text-accent mb-4">groups</span>
+                        <h3 class="text-xl font-semibold text-white mb-3">Customer Management</h3>
+                        <p class="text-slate-400 text-sm leading-relaxed">Complete CRM with booking history, contact details, and customer notes all in one place.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section class="py-24 px-6 bg-primary relative overflow-hidden">
+            <div class="absolute inset-0 pointer-events-none">
+                <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-accent/5 rounded-full blur-[150px]"></div>
+            </div>
+
+            <div class="max-w-4xl mx-auto text-center relative z-10">
+                <h2 class="font-display text-5xl md:text-6xl lg:text-7xl font-light leading-[0.9] tracking-tight mb-8">
+                    Ready to<br/>
+                    <span class="italic text-gold">Transform Your Business?</span>
+                </h2>
+
+                <p class="text-slate-400 text-lg max-w-xl mx-auto mb-10 leading-relaxed">
+                    Join thousands of premium service providers who trust BookFlow to manage their appointments and grow their revenue.
+                </p>
+
+                <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
+                    <a href="https://apps.apple.com/app/id982107779" target="_blank" class="btn-premium-gold flex items-center gap-3 px-10 py-5 rounded-full text-sm font-bold uppercase tracking-widest group">
+                        <span class="material-symbols-outlined text-xl">phone_iphone</span>
+                        Download for iOS
+                    </a>
+                    <a href="/" class="flex items-center gap-3 px-8 py-4 rounded-full border border-white/20 text-white text-sm font-bold uppercase tracking-widest hover:bg-white/5 transition-colors">
+                        <span class="material-symbols-outlined text-lg">open_in_browser</span>
+                        Try Web Version
+                    </a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="bg-charcoal border-t border-white/5 py-16 px-6">
+        <div class="max-w-[1440px] mx-auto">
+            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
+                <div class="flex flex-col gap-6">
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
+                            <span class="material-symbols-outlined text-primary font-bold">calendar_month</span>
+                        </div>
+                        <span class="font-display font-semibold text-2xl tracking-tight text-white">BookFlow</span>
+                    </div>
+                    <p class="text-slate-500 text-sm max-w-xs leading-relaxed">
+                        Empowering the world's most prestigious service providers with seamless mobile management.
+                    </p>
+                </div>
+
+                <nav class="flex flex-wrap gap-x-12 gap-y-4">
+                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="https://apps.apple.com/app/id982107779" target="_blank">App Store</a>
+                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="#">Android</a>
+                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/privacy-policy">Privacy</a>
+                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/terms">Terms</a>
+                </nav>
+
+                <div class="flex flex-col items-start lg:items-end gap-4">
+                    <div class="flex gap-4">
+                        <a class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:border-accent transition-colors group" href="#">
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-accent">share</span>
+                        </a>
+                        <a class="w-12 h-12 rounded-full border border-white/10 flex items-center justify-center hover:border-accent transition-colors group" href="mailto:support@confirmbooking.online">
+                            <span class="material-symbols-outlined text-slate-400 group-hover:text-accent">mail</span>
+                        </a>
+                    </div>
+                    <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
+                        &copy; 2026 BookFlow. All rights reserved.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
