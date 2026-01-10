@@ -44,7 +44,7 @@ interface PremiumProviderProps {
 }
 
 export function PremiumProvider({ children, initialState }: PremiumProviderProps) {
-  const [isPremium, setIsPremium] = useState(initialState?.isPremium ?? false);
+  const [isPremium, setIsPremium] = useState(true);
   
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [paywallType, setPaywallType] = useState<PaywallType>("soft_upsell");
