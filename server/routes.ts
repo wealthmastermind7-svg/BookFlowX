@@ -682,6 +682,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Send test email (for debugging Resend integration)
+  app.post("/api/test-email", async (req: Request, res: Response) => {
+    try {
+      const { email } = req.body;
+      if (!email) {
+        return res.status(400).json({ error: "Email address is required" });
+      }
+      
+      console.log(`[Test Email] Attempting to send test email to ${email}`);
+      
+      const success = await sendBookingConfirmation({
+        customerName: "Test User",
+        customerEmail: email,
+        serviceName: "Test Service",
+        date: new Date().toISOString().split('T')[0],
+        time: "2:00 PM",
+        price: 50,
+        confirmationNumber: "TEST1234",
+        businessName: "BookFlow Test"
+      });
+      
+      if (success) {
+        res.json({ success: true, message: `Test email sent to ${email}` });
+      } else {
+        res.status(500).json({ success: false, message: "Failed to send test email. Check server logs." });
+      }
+    } catch (error) {
+      console.error("[Test Email] Error:", error);
+      res.status(500).json({ error: "Failed to send test email" });
+    }
+  });
+
   // === QR CODE API ===
   
   // Generate QR code for booking link
