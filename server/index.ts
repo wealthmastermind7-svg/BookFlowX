@@ -315,6 +315,25 @@ async function initStripe() {
   setupBodyParsing(app);
   setupRequestLogging(app);
 
+  // Legal routes registered EARLY for maximum priority
+  app.get("/privacy-policy", (_req: Request, res: Response) => {
+    const p = path.resolve(process.cwd(), "server/templates/privacy-policy.html");
+    if (fs.existsSync(p)) {
+      res.sendFile(p);
+    } else {
+      res.status(404).send("Privacy Policy not found");
+    }
+  });
+
+  app.get("/terms", (_req: Request, res: Response) => {
+    const p = path.resolve(process.cwd(), "server/templates/terms.html");
+    if (fs.existsSync(p)) {
+      res.sendFile(p);
+    } else {
+      res.status(404).send("Terms of Service not found");
+    }
+  });
+
   configureExpoAndLanding(app);
 
   await initStripe();
