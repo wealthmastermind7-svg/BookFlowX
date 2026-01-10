@@ -67,3 +67,13 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **PostgreSQL**: Primary database.
 - **Drizzle ORM**: Database ORM.
 - **RevenueCat**: In-app purchase & subscription management.
+- **Resend**: Email service for booking confirmations.
+  - Sender: `bookings@confirmbooking.online` (verified domain)
+  - Triggers on booking creation when customer name and email are provided
+  - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
+
+## Recent Changes (January 2026)
+- Fixed legal pages (privacy-policy, terms) with inline fallback HTML for production reliability
+- Updated Resend sender email from `onboarding@resend.dev` to `bookings@confirmbooking.online`
+- Added comprehensive logging for email debugging (`[Resend]` and `[Booking]` prefixes)
+- Added test email endpoint for debugging Resend integration
