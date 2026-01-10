@@ -21,7 +21,7 @@ export function getApiUrl(): string {
     }
     
     // If running on custom production domain
-    if (currentHost.includes("cerolauto.store")) {
+    if (currentHost.includes("confirmbooking.online")) {
       return `${currentProtocol}//${currentHost}/`;
     }
     
@@ -81,7 +81,7 @@ export function getApiUrl(): string {
 /**
  * Gets the public booking domain (clean domain without protocol)
  * Used for generating public booking URLs and QR codes
- * @returns {string} The clean domain (e.g., "bookflowx.cerolauto.store")
+ * @returns {string} The clean domain (e.g., "confirmbooking.online")
  */
 export function getBookingDomain(): string {
   // Check if we're in a true browser environment (not React Native)
@@ -99,9 +99,9 @@ export function getBookingDomain(): string {
     }
     
     // If running on custom production domain or localhost, use it
-    if (currentHost.includes("cerolauto.store") || currentHost === "localhost" || currentHost === "127.0.0.1") {
+    if (currentHost.includes("confirmbooking.online") || currentHost === "localhost" || currentHost === "127.0.0.1") {
       // For production domain, just use the domain
-      if (currentHost.includes("cerolauto.store")) {
+      if (currentHost.includes("confirmbooking.online")) {
         return currentHost;
       }
       // For localhost, include port

@@ -56,7 +56,7 @@ outputType = "webview"
 [userenv]
 
 [userenv.shared]
-EXPO_PUBLIC_DOMAIN = "bookflowx.cerolauto.store"
-API_DOMAIN = "bookflowx.cerolauto.store"
+EXPO_PUBLIC_DOMAIN = "confirmbooking.online"
+API_DOMAIN = "confirmbooking.online"
 EXPO_PUBLIC_REVENUECAT_API_KEY_IOS = "appl_LqjVbACDADybafbTUXlheXxxhkF"
 EXPO_PUBLIC_REVENUECAT_API_KEY_ANDROID = "goog_test_GWhXYzGjxDAjjsjqebFufZExVDz"
