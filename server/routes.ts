@@ -378,6 +378,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Send email confirmation
       if (req.body.customerEmail && req.body.customerName) {
+        console.log(`[Booking] Triggering email confirmation for ${req.body.customerEmail} (${req.body.customerName})`);
         sendBookingConfirmation({
           customerName: req.body.customerName,
           customerEmail: req.body.customerEmail,
@@ -387,7 +388,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           price: data.totalPrice,
           confirmationNumber: booking.id.slice(0, 8).toUpperCase(),
           businessName: business?.name || "Business"
-        }).catch(err => console.error("Failed to send confirmation email:", err));
+        })
+        .then(success => {
+          if (success) console.log(`[Booking] Email sent successfully to ${req.body.customerEmail}`);
+          else console.error(`[Booking] Failed to send email to ${req.body.customerEmail}`);
+        })
+        .catch(err => console.error("[Booking] Critical error in email confirmation:", err));
+      } else {
+        console.log(`[Booking] Skipping email - missing customer details. Email: ${req.body.customerEmail}, Name: ${req.body.customerName}`);
       }
       
       // Send push notification to business owner (if notifications are enabled)
