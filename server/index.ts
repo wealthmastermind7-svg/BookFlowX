@@ -316,21 +316,103 @@ async function initStripe() {
   setupRequestLogging(app);
 
   // Legal routes registered EARLY for maximum priority
+  // Try multiple paths for production compatibility
+  const findTemplate = (filename: string): string | null => {
+    const paths = [
+      path.resolve(process.cwd(), "server/templates", filename),
+      path.resolve(process.cwd(), "server_dist/templates", filename),
+      path.resolve(process.cwd(), "templates", filename),
+    ];
+    for (const p of paths) {
+      if (fs.existsSync(p)) return p;
+    }
+    return null;
+  };
+
+  // Inline fallback content for production when files aren't available
+  const privacyPolicyFallback = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy | BookFlow</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #fff; }
+        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2rem; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; }
+        p { margin-bottom: 1rem; color: #4a4a4a; }
+        .back-link { display: inline-block; margin-bottom: 2rem; color: #000; text-decoration: none; font-weight: 600; }
+        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Back to Home</a>
+    <h1>Privacy Policy</h1>
+    <p>Last Updated: January 10, 2026</p>
+    <p>At BookFlow, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your information when you use our booking platform.</p>
+    <h2>1. Information We Collect</h2>
+    <p>We collect information that you provide directly to us, including your name, email address, phone number, and any other information you choose to provide when making a booking or setting up a business profile.</p>
+    <h2>2. How We Use Your Information</h2>
+    <p>We use the information we collect to facilitate bookings, communicate with you about your appointments, and improve our services. We do not sell your personal information to third parties.</p>
+    <h2>3. Data Security</h2>
+    <p>We implement a variety of security measures to maintain the safety of your personal information. Your data is stored securely using industry-standard encryption.</p>
+    <h2>4. Contact Us</h2>
+    <p>If you have any questions about this Privacy Policy, please contact us at <strong>admin@cerolauto.com</strong>.</p>
+    <footer>&copy; 2026 BookFlow. All rights reserved.</footer>
+</body>
+</html>`;
+
+  const termsFallback = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Terms of Service | BookFlow</title>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #fff; }
+        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2rem; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; }
+        p { margin-bottom: 1rem; color: #4a4a4a; }
+        .back-link { display: inline-block; margin-bottom: 2rem; color: #000; text-decoration: none; font-weight: 600; }
+        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9rem; color: #888; }
+    </style>
+</head>
+<body>
+    <a href="/" class="back-link">← Back to Home</a>
+    <h1>Terms of Service</h1>
+    <p>Last Updated: January 10, 2026</p>
+    <p>By using BookFlow, you agree to the following terms and conditions. Please read them carefully.</p>
+    <h2>1. Use of Service</h2>
+    <p>You agree to use BookFlow only for lawful purposes and in a way that does not infringe the rights of others or restrict their use of the platform.</p>
+    <h2>2. Business Responsibilities</h2>
+    <p>Businesses using BookFlow are responsible for managing their own availability, services, and customer communications accurately. BookFlow is not responsible for disputes between businesses and their customers.</p>
+    <h2>3. Subscriptions and Payments</h2>
+    <p>Premium features are available through subscription tiers. All payments are processed securely, and subscriptions can be managed through the app settings.</p>
+    <h2>4. Limitation of Liability</h2>
+    <p>BookFlow shall not be liable for any indirect, incidental, or consequential damages resulting from the use or inability to use our services.</p>
+    <h2>5. Contact Us</h2>
+    <p>For any questions regarding these terms, please contact us at <strong>admin@cerolauto.com</strong>.</p>
+    <footer>&copy; 2026 BookFlow. All rights reserved.</footer>
+</body>
+</html>`;
+
   app.get("/privacy-policy", (_req: Request, res: Response) => {
-    const p = path.resolve(process.cwd(), "server/templates/privacy-policy.html");
-    if (fs.existsSync(p)) {
-      res.sendFile(p);
+    const templatePath = findTemplate("privacy-policy.html");
+    if (templatePath) {
+      res.sendFile(templatePath);
     } else {
-      res.status(404).send("Privacy Policy not found");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(privacyPolicyFallback);
     }
   });
 
   app.get("/terms", (_req: Request, res: Response) => {
-    const p = path.resolve(process.cwd(), "server/templates/terms.html");
-    if (fs.existsSync(p)) {
-      res.sendFile(p);
+    const templatePath = findTemplate("terms.html");
+    if (templatePath) {
+      res.sendFile(templatePath);
     } else {
-      res.status(404).send("Terms of Service not found");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(termsFallback);
     }
   });
 
