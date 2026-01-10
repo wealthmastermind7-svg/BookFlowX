@@ -373,15 +373,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Get business and service for notifications
       const business = await storage.getBusiness(req.params.businessId);
       const service = await storage.getService(data.serviceId);
-      const customerName = req.body.customerName || "Customer";
       const serviceName = service?.name || "Service";
       
+      // Get customer details - from request body or by looking up customerId
+      let customerEmail = req.body.customerEmail;
+      let customerName = req.body.customerName;
+      
+      if (!customerEmail && data.customerId) {
+        console.log(`[Booking] Looking up customer ${data.customerId} for email...`);
+        const customer = await storage.getCustomer(data.customerId);
+        if (customer) {
+          customerEmail = customer.email;
+          customerName = customer.name;
+          console.log(`[Booking] Found customer: ${customerName} (${customerEmail})`);
+        }
+      }
+      
       // Send email confirmation
-      if (req.body.customerEmail && req.body.customerName) {
-        console.log(`[Booking] Triggering email confirmation for ${req.body.customerEmail} (${req.body.customerName})`);
+      if (customerEmail && customerName) {
+        console.log(`[Booking] Triggering email confirmation for ${customerEmail} (${customerName})`);
         sendBookingConfirmation({
-          customerName: req.body.customerName,
-          customerEmail: req.body.customerEmail,
+          customerName: customerName,
+          customerEmail: customerEmail,
           serviceName,
           date: data.date,
           time: data.time,
@@ -390,19 +403,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
           businessName: business?.name || "Business"
         })
         .then(success => {
-          if (success) console.log(`[Booking] Email sent successfully to ${req.body.customerEmail}`);
-          else console.error(`[Booking] Failed to send email to ${req.body.customerEmail}`);
+          if (success) console.log(`[Booking] Email sent successfully to ${customerEmail}`);
+          else console.error(`[Booking] Failed to send email to ${customerEmail}`);
         })
         .catch(err => console.error("[Booking] Critical error in email confirmation:", err));
       } else {
-        console.log(`[Booking] Skipping email - missing customer details. Email: ${req.body.customerEmail}, Name: ${req.body.customerName}`);
+        console.log(`[Booking] Skipping email - missing customer details. Email: ${customerEmail}, Name: ${customerName}, CustomerId: ${data.customerId}`);
       }
       
       // Send push notification to business owner (if notifications are enabled)
       if (business?.notificationsEnabled) {
         sendBookingNotification(
           req.params.businessId,
-          customerName,
+          customerName || "Customer",
           serviceName,
           data.date,
           data.time
