@@ -118,6 +118,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadBookingHtml();
   await loadEmbedHtml();
   await loadEmbedJs();
+
+  // Legal routes
+  app.get("/privacy-policy", (req: Request, res: Response) => {
+    res.sendFile(path.resolve(__dirname, "templates/privacy-policy.html"));
+  });
+
+  app.get("/terms", (req: Request, res: Response) => {
+    res.sendFile(path.resolve(__dirname, "templates/terms.html"));
+  });
   
   // === BUSINESSES API ===
   
