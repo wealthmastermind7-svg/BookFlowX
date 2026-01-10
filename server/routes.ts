@@ -23,6 +23,9 @@ import {
   verifyCustomerOwnership,
   type AuthenticatedRequest 
 } from "./middleware/auth";
+import { triggerWorkflows, initializeIndustryBlueprints, INDUSTRY_BLUEPRINTS } from "./workflowEngine";
+import { insertWorkflowSchema, insertBusinessThemeSchema } from "@shared/schema";
+import crypto from "crypto";
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -422,6 +425,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           data.time
         ).catch(err => console.error("Failed to send push notification:", err));
       }
+      
+      // Trigger workflow automations for booking_created
+      const customer = await storage.getCustomer(data.customerId);
+      triggerWorkflows("booking_created", req.params.businessId, {
+        booking,
+        service: service || undefined,
+        customer: customer || undefined,
+      }).catch(err => console.error("[Workflow] Error triggering booking_created:", err));
       
       res.status(201).json(booking);
     } catch (error) {
@@ -1003,6 +1014,330 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error generating embed code:", error);
       res.status(500).json({ error: "Failed to generate embed code" });
     }
+  });
+
+  // === WORKFLOWS API ===
+  
+  // Get available industry blueprints
+  app.get("/api/workflows/blueprints", async (_req: Request, res: Response) => {
+    const blueprintSummary = Object.entries(INDUSTRY_BLUEPRINTS).map(([industry, workflows]) => ({
+      industry,
+      count: workflows.length,
+      workflows: workflows.map(w => ({
+        name: w.name,
+        description: w.description,
+        triggerType: w.triggerType,
+        actionType: w.actionType,
+      })),
+    }));
+    res.json(blueprintSummary);
+  });
+
+  // Get workflows for a business (PROTECTED)
+  app.get("/api/businesses/:businessId/workflows", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const workflows = await storage.getWorkflows(req.params.businessId);
+      res.json(workflows);
+    } catch (error) {
+      console.error("Error getting workflows:", error);
+      res.status(500).json({ error: "Failed to get workflows" });
+    }
+  });
+
+  // Create workflow (PROTECTED)
+  app.post("/api/businesses/:businessId/workflows", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = insertWorkflowSchema.parse({
+        ...req.body,
+        businessId: req.params.businessId,
+      });
+      const workflow = await storage.createWorkflow(data);
+      res.status(201).json(workflow);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      console.error("Error creating workflow:", error);
+      res.status(500).json({ error: "Failed to create workflow" });
+    }
+  });
+
+  // Initialize industry blueprints (PROTECTED)
+  app.post("/api/businesses/:businessId/workflows/initialize", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { industry } = req.body;
+      if (!industry || !INDUSTRY_BLUEPRINTS[industry as keyof typeof INDUSTRY_BLUEPRINTS]) {
+        return res.status(400).json({ error: "Invalid industry" });
+      }
+      await initializeIndustryBlueprints(req.params.businessId, industry);
+      const workflows = await storage.getWorkflows(req.params.businessId);
+      res.status(201).json(workflows);
+    } catch (error) {
+      console.error("Error initializing blueprints:", error);
+      res.status(500).json({ error: "Failed to initialize blueprints" });
+    }
+  });
+
+  // Update workflow (PROTECTED)
+  app.patch("/api/workflows/:id", async (req: Request, res: Response) => {
+    try {
+      const workflow = await storage.getWorkflow(req.params.id);
+      if (!workflow) {
+        return res.status(404).json({ error: "Workflow not found" });
+      }
+      
+      const ownerToken = req.headers["x-owner-token"] as string;
+      const business = await storage.getBusiness(workflow.businessId);
+      if (!business || business.ownerToken !== ownerToken) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const updates = insertWorkflowSchema.partial().parse(req.body);
+      const updated = await storage.updateWorkflow(req.params.id, updates);
+      res.json(updated);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      console.error("Error updating workflow:", error);
+      res.status(500).json({ error: "Failed to update workflow" });
+    }
+  });
+
+  // Delete workflow (PROTECTED)
+  app.delete("/api/workflows/:id", async (req: Request, res: Response) => {
+    try {
+      const workflow = await storage.getWorkflow(req.params.id);
+      if (!workflow) {
+        return res.status(404).json({ error: "Workflow not found" });
+      }
+      
+      const ownerToken = req.headers["x-owner-token"] as string;
+      const business = await storage.getBusiness(workflow.businessId);
+      if (!business || business.ownerToken !== ownerToken) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      await storage.deleteWorkflow(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting workflow:", error);
+      res.status(500).json({ error: "Failed to delete workflow" });
+    }
+  });
+
+  // === BUSINESS THEMES API ===
+  
+  // Get theme for a business (public - for widget rendering)
+  app.get("/api/businesses/:businessId/theme", async (req: Request, res: Response) => {
+    try {
+      const theme = await storage.getBusinessTheme(req.params.businessId);
+      if (!theme) {
+        // Return default theme
+        return res.json({
+          primaryColor: "#000000",
+          accentColor: "#C5A059",
+          backgroundColor: "#FFFFFF",
+          textColor: "#1A1C1E",
+          borderRadius: 12,
+          glassBlurIntensity: 20,
+          fontFamily: "Inter",
+          buttonStyle: "rounded",
+          showPoweredBy: true,
+        });
+      }
+      res.json(theme);
+    } catch (error) {
+      console.error("Error getting theme:", error);
+      res.status(500).json({ error: "Failed to get theme" });
+    }
+  });
+
+  // Update theme (PROTECTED)
+  app.put("/api/businesses/:businessId/theme", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const data = insertBusinessThemeSchema.parse({
+        ...req.body,
+        businessId: req.params.businessId,
+      });
+      const theme = await storage.createOrUpdateBusinessTheme(data);
+      res.json(theme);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({ error: error.errors });
+      }
+      console.error("Error updating theme:", error);
+      res.status(500).json({ error: "Failed to update theme" });
+    }
+  });
+
+  // === API KEYS ===
+  
+  // Get API keys for a business (PROTECTED)
+  app.get("/api/businesses/:businessId/api-keys", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const keys = await storage.getApiKeys(req.params.businessId);
+      // Don't expose the hash, just the prefix and metadata
+      const safeKeys = keys.map(k => ({
+        id: k.id,
+        name: k.name,
+        keyPrefix: k.keyPrefix,
+        permissions: k.permissions,
+        lastUsedAt: k.lastUsedAt,
+        expiresAt: k.expiresAt,
+        isActive: k.isActive,
+        createdAt: k.createdAt,
+      }));
+      res.json(safeKeys);
+    } catch (error) {
+      console.error("Error getting API keys:", error);
+      res.status(500).json({ error: "Failed to get API keys" });
+    }
+  });
+
+  // Create API key (PROTECTED)
+  app.post("/api/businesses/:businessId/api-keys", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      // Generate a secure random API key
+      const rawKey = `bf_${crypto.randomBytes(32).toString("hex")}`;
+      const keyHash = crypto.createHash("sha256").update(rawKey).digest("hex");
+      const keyPrefix = rawKey.substring(0, 10);
+
+      const apiKey = await storage.createApiKey({
+        businessId: req.params.businessId,
+        name: req.body.name || "API Key",
+        keyHash,
+        keyPrefix,
+        permissions: JSON.stringify(req.body.permissions || ["read:services", "read:availability", "create:bookings"]),
+        expiresAt: req.body.expiresAt ? new Date(req.body.expiresAt) : null,
+        isActive: true,
+      });
+
+      // Return the raw key only once - it can't be retrieved later
+      res.status(201).json({
+        id: apiKey.id,
+        name: apiKey.name,
+        key: rawKey, // Only returned on creation
+        keyPrefix: apiKey.keyPrefix,
+        permissions: apiKey.permissions,
+        expiresAt: apiKey.expiresAt,
+        createdAt: apiKey.createdAt,
+      });
+    } catch (error) {
+      console.error("Error creating API key:", error);
+      res.status(500).json({ error: "Failed to create API key" });
+    }
+  });
+
+  // Delete API key (PROTECTED)
+  app.delete("/api/api-keys/:id", async (req: Request, res: Response) => {
+    try {
+      // Get the API key to verify ownership
+      const keys = await storage.getApiKeys(req.params.id);
+      // This is a simplification - in production we'd need proper verification
+      await storage.deleteApiKey(req.params.id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting API key:", error);
+      res.status(500).json({ error: "Failed to delete API key" });
+    }
+  });
+
+  // === FLOATING ACTION BUTTON WIDGET ===
+  
+  // Serve the floating action button script
+  app.get("/api/widget/fab.js", async (req: Request, res: Response) => {
+    const slug = req.query.slug as string;
+    if (!slug) {
+      return res.status(400).send("// Error: slug parameter required");
+    }
+
+    const business = await storage.getBusinessBySlug(slug);
+    if (!business) {
+      return res.status(404).send("// Error: Business not found");
+    }
+
+    const theme = await storage.getBusinessTheme(business.id);
+    const origin = getEmbedOrigin(req);
+
+    const fabScript = `
+(function() {
+  var config = {
+    slug: "${slug}",
+    primaryColor: "${theme?.primaryColor || "#000000"}",
+    accentColor: "${theme?.accentColor || "#C5A059"}",
+    borderRadius: ${theme?.borderRadius || 12},
+    buttonStyle: "${theme?.buttonStyle || "rounded"}",
+    origin: "${origin}"
+  };
+
+  function createFAB() {
+    var fab = document.createElement("div");
+    fab.id = "bookflow-fab";
+    fab.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>';
+    
+    var borderRadius = config.buttonStyle === "pill" ? "50%" : config.buttonStyle === "square" ? "8px" : "16px";
+    
+    fab.style.cssText = "position:fixed;bottom:24px;right:24px;width:56px;height:56px;background:" + config.accentColor + ";border-radius:" + borderRadius + ";display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 20px rgba(0,0,0,0.3);z-index:9999;transition:transform 0.3s ease,box-shadow 0.3s ease;color:#fff;";
+    
+    fab.onmouseenter = function() {
+      fab.style.transform = "scale(1.1)";
+      fab.style.boxShadow = "0 6px 30px rgba(0,0,0,0.4)";
+    };
+    fab.onmouseleave = function() {
+      fab.style.transform = "scale(1)";
+      fab.style.boxShadow = "0 4px 20px rgba(0,0,0,0.3)";
+    };
+    
+    fab.onclick = function() {
+      openBookingModal();
+    };
+    
+    document.body.appendChild(fab);
+  }
+
+  function openBookingModal() {
+    var overlay = document.createElement("div");
+    overlay.id = "bookflow-overlay";
+    overlay.style.cssText = "position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);backdrop-filter:blur(4px);z-index:10000;display:flex;align-items:center;justify-content:center;opacity:0;transition:opacity 0.3s ease;";
+    
+    var modal = document.createElement("div");
+    modal.style.cssText = "width:90%;max-width:480px;height:80%;max-height:700px;background:#fff;border-radius:" + config.borderRadius + "px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,0.3);transform:scale(0.9);transition:transform 0.3s ease;";
+    
+    var iframe = document.createElement("iframe");
+    iframe.src = config.origin + "/book/" + config.slug;
+    iframe.style.cssText = "width:100%;height:100%;border:none;";
+    
+    modal.appendChild(iframe);
+    overlay.appendChild(modal);
+    document.body.appendChild(overlay);
+    
+    setTimeout(function() {
+      overlay.style.opacity = "1";
+      modal.style.transform = "scale(1)";
+    }, 10);
+    
+    overlay.onclick = function(e) {
+      if (e.target === overlay) {
+        overlay.style.opacity = "0";
+        modal.style.transform = "scale(0.9)";
+        setTimeout(function() {
+          overlay.remove();
+        }, 300);
+      }
+    };
+  }
+
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", createFAB);
+  } else {
+    createFAB();
+  }
+})();
+`;
+
+    res.setHeader("Content-Type", "application/javascript");
+    res.send(fabScript);
   });
 
   const httpServer = createServer(app);

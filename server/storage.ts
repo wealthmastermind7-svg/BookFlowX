@@ -7,6 +7,10 @@ import {
   availability,
   pushTokens,
   quickSales,
+  workflows,
+  businessThemes,
+  apiKeys,
+  workflowLogs,
   type User,
   type InsertUser,
   type Business,
@@ -23,6 +27,14 @@ import {
   type InsertPushToken,
   type QuickSale,
   type InsertQuickSale,
+  type Workflow,
+  type InsertWorkflow,
+  type BusinessTheme,
+  type InsertBusinessTheme,
+  type ApiKey,
+  type InsertApiKey,
+  type WorkflowLog,
+  type InsertWorkflowLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -83,6 +95,30 @@ export interface IStorage {
   getQuickSale(id: string): Promise<QuickSale | undefined>;
   createQuickSale(quickSale: InsertQuickSale): Promise<QuickSale>;
   updateQuickSale(id: string, updates: Partial<InsertQuickSale>): Promise<QuickSale | undefined>;
+  
+  // Workflows
+  getWorkflows(businessId: string): Promise<Workflow[]>;
+  getWorkflow(id: string): Promise<Workflow | undefined>;
+  getWorkflowsByTrigger(businessId: string, triggerType: string): Promise<Workflow[]>;
+  createWorkflow(workflow: InsertWorkflow): Promise<Workflow>;
+  updateWorkflow(id: string, updates: Partial<InsertWorkflow>): Promise<Workflow | undefined>;
+  deleteWorkflow(id: string): Promise<void>;
+  
+  // Business Themes
+  getBusinessTheme(businessId: string): Promise<BusinessTheme | undefined>;
+  createOrUpdateBusinessTheme(theme: InsertBusinessTheme): Promise<BusinessTheme>;
+  
+  // API Keys
+  getApiKeys(businessId: string): Promise<ApiKey[]>;
+  getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined>;
+  createApiKey(apiKey: InsertApiKey): Promise<ApiKey>;
+  updateApiKeyLastUsed(id: string): Promise<void>;
+  deleteApiKey(id: string): Promise<void>;
+  
+  // Workflow Logs
+  getWorkflowLogs(workflowId: string): Promise<WorkflowLog[]>;
+  createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog>;
+  updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -654,6 +690,127 @@ export class DatabaseStorage implements IStorage {
       console.error("Error clearing all data:", error);
       throw error;
     }
+  }
+
+  // Workflows
+  async getWorkflows(businessId: string): Promise<Workflow[]> {
+    return db
+      .select()
+      .from(workflows)
+      .where(eq(workflows.businessId, businessId))
+      .orderBy(desc(workflows.createdAt));
+  }
+
+  async getWorkflow(id: string): Promise<Workflow | undefined> {
+    const [workflow] = await db.select().from(workflows).where(eq(workflows.id, id));
+    return workflow || undefined;
+  }
+
+  async getWorkflowsByTrigger(businessId: string, triggerType: string): Promise<Workflow[]> {
+    return db
+      .select()
+      .from(workflows)
+      .where(
+        and(
+          eq(workflows.businessId, businessId),
+          eq(workflows.triggerType, triggerType),
+          eq(workflows.isActive, true)
+        )
+      );
+  }
+
+  async createWorkflow(workflow: InsertWorkflow): Promise<Workflow> {
+    const [created] = await db.insert(workflows).values(workflow).returning();
+    return created;
+  }
+
+  async updateWorkflow(id: string, updates: Partial<InsertWorkflow>): Promise<Workflow | undefined> {
+    const [updated] = await db
+      .update(workflows)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(workflows.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteWorkflow(id: string): Promise<void> {
+    await db.delete(workflows).where(eq(workflows.id, id));
+  }
+
+  // Business Themes
+  async getBusinessTheme(businessId: string): Promise<BusinessTheme | undefined> {
+    const [theme] = await db
+      .select()
+      .from(businessThemes)
+      .where(eq(businessThemes.businessId, businessId));
+    return theme || undefined;
+  }
+
+  async createOrUpdateBusinessTheme(theme: InsertBusinessTheme): Promise<BusinessTheme> {
+    const existing = await this.getBusinessTheme(theme.businessId);
+    if (existing) {
+      const [updated] = await db
+        .update(businessThemes)
+        .set({ ...theme, updatedAt: new Date() })
+        .where(eq(businessThemes.businessId, theme.businessId))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(businessThemes).values(theme).returning();
+    return created;
+  }
+
+  // API Keys
+  async getApiKeys(businessId: string): Promise<ApiKey[]> {
+    return db
+      .select()
+      .from(apiKeys)
+      .where(eq(apiKeys.businessId, businessId))
+      .orderBy(desc(apiKeys.createdAt));
+  }
+
+  async getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined> {
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
+    return apiKey || undefined;
+  }
+
+  async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
+    const [created] = await db.insert(apiKeys).values(apiKey).returning();
+    return created;
+  }
+
+  async updateApiKeyLastUsed(id: string): Promise<void> {
+    await db
+      .update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, id));
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    await db.delete(apiKeys).where(eq(apiKeys.id, id));
+  }
+
+  // Workflow Logs
+  async getWorkflowLogs(workflowId: string): Promise<WorkflowLog[]> {
+    return db
+      .select()
+      .from(workflowLogs)
+      .where(eq(workflowLogs.workflowId, workflowId))
+      .orderBy(desc(workflowLogs.createdAt));
+  }
+
+  async createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog> {
+    const [created] = await db.insert(workflowLogs).values(log).returning();
+    return created;
+  }
+
+  async updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined> {
+    const [updated] = await db
+      .update(workflowLogs)
+      .set(updates)
+      .where(eq(workflowLogs.id, id))
+      .returning();
+    return updated || undefined;
   }
 }
 
