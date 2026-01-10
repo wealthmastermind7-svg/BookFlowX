@@ -119,25 +119,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadEmbedHtml();
   await loadEmbedJs();
 
-  // Legal routes
-  app.get("/privacy-policy", (req: Request, res: Response) => {
-    const p = path.resolve(process.cwd(), "server/templates/privacy-policy.html");
-    if (fs.existsSync(p)) {
-      res.sendFile(p);
-    } else {
-      res.status(404).send("Privacy Policy not found");
-    }
-  });
-
-  app.get("/terms", (req: Request, res: Response) => {
-    const p = path.resolve(process.cwd(), "server/templates/terms.html");
-    if (fs.existsSync(p)) {
-      res.sendFile(p);
-    } else {
-      res.status(404).send("Terms of Service not found");
-    }
-  });
-  
   // === BUSINESSES API ===
   
   // Get business by ID (for admin dashboard)

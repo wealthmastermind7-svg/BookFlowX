@@ -320,6 +320,7 @@ async function initStripe() {
   await initStripe();
 
   registerStripeRoutes(app);
+
   const server = await registerRoutes(app);
 
   setupErrorHandler(app);
