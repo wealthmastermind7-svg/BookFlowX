@@ -121,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // Legal routes
   app.get("/privacy-policy", (req: Request, res: Response) => {
-    const p = path.resolve(__dirname, "templates/privacy-policy.html");
+    const p = path.resolve(process.cwd(), "server/templates/privacy-policy.html");
     if (fs.existsSync(p)) {
       res.sendFile(p);
     } else {
@@ -130,7 +130,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   app.get("/terms", (req: Request, res: Response) => {
-    const p = path.resolve(__dirname, "templates/terms.html");
+    const p = path.resolve(process.cwd(), "server/templates/terms.html");
     if (fs.existsSync(p)) {
       res.sendFile(p);
     } else {
