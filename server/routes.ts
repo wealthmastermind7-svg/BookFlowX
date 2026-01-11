@@ -683,6 +683,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           let allCssContent = html;
           
+          // 1. Target CTA elements first (from static HTML)
+          const ctaColors: string[] = [];
+          const ctaPatterns = [
+            /<(?:button|a)[^>]*class=["'][^"']*(?:btn|button|cta|primary|submit|action)[^"']*["'][^>]*style=["'][^"']*background(?:-color)?:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+            /<(?:button|a)[^>]*style=["'][^"']*background(?:-color)?:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+          ];
+          for (const pattern of ctaPatterns) {
+            const matches = html.matchAll(pattern);
+            for (const match of matches) {
+              ctaColors.push(normalizeHex(match[1]));
+            }
+          }
+
+          // 2. Look for Logo Image colors (sampling placeholder)
+          // In a real headless browser we'd sample pixels, here we look for colors near logo classes
+          const logoPatterns = [
+            /\.(?:logo|brand|header-logo)[^}]*(?:color|background-color):\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+          ];
+          const logoColors: string[] = [];
+          for (const pattern of logoPatterns) {
+            const matches = html.matchAll(pattern);
+            for (const match of matches) {
+              logoColors.push(normalizeHex(match[1]));
+            }
+          }
+
           // Extract and fetch external stylesheets (up to 3 to avoid timeout)
           const stylesheetPattern = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi;
           const stylesheetMatches = [...html.matchAll(stylesheetPattern)].slice(0, 3);

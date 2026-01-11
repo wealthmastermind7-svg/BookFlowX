@@ -192,7 +192,7 @@ export default function WidgetThemeScreen() {
           >
             <View style={styles.magicButtonContent}>
               <Feather name="zap" size={14} color={appTheme.backgroundDefault} style={{ marginRight: 6 }} />
-              <ThemedText style={[styles.magicButtonText, { color: appTheme.backgroundDefault }]}>Match Website</ThemedText>
+              <ThemedText style={[styles.magicButtonText, { color: appTheme.backgroundDefault }]}>Detect Brand Colors (beta)</ThemedText>
             </View>
           </Button>
         </View>
