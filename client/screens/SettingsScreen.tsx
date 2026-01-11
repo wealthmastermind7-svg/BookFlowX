@@ -1047,12 +1047,12 @@ Need help? Contact support at bookings@confirmbooking.online
                 </Pressable>
 
                 <View style={styles.modalActions}>
-                  <Button onPress={handleCopyEmbedCode}>
-                    {copiedCode ? "Copied!" : "Copy Embed Code"}
-                  </Button>
+                  <Button 
+                    onPress={handleCopyEmbedCode}
+                    children={copiedCode ? "Copied!" : "Copy Embed Code"}
+                  />
                   <Button 
                     onPress={() => setEmbedInstructionsVisible(true)}
-                    variant="outline"
                   >
                     How to Install?
                   </Button>
@@ -1109,11 +1109,9 @@ Need help? Contact support at bookings@confirmbooking.online
             </ScrollView>
 
             <Button 
-              title="Download Instructions (.txt)" 
               onPress={handleDownloadInstructions}
-              variant="primary"
+              children="Download Instructions (.txt)"
               style={{ marginTop: Spacing.xl }}
-              leftIcon={<Feather name="download" size={18} color="#000" />}
             />
           </ThemedView>
         </Pressable>
