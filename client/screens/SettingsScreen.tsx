@@ -54,6 +54,7 @@ export default function SettingsScreen() {
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
   const [selectedDemoType, setSelectedDemoType] = useState<string>("salon");
   const [embedModalVisible, setEmbedModalVisible] = useState(false);
+  const [embedInstructionsVisible, setEmbedInstructionsVisible] = useState(false);
   const [embedCode, setEmbedCode] = useState<EmbedCode | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
   const [embedError, setEmbedError] = useState(false);
@@ -383,6 +384,77 @@ export default function SettingsScreen() {
       clearTimeout(copiedTimeoutRef.current);
     }
     copiedTimeoutRef.current = setTimeout(() => setCopiedCode(false), 2000);
+  };
+
+  const handleDownloadInstructions = async () => {
+    if (!business || !embedCode) return;
+    
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      const instructions = `
+BOOKFLOW WIDGET INSTALLATION INSTRUCTIONS
+-----------------------------------------
+Business: ${business.name}
+Slug: ${business.slug}
+
+1. EMBED TYPES
+--------------
+
+A. INLINE WIDGET (Displays directly on page)
+Code:
+${embedCode.inlineCode}
+
+B. POPUP BUTTON (Opens booking window when clicked)
+Code:
+${embedCode.popupButtonCode}
+
+C. POPUP TEXT LINK (Opens booking window from text link)
+Code:
+${embedCode.popupTextCode}
+
+
+2. INSTALLATION STEPS
+---------------------
+
+STEP 1: Copy the code for your preferred embed type above.
+
+STEP 2: Open your website editor (WordPress, Webflow, Shopify, Wix, or custom HTML).
+
+STEP 3: Paste the code where you want the widget or button to appear.
+   - For WordPress: Use a "Custom HTML" block.
+   - For Webflow/Wix: Use an "Embed" or "HTML" element.
+   - For custom sites: Paste directly into your .html file.
+
+STEP 4: Save and publish your website.
+
+
+Need help? Contact support at bookings@confirmbooking.online
+      `.trim();
+
+      if (Platform.OS === "web") {
+        const element = document.createElement("a");
+        const file = new Blob([instructions], { type: 'text/plain' });
+        element.href = URL.createObjectURL(file);
+        element.download = `${business.slug}-embed-instructions.txt`;
+        document.body.appendChild(element);
+        element.click();
+        document.body.removeChild(element);
+        return;
+      }
+
+      const filename = `${business.slug}-instructions.txt`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      await FileSystem.writeAsStringAsync(fileUri, instructions);
+
+      await Share.share({
+        url: fileUri,
+        title: `${business.name} - Embed Instructions`,
+      });
+    } catch (error) {
+      console.error("Error downloading instructions:", error);
+      Alert.alert("Error", "Failed to generate instructions file");
+    }
   };
 
   const getEmbedCodeForType = (): string => {
@@ -978,6 +1050,12 @@ export default function SettingsScreen() {
                   <Button onPress={handleCopyEmbedCode}>
                     {copiedCode ? "Copied!" : "Copy Embed Code"}
                   </Button>
+                  <Button 
+                    onPress={() => setEmbedInstructionsVisible(true)}
+                    variant="outline"
+                  >
+                    How to Install?
+                  </Button>
                   <Pressable onPress={handleCloseEmbedModal} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
                     <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
                   </Pressable>
@@ -986,6 +1064,59 @@ export default function SettingsScreen() {
             )}
           </View>
         </View>
+      </Modal>
+
+      {/* Embed Instructions Modal */}
+      <Modal
+        visible={embedInstructionsVisible}
+        transparent={true}
+        animationType="fade"
+        onRequestClose={() => setEmbedInstructionsVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setEmbedInstructionsVisible(false)}
+        >
+          <ThemedView style={[styles.modalContent, { padding: Spacing.xl, maxHeight: '80%' }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Installation Guide</ThemedText>
+              <Pressable onPress={() => setEmbedInstructionsVisible(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <ScrollView showsVerticalScrollIndicator={false}>
+              <View style={{ marginBottom: Spacing.xl }}>
+                <ThemedText style={{ fontWeight: '700', marginBottom: Spacing.xs }}>Step 1: Copy the Code</ThemedText>
+                <ThemedText style={{ opacity: 0.7 }}>Choose your preferred embed style and click "Copy Code".</ThemedText>
+              </View>
+
+              <View style={{ marginBottom: Spacing.xl }}>
+                <ThemedText style={{ fontWeight: '700', marginBottom: Spacing.xs }}>Step 2: Add to Website</ThemedText>
+                <ThemedText style={{ opacity: 0.7 }}>Open your website editor (Wix, WordPress, Webflow, etc.) and add a "Custom HTML" or "Embed" block.</ThemedText>
+              </View>
+
+              <View style={{ marginBottom: Spacing.xl }}>
+                <ThemedText style={{ fontWeight: '700', marginBottom: Spacing.xs }}>Step 3: Paste & Publish</ThemedText>
+                <ThemedText style={{ opacity: 0.7 }}>Paste the copied code into that block, then save and publish your changes.</ThemedText>
+              </View>
+
+              <View style={[styles.glassCard, { padding: Spacing.md, backgroundColor: theme.text + "05" }]}>
+                <ThemedText style={{ fontSize: 14, fontStyle: 'italic', opacity: 0.6 }}>
+                  Tip: The "Inline" type is best for dedicated booking pages, while "Popup Button" works great on your home page.
+                </ThemedText>
+              </View>
+            </ScrollView>
+
+            <Button 
+              title="Download Instructions (.txt)" 
+              onPress={handleDownloadInstructions}
+              variant="primary"
+              style={{ marginTop: Spacing.xl }}
+              leftIcon={<Feather name="download" size={18} color="#000" />}
+            />
+          </ThemedView>
+        </Pressable>
       </Modal>
 
       {/* Currency Modal */}
