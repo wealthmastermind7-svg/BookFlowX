@@ -490,17 +490,6 @@ export default function WorkflowsScreen() {
         </View>
       )}
       {renderBlueprintModal()}
-
-      {/* Coming Soon Overlay */}
-      <View style={[StyleSheet.absoluteFill, styles.comingSoonOverlay, { backgroundColor: theme.backgroundRoot + "95" }]}>
-        <View style={[styles.comingSoonBadge, { backgroundColor: theme.accent }]}>
-          <Feather name="clock" size={24} color={theme.buttonText} />
-          <ThemedText style={[styles.comingSoonTitle, { color: theme.buttonText }]}>Coming Soon</ThemedText>
-        </View>
-        <ThemedText style={[styles.comingSoonDescription, { color: theme.textSecondary }]}>
-          Intelligent booking automations and custom workflow triggers are currently under development.
-        </ThemedText>
-      </View>
     </ThemedView>
   );
 }
