@@ -71,11 +71,15 @@ export default function WorkflowsScreen() {
   const [initializing, setInitializing] = useState(false);
   const [blueprintModalVisible, setBlueprintModalVisible] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [previewModalVisible, setPreviewModalVisible] = useState(false);
+  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
+  const [business, setBusiness] = useState<any>(null);
 
   useFocusEffect(
     useCallback(() => {
       loadWorkflows();
       loadBlueprints();
+      api.getBusiness().then(setBusiness);
     }, [])
   );
 
@@ -337,12 +341,21 @@ export default function WorkflowsScreen() {
       </View>
 
       <View style={[styles.workflowMeta, { borderTopColor: theme.border }]}>
-        <View style={styles.metaItem}>
-          <Feather name={item.actionType === 'send_email' ? "mail" : "zap"} size={14} color={theme.textSecondary} />
-          <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
-            {item.actionType === 'send_email' ? "Email" : (ACTION_LABELS[item.actionType] || item.actionType)}
+        <Pressable 
+          style={styles.metaItem} 
+          onPress={() => {
+            if (item.actionType === 'send_email') {
+              setPreviewWorkflow(item);
+              setPreviewModalVisible(true);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }
+          }}
+        >
+          <Feather name={item.actionType === 'send_email' ? "mail" : "zap"} size={14} color={item.actionType === 'send_email' ? theme.accent : theme.textSecondary} />
+          <ThemedText style={[styles.metaText, { color: item.actionType === 'send_email' ? theme.accent : theme.textSecondary, textDecorationLine: item.actionType === 'send_email' ? 'underline' : 'none' }]}>
+            {item.actionType === 'send_email' ? "Email (Preview)" : (ACTION_LABELS[item.actionType] || item.actionType)}
           </ThemedText>
-        </View>
+        </Pressable>
         <View style={styles.metaItem}>
           <Feather name="shield" size={14} color={theme.textSecondary} />
           <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
@@ -477,6 +490,80 @@ export default function WorkflowsScreen() {
     </Modal>
   );
 
+  const renderPreviewModal = () => {
+    if (!previewWorkflow) return null;
+    
+    const config = JSON.parse(previewWorkflow.actionConfig);
+    const subject = config.subject || "Booking Confirmation";
+    const businessName = business?.name || "Your Business";
+    
+    return (
+      <Modal
+        visible={previewModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalVisible(false)} />
+          <View style={[styles.previewModalContent, { backgroundColor: theme.backgroundRoot }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Email Preview</ThemedText>
+              <Pressable onPress={() => setPreviewModalVisible(false)}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <View style={styles.emailContainer}>
+              <View style={[styles.emailHeader, { borderBottomColor: theme.border }]}>
+                <ThemedText style={styles.emailSubject}>{subject} - {businessName}</ThemedText>
+                <View style={styles.emailSenderRow}>
+                  <View style={[styles.senderAvatar, { backgroundColor: theme.accent }]}>
+                    <ThemedText style={styles.avatarText}>{businessName[0].toUpperCase()}</ThemedText>
+                  </View>
+                  <View>
+                    <ThemedText style={styles.senderName}>{businessName}</ThemedText>
+                    <ThemedText style={styles.senderDate}>Today</ThemedText>
+                  </View>
+                </View>
+              </View>
+
+              <ScrollView style={styles.emailBodyScroll}>
+                <View style={styles.emailBody}>
+                  <ThemedText style={styles.emailTitle}>Booking Confirmed!</ThemedText>
+                  <ThemedText style={styles.emailGreeting}>Hi John Smith,</ThemedText>
+                  <ThemedText style={styles.emailText}>
+                    Your booking with <ThemedText style={{ fontWeight: '700' }}>{businessName}</ThemedText> has been successfully confirmed.
+                  </ThemedText>
+
+                  <View style={[styles.detailsCard, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Confirmation #:</ThemedText> 77104567</ThemedText>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Service:</ThemedText> Express Glow</ThemedText>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Date:</ThemedText> Wednesday, January 21, 2026</ThemedText>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Time:</ThemedText> 12:30 PM</ThemedText>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Total Price:</ThemedText> {business?.currency || 'USD'} $45.00</ThemedText>
+                  </View>
+
+                  <ThemedText style={styles.emailFooter}>
+                    If you need to make any changes, please contact the business directly.
+                  </ThemedText>
+                  
+                  <ThemedText style={styles.emailSignoff}>Sent via BookFlow</ThemedText>
+                </View>
+              </ScrollView>
+            </View>
+
+            <View style={styles.modalFooter}>
+              <Button onPress={() => setPreviewModalVisible(false)}>
+                <ThemedText style={{ color: theme.buttonText, fontWeight: "600" }}>Close Preview</ThemedText>
+              </Button>
+            </View>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
+
   if (loading) {
     return (
       <ThemedView style={[styles.container, { paddingTop: headerHeight }]}>
@@ -522,6 +609,7 @@ export default function WorkflowsScreen() {
         </View>
       )}
       {renderBlueprintModal()}
+      {renderPreviewModal()}
     </ThemedView>
   );
 }
@@ -752,6 +840,100 @@ const styles = StyleSheet.create({
   },
   blueprintCount: {
     fontSize: Typography.small.fontSize,
+  },
+  previewModalContent: {
+    borderTopLeftRadius: BorderRadius.xl,
+    borderTopRightRadius: BorderRadius.xl,
+    height: "90%",
+    width: "100%",
+  },
+  emailContainer: {
+    flex: 1,
+    marginHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "#E5E7EB",
+    backgroundColor: "#FFFFFF",
+    overflow: "hidden",
+  },
+  emailHeader: {
+    padding: Spacing.md,
+    borderBottomWidth: 1,
+  },
+  emailSubject: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#111827",
+    marginBottom: Spacing.sm,
+  },
+  emailSenderRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  senderAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  avatarText: {
+    color: "#FFFFFF",
+    fontWeight: "700",
+    fontSize: 14,
+  },
+  senderName: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#374151",
+  },
+  senderDate: {
+    fontSize: 12,
+    color: "#6B7280",
+  },
+  emailBodyScroll: {
+    flex: 1,
+  },
+  emailBody: {
+    padding: Spacing.lg,
+  },
+  emailTitle: {
+    fontSize: 24,
+    fontWeight: "800",
+    color: "#111827",
+    marginBottom: Spacing.lg,
+  },
+  emailGreeting: {
+    fontSize: 16,
+    color: "#374151",
+    marginBottom: Spacing.md,
+  },
+  emailText: {
+    fontSize: 16,
+    color: "#374151",
+    lineHeight: 24,
+    marginBottom: Spacing.lg,
+  },
+  detailsCard: {
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.lg,
+  },
+  detailItem: {
+    fontSize: 15,
+    color: "#374151",
+    marginBottom: 8,
+  },
+  emailFooter: {
+    fontSize: 14,
+    color: "#4B5563",
+    lineHeight: 20,
+    marginBottom: Spacing.xl,
+  },
+  emailSignoff: {
+    fontSize: 12,
+    color: "#9CA3AF",
   },
   modalFooter: {
     padding: Spacing.lg,
