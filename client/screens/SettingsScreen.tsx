@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import * as FileSystem from "expo-file-system";
 import { View, FlatList, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
@@ -261,20 +262,37 @@ export default function SettingsScreen() {
   };
 
   const handleDownloadQRCode = async () => {
-    if (!business) return;
+    if (!business || !qrCode) return;
     if (!checkQrAccess()) return;
     
     try {
-      const cleanDomain = getBookingDomain();
-      const qrImageUrl = `/api/businesses/${business.id}/qrcode?format=image`;
-      const fullUrl = `https://${cleanDomain}${qrImageUrl}`;
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      if (Platform.OS === "web") {
+        const link = document.createElement("a");
+        link.href = qrCode;
+        link.download = `${business.slug}-qr.png`;
+        link.click();
+        return;
+      }
+
+      const filename = `${business.slug}-booking-qr.png`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      
+      // The qrCode from api.getQRCode() is a base64 data URI
+      const base64Data = qrCode.split("base64,")[1];
+      
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+
       await Share.share({
-        url: fullUrl,
-        message: `Share this QR code to book appointments with ${business.name}`,
+        url: fileUri,
         title: `${business.name} - Booking QR Code`,
       });
     } catch (error) {
       console.error("Error sharing QR code:", error);
+      Alert.alert("Error", "Failed to share QR code image");
     }
   };
 
@@ -753,9 +771,21 @@ export default function SettingsScreen() {
               </View>
             ) : null}
             
-            <View style={styles.modalActions}>
-              <Button onPress={handleDownloadQRCode}>
+          <View style={styles.modalActions}>
+              <Button onPress={handleDownloadQRCode} style={{ marginBottom: Spacing.sm }}>
                 Share QR Code Image
+              </Button>
+              <Button 
+                variant="outline" 
+                onPress={async () => {
+                  const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+                  await Share.share({
+                    message: `Book an appointment with ${business.name}:\n${bookingLink}`,
+                    url: bookingLink,
+                  });
+                }}
+              >
+                Share Booking Link
               </Button>
             </View>
           </View>
