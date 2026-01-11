@@ -85,7 +85,8 @@ export default function WorkflowsScreen() {
       if (!businessId) return;
 
       const ownerToken = await api.getOwnerToken();
-      const response = await fetch(`${getApiUrl()}/api/businesses/${businessId}/workflows`, {
+      const baseUrl = getApiUrl().replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/businesses/${businessId}/workflows`, {
         headers: {
           "x-owner-token": ownerToken || "",
         },
@@ -104,7 +105,8 @@ export default function WorkflowsScreen() {
 
   const loadBlueprints = async () => {
     try {
-      const response = await fetch(`${getApiUrl()}/api/workflows/blueprints`);
+      const baseUrl = getApiUrl().replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/workflows/blueprints`);
       if (response.ok) {
         const data = await response.json();
         setBlueprints(data);
@@ -119,7 +121,8 @@ export default function WorkflowsScreen() {
     
     try {
       const ownerToken = await api.getOwnerToken();
-      const response = await fetch(`${getApiUrl()}/api/workflows/${workflow.id}`, {
+      const baseUrl = getApiUrl().replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/workflows/${workflow.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -146,7 +149,8 @@ export default function WorkflowsScreen() {
     
     try {
       const ownerToken = await api.getOwnerToken();
-      const response = await fetch(`${getApiUrl()}/api/workflows/${workflow.id}`, {
+      const baseUrl = getApiUrl().replace(/\/$/, '');
+      const response = await fetch(`${baseUrl}/api/workflows/${workflow.id}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +187,8 @@ export default function WorkflowsScreen() {
           onPress: async () => {
             try {
               const ownerToken = await api.getOwnerToken();
-              const response = await fetch(`${getApiUrl()}/api/workflows/${workflow.id}`, {
+              const baseUrl = getApiUrl().replace(/\/$/, '');
+              const response = await fetch(`${baseUrl}/api/workflows/${workflow.id}`, {
                 method: "DELETE",
                 headers: {
                   "x-owner-token": ownerToken || "",
@@ -215,7 +220,8 @@ export default function WorkflowsScreen() {
 
       console.log("[Workflow] Starting blueprint init for industry:", industry);
       const ownerToken = await api.getOwnerToken();
-      const url = `${getApiUrl()}/api/businesses/${businessId}/workflows/initialize`;
+      const baseUrl = getApiUrl().replace(/\/$/, ''); // Remove trailing slash
+      const url = `${baseUrl}/api/businesses/${businessId}/workflows/initialize`;
       console.log("[Workflow] Calling:", url);
       console.log("[Workflow] Owner token present:", !!ownerToken);
       
