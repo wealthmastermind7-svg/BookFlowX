@@ -215,9 +215,11 @@ export default function WorkflowsScreen() {
 
       console.log("[Workflow] Starting blueprint init for industry:", industry);
       const ownerToken = await api.getOwnerToken();
-      const response = await fetch(
-        `${getApiUrl()}/api/businesses/${businessId}/workflows/initialize`,
-        {
+      const url = `${getApiUrl()}/api/businesses/${businessId}/workflows/initialize`;
+      console.log("[Workflow] Calling:", url);
+      console.log("[Workflow] Owner token present:", !!ownerToken);
+      
+      const response = await fetch(url, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -227,6 +229,8 @@ export default function WorkflowsScreen() {
         }
       );
 
+      console.log("[Workflow] Response status:", response.status, response.statusText);
+      
       if (response.ok) {
         const data = await response.json();
         console.log("[Workflow] Init successful, received", data.length, "workflows");
@@ -237,13 +241,26 @@ export default function WorkflowsScreen() {
           `${INDUSTRY_LABELS[industry]?.label || industry} automation workflows have been set up.`
         );
       } else {
-        const errorData = await response.json().catch(() => ({}));
-        console.error("[Workflow] Server error during init:", errorData);
-        throw new Error(errorData.error || "Failed to initialize blueprints");
+        const responseText = await response.text();
+        console.error("[Workflow] Server error during init - Status:", response.status);
+        console.error("[Workflow] Response body:", responseText);
+        let errorMessage = "Failed to initialize blueprints";
+        try {
+          const errorData = JSON.parse(responseText);
+          errorMessage = errorData.error || errorMessage;
+        } catch {
+          if (responseText) errorMessage = responseText;
+        }
+        throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error("Blueprint init failed:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
-      Alert.alert("Error", `Failed to set up workflows: ${error.message || "Please try again."}`);
+      console.error("[Workflow] Blueprint init failed:", error?.message || "Unknown error");
+      console.error("[Workflow] Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      const isNetworkError = error?.message?.includes("Network") || error?.message?.includes("fetch") || error?.message?.includes("Load failed");
+      const displayMessage = isNetworkError 
+        ? "Could not connect to server. Please check your connection and try again."
+        : (error?.message || "Please try again.");
+      Alert.alert("Error", `Failed to set up workflows: ${displayMessage}`);
     } finally {
       setInitializing(false);
     }
