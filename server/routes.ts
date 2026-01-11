@@ -678,8 +678,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             const b = parseInt(h.substring(4, 6), 16);
             const brightness = (r * 299 + g * 587 + b * 114) / 1000;
             const saturation = Math.max(r, g, b) - Math.min(r, g, b);
-            // Avoid very dark, very light, or very gray colors
-            return brightness > 40 && brightness < 220 && saturation > 20;
+            
+            // Mintwash specific: they use a lot of blue/teal
+            // Increase brightness upper bound slightly for their vibrant blue
+            return brightness > 40 && brightness < 240 && saturation > 15;
           };
 
           // Helper to calculate color contrast for better accent selection
