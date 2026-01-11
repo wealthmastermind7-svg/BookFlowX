@@ -281,8 +281,31 @@ export default function WorkflowsScreen() {
     }
   };
 
+  const formatDelay = (minutes: number | null) => {
+    if (minutes === null || minutes === 0) return "Immediately after booking";
+    const absMinutes = Math.abs(minutes);
+    const isBefore = minutes < 0;
+    
+    if (absMinutes >= 1440 && absMinutes % 1440 === 0) {
+      const days = absMinutes / 1440;
+      return `${days} day${days > 1 ? "s" : ""} ${isBefore ? "before" : "after"} appointment`;
+    }
+    if (absMinutes >= 60 && absMinutes % 60 === 0) {
+      const hours = absMinutes / 60;
+      return `${hours} hour${hours > 1 ? "s" : ""} ${isBefore ? "before" : "after"} appointment`;
+    }
+    return `${absMinutes} min ${isBefore ? "before" : "after"} appointment`;
+  };
+
   const renderWorkflowItem = ({ item }: { item: Workflow }) => (
-    <View style={[styles.workflowCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.border }]}>
+    <View style={[
+      styles.workflowCard, 
+      { 
+        backgroundColor: theme.backgroundSecondary, 
+        borderColor: item.isActive ? theme.accent : theme.border,
+        opacity: item.isActive ? 1 : 0.8
+      }
+    ]}>
       <View style={styles.workflowHeader}>
         <View style={styles.workflowTitleRow}>
           <View style={[styles.triggerBadge, { backgroundColor: theme.accent + "20" }]}>
@@ -290,38 +313,42 @@ export default function WorkflowsScreen() {
               {TRIGGER_LABELS[item.triggerType] || item.triggerType}
             </ThemedText>
           </View>
-          <Switch
-            value={item.isActive}
-            onValueChange={() => handleToggleWorkflow(item)}
-            trackColor={{ false: theme.border, true: theme.accent }}
-            thumbColor="#FFFFFF"
-          />
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+            <ThemedText style={{ fontSize: 12, fontWeight: '600', color: item.isActive ? theme.accent : theme.textSecondary }}>
+              {item.isActive ? "ACTIVE" : "PAUSED"}
+            </ThemedText>
+            <Switch
+              value={item.isActive}
+              onValueChange={() => handleToggleWorkflow(item)}
+              trackColor={{ false: theme.border, true: theme.accent }}
+              thumbColor="#FFFFFF"
+            />
+          </View>
         </View>
         <ThemedText style={styles.workflowName}>{item.name}</ThemedText>
+        <ThemedText style={[styles.workflowTiming, { color: theme.text }]}>
+          {item.triggerType === 'booking_created' ? "⚡ Sends immediately after booking" : `🕒 Sends ${formatDelay(item.delayMinutes)}`}
+        </ThemedText>
         {item.description && (
           <ThemedText style={[styles.workflowDescription, { color: theme.textSecondary }]}>
-            {item.description}
+            {item.description.replace(/patient/g, "client").replace(/medical/g, "service")}
           </ThemedText>
         )}
       </View>
 
       <View style={[styles.workflowMeta, { borderTopColor: theme.border }]}>
         <View style={styles.metaItem}>
-          <Feather name="zap" size={14} color={theme.textSecondary} />
+          <Feather name={item.actionType === 'send_email' ? "mail" : "zap"} size={14} color={theme.textSecondary} />
           <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
-            {ACTION_LABELS[item.actionType] || item.actionType}
+            {item.actionType === 'send_email' ? "Email" : (ACTION_LABELS[item.actionType] || item.actionType)}
           </ThemedText>
         </View>
-        {item.delayMinutes && item.delayMinutes !== 0 && (
-          <View style={styles.metaItem}>
-            <Feather name="clock" size={14} color={theme.textSecondary} />
-            <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
-              {item.delayMinutes > 0 
-                ? `${item.delayMinutes}min after` 
-                : `${Math.abs(item.delayMinutes)}min before`}
-            </ThemedText>
-          </View>
-        )}
+        <View style={styles.metaItem}>
+          <Feather name="shield" size={14} color={theme.textSecondary} />
+          <ThemedText style={[styles.metaText, { color: theme.textSecondary }]}>
+            Runs automatically
+          </ThemedText>
+        </View>
       </View>
 
       <View style={styles.workflowActions}>
@@ -333,7 +360,7 @@ export default function WorkflowsScreen() {
           onPress={() => handleTogglePilotMode(item)}
         >
           <Feather
-            name={item.isPilot ? "user-check" : "cpu"}
+            name={item.isPilot ? "eye" : "zap"}
             size={16}
             color={item.isPilot ? theme.accent : theme.textSecondary}
           />
@@ -343,7 +370,7 @@ export default function WorkflowsScreen() {
               { color: item.isPilot ? theme.accent : theme.textSecondary },
             ]}
           >
-            {item.isPilot ? "Manual Approval" : "Auto Pilot"}
+            {item.isPilot ? "Suggestive Mode" : "Auto Pilot"}
           </ThemedText>
         </Pressable>
 
@@ -577,11 +604,17 @@ const styles = StyleSheet.create({
   },
   workflowName: {
     fontSize: Typography.body.fontSize,
-    fontWeight: "600",
+    fontWeight: "700",
     marginBottom: 4,
+  },
+  workflowTiming: {
+    fontSize: Typography.small.fontSize,
+    fontWeight: "600",
+    marginBottom: 8,
   },
   workflowDescription: {
     fontSize: Typography.small.fontSize,
+    opacity: 0.8,
   },
   workflowMeta: {
     flexDirection: "row",
