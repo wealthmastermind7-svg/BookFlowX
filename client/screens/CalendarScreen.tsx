@@ -157,15 +157,18 @@ export default function CalendarScreen() {
           <ThemedText type="h3" style={styles.monthTitle}>
             {monthName}
           </ThemedText>
-          <Pressable
-            onPress={handleOpenAvailability}
-            style={[styles.hoursButton, { backgroundColor: theme.backgroundSecondary }]}
-          >
-            <Feather name="clock" size={16} color={theme.text} />
-            <ThemedText type="small" style={styles.hoursButtonText}>
-              Hours
-            </ThemedText>
-          </Pressable>
+          <View style={styles.headerActions}>
+            <ThemedText type="small" style={styles.setupText}>Set up your business hours</ThemedText>
+            <Pressable
+              onPress={handleOpenAvailability}
+              style={[styles.hoursButton, { backgroundColor: theme.backgroundSecondary }]}
+            >
+              <Feather name="clock" size={16} color={theme.text} />
+              <ThemedText type="small" style={styles.hoursButtonText}>
+                Hours
+              </ThemedText>
+            </Pressable>
+          </View>
         </View>
         <View style={styles.weekDays}>
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
@@ -247,6 +250,15 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   monthTitle: {},
+  headerActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  setupText: {
+    opacity: 0.6,
+    fontStyle: "italic",
+  },
   hoursButton: {
     flexDirection: "row",
     alignItems: "center",
