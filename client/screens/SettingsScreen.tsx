@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import * as FileSystem from "expo-file-system";
+import { Paths, File as ExpoFile } from "expo-file-system";
 import { View, FlatList, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
@@ -277,17 +277,15 @@ export default function SettingsScreen() {
       }
 
       const filename = `${business.slug}-booking-qr.png`;
-      const fileUri = `${FileSystem.documentDirectory}${filename}`;
+      const file = new ExpoFile(Paths.cache, filename);
       
       // The qrCode from api.getQRCode() is a base64 data URI
       const base64Data = qrCode.split("base64,")[1];
       
-      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
+      file.write(base64Data, { encoding: "base64" });
 
       await Share.share({
-        url: fileUri,
+        url: file.uri,
         title: `${business.name} - Booking QR Code`,
       });
     } catch (error) {
@@ -771,20 +769,9 @@ export default function SettingsScreen() {
               </View>
             ) : null}
             
-              <Button onPress={handleDownloadQRCode} style={{ marginBottom: Spacing.sm }}>
+            <View style={styles.modalActions}>
+              <Button onPress={handleDownloadQRCode}>
                 Share QR Code Image
-              </Button>
-              <Button 
-                onPress={async () => {
-                  if (!business) return;
-                  const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
-                  await Share.share({
-                    message: `Book an appointment with ${business.name}:\n${bookingLink}`,
-                    url: bookingLink,
-                  });
-                }}
-              >
-                Share Booking Link
               </Button>
             </View>
           </View>
