@@ -666,7 +666,10 @@ export default function SettingsScreen() {
               onPress={handleShowQRCode}
               style={[styles.qrButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
             >
-              <Feather name="grid" size={20} color={theme.text} />
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                <Feather name="grid" size={18} color={theme.text} />
+                <ThemedText style={{ fontSize: 13, fontWeight: "600" }}>Share QR Code</ThemedText>
+              </View>
             </Pressable>
           </View>
         </GlassCard>
