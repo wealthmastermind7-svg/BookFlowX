@@ -302,47 +302,44 @@ export default function SettingsScreen() {
     }
   };
 
+  const generateLocalEmbedCode = (): EmbedCode | null => {
+    if (!business?.slug) return null;
+    const origin = getBookingDomain();
+    const embedUrl = `${origin}/embed/${business.slug}`;
+    const scriptUrl = `${origin}/embed.js`;
+    
+    return {
+      embedUrl,
+      scriptUrl,
+      businessSlug: business.slug,
+      inlineCode: `<iframe src="${embedUrl}" style="width:100%;height:600px;border:none;border-radius:12px;" title="Book with ${business.name || 'us'}"></iframe>`,
+      popupButtonCode: `<script src="${scriptUrl}"></script>\n<button onclick="BookFlow.open('${business.slug}')" style="background:#000;color:#fff;padding:12px 24px;border:none;border-radius:999px;cursor:pointer;font-weight:600;">Book Appointment</button>`,
+      popupTextCode: `<script src="${scriptUrl}"></script>\n<a href="#" onclick="BookFlow.open('${business.slug}');return false;" style="color:#C5A059;font-weight:600;">Schedule a call</a>`,
+    };
+  };
+
   const handleShowEmbedModal = async () => {
     if (!checkEmbedAccess()) {
       return;
     }
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setEmbedCode(null);
-    setEmbedError(false);
-    setEmbedLoading(true);
     setCopiedCode(false);
     setSelectedEmbedType("inline");
     setEmbedModalVisible(true);
-    
-    try {
-      const data = await api.getEmbedCode();
-      if (data) {
-        setEmbedCode(data);
-      } else {
-        setEmbedError(true);
-      }
-    } catch (error) {
-      console.error("Error getting embed code:", error);
-      setEmbedError(true);
-    } finally {
-      setEmbedLoading(false);
-    }
-  };
-
-  const handleRetryEmbedCode = async () => {
-    setEmbedError(false);
     setEmbedLoading(true);
+    
+    // Try API first, fallback to local generation
     try {
       const data = await api.getEmbedCode();
       if (data) {
         setEmbedCode(data);
       } else {
-        setEmbedError(true);
+        setEmbedCode(generateLocalEmbedCode());
       }
     } catch (error) {
-      console.error("Error getting embed code:", error);
-      setEmbedError(true);
+      console.error("Error getting embed code, using local generation:", error);
+      setEmbedCode(generateLocalEmbedCode());
     } finally {
       setEmbedLoading(false);
     }
@@ -357,20 +354,26 @@ export default function SettingsScreen() {
   };
 
   const handleCopyEmbedCode = async () => {
-    if (!embedCode) return;
     if (!checkEmbedAccess()) return;
+    
+    // Use existing or generate fresh
+    const codeData = embedCode || generateLocalEmbedCode();
+    if (!codeData) {
+      Alert.alert("Error", "Unable to generate embed code");
+      return;
+    }
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     let codeToCopy = "";
     switch (selectedEmbedType) {
       case "inline":
-        codeToCopy = embedCode.inlineCode;
+        codeToCopy = codeData.inlineCode;
         break;
       case "popup-button":
-        codeToCopy = embedCode.popupButtonCode;
+        codeToCopy = codeData.popupButtonCode;
         break;
       case "popup-text":
-        codeToCopy = embedCode.popupTextCode;
+        codeToCopy = codeData.popupTextCode;
         break;
     }
     await Clipboard.setStringAsync(codeToCopy);
@@ -867,52 +870,119 @@ export default function SettingsScreen() {
             {embedLoading ? (
               <View style={styles.embedLoading}>
                 <ActivityIndicator size="large" color={theme.text} />
-                <ThemedText style={styles.embedLoadingText}>Generating embed code...</ThemedText>
-              </View>
-            ) : embedError ? (
-              <View style={styles.embedLoading}>
-                <Feather name="alert-circle" size={48} color={theme.textSecondary} />
-                <ThemedText style={styles.embedLoadingText}>Failed to generate embed code</ThemedText>
-                <Button onPress={handleRetryEmbedCode} style={{ marginTop: Spacing.md }}>Retry</Button>
+                <ThemedText style={styles.embedLoadingText}>Loading widget options...</ThemedText>
               </View>
             ) : (
-              <>
+              <ScrollView showsVerticalScrollIndicator={false} style={{ maxHeight: 500 }}>
                 <ThemedText style={styles.embedDescription}>
-                  Add a booking widget to your website. Choose a style below:
+                  Add a booking widget to your website. Select a style:
                 </ThemedText>
-                <View style={styles.embedTypeTabs}>
-                  {(["inline", "popup-button", "popup-text"] as EmbedType[]).map((type) => (
-                    <Pressable
-                      key={type}
-                      style={[
-                        styles.embedTypeTab,
-                        { backgroundColor: selectedEmbedType === type ? theme.accent : theme.backgroundSecondary }
-                      ]}
-                      onPress={() => setSelectedEmbedType(type)}
-                    >
-                      <ThemedText style={[styles.embedTypeTabText, { color: selectedEmbedType === type ? theme.buttonText : theme.text }]}>
-                        {type === "inline" ? "Inline" : type === "popup-button" ? "Button" : "Link"}
-                      </ThemedText>
-                    </Pressable>
-                  ))}
-                </View>
-                <ThemedText style={styles.embedTypeHint}>
-                  {selectedEmbedType === "inline" ? "Displays booking form directly on your page" :
-                   selectedEmbedType === "popup-button" ? "Button that opens booking in a popup" :
-                   "Text link that opens booking in a popup"}
-                </ThemedText>
-                <ScrollView style={[styles.codeContainer, { backgroundColor: theme.backgroundSecondary }]}>
-                  <ThemedText style={styles.codeText}>{getEmbedCodeForType()}</ThemedText>
-                </ScrollView>
+
+                {/* Inline Widget Preview */}
+                <Pressable 
+                  style={[styles.embedPreviewCard, { borderColor: selectedEmbedType === "inline" ? ACCENT_GOLD : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)") }]}
+                  onPress={() => setSelectedEmbedType("inline")}
+                >
+                  <View style={styles.embedPreviewHeader}>
+                    <View style={[styles.embedPreviewIcon, { backgroundColor: selectedEmbedType === "inline" ? ACCENT_GOLD + "20" : theme.backgroundSecondary }]}>
+                      <Feather name="layout" size={20} color={selectedEmbedType === "inline" ? ACCENT_GOLD : theme.text} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <ThemedText style={styles.embedPreviewTitle}>Inline Widget</ThemedText>
+                      <ThemedText style={styles.embedPreviewSubtitle}>Embedded directly on your page</ThemedText>
+                    </View>
+                    {selectedEmbedType === "inline" && <Feather name="check-circle" size={20} color={ACCENT_GOLD} />}
+                  </View>
+                  <View style={[styles.embedPreviewMockup, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }]}>
+                    <View style={[styles.mockupHeader, { backgroundColor: theme.backgroundSecondary }]}>
+                      <View style={[styles.mockupDot, { backgroundColor: "#FF5F56" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#FFBD2E" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#27CA40" }]} />
+                    </View>
+                    <View style={styles.mockupContent}>
+                      <View style={[styles.mockupLine, { width: "60%", backgroundColor: theme.textTertiary + "30" }]} />
+                      <View style={[styles.mockupLine, { width: "40%", backgroundColor: theme.textTertiary + "20" }]} />
+                      <View style={[styles.mockupWidget, { backgroundColor: theme.text, borderRadius: BorderRadius.md }]}>
+                        <Feather name="calendar" size={12} color={theme.backgroundDefault} />
+                        <ThemedText style={[styles.mockupWidgetText, { color: theme.backgroundDefault }]}>Book Now</ThemedText>
+                      </View>
+                      <View style={[styles.mockupLine, { width: "80%", backgroundColor: theme.textTertiary + "20" }]} />
+                    </View>
+                  </View>
+                </Pressable>
+
+                {/* Popup Button Preview */}
+                <Pressable 
+                  style={[styles.embedPreviewCard, { borderColor: selectedEmbedType === "popup-button" ? ACCENT_GOLD : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)") }]}
+                  onPress={() => setSelectedEmbedType("popup-button")}
+                >
+                  <View style={styles.embedPreviewHeader}>
+                    <View style={[styles.embedPreviewIcon, { backgroundColor: selectedEmbedType === "popup-button" ? ACCENT_GOLD + "20" : theme.backgroundSecondary }]}>
+                      <Feather name="square" size={20} color={selectedEmbedType === "popup-button" ? ACCENT_GOLD : theme.text} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <ThemedText style={styles.embedPreviewTitle}>Popup Button</ThemedText>
+                      <ThemedText style={styles.embedPreviewSubtitle}>Styled button opens a popup</ThemedText>
+                    </View>
+                    {selectedEmbedType === "popup-button" && <Feather name="check-circle" size={20} color={ACCENT_GOLD} />}
+                  </View>
+                  <View style={[styles.embedPreviewMockup, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }]}>
+                    <View style={[styles.mockupHeader, { backgroundColor: theme.backgroundSecondary }]}>
+                      <View style={[styles.mockupDot, { backgroundColor: "#FF5F56" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#FFBD2E" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#27CA40" }]} />
+                    </View>
+                    <View style={styles.mockupContent}>
+                      <View style={[styles.mockupLine, { width: "70%", backgroundColor: theme.textTertiary + "30" }]} />
+                      <View style={[styles.mockupButton, { backgroundColor: theme.text }]}>
+                        <ThemedText style={[styles.mockupButtonText, { color: theme.backgroundDefault }]}>Book Appointment</ThemedText>
+                      </View>
+                      <View style={[styles.mockupLine, { width: "50%", backgroundColor: theme.textTertiary + "20" }]} />
+                    </View>
+                  </View>
+                </Pressable>
+
+                {/* Popup Link Preview */}
+                <Pressable 
+                  style={[styles.embedPreviewCard, { borderColor: selectedEmbedType === "popup-text" ? ACCENT_GOLD : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)") }]}
+                  onPress={() => setSelectedEmbedType("popup-text")}
+                >
+                  <View style={styles.embedPreviewHeader}>
+                    <View style={[styles.embedPreviewIcon, { backgroundColor: selectedEmbedType === "popup-text" ? ACCENT_GOLD + "20" : theme.backgroundSecondary }]}>
+                      <Feather name="link" size={20} color={selectedEmbedType === "popup-text" ? ACCENT_GOLD : theme.text} />
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <ThemedText style={styles.embedPreviewTitle}>Text Link</ThemedText>
+                      <ThemedText style={styles.embedPreviewSubtitle}>Minimal link opens a popup</ThemedText>
+                    </View>
+                    {selectedEmbedType === "popup-text" && <Feather name="check-circle" size={20} color={ACCENT_GOLD} />}
+                  </View>
+                  <View style={[styles.embedPreviewMockup, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)" }]}>
+                    <View style={[styles.mockupHeader, { backgroundColor: theme.backgroundSecondary }]}>
+                      <View style={[styles.mockupDot, { backgroundColor: "#FF5F56" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#FFBD2E" }]} />
+                      <View style={[styles.mockupDot, { backgroundColor: "#27CA40" }]} />
+                    </View>
+                    <View style={styles.mockupContent}>
+                      <View style={[styles.mockupLine, { width: "60%", backgroundColor: theme.textTertiary + "30" }]} />
+                      <View style={{ flexDirection: "row", alignItems: "center", gap: 4 }}>
+                        <View style={[styles.mockupLine, { width: "30%", backgroundColor: theme.textTertiary + "20" }]} />
+                        <ThemedText style={[styles.mockupLinkText, { color: ACCENT_GOLD }]}>Schedule a call</ThemedText>
+                      </View>
+                      <View style={[styles.mockupLine, { width: "75%", backgroundColor: theme.textTertiary + "20" }]} />
+                    </View>
+                  </View>
+                </Pressable>
+
                 <View style={styles.modalActions}>
                   <Button onPress={handleCopyEmbedCode}>
-                    {copiedCode ? "Copied!" : "Copy Code"}
+                    {copiedCode ? "Copied!" : "Copy Embed Code"}
                   </Button>
                   <Pressable onPress={handleCloseEmbedModal} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
                     <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
                   </Pressable>
                 </View>
-              </>
+              </ScrollView>
             )}
           </View>
         </View>
@@ -1341,6 +1411,88 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     fontSize: 11,
     lineHeight: 16,
+  },
+  embedPreviewCard: {
+    borderWidth: 1.5,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  embedPreviewHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  embedPreviewIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  embedPreviewTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  embedPreviewSubtitle: {
+    fontSize: 12,
+    opacity: 0.6,
+    marginTop: 2,
+  },
+  embedPreviewMockup: {
+    borderRadius: BorderRadius.md,
+    overflow: "hidden",
+  },
+  mockupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 6,
+    paddingHorizontal: 10,
+    gap: 5,
+  },
+  mockupDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+  },
+  mockupContent: {
+    padding: Spacing.md,
+    gap: 8,
+  },
+  mockupLine: {
+    height: 8,
+    borderRadius: 4,
+  },
+  mockupWidget: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: Spacing.lg,
+    alignSelf: "flex-start",
+    gap: 6,
+    marginVertical: 4,
+  },
+  mockupWidgetText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  mockupButton: {
+    paddingVertical: 8,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    alignSelf: "flex-start",
+    marginVertical: 4,
+  },
+  mockupButtonText: {
+    fontSize: 11,
+    fontWeight: "600",
+  },
+  mockupLinkText: {
+    fontSize: 11,
+    fontWeight: "600",
+    textDecorationLine: "underline",
   },
   currencyModalContent: {
     width: "100%",
