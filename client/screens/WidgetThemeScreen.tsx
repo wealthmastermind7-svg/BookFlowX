@@ -108,7 +108,14 @@ export default function WidgetThemeScreen() {
 
       setSaving(true);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      const extracted = await api.extractThemeFromWebsite(business.website);
+      
+      // Add a client-side timeout to prevent UI hang
+      const extractionPromise = api.extractThemeFromWebsite(business.website);
+      const timeoutPromise = new Promise((_, reject) => 
+        setTimeout(() => reject(new Error("Timeout")), 10000)
+      );
+
+      const extracted = await Promise.race([extractionPromise, timeoutPromise]) as Partial<WidgetTheme>;
       
       setWidgetTheme(prev => ({
         ...prev,
@@ -119,7 +126,10 @@ export default function WidgetThemeScreen() {
       Alert.alert("Theme Extracted", "We've matched your widget colors to your website!");
     } catch (error) {
       console.error("Error fetching website theme:", error);
-      Alert.alert("Extraction Failed", "We couldn't reach your website right now.");
+      const message = error instanceof Error && error.message === "Timeout" 
+        ? "The website is taking too long to respond. Please try again or enter colors manually."
+        : "We couldn't reach your website right now. Please check the URL and try again.";
+      Alert.alert("Extraction Failed", message);
     } finally {
       setSaving(false);
     }

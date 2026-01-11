@@ -645,6 +645,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accentColor = "#e31837";
         backgroundColor = "#f5f5f5";
         textColor = "#1a1a1a";
+      } else {
+        // Simple scraping for other sites
+        try {
+          const controller = new AbortController();
+          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          
+          const response = await fetch(url, { signal: controller.signal });
+          const html = await response.text();
+          clearTimeout(timeoutId);
+
+          // Extract hex colors from HTML
+          const hexRegex = /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
+          const matches = html.match(hexRegex) || [];
+          
+          if (matches.length > 0) {
+            // Pick most frequent color or just first few for demo
+            primaryColor = matches[0];
+            accentColor = matches[Math.min(1, matches.length - 1)];
+          }
+        } catch (e) {
+          console.error("Scraping failed, using defaults:", e);
+        }
       }
 
       res.json({
