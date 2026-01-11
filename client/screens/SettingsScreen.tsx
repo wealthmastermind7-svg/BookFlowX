@@ -30,8 +30,8 @@ type EmbedType = "inline" | "popup-button" | "popup-text";
 
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
-const ACCENT_GOLD = "#D4AF37";
-const ACCENT_SILVER = "#C0C0C0";
+const ACCENT_GOLD = "#FFFFFF";
+const ACCENT_SILVER = "#FFFFFF";
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
@@ -497,10 +497,10 @@ export default function SettingsScreen() {
 
   const SectionTitle = ({ children, badge }: { children: string; badge?: string }) => (
     <View style={styles.sectionTitleRow}>
-      <ThemedText style={[styles.sectionTitle, { fontStyle: "italic" }]}>{children}</ThemedText>
+      <ThemedText style={[styles.sectionTitle]}>{children}</ThemedText>
       {badge && (
-        <View style={[styles.badge, { backgroundColor: `${ACCENT_GOLD}15`, borderColor: `${ACCENT_GOLD}30` }]}>
-          <ThemedText style={[styles.badgeText, { color: ACCENT_GOLD }]}>{badge}</ThemedText>
+        <View style={[styles.badge, { backgroundColor: theme.text + "15", borderColor: theme.text + "30" }]}>
+          <ThemedText style={[styles.badgeText, { color: theme.text }]}>{badge}</ThemedText>
         </View>
       )}
     </View>
@@ -508,12 +508,12 @@ export default function SettingsScreen() {
 
   const PremiumRow = ({ icon, title, subtitle, onPress, isGold = false, disabled = false }: any) => (
     <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
-      <View style={[styles.premiumIconBox, { backgroundColor: isGold ? `${ACCENT_GOLD}20` : `${ACCENT_SILVER}15` }]}>
-        <Feather name={icon} size={22} color={isGold ? ACCENT_GOLD : ACCENT_SILVER} />
+      <View style={[styles.premiumIconBox, { backgroundColor: theme.text + "15" }]}>
+        <Feather name={icon} size={22} color={theme.text} />
       </View>
       <View style={{ flex: 1 }}>
         <ThemedText style={styles.premiumRowTitle}>{title}</ThemedText>
-        <ThemedText style={[styles.premiumRowSubtitle, { fontStyle: "italic" }]}>{subtitle}</ThemedText>
+        <ThemedText style={[styles.premiumRowSubtitle]}>{subtitle}</ThemedText>
       </View>
       {disabled ? (
         <ActivityIndicator size="small" color={theme.textTertiary} />
@@ -525,7 +525,7 @@ export default function SettingsScreen() {
 
   const InfoRow = ({ icon, label, value, onPress }: any) => (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.infoRow, pressed && { opacity: 0.7 }]}>
-      <Feather name={icon} size={18} color={ACCENT_GOLD} style={{ opacity: 0.6 }} />
+      <Feather name={icon} size={18} color={theme.text} style={{ opacity: 0.6 }} />
       <View style={{ flex: 1, marginLeft: Spacing.md }}>
         <ThemedText style={styles.infoLabel}>{label}</ThemedText>
         <ThemedText style={styles.infoValue}>{value}</ThemedText>
@@ -587,8 +587,8 @@ export default function SettingsScreen() {
         <SectionTitle>Business</SectionTitle>
         <View style={styles.gridRow}>
           <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
-            <View style={[styles.gridIconCircle, { backgroundColor: `${ACCENT_GOLD}15` }]}>
-              <Feather name="briefcase" size={16} color={ACCENT_GOLD} />
+            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
+              <Feather name="briefcase" size={16} color={theme.text} />
             </View>
             <View style={styles.gridCardContent}>
               <ThemedText style={styles.gridLabel}>Entity</ThemedText>
@@ -596,8 +596,8 @@ export default function SettingsScreen() {
             </View>
           </GlassCard>
           <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
-            <View style={[styles.gridIconCircle, { backgroundColor: `${ACCENT_SILVER}15` }]}>
-              <Feather name="dollar-sign" size={16} color={ACCENT_SILVER} />
+            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
+              <Feather name="dollar-sign" size={16} color={theme.text} />
             </View>
             <View style={styles.gridCardContent}>
               <ThemedText style={styles.gridLabel}>Currency</ThemedText>
@@ -1083,7 +1083,7 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: BorderRadius.full,
-    borderWidth: 2,
+    borderWidth: 1,
     alignItems: "center",
     justifyContent: "center",
   },
