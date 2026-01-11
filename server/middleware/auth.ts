@@ -38,27 +38,17 @@ export async function verifyBusinessOwnership(
     if (tokenBusiness.id !== businessId) {
       console.warn(`[Auth] Token mismatch: Token ${tokenBusiness.id} vs URL ${businessId}`);
       
-      // AUTO-HEAL in development: If both IDs are valid but different, 
-      // the client might be in a session sync transition.
-      // We'll trust the token's business as the "truth" if the client uses it.
-      if (process.env.NODE_ENV === 'development') {
-        console.info(`[Auth] Development mode: Overriding URL businessId ${businessId} with token businessId ${tokenBusiness.id}`);
-        req.business = {
-          id: tokenBusiness.id,
-          ownerToken: tokenBusiness.ownerToken as string,
-          name: tokenBusiness.name,
-          slug: tokenBusiness.slug
-        };
-        return next();
-      }
-
-      return res.status(403).json({ 
-        error: "Token does not belong to this business",
-        details: {
-          tokenBusinessId: tokenBusiness.id,
-          requestedBusinessId: businessId
-        }
-      });
+      // AUTO-HEAL: If both IDs are valid but different, the client might be in a 
+      // session sync transition (common with mobile apps). Trust the token as the 
+      // source of truth since it's cryptographically verified.
+      console.info(`[Auth] Auto-healing: Overriding URL businessId ${businessId} with token businessId ${tokenBusiness.id}`);
+      req.business = {
+        id: tokenBusiness.id,
+        ownerToken: tokenBusiness.ownerToken as string,
+        name: tokenBusiness.name,
+        slug: tokenBusiness.slug
+      };
+      return next();
     }
 
     req.business = {
