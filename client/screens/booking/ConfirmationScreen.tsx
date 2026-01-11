@@ -1,95 +1,195 @@
-import React from "react";
-import { View, StyleSheet, Pressable } from "react-native";
+import React, { useEffect, useState } from "react";
+import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withSpring,
+  withDelay,
+  withSequence,
+  FadeIn,
+  FadeInUp,
+} from "react-native-reanimated";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
-import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
+import { StorageService, Booking } from "@/lib/storage";
+import { formatPrice } from "@/lib/currency";
 
-type Navigation = NativeStackNavigationProp<RootStackParamList>;
+type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const SPRING_CONFIG = {
+  damping: 12,
+  mass: 0.5,
+  stiffness: 100,
+};
 
 export default function ConfirmationScreen() {
   const insets = useSafeAreaInsets();
-  const { theme } = useTheme();
+  const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
+  const route = useRoute();
+
+  const bookingId = (route.params as any)?.bookingId || "";
+  const [booking, setBooking] = useState<Booking | null>(null);
+
+  const checkScale = useSharedValue(0);
+  const checkOpacity = useSharedValue(0);
+
+  React.useEffect(() => {
+    loadBooking();
+    animateCheckmark();
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+  }, []);
+
+  const loadBooking = async () => {
+    const found = await StorageService.getBookingById(bookingId);
+    if (found) setBooking(found);
+  };
+
+  const animateCheckmark = () => {
+    checkOpacity.value = withDelay(200, withSpring(1, SPRING_CONFIG));
+    checkScale.value = withDelay(
+      200,
+      withSequence(
+        withSpring(1.2, { ...SPRING_CONFIG, stiffness: 200 }),
+        withSpring(1, SPRING_CONFIG)
+      )
+    );
+  };
+
+  const checkAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: checkScale.value }],
+    opacity: checkOpacity.value,
+  }));
 
   const handleDone = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    navigation.goBack();
+    const parent = navigation.getParent();
+    if (parent) {
+      parent.goBack();
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const formatDate = () => {
+    if (!booking?.date) return "--";
+    const date = new Date(booking.date);
+    return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
   };
 
   return (
     <ThemedView style={styles.container}>
+      <View style={[styles.oversizedTextContainer, { top: insets.top + 60 }]}>
+        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.02 : 0.03 }]}>
+          CONFIRMED
+        </ThemedText>
+      </View>
+
       <View
         style={[
           styles.content,
           {
-            paddingTop: insets.top + Spacing["3xl"],
-            paddingBottom: insets.bottom + Spacing["3xl"],
-            paddingHorizontal: Spacing.lg,
+            paddingTop: insets.top + Spacing["5xl"],
+            paddingBottom: insets.bottom + 140,
           },
         ]}
       >
-        <View
-          style={[styles.checkmark, { backgroundColor: theme.success }]}
-        >
-          <Feather name="check" size={48} color={theme.buttonText} />
-        </View>
-
-        <ThemedText type="h1" style={styles.title}>
-          Booking Confirmed!
-        </ThemedText>
-
-        <ThemedText type="body" style={styles.message}>
-          Your booking has been successfully confirmed. You will receive a confirmation email shortly.
-        </ThemedText>
-
-        <View style={styles.details}>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={styles.detailLabel}>
-              Service
-            </ThemedText>
-            <ThemedText type="body" style={styles.detailValue}>
-              Hair Coloring
-            </ThemedText>
-          </View>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={styles.detailLabel}>
-              Date & Time
-            </ThemedText>
-            <ThemedText type="body" style={styles.detailValue}>
-              Jan 20, 2025 • 2:00 PM
-            </ThemedText>
-          </View>
-          <View style={styles.detailRow}>
-            <ThemedText type="small" style={styles.detailLabel}>
-              Price
-            </ThemedText>
-            <ThemedText type="body" style={styles.detailValue}>
-              $85.00
-            </ThemedText>
-          </View>
-        </View>
-
-        <Pressable
-          onPress={handleDone}
+        <Animated.View
           style={[
-            styles.button,
-            { backgroundColor: theme.accent },
+            styles.checkmarkContainer,
+            checkAnimatedStyle,
+            { backgroundColor: theme.text },
           ]}
         >
-          <ThemedText
-            type="body"
-            style={[styles.buttonText, { color: theme.buttonText }]}
-          >
-            Done
+          <Feather name="check" size={48} color={theme.buttonText} />
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(400).springify()}>
+          <ThemedText style={styles.title}>
+            Booking{"\n"}Confirmed!
           </ThemedText>
-        </Pressable>
+        </Animated.View>
+
+        <Animated.View entering={FadeIn.delay(500)}>
+          <ThemedText style={styles.message}>
+            Your booking has been successfully confirmed. You will receive a confirmation email shortly.
+          </ThemedText>
+        </Animated.View>
+
+        <Animated.View 
+          entering={FadeInUp.delay(600).springify()}
+          style={[
+            styles.detailsCard,
+            {
+              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+            },
+          ]}
+        >
+          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+            <ThemedText style={styles.detailLabel}>Service</ThemedText>
+            <ThemedText style={styles.detailValue}>{booking?.serviceName || "--"}</ThemedText>
+          </View>
+
+          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+            <ThemedText style={styles.detailLabel}>Date & Time</ThemedText>
+            <ThemedText style={styles.detailValue}>
+              {formatDate()} • {booking?.time || "--"}
+            </ThemedText>
+          </View>
+
+          <View style={styles.detailRow}>
+            <ThemedText style={styles.detailLabel}>Total</ThemedText>
+            <ThemedText style={styles.detailPrice}>
+              {booking ? formatPrice(booking.totalPrice) : "--"}
+            </ThemedText>
+          </View>
+        </Animated.View>
+      </View>
+
+      <View
+        style={[
+          styles.bottomSection,
+          {
+            paddingBottom: insets.bottom + Spacing.lg,
+            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+          },
+        ]}
+      >
+        <Animated.View 
+          entering={FadeInUp.delay(700).springify()}
+          style={{ width: "100%" }}
+        >
+          <Pressable
+            onPress={handleDone}
+            style={[styles.doneButton, { backgroundColor: theme.text }]}
+          >
+            <ThemedText style={[styles.doneButtonText, { color: theme.buttonText }]}>
+              Done
+            </ThemedText>
+          </Pressable>
+        </Animated.View>
+
+        <View style={styles.confirmationBadge}>
+          <Feather name="check-circle" size={12} color={theme.textSecondary} />
+          <ThemedText style={styles.confirmationBadgeText}>
+            Confirmation sent to your email
+          </ThemedText>
+        </View>
       </View>
     </ThemedView>
   );
@@ -98,53 +198,104 @@ export default function ConfirmationScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
+  },
+  oversizedTextContainer: {
+    position: "absolute",
+    left: -20,
+    width: SCREEN_WIDTH + 40,
+    overflow: "hidden",
+    pointerEvents: "none",
+    zIndex: 0,
+  },
+  oversizedText: {
+    fontSize: 56,
+    fontWeight: "900",
+    letterSpacing: -3,
+    lineHeight: 56,
   },
   content: {
+    flex: 1,
     alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.lg,
   },
-  checkmark: {
+  checkmarkContainer: {
     width: 100,
     height: 100,
     borderRadius: 50,
-    justifyContent: "center",
     alignItems: "center",
+    justifyContent: "center",
     marginBottom: Spacing["3xl"],
   },
   title: {
-    marginBottom: Spacing.lg,
+    fontSize: 40,
+    fontWeight: "700",
     textAlign: "center",
+    marginBottom: Spacing.lg,
+    lineHeight: 48,
+    letterSpacing: -1,
   },
   message: {
+    fontSize: 16,
     textAlign: "center",
-    opacity: 0.7,
+    opacity: 0.6,
+    lineHeight: 24,
     marginBottom: Spacing["3xl"],
+    maxWidth: 280,
   },
-  details: {
+  detailsCard: {
     width: "100%",
-    marginBottom: Spacing["3xl"],
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    padding: Spacing.xl,
   },
   detailRow: {
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "center",
     paddingVertical: Spacing.lg,
     borderBottomWidth: 1,
-    borderBottomColor: "rgba(0,0,0,0.1)",
   },
   detailLabel: {
-    opacity: 0.6,
+    fontSize: 14,
+    opacity: 0.5,
   },
   detailValue: {
+    fontSize: 14,
     fontWeight: "600",
   },
-  button: {
-    width: "100%",
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
+  detailPrice: {
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: -0.5,
+  },
+  bottomSection: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingTop: Spacing["2xl"],
+    paddingHorizontal: Spacing.lg,
     alignItems: "center",
   },
-  buttonText: {
-    fontWeight: "600",
+  doneButton: {
+    width: "100%",
+    paddingVertical: 18,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    marginBottom: Spacing.lg,
+  },
+  doneButtonText: {
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  confirmationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  confirmationBadgeText: {
+    fontSize: 12,
+    opacity: 0.5,
   },
 });
