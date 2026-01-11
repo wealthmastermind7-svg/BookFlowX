@@ -219,8 +219,14 @@ export default function WorkflowsScreen() {
       if (!businessId) throw new Error("No business ID");
 
       const ownerToken = await api.getOwnerToken();
+      // Use the business ID from the token if available to ensure sync
+      const currentBusiness = await api.getBusiness();
+      const targetBusinessId = currentBusiness?.id || businessId;
+      
+      console.log(`[Workflow] Init attempt. URL ID: ${businessId}, Target ID: ${targetBusinessId}`);
+
       const baseUrl = getApiUrl().replace(/\/$/, '');
-      const url = `${baseUrl}/api/businesses/${businessId}/workflows/initialize`;
+      const url = `${baseUrl}/api/businesses/${targetBusinessId}/workflows/initialize`;
       
       const headers: Record<string, string> = {
         "Content-Type": "application/json",

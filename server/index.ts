@@ -46,6 +46,13 @@ function setupCors(app: express.Application) {
       });
     }
 
+    // Add production domain if it exists
+    const prodDomain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
+    if (prodDomain) {
+      const cleanProd = prodDomain.replace(/^https?:\/\//, '').replace(/:5000$/, '');
+      origins.add(`https://${cleanProd}`);
+    }
+
     const origin = req.header("origin");
 
     if (origin && origins.has(origin)) {

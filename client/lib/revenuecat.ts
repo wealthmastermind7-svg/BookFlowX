@@ -30,6 +30,18 @@ export async function initializeRevenueCat(): Promise<boolean> {
     return false;
   }
 
+  // Skip initialization if we are in Expo Go to avoid native module errors
+  try {
+    const Constants = require("expo-constants").default;
+    const isExpoGo = Constants.executionEnvironment === "storeClient";
+    if (isExpoGo) {
+      console.log("RevenueCat: Running in Expo Go, skipping native initialization. Use a development build for full features.");
+      return false;
+    }
+  } catch (e) {
+    // Fallback if constants aren't available
+  }
+
   const apiKey = getApiKey();
   if (!apiKey) {
     console.log("RevenueCat: No API key configured for platform", Platform.OS);
