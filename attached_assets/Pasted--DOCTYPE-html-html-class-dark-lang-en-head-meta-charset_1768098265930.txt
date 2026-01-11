@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html class="dark" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<title>Cinematic Premium Settings</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#D4AF37", // Muted Gold
+                        "background-light": "#F8F9FA",
+                        "background-dark": "#0A0A0B",
+                        accent: {
+                            gold: "#D4AF37",
+                            silver: "#C0C0C0",
+                            charcoal: "#1A1A1D"
+                        }
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Plus Jakarta Sans", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "1.5rem",
+                        '2xl': "2rem",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .light .glass {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.4);
+            box-shadow: 0 4px 24px 0 rgba(0, 0, 0, 0.05);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #D4AF37 0%, #F8E58C 50%, #C0C0C0 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .cinematic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            background: #0A0A0B;
+        }.orb {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.15;
+            animation: float 20s infinite alternate;
+        }
+        @keyframes float {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(50px, 100px) scale(1.2); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans antialiased overflow-x-hidden">
+<div class="cinematic-bg dark:block hidden">
+<div class="orb w-96 h-96 bg-primary -top-20 -left-20"></div>
+<div class="orb w-80 h-80 bg-accent-silver bottom-20 -right-20" style="animation-delay: -5s;"></div>
+<div class="orb w-64 h-64 bg-accent-gold top-1/2 left-1/2 transform -translate-x-1/2" style="animation-delay: -10s;"></div>
+</div>
+<main class="relative z-10 px-6 pt-16 pb-32 max-w-lg mx-auto min-h-screen">
+<header class="flex justify-between items-center mb-12">
+<h1 class="text-3xl font-display italic tracking-tight dark:text-white">Settings</h1>
+<button class="w-10 h-10 flex items-center justify-center rounded-full glass">
+<span class="material-icons-round text-primary">search</span>
+</button>
+</header>
+<section class="mb-14">
+<div class="flex items-center justify-between mb-6">
+<h2 class="text-4xl font-display font-bold tracking-tighter opacity-90">Premium</h2>
+<span class="px-3 py-1 bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-widest rounded-full">Member</span>
+</div>
+<div class="space-y-4">
+<div class="glass p-6 rounded-2xl relative overflow-hidden group active:scale-[0.98] transition-all">
+<div class="absolute top-0 right-0 w-32 h-32 bg-primary/5 rounded-full -mr-16 -mt-16 blur-2xl group-hover:bg-primary/10 transition-all"></div>
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center text-primary">
+<span class="material-icons-round">auto_awesome</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold tracking-tight">Upgrade Plan</h3>
+<p class="text-sm opacity-50 font-light italic">Access cinematic tools</p>
+</div>
+<span class="material-icons-round opacity-30">chevron_right</span>
+</div>
+</div>
+<div class="glass p-6 rounded-2xl group active:scale-[0.98] transition-all">
+<div class="flex items-center gap-5">
+<div class="w-12 h-12 rounded-xl bg-accent-silver/10 flex items-center justify-center text-accent-silver">
+<span class="material-icons-round">restore</span>
+</div>
+<div class="flex-1">
+<h3 class="text-lg font-bold tracking-tight">Restore</h3>
+<p class="text-sm opacity-50 font-light italic">Previous purchases</p>
+</div>
+<span class="material-icons-round opacity-30">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+<section class="mb-14">
+<h2 class="text-4xl font-display font-bold tracking-tighter mb-6 opacity-90">Business</h2>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="glass p-5 rounded-2xl h-40 flex flex-col justify-between">
+<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-icons-round text-sm">business</span>
+</div>
+<div>
+<h3 class="text-xs uppercase tracking-widest font-bold opacity-40 mb-1">Entity</h3>
+<p class="font-bold text-lg leading-tight">Care Dental</p>
+</div>
+</div>
+<div class="glass p-5 rounded-2xl h-40 flex flex-col justify-between overflow-hidden relative">
+<div class="w-10 h-10 rounded-full bg-accent-silver/10 flex items-center justify-center text-accent-silver">
+<span class="material-icons-round text-sm">payments</span>
+</div>
+<div>
+<h3 class="text-xs uppercase tracking-widest font-bold opacity-40 mb-1">Currency</h3>
+<p class="font-bold text-lg leading-tight">AUD $</p>
+</div>
+<svg class="absolute -bottom-4 -right-4 w-20 h-20 opacity-20 transform -rotate-90">
+<circle class="text-primary" cx="40" cy="40" fill="transparent" r="30" stroke="currentColor" stroke-dasharray="188" stroke-dashoffset="40" stroke-width="2"></circle>
+</svg>
+</div>
+</div>
+<div class="glass p-6 rounded-2xl space-y-6">
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary opacity-60">language</span>
+<div>
+<p class="text-xs font-bold opacity-40 uppercase tracking-widest">Website</p>
+<p class="font-medium">Not set</p>
+</div>
+</div>
+<span class="material-icons-round text-xs opacity-30">edit</span>
+</div>
+<div class="h-[1px] bg-white/5 dark:bg-white/5"></div>
+<div class="flex items-center justify-between">
+<div class="flex items-center gap-4">
+<span class="material-icons-round text-primary opacity-60">phone</span>
+<div>
+<p class="text-xs font-bold opacity-40 uppercase tracking-widest">Support Line</p>
+<p class="font-medium">+1 (555) 123-4567</p>
+</div>
+</div>
+<span class="material-icons-round text-xs opacity-30">edit</span>
+</div>
+</div>
+</section>
+<section class="mb-14">
+<h2 class="text-4xl font-display font-bold tracking-tighter mb-6 opacity-90">Automation</h2>
+<div class="glass p-8 rounded-2xl relative overflow-hidden mb-4">
+<div class="absolute top-0 right-0 w-40 h-full opacity-10 pointer-events-none">
+<svg class="w-full h-full fill-primary" viewBox="0 0 100 100">
+<circle cx="50" cy="50" r="40"></circle>
+</svg>
+</div>
+<div class="flex items-start gap-6">
+<div class="relative">
+<div class="w-16 h-16 rounded-full border-2 border-primary/30 flex items-center justify-center">
+<span class="material-icons-round text-3xl text-primary animate-pulse">bolt</span>
+</div>
+</div>
+<div>
+<h3 class="text-xl font-bold mb-1">Workflows</h3>
+<p class="text-sm opacity-50 leading-relaxed font-light">Intelligent reminders &amp; cinematic confirmation sequences.</p>
+<button class="mt-4 text-xs font-bold tracking-widest uppercase text-primary border-b border-primary/30 pb-1">Configure</button>
+</div>
+</div>
+</div>
+<div class="glass p-6 rounded-2xl flex items-center justify-between">
+<div class="flex items-center gap-4">
+<div class="w-10 h-10 rounded-xl bg-accent-charcoal/50 flex items-center justify-center">
+<span class="material-icons-round text-accent-silver">palette</span>
+</div>
+<div>
+<h3 class="font-bold tracking-tight">Widget Theming</h3>
+<p class="text-xs opacity-40">Visual appearance</p>
+</div>
+</div>
+<span class="material-icons-round opacity-30">settings_suggest</span>
+</div>
+</section>
+<section class="mb-14">
+<h2 class="text-4xl font-display font-bold tracking-tighter mb-6 opacity-90">Booking</h2>
+<div class="space-y-4">
+<div class="glass p-6 rounded-2xl flex flex-col gap-4">
+<div class="flex justify-between items-start">
+<div>
+<h3 class="font-bold tracking-tight mb-1">Booking Link</h3>
+<p class="text-xs font-medium text-primary break-all">confirmbooking.online/book/care-dental</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center">
+<span class="material-icons-round text-sm">content_copy</span>
+</button>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-3 bg-primary text-background-dark font-bold text-sm rounded-xl active:scale-95 transition-all">Share Link</button>
+<button class="px-4 py-3 bg-white/5 font-bold text-sm rounded-xl active:scale-95 transition-all">
+<span class="material-icons-round">qr_code_2</span>
+</button>
+</div>
+</div>
+<div class="glass p-5 rounded-2xl flex items-center justify-between opacity-60">
+<div class="flex items-center gap-4">
+<span class="material-icons-round">shopping_bag</span>
+<h3 class="font-bold tracking-tight">Quick Sale</h3>
+</div>
+<span class="text-[10px] uppercase tracking-widest font-bold px-2 py-1 bg-white/10 rounded">Soon</span>
+</div>
+</div>
+</section>
+<section class="mb-20">
+<h2 class="text-4xl font-display font-bold tracking-tighter mb-6 opacity-90">Security</h2>
+<div class="grid grid-cols-2 gap-4 mb-4">
+<div class="glass p-5 rounded-2xl">
+<span class="material-icons-round text-primary mb-3">cloud_download</span>
+<h3 class="font-bold text-sm mb-1">Demo Data</h3>
+<p class="text-[10px] opacity-40 uppercase tracking-tighter">Load samples</p>
+</div>
+<div class="glass p-5 rounded-2xl border-red-500/20">
+<span class="material-icons-round text-red-500/60 mb-3">delete_sweep</span>
+<h3 class="font-bold text-sm mb-1">Wipe Cloud</h3>
+<p class="text-[10px] opacity-40 uppercase tracking-tighter">Clear all data</p>
+</div>
+</div>
+<div class="glass p-6 rounded-2xl space-y-4">
+<div class="flex items-center justify-between opacity-70">
+<span class="text-sm font-medium">Privacy Protocol</span>
+<span class="material-icons-round text-sm">chevron_right</span>
+</div>
+<div class="h-[1px] bg-white/5"></div>
+<div class="flex items-center justify-between opacity-70">
+<span class="text-sm font-medium">Terms of Use</span>
+<span class="material-icons-round text-sm">chevron_right</span>
+</div>
+</div>
+<div class="mt-8 text-center">
+<p class="text-[10px] font-bold uppercase tracking-[0.2em] opacity-20 italic">Designed for Excellence • v4.2.0</p>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 z-50 px-6 pb-8 pt-4">
+<div class="glass rounded-full px-4 py-3 flex items-center justify-between shadow-2xl border border-white/10">
+<button class="w-12 h-12 flex flex-col items-center justify-center gap-1 opacity-30 hover:opacity-100 transition-opacity">
+<span class="material-icons-round text-xl">home</span>
+<span class="text-[8px] font-bold uppercase tracking-widest">Home</span>
+</button>
+<button class="w-12 h-12 flex flex-col items-center justify-center gap-1 opacity-30 hover:opacity-100 transition-opacity">
+<span class="material-icons-round text-xl">calendar_today</span>
+<span class="text-[8px] font-bold uppercase tracking-widest">Plan</span>
+</button>
+<button class="w-14 h-14 bg-primary text-background-dark rounded-full -mt-10 shadow-lg shadow-primary/20 flex items-center justify-center active:scale-90 transition-all border-4 border-background-dark">
+<span class="material-icons-round text-2xl">add</span>
+</button>
+<button class="w-12 h-12 flex flex-col items-center justify-center gap-1 opacity-30 hover:opacity-100 transition-opacity">
+<span class="material-icons-round text-xl">group</span>
+<span class="text-[8px] font-bold uppercase tracking-widest">Clients</span>
+</button>
+<button class="w-12 h-12 flex flex-col items-center justify-center gap-1 text-primary">
+<span class="material-icons-round text-xl">settings</span>
+<span class="text-[8px] font-bold uppercase tracking-widest">Config</span>
+</button>
+</div>
+</nav>
+<script>
+        // Simple parallax effect on scroll for icons
+        window.addEventListener('scroll', () => {
+            const icons = document.querySelectorAll('.material-icons-round');
+            const scrolled = window.pageYOffset;
+            icons.forEach(icon => {
+                const speed = 0.05;
+                icon.style.transform = `translateY(${scrolled * speed}px)`;
+            });
+        });
+        // Theme preference watcher (optional, defaults to dark as requested for 'cinematic')
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+            // document.documentElement.classList.remove('dark');
+        }
+    </script>
+
+</body></html>
