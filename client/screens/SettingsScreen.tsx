@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Paths, File as ExpoFile } from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { View, FlatList, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
@@ -277,15 +277,17 @@ export default function SettingsScreen() {
       }
 
       const filename = `${business.slug}-booking-qr.png`;
-      const file = new ExpoFile(Paths.cache, filename);
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
       
       // The qrCode from api.getQRCode() is a base64 data URI
       const base64Data = qrCode.split("base64,")[1];
       
-      file.write(base64Data, { encoding: "base64" });
+      await FileSystem.writeAsStringAsync(fileUri, base64Data, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
 
       await Share.share({
-        url: file.uri,
+        url: fileUri,
         title: `${business.name} - Booking QR Code`,
       });
     } catch (error) {
