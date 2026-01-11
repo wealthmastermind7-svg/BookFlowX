@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Pressable, Alert, ActivityIndicator, TextInput } from "react-native";
+import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import * as Haptics from "expo-haptics";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
@@ -13,11 +14,11 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 const COLOR_PRESETS = [
   { name: "Classic", primary: "#000000", accent: "#C5A059", bg: "#FFFFFF", text: "#1A1C1E" },
-  { name: "Dark Mode", primary: "#1A1C1E", accent: "#C5A059", bg: "#0A0A0B", text: "#FFFFFF" },
-  { name: "Ocean", primary: "#0066CC", accent: "#00AAFF", bg: "#F0F8FF", text: "#003366" },
-  { name: "Forest", primary: "#2D5016", accent: "#5FAD41", bg: "#F5FFF0", text: "#1A3006" },
-  { name: "Sunset", primary: "#FF6B35", accent: "#FFB347", bg: "#FFF8F0", text: "#4A2000" },
-  { name: "Lavender", primary: "#6B5B95", accent: "#B8A9C9", bg: "#FAF8FF", text: "#3D3053" },
+  { name: "Dark Mode", primary: "#FFFFFF", accent: "#C5A059", bg: "#0A0A0B", text: "#FFFFFF" },
+  { name: "Charcoal", primary: "#2D2D2D", accent: "#A8A8A8", bg: "#FAFAFA", text: "#1A1C1E" },
+  { name: "Graphite", primary: "#3D3D3D", accent: "#C5A059", bg: "#F5F5F5", text: "#2D2D2D" },
+  { name: "Pearl", primary: "#1A1C1E", accent: "#E8E8E8", bg: "#FFFFFF", text: "#1A1C1E" },
+  { name: "Smoke", primary: "#4A4A4A", accent: "#8C8C8C", bg: "#F0F0F0", text: "#2D2D2D" },
 ];
 
 const BUTTON_STYLES: { value: "rounded" | "pill" | "square"; label: string }[] = [
@@ -138,7 +139,7 @@ export default function WidgetThemeScreen() {
 
   return (
     <ThemedView style={styles.container}>
-      <ScrollView
+      <KeyboardAwareScrollViewCompat
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.lg,
@@ -294,7 +295,7 @@ export default function WidgetThemeScreen() {
             <ThemedText style={[styles.previewPoweredBy, { color: widgetTheme.textColor + "40" }]}>Powered by BookFlow</ThemedText>
           )}
         </View>
-      </ScrollView>
+      </KeyboardAwareScrollViewCompat>
 
       <View style={[styles.saveContainer, { backgroundColor: appTheme.backgroundDefault, borderTopColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)", paddingBottom: insets.bottom + Spacing.md }]}>
         <Button onPress={handleSave} disabled={saving} style={{ flex: 1 }}>
