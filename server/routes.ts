@@ -646,40 +646,176 @@ export async function registerRoutes(app: Express): Promise<Server> {
         backgroundColor = "#f5f5f5";
         textColor = "#1a1a1a";
       } else {
-        // Simple scraping for other sites
+        // Intelligent scraping for other sites
         try {
           const controller = new AbortController();
-          const timeoutId = setTimeout(() => controller.abort(), 5000);
+          const timeoutId = setTimeout(() => controller.abort(), 8000);
           
-          const response = await fetch(url, { signal: controller.signal });
+          const response = await fetch(url, { 
+            signal: controller.signal,
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36'
+            }
+          });
           const html = await response.text();
           clearTimeout(timeoutId);
 
-          // Extract hex colors from HTML
-          const hexRegex = /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/g;
-          const matches = html.match(hexRegex) || [];
-          
-          if (matches.length > 0) {
-            // Filter out colors that are too close to white or black to find "branding" colors
-            const brandingColors = matches.filter(color => {
-              const hex = color.replace('#', '');
-              const r = parseInt(hex.substring(0, 2), 16);
-              const g = parseInt(hex.substring(2, 4), 16);
-              const b = parseInt(hex.substring(4, 6), 16);
-              const brightness = (r * 299 + g * 587 + b * 114) / 1000;
-              return brightness > 30 && brightness < 225;
-            });
+          // Helper to normalize 3-digit hex to 6-digit and uppercase
+          const normalizeHex = (hex: string): string => {
+            const h = hex.replace('#', '').toUpperCase();
+            if (h.length === 3) {
+              return '#' + h[0] + h[0] + h[1] + h[1] + h[2] + h[2];
+            }
+            return '#' + h;
+          };
 
-            if (brandingColors.length > 0) {
-              primaryColor = brandingColors[0];
-              accentColor = brandingColors[Math.min(1, brandingColors.length - 1)];
-            } else {
-              primaryColor = matches[0];
-              accentColor = matches[Math.min(1, matches.length - 1)];
+          // Helper to check if color is a useful branding color (not too light/dark/gray)
+          const isUsefulColor = (hex: string): boolean => {
+            const h = hex.replace('#', '');
+            if (h.length !== 6) return false;
+            const r = parseInt(h.substring(0, 2), 16);
+            const g = parseInt(h.substring(2, 4), 16);
+            const b = parseInt(h.substring(4, 6), 16);
+            const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+            const saturation = Math.max(r, g, b) - Math.min(r, g, b);
+            // Avoid very dark, very light, or very gray colors
+            return brightness > 40 && brightness < 220 && saturation > 20;
+          };
+
+          // Helper to calculate color contrast for better accent selection
+          const getColorLuminance = (hex: string): number => {
+            const h = hex.replace('#', '');
+            const r = parseInt(h.substring(0, 2), 16) / 255;
+            const g = parseInt(h.substring(2, 4), 16) / 255;
+            const b = parseInt(h.substring(4, 6), 16) / 255;
+            return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+          };
+
+          let allCssContent = html;
+          
+          // Extract and fetch external stylesheets (up to 3 to avoid timeout)
+          const stylesheetPattern = /<link[^>]*rel=["']stylesheet["'][^>]*href=["']([^"']+)["']/gi;
+          const stylesheetMatches = [...html.matchAll(stylesheetPattern)].slice(0, 3);
+          
+          for (const match of stylesheetMatches) {
+            try {
+              let cssUrl = match[1];
+              // Handle relative URLs
+              if (cssUrl.startsWith('/')) {
+                const baseUrl = new URL(url);
+                cssUrl = baseUrl.origin + cssUrl;
+              } else if (!cssUrl.startsWith('http')) {
+                const baseUrl = new URL(url);
+                cssUrl = baseUrl.origin + '/' + cssUrl;
+              }
+              
+              const cssController = new AbortController();
+              const cssTimeoutId = setTimeout(() => cssController.abort(), 3000);
+              const cssResponse = await fetch(cssUrl, { 
+                signal: cssController.signal,
+                headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BookFlow/1.0)' }
+              });
+              const cssText = await cssResponse.text();
+              clearTimeout(cssTimeoutId);
+              allCssContent += '\n' + cssText;
+            } catch {
+              // Ignore failed stylesheet fetches
             }
           }
+
+          const foundColors: string[] = [];
+
+          // 1. Look for CSS custom properties (most reliable for branding)
+          const cssVarPatterns = [
+            /--(?:primary|brand|main|accent|theme|highlight)[-_]?(?:color)?:\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+            /--color-(?:primary|brand|main|accent|highlight):\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+            /--(?:c-|color-)(?:primary|brand|accent):\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+          ];
+          for (const pattern of cssVarPatterns) {
+            const matches = allCssContent.matchAll(pattern);
+            for (const match of matches) {
+              foundColors.push(normalizeHex(match[1]));
+            }
+          }
+
+          // 2. Look for theme-color meta tag
+          const themeColorMatch = html.match(/<meta[^>]*name=["']theme-color["'][^>]*content=["']#?([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})["']/i);
+          if (themeColorMatch) {
+            foundColors.unshift(normalizeHex(themeColorMatch[1])); // Priority
+          }
+
+          // 3. Look for colors in button/link/header styles (likely brand colors)
+          const brandingPatterns = [
+            /(?:\.btn|button|\.cta|\.primary|\.header|\.nav|\.logo|\.brand)[^}]*(?:background(?:-color)?|color):\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+            /(?:a:hover|\.active|\.selected)[^}]*(?:background(?:-color)?|color):\s*#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})/gi,
+          ];
+          for (const pattern of brandingPatterns) {
+            const matches = allCssContent.matchAll(pattern);
+            for (const match of matches) {
+              const color = normalizeHex(match[1]);
+              if (isUsefulColor(color)) {
+                foundColors.push(color);
+              }
+            }
+          }
+
+          // 4. Fallback: extract all hex colors and count frequency
+          const allHexPattern = /#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})(?![A-Fa-f0-9])/g;
+          const allMatches = allCssContent.match(allHexPattern) || [];
+          const colorFrequency: Record<string, number> = {};
+          
+          for (const color of allMatches) {
+            const normalized = normalizeHex(color);
+            if (isUsefulColor(normalized)) {
+              colorFrequency[normalized] = (colorFrequency[normalized] || 0) + 1;
+            }
+          }
+          
+          // Sort by frequency
+          const sortedColors = Object.entries(colorFrequency)
+            .sort((a, b) => b[1] - a[1])
+            .map(([color]) => color);
+          
+          foundColors.push(...sortedColors);
+
+          // Remove duplicates while preserving order (all normalized to uppercase)
+          const uniqueColors = [...new Set(foundColors.map(c => c.toUpperCase()))].filter(c => c && c.length === 7);
+          
+          if (uniqueColors.length > 0) {
+            primaryColor = uniqueColors[0];
+            
+            // Find a contrasting accent color
+            if (uniqueColors.length > 1) {
+              const primaryLum = getColorLuminance(primaryColor);
+              // Pick color with most contrast from primary
+              let bestAccent = uniqueColors[1];
+              let bestContrast = 0;
+              
+              for (let i = 1; i < Math.min(uniqueColors.length, 10); i++) {
+                const accentLum = getColorLuminance(uniqueColors[i]);
+                const contrast = Math.abs(primaryLum - accentLum);
+                if (contrast > bestContrast) {
+                  bestContrast = contrast;
+                  bestAccent = uniqueColors[i];
+                }
+              }
+              accentColor = bestAccent;
+            }
+            // If only one color found, derive an accent by adjusting brightness
+            else {
+              const h = primaryColor.replace('#', '');
+              const r = Math.min(255, parseInt(h.substring(0, 2), 16) + 60);
+              const g = Math.min(255, parseInt(h.substring(2, 4), 16) + 40);
+              const b = Math.min(255, parseInt(h.substring(4, 6), 16) + 20);
+              accentColor = '#' + r.toString(16).padStart(2, '0').toUpperCase() + 
+                            g.toString(16).padStart(2, '0').toUpperCase() + 
+                            b.toString(16).padStart(2, '0').toUpperCase();
+            }
+          }
+          
+          console.log(`[Theme] Found ${uniqueColors.length} unique branding colors:`, uniqueColors.slice(0, 5));
         } catch (e) {
-          console.error("Scraping failed, using defaults:", e);
+          console.error("[Theme] Scraping failed, using defaults:", e);
         }
       }
 
