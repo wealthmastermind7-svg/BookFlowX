@@ -500,7 +500,12 @@ export default function WorkflowsScreen() {
                 setBlueprintModalVisible(true);
               }}
             >
-              <Feather name="plus" size={20} color={theme.buttonText} />
+              <View style={styles.addButtonContent}>
+                <Feather name="plus" size={16} color={theme.buttonText} />
+                <ThemedText style={[styles.addButtonText, { color: theme.buttonText }]}>
+                  Choose template
+                </ThemedText>
+              </View>
             </Pressable>
           </View>
           <FlatList
@@ -568,11 +573,20 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   addButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    paddingHorizontal: Spacing.md,
+    height: 36,
+    borderRadius: 18,
     justifyContent: "center",
     alignItems: "center",
+  },
+  addButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  addButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
   },
   listContent: {
     padding: Spacing.lg,
