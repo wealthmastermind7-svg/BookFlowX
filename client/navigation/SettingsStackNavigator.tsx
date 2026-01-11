@@ -3,7 +3,6 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "@/screens/SettingsScreen";
 import SharePreviewScreen from "@/screens/SharePreviewScreen";
 import WorkflowsScreen from "@/screens/WorkflowsScreen";
-import WidgetThemeScreen from "@/screens/WidgetThemeScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type SettingsStackParamList = {
@@ -14,7 +13,6 @@ export type SettingsStackParamList = {
     slug: string;
   };
   Workflows: undefined;
-  WidgetTheme: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -43,13 +41,6 @@ export default function SettingsStackNavigator() {
         component={WorkflowsScreen}
         options={{
           headerTitle: "Workflows",
-        }}
-      />
-      <Stack.Screen
-        name="WidgetTheme"
-        component={WidgetThemeScreen}
-        options={{
-          headerTitle: "Widget Theming",
         }}
       />
     </Stack.Navigator>

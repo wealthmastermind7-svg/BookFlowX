@@ -700,19 +700,7 @@ Need help? Contact support at bookings@confirmbooking.online
             <ThemedText style={[styles.workflowCta, { color: ACCENT_GOLD }]}>Configure</ThemedText>
           </View>
         </GlassCard>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={() => navigation.navigate("WidgetTheme")}>
-          <View style={styles.compactInnerRow}>
-            <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
-              <Feather name="sliders" size={18} color={ACCENT_SILVER} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <ThemedText style={styles.compactRowTitle}>Widget Theming</ThemedText>
-              <ThemedText style={styles.compactRowSubtitle}>Visual appearance</ThemedText>
-            </View>
-            <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
-          </View>
-        </GlassCard>
-
+        
         {/* Booking Section */}
         <SectionTitle>Booking</SectionTitle>
         <GlassCard style={{ marginBottom: Spacing.md }}>
