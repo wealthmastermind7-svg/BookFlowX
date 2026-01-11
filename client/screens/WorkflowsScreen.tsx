@@ -220,17 +220,23 @@ export default function WorkflowsScreen() {
 
       console.log("[Workflow] Starting blueprint init for industry:", industry);
       const ownerToken = await api.getOwnerToken();
+      console.log("[Workflow] Token retrieved length:", ownerToken?.length || 0);
+      
       const baseUrl = getApiUrl().replace(/\/$/, ''); // Remove trailing slash
       const url = `${baseUrl}/api/businesses/${businessId}/workflows/initialize`;
-      console.log("[Workflow] Calling:", url);
-      console.log("[Workflow] Owner token present:", !!ownerToken);
+      
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+      
+      if (ownerToken) {
+        headers["x-owner-token"] = ownerToken;
+        headers["x-business-token"] = ownerToken;
+      }
       
       const response = await fetch(url, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-owner-token": ownerToken || "",
-          },
+          headers,
           body: JSON.stringify({ industry }),
         }
       );

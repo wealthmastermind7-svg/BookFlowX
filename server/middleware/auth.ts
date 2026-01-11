@@ -16,7 +16,6 @@ export async function verifyBusinessOwnership(
   next: NextFunction
 ) {
   try {
-    const businessId = req.params.businessId || req.params.id;
     const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!businessId) {
@@ -24,6 +23,7 @@ export async function verifyBusinessOwnership(
     }
 
     if (!ownerToken) {
+      console.warn(`[Auth] Missing token for business ${businessId}. Headers received:`, Object.keys(req.headers));
       return res.status(401).json({ error: "Authentication required" });
     }
 
