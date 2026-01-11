@@ -660,9 +660,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const matches = html.match(hexRegex) || [];
           
           if (matches.length > 0) {
-            // Pick most frequent color or just first few for demo
-            primaryColor = matches[0];
-            accentColor = matches[Math.min(1, matches.length - 1)];
+            // Filter out colors that are too close to white or black to find "branding" colors
+            const brandingColors = matches.filter(color => {
+              const hex = color.replace('#', '');
+              const r = parseInt(hex.substring(0, 2), 16);
+              const g = parseInt(hex.substring(2, 4), 16);
+              const b = parseInt(hex.substring(4, 6), 16);
+              const brightness = (r * 299 + g * 587 + b * 114) / 1000;
+              return brightness > 30 && brightness < 225;
+            });
+
+            if (brandingColors.length > 0) {
+              primaryColor = brandingColors[0];
+              accentColor = brandingColors[Math.min(1, brandingColors.length - 1)];
+            } else {
+              primaryColor = matches[0];
+              accentColor = matches[Math.min(1, matches.length - 1)];
+            }
           }
         } catch (e) {
           console.error("Scraping failed, using defaults:", e);
