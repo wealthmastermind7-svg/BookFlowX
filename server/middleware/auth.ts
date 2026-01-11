@@ -46,7 +46,8 @@ export async function verifyBusinessOwnership(
         req.business = {
           id: tokenBusiness.id,
           ownerToken: tokenBusiness.ownerToken as string,
-          name: tokenBusiness.name
+          name: tokenBusiness.name,
+          slug: tokenBusiness.slug
         };
         return next();
       }

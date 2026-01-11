@@ -1036,7 +1036,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get workflows for a business (PROTECTED)
   app.get("/api/businesses/:businessId/workflows", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const workflows = await storage.getWorkflows(req.params.businessId);
+      // Use authenticated business ID (auto-healed in dev mode if mismatched)
+      const businessId = req.business?.id || req.params.businessId;
+      const workflows = await storage.getWorkflows(businessId);
       res.json(workflows);
     } catch (error) {
       console.error("Error getting workflows:", error);
@@ -1047,9 +1049,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Create workflow (PROTECTED)
   app.post("/api/businesses/:businessId/workflows", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
+      // Use authenticated business ID (auto-healed in dev mode if mismatched)
+      const businessId = req.business?.id || req.params.businessId;
       const data = insertWorkflowSchema.parse({
         ...req.body,
-        businessId: req.params.businessId,
+        businessId,
       });
       const workflow = await storage.createWorkflow(data);
       res.status(201).json(workflow);
@@ -1070,7 +1074,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "Industry is required" });
       }
 
-      console.log(`[Workflow] Initializing blueprints for business: ${req.params.businessId}, industry: "${industry}"`);
+      // Use authenticated business ID (auto-healed in dev mode if mismatched)
+      const businessId = req.business?.id || req.params.businessId;
+      console.log(`[Workflow] Initializing blueprints for business: ${businessId}, industry: "${industry}"`);
       
       const normalizedIndustry = industry.toLowerCase().trim();
       if (!INDUSTRY_BLUEPRINTS[normalizedIndustry as keyof typeof INDUSTRY_BLUEPRINTS]) {
@@ -1081,9 +1087,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      await initializeIndustryBlueprints(req.params.businessId, normalizedIndustry);
+      await initializeIndustryBlueprints(businessId, normalizedIndustry);
       
-      const workflows = await storage.getWorkflows(req.params.businessId);
+      const workflows = await storage.getWorkflows(businessId);
       res.status(201).json(workflows);
     } catch (error) {
       console.error("[Workflow] Error initializing blueprints:", error);

@@ -220,7 +220,7 @@ class ApiClient {
         phone: "+1 (555) 123-4567",
         email: "demo@bookflow.app",
       }, false);
-      await this.setBusinessId(newBusiness.id, newBusiness.ownerToken);
+      await this.setBusinessId(newBusiness.id, newBusiness.ownerToken ?? undefined);
       return newBusiness;
     } catch (error) {
       console.error("Error creating business:", error);
