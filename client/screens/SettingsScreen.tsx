@@ -660,17 +660,20 @@ export default function SettingsScreen() {
           <View style={styles.bookingActions}>
             <Pressable 
               onPress={handleOpenSharePreview}
-              style={[styles.shareButton, { backgroundColor: ACCENT_GOLD }]}
+              style={[styles.shareButton, { backgroundColor: theme.text }]}
             >
-              <ThemedText style={[styles.shareButtonText, { color: "#0A0A0B" }]}>Share Link</ThemedText>
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                <Feather name="share-2" size={18} color={theme.backgroundDefault} />
+                <ThemedText style={[styles.shareButtonText, { color: theme.backgroundDefault }]}>Share Link</ThemedText>
+              </View>
             </Pressable>
             <Pressable 
               onPress={handleShowQRCode}
-              style={[styles.qrButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
+              style={[styles.qrButton, { borderColor: theme.text + "30" }]}
             >
               <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
                 <Feather name="grid" size={18} color={theme.text} />
-                <ThemedText style={{ fontSize: 13, fontWeight: "600" }}>Share QR Code</ThemedText>
+                <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>Share QR</ThemedText>
               </View>
             </Pressable>
           </View>
@@ -1180,17 +1183,21 @@ const styles = StyleSheet.create({
     paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: "center",
+    justifyContent: "center",
+    height: 52,
   },
   shareButtonText: {
     fontSize: 14,
     fontWeight: "700",
   },
   qrButton: {
-    width: 48,
-    height: 48,
+    flex: 1,
+    paddingVertical: Spacing.md,
     borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
+    height: 52,
+    borderWidth: 1,
   },
   securityCard: {
     flex: 1,
