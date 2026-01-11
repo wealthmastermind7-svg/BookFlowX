@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { View, StyleSheet, ScrollView, Pressable, Alert, ActivityIndicator, TextInput } from "react-native";
+import Slider from "@react-native-community/slider";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import * as Haptics from "expo-haptics";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -11,15 +12,6 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { api, WidgetTheme } from "@/lib/api";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-
-const COLOR_PRESETS = [
-  { name: "Classic", primary: "#000000", accent: "#C5A059", bg: "#FFFFFF", text: "#1A1C1E" },
-  { name: "Dark Mode", primary: "#FFFFFF", accent: "#C5A059", bg: "#0A0A0B", text: "#FFFFFF" },
-  { name: "Charcoal", primary: "#2D2D2D", accent: "#A8A8A8", bg: "#FAFAFA", text: "#1A1C1E" },
-  { name: "Graphite", primary: "#3D3D3D", accent: "#C5A059", bg: "#F5F5F5", text: "#2D2D2D" },
-  { name: "Pearl", primary: "#1A1C1E", accent: "#E8E8E8", bg: "#FFFFFF", text: "#1A1C1E" },
-  { name: "Smoke", primary: "#4A4A4A", accent: "#8C8C8C", bg: "#F0F0F0", text: "#2D2D2D" },
-];
 
 const BUTTON_STYLES: { value: "rounded" | "pill" | "square"; label: string }[] = [
   { value: "rounded", label: "Rounded" },
@@ -35,6 +27,29 @@ const FONT_OPTIONS = [
   "Georgia",
   "Times New Roman",
 ];
+
+const hexToRgb = (hex: string) => {
+  const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+  return result ? {
+    r: parseInt(result[1], 16),
+    g: parseInt(result[2], 4 + 12), // wait, index 2
+    b: parseInt(result[3], 16)
+  } : { r: 0, g: 0, b: 0 };
+};
+
+// Real logic:
+const parseHex = (hex: string) => {
+  const h = hex.replace("#", "");
+  const r = parseInt(h.substring(0, 2), 16) || 0;
+  const g = parseInt(h.substring(2, 4), 16) || 0;
+  const b = parseInt(h.substring(4, 6), 16) || 0;
+  return { r, g, b };
+};
+
+const toHex = (r: number, g: number, b: number) => {
+  const toH = (n: number) => Math.max(0, Math.min(255, Math.round(n))).toString(16).padStart(2, "0").toUpperCase();
+  return `#${toH(r)}${toH(g)}${toH(b)}`;
+};
 
 export default function WidgetThemeScreen() {
   const headerHeight = useHeaderHeight();
@@ -87,17 +102,6 @@ export default function WidgetThemeScreen() {
     }
   };
 
-  const applyPreset = (preset: typeof COLOR_PRESETS[0]) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    setWidgetTheme(prev => ({
-      ...prev,
-      primaryColor: preset.primary,
-      accentColor: preset.accent,
-      backgroundColor: preset.bg,
-      textColor: preset.text,
-    }));
-  };
-
   const handleFetchWebsiteTheme = async () => {
     try {
       const business = await api.getCurrentBusiness();
@@ -145,23 +149,70 @@ export default function WidgetThemeScreen() {
     <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
   );
 
-  const ColorPicker = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => (
-    <View style={styles.colorRow}>
-      <ThemedText style={styles.colorLabel}>{label}</ThemedText>
-      <View style={styles.colorInputRow}>
-        <View style={[styles.colorSwatch, { backgroundColor: value }]} />
-        <TextInput
-          style={[styles.colorInput, { backgroundColor: appTheme.backgroundSecondary, color: appTheme.text, borderColor: appTheme.border }]}
-          value={value}
-          onChangeText={onChange}
-          placeholder="#000000"
-          placeholderTextColor={appTheme.textTertiary}
-          autoCapitalize="characters"
-          maxLength={7}
-        />
+  const ColorPicker = ({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) => {
+    const { r, g, b } = parseHex(value);
+
+    const updateColor = (channel: "r" | "g" | "b", val: number) => {
+      const newColor = toHex(
+        channel === "r" ? val : r,
+        channel === "g" ? val : g,
+        channel === "b" ? val : b
+      );
+      onChange(newColor);
+    };
+
+    return (
+      <View style={styles.colorContainer}>
+        <View style={styles.colorRow}>
+          <ThemedText style={styles.colorLabel}>{label}</ThemedText>
+          <View style={styles.colorInputRow}>
+            <View style={[styles.colorSwatch, { backgroundColor: value }]} />
+            <TextInput
+              style={[styles.colorInput, { backgroundColor: appTheme.backgroundSecondary, color: appTheme.text, borderColor: appTheme.border }]}
+              value={value}
+              onChangeText={onChange}
+              placeholder="#000000"
+              placeholderTextColor={appTheme.textTertiary}
+              autoCapitalize="characters"
+              maxLength={7}
+            />
+          </View>
+        </View>
+        <View style={styles.slidersContainer}>
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={255}
+            value={r}
+            onValueChange={(v) => updateColor("r", v)}
+            minimumTrackTintColor="#FF3B30"
+            maximumTrackTintColor={appTheme.border}
+            thumbTintColor="#FF3B30"
+          />
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={255}
+            value={g}
+            onValueChange={(v) => updateColor("g", v)}
+            minimumTrackTintColor="#4CD964"
+            maximumTrackTintColor={appTheme.border}
+            thumbTintColor="#4CD964"
+          />
+          <Slider
+            style={styles.slider}
+            minimumValue={0}
+            maximumValue={255}
+            value={b}
+            onValueChange={(v) => updateColor("b", v)}
+            minimumTrackTintColor="#007AFF"
+            maximumTrackTintColor={appTheme.border}
+            thumbTintColor="#007AFF"
+          />
+        </View>
       </View>
-    </View>
-  );
+    );
+  };
 
   if (loading) {
     return (
@@ -184,8 +235,8 @@ export default function WidgetThemeScreen() {
           paddingHorizontal: Spacing.lg,
         }}
       >
-        <SectionTitle>Color Presets</SectionTitle>
         <View style={styles.headerActionRow}>
+          <SectionTitle>Branding</SectionTitle>
           <Button 
             onPress={handleFetchWebsiteTheme} 
             style={styles.magicButton}
@@ -196,21 +247,6 @@ export default function WidgetThemeScreen() {
             </View>
           </Button>
         </View>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
-          {COLOR_PRESETS.map((preset) => (
-            <Pressable
-              key={preset.name}
-              onPress={() => applyPreset(preset)}
-              style={[styles.presetCard, { backgroundColor: preset.bg, borderColor: preset.primary + "30" }]}
-            >
-              <View style={styles.presetColors}>
-                <View style={[styles.presetDot, { backgroundColor: preset.primary }]} />
-                <View style={[styles.presetDot, { backgroundColor: preset.accent }]} />
-              </View>
-              <ThemedText style={[styles.presetName, { color: preset.text }]}>{preset.name}</ThemedText>
-            </Pressable>
-          ))}
-        </ScrollView>
 
         <SectionTitle>Colors</SectionTitle>
         <GlassCard>
@@ -377,9 +413,9 @@ const styles = StyleSheet.create({
   },
   headerActionRow: {
     flexDirection: "row",
-    justifyContent: "flex-end",
-    marginTop: -Spacing.xl - Spacing.md,
-    marginBottom: Spacing.md,
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginTop: Spacing.md,
   },
   magicButton: {
     paddingHorizontal: Spacing.md,
@@ -399,31 +435,8 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     padding: Spacing.lg,
   },
-  presetsScroll: {
-    marginHorizontal: -Spacing.lg,
-    paddingHorizontal: Spacing.lg,
-  },
-  presetCard: {
-    width: 100,
-    padding: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    marginRight: Spacing.sm,
-    alignItems: "center",
-  },
-  presetColors: {
-    flexDirection: "row",
-    gap: Spacing.xs,
-    marginBottom: Spacing.sm,
-  },
-  presetDot: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-  },
-  presetName: {
-    fontSize: 12,
-    fontWeight: "600",
+  colorContainer: {
+    marginVertical: Spacing.xs,
   },
   colorRow: {
     flexDirection: "row",
@@ -453,6 +466,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.sm,
     fontSize: 14,
     fontWeight: "500",
+  },
+  slidersContainer: {
+    marginTop: Spacing.xs,
+    gap: Spacing.xs,
+  },
+  slider: {
+    width: "100%",
+    height: 30,
   },
   divider: {
     height: 1,
