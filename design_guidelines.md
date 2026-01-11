@@ -1,221 +1,203 @@
-# Design Guidelines: Premium Multi-Tenancy Booking Platform
+# Design Guidelines: BookFlowX - Premium Booking Platform
 
-## Visual Identity
+## Brand Identity
 
-### Color Palette
-**Premium Black & White Foundation**
-- Pure Black (#000000) - Primary text, high-emphasis elements
-- Charcoal (#1A1A1A) - Cards, elevated surfaces
-- Graphite (#2D2D2D) - Secondary containers
-- Slate (#4A4A4A) - Dividers, borders
-- Smoke (#6B6B6B) - Secondary text
-- Silver (#9E9E9E) - Tertiary text
-- Fog (#D4D4D4) - Disabled states
-- Whisper (#EBEBEB) - Subtle backgrounds
-- Pearl (#F5F5F5) - Light surfaces
-- Pure White (#FFFFFF) - Primary background
+**Aesthetic Direction:** Luxurious minimalism with cinematic drama. Think luxury fashion e-commerce meets Apple keynote presentation—bold oversized type, subtle glass effects, intentional whitespace. The app whispers premium rather than shouting it.
 
-**Accent Shades** (for status/metrics)
-- Success: #2D2D2D with 100% opacity for confirmed states
-- Warning: #4A4A4A for pending states
-- Critical: #1A1A1A with red undertones for cancellations
+**Memorable Element:** Oversized background typography that creates depth layers—service names, times, and numbers appear behind frosted glass cards, creating a sophisticated parallax effect as users scroll.
 
-### Typography
-**Oversized Hierarchy**
-- Display: 72-96px - Hero numbers (revenue, booking counts)
-- Headline 1: 48-56px - Section titles
-- Headline 2: 32-40px - Card headers
-- Body Large: 24px - Primary content
-- Body: 18px - Standard text
-- Caption: 14px - Metadata, timestamps
-
-**Font Weight Contrast**
-- Ultra Light (200) for large display numbers
-- Regular (400) for body text
-- Bold (700) for emphasis and CTAs
+**Differentiation:** Most booking apps are cluttered with color and information. BookFlowX is radically simplified—pure black and white with glass morphism creating hierarchy through depth, not decoration.
 
 ## Navigation Architecture
 
-### Business Owner (Admin)
-**Tab Navigation** (5 tabs)
-- Home (Dashboard)
-- Calendar
-- Services (Center tab - core creation action)
-- Customers
-- Settings
-
-### Public Booking Portal
-**Stack-Only Navigation** - Linear booking flow
+### Public Booking Portal (PRIMARY FOCUS)
+**Stack-Only Navigation** - Linear flow
 1. Service Selection
-2. Date/Time Selection
+2. Date/Time Selection  
 3. Customer Details
-4. Payment/Confirmation
+4. Confirmation
 
-## Screen Specifications
+### Admin Portal
+**Tab Navigation** (5 tabs)
+- Dashboard, Calendar, **Services** (center), Customers, Settings
 
-### Admin Dashboard (Home Tab)
+## Screen-by-Screen Specifications
+
+### Public: Service Selection (Entry Point)
+**Purpose:** Customer browses and selects a service
+
 **Layout:**
-- Header: Transparent with greeting text (large 40px)
-- Scrollable content with safe area: top inset = headerHeight + 32px, bottom = tabBarHeight + 32px
-- No search bar in header
-
-**Content Zones:**
-1. **Hero Metrics Card**
-   - Full-width card with subtle elevation
-   - Large display typography (72px) for primary metric
-   - Circular progress meters showing capacity utilization
-   - Subtle parallax: metrics shift -20px on scroll
-
-2. **Revenue Graph**
-   - Cinematic line/bar chart with animated drawing
-   - Black gridlines on white background
-   - Numbers appear sequentially with fade-in
-   - Smooth bezier curves, no hard angles
-
-3. **Upcoming Bookings Preview**
-   - Card-based list (3 visible)
-   - Each card: 24px padding, 16px radius
-   - Gentle hover lift (translateY: -4px, 300ms ease)
-
-**Floating Elements:**
-- Quick action button (bottom-right)
-- Shadow: offset(0,2), opacity 0.10, radius 2
-- Safe area bottom: tabBarHeight + 24px
-
-### Calendar View
-**Layout:**
-- Header: Custom with month/year (48px), week/day toggle buttons
-- Non-scrollable content (fixed calendar grid)
-- Safe area top: headerHeight + 24px, bottom: tabBarHeight + 24px
+- Header: Transparent with business name (40px regular weight), no buttons
+- Scrollable content area
+- Safe area: top = headerHeight + 40px, bottom = insets.bottom + 40px
 
 **Visual Design:**
-- Month view: Circular day indicators
-- Booked days: filled black circles
-- Available: outlined smoke circles
-- Selected: white text on black
-- Transition between month/week: 400ms ease-out with subtle scale
+- Oversized service category names (120-180px ultra-light weight) positioned as fixed background text in upper third of screen
+- Frosted glass cards float above background typography
+- Cards: 24px padding, 20px corner radius, backdrop blur (20px), white background at 15% opacity, 1px border at 10% white opacity
+- Each card contains: service name (32px bold), duration/price (56px ultra-light), brief description (18px)
+- Parallax: background text scrolls at 0.3x speed of cards
 
-### Services Management (Center Tab)
+**Empty State:** "No Services Available" (if business has zero services)
+
+**Floating Elements:** None
+
+---
+
+### Public: Availability Calendar
+**Purpose:** Customer selects date and time slot
+
 **Layout:**
-- Header: Transparent, right button = "Create Service"
-- Scrollable grid/list
-- Safe area: top = headerHeight + 32px, bottom = tabBarHeight + 32px
+- Header: Default navigation, "Select Time" title
+- Fixed calendar grid (top half), scrollable time slots (bottom half)
+- Safe area: top = 24px (opaque header), bottom = insets.bottom + 32px
 
-**Service Cards:**
-- Large typography for service name (32px)
-- Duration/price in oversized numbers (40px)
-- Meter showing booking rate
-- Tap animation: scale 0.98, 150ms
+**Visual Design:**
+- Oversized month/year (200px ultra-light) positioned as watermark behind calendar grid
+- Calendar grid on frosted glass surface (same specs as cards)
+- Available dates: white circles with black text
+- Booked dates: black circles with opacity 0.3, crossed out
+- Selected date: solid black circle, white text
+- Time slots: glass-effect buttons in scrollable list
+- Selected slot: inverted (black background, white text), gentle glow effect
 
-### Service Creation Modal
-**Native Modal Screen**
-- Full-screen form
-- Header: opaque with "Cancel" (left), "Save" (right)
-- Scrollable form content
-- Submit/Cancel in header (not below form)
-- Safe area top: default, bottom: insets.bottom + 24px
+**Animations:** 
+- Date selection: scale 1.05 → 1.0 over 200ms
+- Time slot selection: slide-in highlight bar (300ms ease-out)
 
-**Form Fields:**
-- Oversized input labels (24px)
-- Inputs with 16px padding, 8px radius
-- Black borders (2px) on focus
+---
 
-### Booking Detail Screen
+### Public: Customer Details Form
+**Purpose:** Customer enters name, email, phone
+
 **Layout:**
-- Header: Default navigation with back button
-- Scrollable content
-- Safe area: top = 24px (non-transparent header), bottom = insets.bottom + 24px
-
-**Content:**
-- Customer name in 48px headline
-- Service/time details in 24px body
-- Status indicator: circular badge with animation
-- Action buttons (Confirm/Cancel/Complete) with visual press states
-
-### Public Booking Portal - Service Selection
-**Stack Screen (No Tabs)**
-- Header: Transparent with business logo/name (40px)
-- Scrollable grid of service cards
-- Safe area: top = headerHeight + 32px, bottom = insets.bottom + 32px
-
-**Service Cards:**
-- Full-width cards with hero imagery (if available)
-- Oversized service name (40px)
-- Price in display typography (56px)
-- Parallax: card images shift slightly on scroll
-
-### Availability Calendar (Booking Flow)
-**Stack Screen**
-- Header: Default with "Select Time" title
-- Calendar grid (non-scrollable)
-- Available slots below calendar (scrollable list)
-- Safe area top: 24px, bottom: insets.bottom + 32px
-
-**Time Slots:**
-- Large touchable cards (18px text)
-- Selected: black background, white text
-- Smooth selection animation (200ms)
-
-### Checkout Screen
-**Stack Screen**
-- Header: Default with "Confirm Booking"
+- Header: Default navigation, "Your Details" title
 - Scrollable form
 - Safe area: top = 24px, bottom = insets.bottom + 24px
 
-**Summary Card:**
-- Floating card above form
-- Oversized total price (72px)
-- Breakdown in 18px text
-- Subtle shadow (as specified for floating elements)
+**Visual Design:**
+- Oversized "Almost There" (160px ultra-light) as background text behind form
+- Form container: single frosted glass card containing all inputs
+- Input fields: borderless, white background at 8% opacity, 16px padding, 12px corner radius
+- Labels: 14px, positioned above inputs
+- Submit button: Full-width black button with white text (24px), sits within glass card
+- Button press state: scale 0.98, opacity 0.9
 
-**Submit Button:**
-- Full-width, fixed at bottom
-- Large text (24px)
-- Safe area: insets.bottom + 24px
-- Press state: opacity 0.85
+**Validation:** Inline error messages appear below invalid fields in black text
 
-## Design System Components
+---
 
-### Touchable Feedback
-- Default touchables: opacity 0.7 on press, no shadow
-- Floating buttons: subtle shadow (offset 0,2 / opacity 0.10 / radius 2)
-- Cards: scale 0.98 on press
-- Transition duration: 150-200ms
+### Public: Confirmation Screen
+**Purpose:** Show booking success and details
 
-### Iconography
-- Use Feather icons from @expo/vector-icons
-- Icon sizes: 24px (standard), 32px (emphasis), 20px (small)
-- No emoji usage
+**Layout:**
+- Header: Default navigation, "Confirmed" title
+- Scrollable content
+- Safe area: top = 24px, bottom = insets.bottom + 40px
 
-### Animations
-**Cinematic Transitions:**
+**Visual Design:**
+- Oversized "Confirmed" (220px ultra-light) as watermark in center
+- Booking summary in frosted glass card: service, date/time, customer name, confirmation number (each field 18px)
+- Success checkmark icon (64px Feather check-circle) centered above card
+- "Add to Calendar" button below summary (glass-effect button)
+- Subtle radial gradient emanates from checkmark (white to transparent)
+
+**Animations:**
+- Screen enter: checkmark scales from 0 → 1.2 → 1.0 (500ms bounce)
+- Background typography fades in (600ms)
+- Card slides up (400ms ease-out)
+
+---
+
+### Admin: Service Creation Modal
+**Purpose:** Business owner creates new service
+
+**Layout:**
+- Native modal, full-screen
+- Header: Opaque white background, "Cancel" left, "Save" right (both 18px)
+- Scrollable form
+- Safe area: top = default, bottom = insets.bottom + 24px
+
+**Visual Design:**
+- Form fields in frosted glass container
+- Input labels: 24px bold
+- Text inputs: 2px black border on focus, 16px padding
+- Duration/price inputs: oversized (40px) with suffix labels
+- Photo upload area: dashed border glass card with centered "Add Photo" text
+
+---
+
+### Admin: Dashboard
+**Purpose:** Overview of business metrics
+
+**Layout:**
+- Header: Transparent, greeting text (40px)
+- Scrollable content
+- Safe area: top = headerHeight + 32px, bottom = tabBarHeight + 32px
+
+**Visual Design:**
+- Revenue numbers (72px ultra-light) float on frosted glass hero card
+- Upcoming bookings: glass-effect cards in vertical list
+- Each booking card: customer name (24px), service/time (18px), status indicator (8px circle)
+- Subtle parallax: hero card shifts -15px on scroll
+
+**Floating Action Button:**
+- Bottom-right, 56x56px black circle, white "+" icon
+- Shadow: offset (0, 2), opacity 0.10, radius 2
+- Safe area: bottom = tabBarHeight + 24px
+
+---
+
+## Color Palette
+- Pure Black (#000000) - Primary text, buttons
+- Charcoal (#1A1A1A) - Secondary surfaces
+- Smoke (#6B6B6B) - Secondary text
+- Silver (#9E9E9E) - Tertiary text, placeholders
+- Pearl (#F5F5F5) - Subtle backgrounds
+- Pure White (#FFFFFF) - Primary background, card text
+
+**Glass Effect Formula:**
+- Background: white at 15% opacity
+- Border: 1px white at 10% opacity
+- Backdrop blur: 20px
+- Shadow: offset (0, 8), opacity 0.05, radius 24
+
+## Typography
+**System Font** (SF Pro/Roboto)
+
+**Type Scale:**
+- Background Display: 120-220px, weight 200 (ultra-light)
+- Metric Display: 56-72px, weight 200
+- Headline: 32-40px, weight 700 (bold)
+- Body: 18px, weight 400
+- Caption: 14px, weight 400
+
+**Principle:** Extreme contrast between ultra-light background type and bold foreground type creates cinematic tension.
+
+## Visual Design
+
+**Touchable Feedback:**
+- Glass cards: scale 0.98 on press, 150ms
+- Buttons: opacity 0.9 on press, 150ms
+- No blurred drop shadows except on floating action button
+
+**Icons:** Feather icons, 24px standard, 32px emphasis
+
+**Animations:**
 - Screen transitions: 400ms ease-out
-- Graph animations: staggered 600ms with bezier(0.4, 0.0, 0.2, 1)
-- Parallax scroll: -0.5 to -1.0 parallax ratio
-- Micro-interactions: 200ms for toggles, 300ms for cards
+- Card entrances: stagger by 100ms
+- Parallax: background elements at 0.3-0.5x scroll speed
+- Glass blur: maintain 60fps by limiting simultaneous blurs
 
-**Loading States:**
-- Skeleton screens with shimmer gradient
-- Fade-in for loaded content (300ms)
+## Assets to Generate
 
-## Accessibility
-- Minimum touch target: 44x44px
-- Text contrast: AAA rating (black on white, white on black)
-- Large type option: scale all text +20%
-- VoiceOver labels for all interactive elements
-- Reduce motion: disable parallax, use simple fades
+**Filename** | **Description** | **Where Used**
+--- | --- | ---
+`icon.png` | Minimalist "BF" monogram, black on white, sharp geometry | App icon
+`splash-icon.png` | Same monogram, used during launch | Splash screen
+`empty-services.png` | Simple line art: calendar with checkmark, B&W | Service selection screen when no services exist
+`confirmation-checkmark.png` | Animated checkmark sequence (3 frames), bold stroke | Confirmation screen success animation
+`service-placeholder.png` | Geometric pattern in light gray | Service cards without photos
+`avatar-default.png` | Circular gradient monogram placeholder | Customer/admin profiles
 
-## Critical Assets
-**Business Owner Portal:**
-1. Generic business avatar placeholder (minimalist geometric icon in B&W)
-2. Empty state illustrations (line art in black on white)
-   - No bookings yet
-   - No services created
-   - No customers
-
-**Public Booking Portal:**
-1. Service category icons (8 standard icons: Haircut, Massage, Consultation, Class, Appointment, Cleaning, Repair, Custom)
-2. Confirmation checkmark animation asset
-
-**Profile Avatars:**
-Not needed - business logos are custom uploads
+**Note:** All illustrations should use clean line art (2-3px strokes) on white background. Avoid gradients except for subtle radial glows.
