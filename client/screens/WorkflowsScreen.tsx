@@ -221,9 +221,13 @@ export default function WorkflowsScreen() {
       const ownerToken = await api.getOwnerToken();
       // Use the business ID from the token if available to ensure sync
       const currentBusiness = await api.getBusiness();
+      
+      // CRITICAL: We must use the business ID that the server actually associates with this token
       const targetBusinessId = currentBusiness?.id || businessId;
       
-      console.log(`[Workflow] Init attempt. URL ID: ${businessId}, Target ID: ${targetBusinessId}`);
+      if (currentBusiness && currentBusiness.id !== businessId) {
+        console.warn(`[Workflow] Business ID mismatch detected on client. Redirecting to token's business: ${currentBusiness.id}`);
+      }
 
       const baseUrl = getApiUrl().replace(/\/$/, '');
       const url = `${baseUrl}/api/businesses/${targetBusinessId}/workflows/initialize`;

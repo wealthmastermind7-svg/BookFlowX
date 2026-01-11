@@ -37,10 +37,19 @@ export async function verifyBusinessOwnership(
     // Then, verify the token's business matches the requested business
     // This prevents cross-tenant access even if someone has a valid token for a different business
     if (tokenBusiness.id !== businessId) {
-      console.warn(`[Auth] Token mismatch: Token business ${tokenBusiness.id} requested ${businessId}`);
-      // Fallback: If both are valid but don't match, we might have a session sync issue
-      // We'll allow it if the token is valid for SOME business and we're in dev, but for now just log
-      return res.status(403).json({ error: `Token does not belong to this business. Expected ${businessId}, got ${tokenBusiness.id}` });
+      console.warn(`[Auth] Token mismatch detected!`);
+      console.warn(`[Auth] Business from Token: ${tokenBusiness.id} (${tokenBusiness.name})`);
+      console.warn(`[Auth] Business from URL:   ${businessId}`);
+      
+      // If we are in development and the token is valid for SOME business, 
+      // we might want to be more flexible, but for security we stay strict.
+      return res.status(403).json({ 
+        error: "Token does not belong to this business",
+        details: {
+          tokenBusinessId: tokenBusiness.id,
+          requestedBusinessId: businessId
+        }
+      });
     }
 
     req.business = {

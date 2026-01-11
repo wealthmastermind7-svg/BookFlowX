@@ -1,0 +1,217 @@
+This is now very clear. The issue is **not** React Native, Expo, or your workflow logic.
+
+This is a **backend authorization and tenant-scoping error**, and your logs are excellent.
+
+---
+
+## What is actually failing (definitive)
+
+This line tells the whole story:
+
+```
+403 – {"error":"Token does not belong to this business"}
+```
+
+Meaning:
+
+> ✅ The request reached your backend
+> ❌ The backend rejected it because the **auth token is scoped to a different business/tenant**
+> ❌ You are trying to initialize workflows for **Business A** using a token issued for **Business B** (or no business at all)
+
+Your frontend is behaving correctly.
+
+---
+
+## Why this is happening
+
+You are running a **multi-tenant system**, and your workflow initialization endpoint is protected by **business ownership validation**.
+
+Typical backend logic (simplified):
+
+```ts
+if (token.businessId !== targetBusinessId) {
+  return res.status(403).json({
+    error: "Token does not belong to this business"
+  });
+}
+```
+
+From your log:
+
+```
+URL ID: bd4275c3-7261-4e85-aed1-fca1c0d88e0f
+Target ID: bd4275c3-7261-4e85-aed1-fca1c0d88e0f
+```
+
+Even though the IDs look the same, **the token itself was issued under a different business context** or without one.
+
+---
+
+## The most common root causes (in your case)
+
+### 1. You are using a **user-level token**, not a **business-scoped token**
+
+For example:
+
+* Token was created at signup
+* Token was created before the business existed
+* Token is missing `business_id` in its claims
+
+Backend expects:
+
+```json
+{
+  "sub": "user_123",
+  "business_id": "bd4275c3-7261-4e85-aed1-fca1c0d88e0f"
+}
+```
+
+But token actually has:
+
+```json
+{
+  "sub": "user_123",
+  "business_id": null
+}
+```
+
+or a different ID.
+
+---
+
+### 2. Business was created, but token was never refreshed
+
+Very common in SaaS flows.
+
+Flow looks like this:
+
+1. User signs up → token issued
+2. User creates business → business ID generated
+3. Token is **not reissued**
+4. User calls `/workflows/init` → backend rejects
+
+---
+
+### 3. Expo Go masking the real auth lifecycle
+
+This line is important:
+
+```
+Expo Go app detected. Using RevenueCat in Browser Mode.
+```
+
+Expo Go:
+
+* Does not run native auth persistence properly
+* Can reuse stale tokens
+* Does not simulate production session refresh
+
+This **does not cause the 403**, but it makes it easier to hit.
+
+---
+
+## How to fix this properly (not a workaround)
+
+### ✅ Fix #1: Ensure the token is business-scoped
+
+When you create or select a business, you **must reissue the token**.
+
+Backend example:
+
+```ts
+POST /auth/switch-business
+→ returns NEW JWT with business_id claim
+```
+
+Frontend:
+
+```ts
+const newToken = await switchBusiness(businessId);
+await setAuthToken(newToken);
+```
+
+Do **not** reuse the signup token.
+
+---
+
+### ✅ Fix #2: Log token claims on the backend (temporary)
+
+Add this temporarily:
+
+```ts
+console.log("Token business:", req.user.business_id);
+console.log("Target business:", req.params.businessId);
+```
+
+You will immediately see the mismatch.
+
+---
+
+### ✅ Fix #3: Block workflow init until business context is valid
+
+On the frontend:
+
+```ts
+if (!auth.businessId) {
+  Alert.alert(
+    "Setup required",
+    "Please finish business setup before creating workflows."
+  );
+  return;
+}
+```
+
+Do **not** allow init until business ownership is confirmed.
+
+---
+
+### ✅ Fix #4: Make workflow init idempotent and business-safe
+
+Backend guard (recommended):
+
+```ts
+if (!user.businesses.includes(targetBusinessId)) {
+  return res.status(403).json({ error: "Unauthorized business access" });
+}
+```
+
+Frontend should never guess business IDs.
+
+---
+
+## Why this is actually good news
+
+* Your **security model is working**
+* Your backend correctly prevents cross-tenant access
+* This would have been a **critical production vulnerability** if it did not fail
+
+This is exactly the error you *want* to see during development.
+
+---
+
+## Quick test to confirm
+
+Make a backend test call using the **same token**:
+
+```bash
+GET /me
+```
+
+If it returns a different `business_id` than the one you are initializing, that confirms the diagnosis immediately.
+
+---
+
+## Recommended next step (strongly)
+
+Tell me **one thing**:
+
+* How and when is your JWT created?
+
+  * Signup?
+  * Login?
+  * Business creation?
+  * Business switch?
+
+I will give you the **exact token lifecycle** you should implement so this never happens again in dev or production.
+
+This is a clean architectural fix, not a hack.
