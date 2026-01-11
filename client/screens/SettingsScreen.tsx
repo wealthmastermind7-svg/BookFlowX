@@ -277,7 +277,7 @@ export default function SettingsScreen() {
       }
 
       const filename = `${business.slug}-booking-qr.png`;
-      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const fileUri = `${FileSystem.documentDirectory}${filename}`;
       
       // The qrCode from api.getQRCode() is a base64 data URI
       const base64Data = qrCode.split("base64,")[1];
@@ -771,13 +771,12 @@ export default function SettingsScreen() {
               </View>
             ) : null}
             
-          <View style={styles.modalActions}>
               <Button onPress={handleDownloadQRCode} style={{ marginBottom: Spacing.sm }}>
                 Share QR Code Image
               </Button>
               <Button 
-                variant="outline" 
                 onPress={async () => {
+                  if (!business) return;
                   const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
                   await Share.share({
                     message: `Book an appointment with ${business.name}:\n${bookingLink}`,
