@@ -18,6 +18,9 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { getApiUrl } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
+import {
+  restorePurchases,
+} from "@/lib/revenuecat";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
@@ -55,6 +58,7 @@ export default function SettingsScreen() {
   const copiedTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencyLoading, setCurrencyLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
 
 
   const DEMO_TYPES = [
@@ -153,6 +157,24 @@ export default function SettingsScreen() {
   const handleShowDemoTypeModal = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     setDemoTypeModalVisible(true);
+  };
+
+  const handleRestorePurchases = async () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setRestoreLoading(true);
+    try {
+      const result = await restorePurchases();
+      if (result.success) {
+        Alert.alert("Success", result.isPremium ? "Purchases restored! You now have Pro access." : "Restore complete, but no active subscriptions were found.");
+      } else {
+        Alert.alert("Error", result.error || "Failed to restore purchases.");
+      }
+    } catch (error) {
+      console.error("Error restoring purchases:", error);
+      Alert.alert("Error", "An unexpected error occurred during restoration.");
+    } finally {
+      setRestoreLoading(false);
+    }
   };
 
   const handleShowCurrencyModal = () => {
@@ -441,6 +463,14 @@ export default function SettingsScreen() {
           subtitle: isPremium ? "You are a Premium member" : "Unlock all features",
           onPress: () => showPaywall("soft_upsell"),
           showChevron: true,
+        },
+        {
+          icon: "refresh-cw" as const,
+          title: "Restore Purchases",
+          subtitle: "Restore your previous Pro subscription",
+          onPress: handleRestorePurchases,
+          showChevron: true,
+          disabled: restoreLoading,
         },
       ],
     },

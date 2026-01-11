@@ -42,28 +42,24 @@ export async function initializeRevenueCat(): Promise<boolean> {
     // Fallback if constants aren't available
   }
 
-  const apiKey = getApiKey();
-  if (!apiKey) {
-    console.log("RevenueCat: No API key configured for platform", Platform.OS);
-    return false;
+  // Ensure Purchases is configured for native platforms
+  if (Platform.OS !== "web" && (Platform.OS as string) !== "web") {
+    const apiKey = getApiKey();
+    if (apiKey) {
+      try {
+        // Purchases.configure can be called multiple times safely in newer versions
+        // but we'll guard it anyway
+        if (!isInitialized) {
+          Purchases.configure({ apiKey });
+          isInitialized = true;
+        }
+      } catch (e) {
+        console.error("RevenueCat early config failed", e);
+      }
+    }
   }
 
-  try {
-    Purchases.setLogLevel(LOG_LEVEL.VERBOSE);
-    
-    console.log(`RevenueCat: Configuring with ${Platform.OS} API key`);
-    if (Platform.OS === "ios") {
-      console.log(`RevenueCat: Using hardcoded iOS key: ${IOS_REVENUECAT_API_KEY}`);
-    }
-    
-    await Purchases.configure({ apiKey });
-    isInitialized = true;
-    console.log("RevenueCat: Successfully initialized");
-    return true;
-  } catch (error) {
-    console.error("RevenueCat: Failed to initialize", error);
-    return false;
-  }
+  return isInitialized;
 }
 
 export async function checkPremiumStatus(): Promise<boolean> {
@@ -74,10 +70,9 @@ export async function checkPremiumStatus(): Promise<boolean> {
   try {
     const customerInfo = await Purchases.getCustomerInfo();
     const isPremium = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined";
-    console.log(`RevenueCat: Premium status = ${isPremium}`);
     return isPremium;
   } catch (error) {
-    console.error("RevenueCat: Failed to check premium status", error);
+    // console.error("RevenueCat: Failed to check premium status", error);
     return false;
   }
 }
