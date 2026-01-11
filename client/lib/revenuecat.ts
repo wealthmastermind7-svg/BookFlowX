@@ -43,7 +43,7 @@ export async function initializeRevenueCat(): Promise<boolean> {
   }
 
   // Ensure Purchases is configured for native platforms
-  if (Platform.OS !== "web" && (Platform.OS as string) !== "web") {
+  if (Platform.OS === "ios" || Platform.OS === "android") {
     const apiKey = getApiKey();
     if (apiKey) {
       try {
@@ -69,10 +69,8 @@ export async function checkPremiumStatus(): Promise<boolean> {
 
   try {
     const customerInfo = await Purchases.getCustomerInfo();
-    const isPremium = typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined";
-    return isPremium;
+    return typeof customerInfo.entitlements.active[ENTITLEMENT_ID] !== "undefined";
   } catch (error) {
-    // console.error("RevenueCat: Failed to check premium status", error);
     return false;
   }
 }
