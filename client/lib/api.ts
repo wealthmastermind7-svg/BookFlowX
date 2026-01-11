@@ -259,6 +259,14 @@ class ApiClient {
   }
 
   async updateBusiness(updates: Partial<Business>): Promise<Business> {
+    // Always sync business ID with server before updates
+    // This prevents token/businessId mismatch errors on mobile where
+    // stored IDs can get out of sync
+    const currentBusiness = await this.getBusiness();
+    if (!currentBusiness) {
+      throw new Error("No business found - please reload the app");
+    }
+    // getBusiness() already syncs this.businessId if there's a mismatch
     return makeRequest<Business>("PATCH", `/api/businesses/${this.businessId}`, updates);
   }
 
