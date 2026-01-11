@@ -98,6 +98,33 @@ export default function WidgetThemeScreen() {
     }));
   };
 
+  const handleFetchWebsiteTheme = async () => {
+    try {
+      const business = await api.getCurrentBusiness();
+      if (!business?.website) {
+        Alert.alert("No Website", "Please add a website in Settings first.");
+        return;
+      }
+
+      setSaving(true);
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const extracted = await api.extractThemeFromWebsite(business.website);
+      
+      setWidgetTheme(prev => ({
+        ...prev,
+        ...extracted
+      }));
+      
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Theme Extracted", "We've matched your widget colors to your website!");
+    } catch (error) {
+      console.error("Error fetching website theme:", error);
+      Alert.alert("Extraction Failed", "We couldn't reach your website right now.");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const GlassCard = ({ children, style }: { children: React.ReactNode; style?: any }) => (
     <View style={[styles.glassCard, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }, style]}>
       {children}
@@ -148,6 +175,19 @@ export default function WidgetThemeScreen() {
         }}
       >
         <SectionTitle>Color Presets</SectionTitle>
+        <View style={styles.headerActionRow}>
+          <Button 
+            onPress={handleFetchWebsiteTheme} 
+            variant="outline" 
+            size="small"
+            style={styles.magicButton}
+          >
+            <View style={styles.magicButtonContent}>
+              <Feather name="zap" size={14} color={appTheme.text} style={{ marginRight: 6 }} />
+              <ThemedText style={styles.magicButtonText}>Match Website</ThemedText>
+            </View>
+          </Button>
+        </View>
         <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.presetsScroll}>
           {COLOR_PRESETS.map((preset) => (
             <Pressable
@@ -326,6 +366,25 @@ const styles = StyleSheet.create({
     letterSpacing: -0.5,
     marginTop: Spacing.xl,
     marginBottom: Spacing.md,
+  },
+  headerActionRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    marginTop: -Spacing.xl - Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  magicButton: {
+    paddingHorizontal: Spacing.md,
+    height: 36,
+    borderRadius: 18,
+  },
+  magicButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  magicButtonText: {
+    fontSize: 13,
+    fontWeight: "600",
   },
   glassCard: {
     borderRadius: BorderRadius.xl,

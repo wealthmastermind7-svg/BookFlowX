@@ -459,6 +459,14 @@ class ApiClient {
     }
   }
 
+  async extractThemeFromWebsite(url: string): Promise<Partial<WidgetTheme>> {
+    return makeRequest<Partial<WidgetTheme>>("POST", `${this.getBusinessPath()}/theme/extract`, { url });
+  }
+
+  async getCurrentBusiness(): Promise<Business | null> {
+    return this.getBusiness();
+  }
+
   async updateWidgetTheme(theme: Partial<WidgetTheme>): Promise<WidgetTheme> {
     return makeRequest<WidgetTheme>("PUT", `${this.getBusinessPath()}/theme`, theme);
   }
