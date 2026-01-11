@@ -33,7 +33,7 @@ export const INDUSTRY_BLUEPRINTS = {
   salon: [
     {
       name: "Booking Confirmation",
-      description: "Send confirmation email when booking is created",
+      description: "Confirm appointment booking immediately",
       triggerType: "booking_created",
       actionType: "send_email",
       actionConfig: JSON.stringify({
@@ -43,19 +43,26 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "48-Hour Color Prep Reminder",
-      description: "Remind clients to prep for color services",
+      name: "24-Hour Reminder",
+      description: "Remind clients 24 hours before service",
       triggerType: "booking_reminder",
-      triggerConditions: JSON.stringify([
-        { field: "service.name", operator: "contains", value: "Color" },
-      ]),
       actionType: "send_email",
       actionConfig: JSON.stringify({
-        subject: "Prep reminder for your color appointment",
+        subject: "See you tomorrow!",
         templateType: "reminder",
-        customBody: "Please arrive with clean, dry hair. Avoid using heavy styling products.",
       }),
-      delayMinutes: -2880, // 48 hours before
+      delayMinutes: -1440,
+    },
+    {
+      name: "2-Hour Reminder",
+      description: "Last-minute reminder to reduce no-shows",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Your appointment is in 2 hours",
+        templateType: "reminder",
+      }),
+      delayMinutes: -120,
     },
     {
       name: "Post-Service Follow Up",
@@ -66,7 +73,7 @@ export const INDUSTRY_BLUEPRINTS = {
         subject: "How was your visit?",
         templateType: "followup",
       }),
-      delayMinutes: 1440, // 24 hours after
+      delayMinutes: 1440,
     },
   ],
   fitness: [
@@ -82,16 +89,27 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "1-Hour Class Reminder",
-      description: "Remind members 1 hour before class",
+      name: "24-Hour Reminder",
+      description: "Remind members 24 hours before class",
       triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
-        subject: "Your class starts in 1 hour",
+        subject: "Class reminder for tomorrow",
+        templateType: "reminder",
+      }),
+      delayMinutes: -1440,
+    },
+    {
+      name: "2-Hour Reminder",
+      description: "Quick reminder 2 hours before class starts",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Class starts in 2 hours!",
         templateType: "reminder",
         customBody: "Don't forget your water bottle and towel!",
       }),
-      delayMinutes: -60,
+      delayMinutes: -120,
     },
   ],
   consulting: [
@@ -107,25 +125,32 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "Document Request",
-      description: "Request documents before high-value consultations",
-      triggerType: "booking_confirmed",
-      triggerConditions: JSON.stringify([
-        { field: "service.price", operator: "greater_than", value: 20000 },
-      ]),
+      name: "24-Hour Reminder",
+      description: "Remind clients 24 hours before meeting",
+      triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
-        subject: "Please prepare the following documents",
-        templateType: "custom",
-        customBody: "To make the most of our consultation, please have the following ready: relevant contracts, financial statements, and any specific questions.",
+        subject: "Meeting reminder for tomorrow",
+        templateType: "reminder",
       }),
-      delayMinutes: 0,
+      delayMinutes: -1440,
+    },
+    {
+      name: "1-Hour Quick Reminder",
+      description: "Final reminder before your consultation",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Our meeting starts in 1 hour",
+        templateType: "reminder",
+      }),
+      delayMinutes: -60,
     },
   ],
   medical: [
     {
       name: "Appointment Confirmation",
-      description: "Confirm medical appointment",
+      description: "Confirm appointment booking",
       triggerType: "booking_created",
       actionType: "send_email",
       actionConfig: JSON.stringify({
@@ -135,14 +160,25 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "24-Hour Reminder",
-      description: "Remind patients 24 hours before",
+      name: "48-Hour Planning Reminder",
+      description: "Early reminder for planning and preparation",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Upcoming appointment reminder",
+        templateType: "reminder",
+        customBody: "Please bring any required documents and arrive 15 minutes early.",
+      }),
+      delayMinutes: -2880,
+    },
+    {
+      name: "24-Hour Final Reminder",
+      description: "Final confirmation 24 hours before",
       triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
         subject: "Appointment reminder for tomorrow",
         templateType: "reminder",
-        customBody: "Please bring your insurance card and arrive 15 minutes early.",
       }),
       delayMinutes: -1440,
     },
@@ -150,7 +186,7 @@ export const INDUSTRY_BLUEPRINTS = {
   auto: [
     {
       name: "Service Confirmation",
-      description: "Confirm auto service appointment",
+      description: "Confirm service appointment",
       triggerType: "booking_created",
       actionType: "send_email",
       actionConfig: JSON.stringify({
@@ -160,19 +196,26 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "Deposit Required Notice",
-      description: "Request deposit for high-value services",
-      triggerType: "booking_created",
-      triggerConditions: JSON.stringify([
-        { field: "service.price", operator: "greater_than", value: 50000 },
-      ]),
+      name: "24-Hour Reminder",
+      description: "Remind clients 24 hours before service",
+      triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
-        subject: "Deposit required for your service",
-        templateType: "custom",
-        customBody: "Due to the nature of this service, a 50% deposit is required to secure your appointment.",
+        subject: "Service reminder for tomorrow",
+        templateType: "reminder",
       }),
-      delayMinutes: 5,
+      delayMinutes: -1440,
+    },
+    {
+      name: "3-Hour Preparation Reminder",
+      description: "Remind clients to prepare space or vehicle",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Service starting in 3 hours",
+        templateType: "reminder",
+      }),
+      delayMinutes: -180,
     },
   ],
   custom: [],
