@@ -640,7 +640,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         accentColor = "#FFD700";  // Golden yellow (common for auto luxury/service)
         backgroundColor = "#ffffff";
         textColor = "#1a1a1a";
-      } else if (url.includes("auto")) {
+      } else if (url.includes("mintwash.com")) {
+        // MintWash - car detailing service with mint green branding
+        primaryColor = "#3EB489"; // Mint green (their brand color)
+        accentColor = "#1A1A1A";  // Dark contrast accent
+        backgroundColor = "#ffffff";
+        textColor = "#1A1A1A";
+      } else if (url.includes("auto") || url.includes("wash") || url.includes("detail")) {
         primaryColor = "#1a1a1a";
         accentColor = "#e31837";
         backgroundColor = "#f5f5f5";
