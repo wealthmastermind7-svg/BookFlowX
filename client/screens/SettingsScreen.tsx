@@ -20,6 +20,7 @@ import { getApiUrl } from "@/lib/query-client";
 import { usePremium } from "@/contexts/PremiumContext";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { CURRENCY_OPTIONS } from "@/lib/currency";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 
@@ -55,18 +56,6 @@ export default function SettingsScreen() {
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencyLoading, setCurrencyLoading] = useState(false);
 
-  const CURRENCIES = [
-    { id: "USD", label: "US Dollar", symbol: "$" },
-    { id: "EUR", label: "Euro", symbol: "€" },
-    { id: "GBP", label: "British Pound", symbol: "£" },
-    { id: "AUD", label: "Australian Dollar", symbol: "A$" },
-    { id: "CAD", label: "Canadian Dollar", symbol: "C$" },
-    { id: "JPY", label: "Japanese Yen", symbol: "¥" },
-    { id: "INR", label: "Indian Rupee", symbol: "₹" },
-    { id: "ZAR", label: "South African Rand", symbol: "R" },
-    { id: "NGN", label: "Nigerian Naira", symbol: "₦" },
-    { id: "KES", label: "Kenyan Shilling", symbol: "KSh" },
-  ];
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -188,7 +177,7 @@ export default function SettingsScreen() {
   };
 
   const getCurrentCurrencyLabel = (): string => {
-    const currency = CURRENCIES.find(c => c.id === (business?.currency || "USD"));
+    const currency = CURRENCY_OPTIONS.find(c => c.id === (business?.currency || "USD"));
     return currency ? `${currency.symbol} ${currency.label}` : "$ US Dollar";
   };
 
@@ -801,7 +790,7 @@ export default function SettingsScreen() {
             
             <ScrollView style={{ maxHeight: 400 }}>
               <View style={styles.demoTypeGrid}>
-                {CURRENCIES.map((currency) => (
+                {CURRENCY_OPTIONS.map((currency) => (
                   <Pressable
                     key={currency.id}
                     onPress={() => handleSelectCurrency(currency.id)}

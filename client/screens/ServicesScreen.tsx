@@ -6,7 +6,7 @@ import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
-import { api, Service } from "@/lib/api";
+import { api, Service, Business } from "@/lib/api";
 import { ServiceCard } from "@/components/ServiceCard";
 import { FloatingActionButton } from "@/components/FloatingActionButton";
 import { ThemedView } from "@/components/ThemedView";
@@ -23,6 +23,7 @@ export default function ServicesScreen() {
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [business, setBusiness] = useState<Business | null>(null);
 
   useEffect(() => {
     initializeBusiness();
@@ -48,8 +49,12 @@ export default function ServicesScreen() {
   const loadServices = async () => {
     setLoading(true);
     try {
-      const data = await api.getServices();
+      const [data, biz] = await Promise.all([
+        api.getServices(),
+        api.getBusiness(),
+      ]);
       setServices(data);
+      if (biz) setBusiness(biz);
     } catch (error) {
       console.error("Error loading services:", error);
     } finally {
@@ -70,6 +75,7 @@ export default function ServicesScreen() {
       name={item.name}
       duration={item.duration}
       price={item.price / 100}
+      currency={business?.currency || "USD"}
       bookingRate={Math.floor(Math.random() * 100)}
       onPress={() => handleSelectService(item.id)}
     />

@@ -77,3 +77,8 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - Updated Resend sender email from `onboarding@resend.dev` to `bookings@confirmbooking.online`
 - Added comprehensive logging for email debugging (`[Resend]` and `[Booking]` prefixes)
 - Added test email endpoint for debugging Resend integration
+- **Multi-Currency Support**: Added support for 75+ world currencies in `client/lib/currency.ts`
+  - Currencies include proper symbols, formatting rules, and decimal separators
+  - Currency selection available in Settings screen
+  - Dashboard, Services, and Quick Sale screens now display prices in business currency
+  - Known limitation: Prices are stored assuming 2 decimal places; currencies with 0 or 3 decimal places (JPY, KWD) may display incorrectly

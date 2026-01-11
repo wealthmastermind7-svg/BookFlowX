@@ -5,7 +5,7 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, AnimationConfig } from "@/constants/theme";
-import { api, Booking, DashboardStats } from "@/lib/api";
+import { api, Booking, DashboardStats, Business } from "@/lib/api";
 import { AnimatedMetricCard } from "@/components/AnimatedMetricCard";
 import { LineGraph } from "@/components/LineGraph";
 import { CircularMeter } from "@/components/CircularMeter";
@@ -13,7 +13,7 @@ import { BookingCard } from "@/components/BookingCard";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { PremiumBanner } from "@/components/PremiumBanner";
-
+import { formatPrice } from "@/lib/currency";
 import { usePremium } from "@/contexts/PremiumContext";
 
 export default function DashboardScreen() {
@@ -26,6 +26,7 @@ export default function DashboardScreen() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAllBookings, setShowAllBookings] = useState(false);
+  const [business, setBusiness] = useState<Business | null>(null);
 
   useEffect(() => {
     initializeBusiness();
@@ -67,12 +68,14 @@ export default function DashboardScreen() {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [statsData, bookingsData] = await Promise.all([
+      const [statsData, bookingsData, businessData] = await Promise.all([
         api.getStats(),
         api.getBookings(),
+        api.getBusiness(),
       ]);
       setStats(statsData);
       setBookings(bookingsData);
+      if (businessData) setBusiness(businessData);
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -108,7 +111,7 @@ export default function DashboardScreen() {
         return (
           <AnimatedMetricCard
             title="Total Revenue"
-            value={`$${totalRevenue.toFixed(2)}`}
+            value={formatPrice(Math.round(totalRevenue * 100), business?.currency || "USD")}
             style={styles.heroCard}
             delay={0}
           >

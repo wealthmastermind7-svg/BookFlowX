@@ -24,29 +24,12 @@ import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { getCurrencySymbol } from "@/lib/currency";
 
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "ServiceEditor"
 >;
-
-const CURRENCIES = [
-  { label: "US Dollar ($)", value: "USD", symbol: "$" },
-  { label: "Euro (€)", value: "EUR", symbol: "€" },
-  { label: "British Pound (£)", value: "GBP", symbol: "£" },
-  { label: "Australian Dollar (A$)", value: "AUD", symbol: "A$" },
-  { label: "Canadian Dollar (C$)", value: "CAD", symbol: "C$" },
-  { label: "Japanese Yen (¥)", value: "JPY", symbol: "¥" },
-  { label: "Indian Rupee (₹)", value: "INR", symbol: "₹" },
-  { label: "South African Rand (R)", value: "ZAR", symbol: "R" },
-  { label: "Nigerian Naira (₦)", value: "NGN", symbol: "₦" },
-  { label: "Kenyan Shilling (KSh)", value: "KES", symbol: "KSh" },
-];
-
-export function getCurrencySymbol(currencyCode: string): string {
-  const currency = CURRENCIES.find(c => c.value === currencyCode);
-  return currency?.symbol || "$";
-}
 
 export default function ServiceEditorScreen() {
   const insets = useSafeAreaInsets();

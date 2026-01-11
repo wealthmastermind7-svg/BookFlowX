@@ -22,7 +22,8 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { api } from "@/lib/api";
+import { api, Business } from "@/lib/api";
+import { getCurrencySymbol, formatPrice } from "@/lib/currency";
 
 type StripeStatus = {
   connected: boolean;
@@ -44,6 +45,7 @@ export default function QuickSaleScreen() {
   const [saleComplete, setSaleComplete] = useState(false);
   const [paymentUrl, setPaymentUrl] = useState<string | null>(null);
   const [qrCode, setQrCode] = useState<string | null>(null);
+  const [business, setBusiness] = useState<Business | null>(null);
 
   const animationScale = useRef(new Animated.Value(0.5)).current;
   const animationOpacity = useRef(new Animated.Value(0)).current;
@@ -97,20 +99,24 @@ export default function QuickSaleScreen() {
       const businessId = api.getBusinessId();
       if (!businessId) return;
       
-      const response = await fetch(
-        `${api.getBaseUrl()}/api/businesses/${businessId}/stripe/status`,
-        {
-          headers: {
-            "Content-Type": "application/json",
-            "x-business-token": await api.getOwnerToken() || "",
-          },
-        }
-      );
+      const [statusResponse, businessData] = await Promise.all([
+        fetch(
+          `${api.getBaseUrl()}/api/businesses/${businessId}/stripe/status`,
+          {
+            headers: {
+              "Content-Type": "application/json",
+              "x-business-token": await api.getOwnerToken() || "",
+            },
+          }
+        ),
+        api.getBusiness(),
+      ]);
       
-      if (response.ok) {
-        const status = await response.json();
+      if (statusResponse.ok) {
+        const status = await statusResponse.json();
         setStripeStatus(status);
       }
+      if (businessData) setBusiness(businessData);
     } catch (error) {
       console.error("Error checking Stripe status:", error);
     } finally {
@@ -280,11 +286,14 @@ export default function QuickSaleScreen() {
     }
   };
 
+  const currencyCode = business?.currency || "USD";
+  const currencySymbol = getCurrencySymbol(currencyCode);
+
   const formatAmount = (value: string): string => {
-    if (!value) return "$0.00";
+    if (!value) return `${currencySymbol}0.00`;
     const num = parseFloat(value);
-    if (isNaN(num)) return "$0.00";
-    return `$${num.toFixed(2)}`;
+    if (isNaN(num)) return `${currencySymbol}0.00`;
+    return formatPrice(Math.round(num * 100), currencyCode);
   };
 
   const NumberButton = ({ value, onPress }: { value: string; onPress: () => void }) => (
@@ -441,7 +450,7 @@ export default function QuickSaleScreen() {
       </View>
       
       <View style={styles.amountContainer}>
-        <ThemedText style={styles.dollarSign}>$</ThemedText>
+        <ThemedText style={styles.dollarSign}>{currencySymbol}</ThemedText>
         <ThemedText style={styles.amountText}>
           {amount || "0.00"}
         </ThemedText>

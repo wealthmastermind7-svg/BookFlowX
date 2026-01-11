@@ -10,11 +10,13 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, AnimationConfig } from "@/constants/theme";
+import { formatPriceSimple } from "@/lib/currency";
 
 interface ServiceCardProps {
   name: string;
   duration: number;
   price: number;
+  currency?: string;
   bookingRate?: number;
   onPress?: () => void;
   compact?: boolean;
@@ -24,6 +26,7 @@ export function ServiceCard({
   name,
   duration,
   price,
+  currency = "USD",
   bookingRate,
   onPress,
   compact = false,
@@ -79,7 +82,7 @@ export function ServiceCard({
           </ThemedText>
         </View>
         <ThemedText type={compact ? "h3" : "h2"} style={styles.price}>
-          ${price}
+          {formatPriceSimple(price, currency)}
         </ThemedText>
       </View>
       {bookingRate !== undefined && !compact ? (
