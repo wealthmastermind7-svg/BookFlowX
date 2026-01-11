@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Confirm Booking - Epic Saloon</title>
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;family=Playfair+Display:ital,wght@0,700;1,700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-light": "#F9F9F9",
+                        "background-dark": "#0A0A0A",
+                        "card-light": "#FFFFFF",
+                        "card-dark": "#171717",
+                    },
+                    fontFamily: {
+                        display: ["Playfair Display", "serif"],
+                        sans: ["Inter", "sans-serif"],
+                    },
+                    borderRadius: {
+                        DEFAULT: "12px",
+                        "xl": "24px",
+                    },
+                },
+            },
+        };
+    </script>
+<style>
+        .video-overlay {
+            background: linear-gradient(to bottom, rgba(249, 249, 249, 0.8), rgba(249, 249, 249, 1));
+        }
+        .dark .video-overlay {
+            background: linear-gradient(to bottom, rgba(10, 10, 10, 0.85), rgba(10, 10, 10, 1));
+        }
+        .cinematic-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            object-fit: cover;
+            filter: grayscale(100%) contrast(110%);
+            opacity: 0.15;
+        }
+        input:focus {
+            outline: none;
+            border-color: #000;
+            box-shadow: none !important;
+        }
+        .dark input:focus {
+            border-color: #fff;
+        }
+        .oversized-text {
+            font-size: 5rem;
+            line-height: 1;
+            letter-spacing: -0.05em;
+            opacity: 0.05;
+            position: absolute;
+            top: 20px;
+            right: -20px;
+            pointer-events: none;
+            text-transform: uppercase;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-sans min-h-screen">
+<img alt="Cinematic salon background" class="cinematic-bg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAhQxctb1NcWabM3AkCS1gTROXObv3cs2XHhiKQHO7JPHC1nCPWdv0_OUQsMYQ5-wbKVWcnsj5q1iM4G7ZeHcsaW5fM39pmw3NEkTqsdswcX-xiNePEq4Y_3wCO2co_wPcAZh3hPyo98Wbs7GlMgeAu4Wh0BkFcZXl1RECNeW1-r9kl_hDq36DvpTZy2wq8IW4cuRXgSjKuNQEN1TFXQlx4yqL2IOwS5PIs-BxabT2H_QFsCSaftYXKcz6mzO41Q4jPue6qwuPOWYQ"/>
+<div class="video-overlay fixed inset-0 z-[-1]"></div>
+<div class="max-w-md mx-auto px-6 pt-12 pb-32 relative">
+<h1 class="font-display font-bold oversized-text dark:text-white">RESERVE</h1>
+<header class="mb-10">
+<div class="flex justify-between items-center mb-6">
+<button class="p-2 -ml-2 hover:bg-black/5 dark:hover:bg-white/5 rounded-full transition-colors">
+<span class="material-icons-outlined">arrow_back_ios_new</span>
+</button>
+<div class="flex space-x-2">
+<div class="h-1.5 w-6 bg-primary/20 dark:bg-white/20 rounded-full"></div>
+<div class="h-1.5 w-6 bg-primary/20 dark:bg-white/20 rounded-full"></div>
+<div class="h-1.5 w-12 bg-primary dark:bg-white rounded-full"></div>
+</div>
+</div>
+<h2 class="text-4xl font-display font-bold mb-2">Your Details</h2>
+<p class="text-slate-500 dark:text-slate-400 font-light">Complete your reservation for the Luxury Experience.</p>
+</header>
+<div class="space-y-6 mb-10">
+<div>
+<label class="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Full Name</label>
+<input class="w-full bg-transparent border-b border-slate-200 dark:border-slate-800 px-0 py-3 text-lg transition-all focus:border-primary dark:focus:border-white" placeholder="John Smith" type="text"/>
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Email Address</label>
+<input class="w-full bg-transparent border-b border-slate-200 dark:border-slate-800 px-0 py-3 text-lg transition-all focus:border-primary dark:focus:border-white" placeholder="john@example.com" type="email"/>
+</div>
+<div>
+<label class="block text-xs font-semibold uppercase tracking-widest mb-2 text-slate-400">Phone Number</label>
+<input class="w-full bg-transparent border-b border-slate-200 dark:border-slate-800 px-0 py-3 text-lg transition-all focus:border-primary dark:focus:border-white" placeholder="(555) 000-0000" type="tel"/>
+</div>
+</div>
+<div class="bg-card-light dark:bg-card-dark rounded-xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 mb-10">
+<h3 class="text-xs font-semibold uppercase tracking-widest mb-6 text-slate-400 border-b border-slate-100 dark:border-slate-800 pb-4">Booking Summary</h3>
+<div class="space-y-4">
+<div class="flex justify-between items-center">
+<span class="text-slate-500 dark:text-slate-400 font-light">Service</span>
+<span class="font-medium">Luxury Experience</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-500 dark:text-slate-400 font-light">Date</span>
+<span class="font-medium">Wed, Jan 14, 2026</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-slate-500 dark:text-slate-400 font-light">Time</span>
+<span class="font-medium">11:00 AM</span>
+</div>
+<div class="pt-6 mt-4 border-t border-slate-100 dark:border-slate-800 flex justify-between items-end">
+<span class="text-slate-500 dark:text-slate-400">Total amount</span>
+<div class="text-right">
+<span class="text-3xl font-display font-bold">$180.00</span>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 p-6 bg-gradient-to-t from-background-light dark:from-background-dark via-background-light dark:via-background-dark to-transparent">
+<div class="max-w-md mx-auto flex flex-col items-center space-y-4">
+<button class="w-full bg-primary dark:bg-white text-white dark:text-black py-5 rounded-full font-bold text-lg tracking-wide shadow-2xl hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center">
+                    Confirm Booking
+                    <span class="material-icons-outlined ml-2 text-sm">lock</span>
+</button>
+<button class="text-sm font-medium text-slate-400 hover:text-primary dark:hover:text-white transition-colors">
+                    Review Selections
+                </button>
+</div>
+</div>
+</div>
+<div class="fixed top-4 right-4 z-50">
+<button class="bg-white dark:bg-slate-800 p-2 rounded-full shadow-lg border border-slate-200 dark:border-slate-700" onclick="document.documentElement.classList.toggle('dark')">
+<span class="material-icons-outlined dark:hidden">dark_mode</span>
+<span class="material-icons-outlined hidden dark:block">light_mode</span>
+</button>
+</div>
+
+</body></html>
