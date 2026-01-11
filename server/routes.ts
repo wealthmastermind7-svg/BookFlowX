@@ -452,6 +452,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!booking) {
         return res.status(404).json({ error: "Booking not found" });
       }
+
+      // Trigger workflows on status change
+      if (updates.status) {
+        const triggerType = `booking_${updates.status}`;
+        const service = await storage.getService(booking.serviceId);
+        const customer = await storage.getCustomer(booking.customerId);
+        
+        triggerWorkflows(triggerType, booking.businessId, {
+          booking,
+          service: service || undefined,
+          customer: customer || undefined,
+        }).catch(err => console.error(`[Workflow] Error triggering ${triggerType}:`, err));
+      }
+
       res.json(booking);
     } catch (error) {
       if (error instanceof z.ZodError) {
