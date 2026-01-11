@@ -231,9 +231,24 @@ class ApiClient {
   async getBusiness(): Promise<Business | null> {
     if (!this.businessId) return null;
     try {
-      const res = await fetch(`${getApiBase()}api/businesses/${this.businessId}`);
+      const token = await getSecureToken();
+      const headers: Record<string, string> = {};
+      if (token) {
+        headers["x-business-token"] = token;
+      }
+
+      const res = await fetch(`${getApiBase()}api/businesses/${this.businessId}`, {
+        headers
+      });
       if (!res.ok) return null;
       const business = await res.json();
+      
+      // Sync Business ID if token belongs to a different one
+      if (business.id !== this.businessId) {
+        console.warn(`[API] Business ID sync: ${this.businessId} -> ${business.id}`);
+        await this.setBusinessId(business.id);
+      }
+
       if (business.ownerToken && !cachedToken) {
         await setSecureToken(business.ownerToken);
       }
