@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { View, FlatList, StyleSheet, Alert, Modal, Pressable, ActivityIndicator, Switch } from "react-native";
+import { View, FlatList, StyleSheet, Alert, Modal, Pressable, ActivityIndicator, Switch, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useFocusEffect } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
@@ -22,6 +22,7 @@ interface Workflow {
   isPilot: boolean;
   industryBlueprint: string | null;
   delayMinutes: number | null;
+  actionConfig: string;
 }
 
 interface BlueprintSummary {
