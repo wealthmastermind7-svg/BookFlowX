@@ -830,7 +830,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Helper function to generate Open Graph meta tags
-  function generateOpenGraphMeta(business: any, service?: any, req?: Request): string {
+  function generateOpenGraphMeta(business: any, service?: any, req?: Request, allServices?: any[]): string {
     // Determine the base URL - use env domain if set, otherwise use request host
     let baseUrl = '';
     const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
@@ -848,10 +848,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       baseUrl = 'https://localhost:5000';
     }
     
-    const title = service ? `${service.name} - ${business.name}` : `Book with ${business.name}`;
-    const description = service 
-      ? `Schedule your ${service.name} appointment instantly. No calls required.`
-      : `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
+    let title = business.name;
+    let description = `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
+
+    if (service) {
+      title = `${service.name} - ${business.name}`;
+      description = `Schedule your ${service.name} appointment instantly. No calls required.`;
+    } else if (allServices && allServices.length > 0) {
+      // Highlight all services by listing them
+      const serviceNames = allServices.slice(0, 4).map(s => s.name).join(', ');
+      title = `${business.name} | Professional Services`;
+      description = `Services: ${serviceNames}${allServices.length > 4 ? ' and more' : ''}. Book your appointment instantly online.`;
+    }
     
     // Use OG image from assets
     const ogImage = `${baseUrl}/assets/og/booking-preview.png`;
@@ -886,9 +894,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const services = await storage.getServices(business.id);
-      const firstService = services && services.length > 0 ? services[0] : undefined;
       
-      const ogMeta = generateOpenGraphMeta(business, firstService, req);
+      // Check for specific service highlight via query param
+      const targetServiceId = req.query.serviceId as string;
+      let highlightedService = services && services.length > 0 ? services[0] : undefined;
+      
+      if (targetServiceId) {
+        const found = services.find(s => s.id === targetServiceId);
+        if (found) highlightedService = found;
+      }
+
+      // If no specific service is requested via query, and user wants "all services", 
+      // we pass null to service to trigger the "all services" description logic
+      const ogMeta = generateOpenGraphMeta(
+        business, 
+        targetServiceId ? highlightedService : undefined, 
+        req, 
+        services
+      );
       
       // Insert Open Graph meta tags into the HTML before the closing </head> tag
       const htmlWithMeta = bookingHtmlContent.replace(
