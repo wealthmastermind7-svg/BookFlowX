@@ -485,13 +485,13 @@ const styles = StyleSheet.create({
     marginBottom: 2,
   },
   dateDay: {
-    fontSize: 28,
-    fontWeight: "700",
+    fontSize: 34,
+    fontWeight: "800",
     marginVertical: 2,
   },
   dateDayName: {
-    fontSize: 11,
-    fontWeight: "500",
+    fontSize: 12,
+    fontWeight: "600",
     marginTop: 2,
   },
   timesSection: {
@@ -514,13 +514,13 @@ const styles = StyleSheet.create({
     width: (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3,
   },
   timeSlot: {
-    paddingVertical: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    paddingVertical: Spacing.xl,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
   timeSlotText: {
-    fontSize: 13,
+    fontSize: 15,
   },
   summaryContainer: {
     paddingHorizontal: Spacing.lg,
