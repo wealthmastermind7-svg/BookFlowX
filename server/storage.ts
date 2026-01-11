@@ -119,6 +119,7 @@ export interface IStorage {
   getWorkflowLogs(workflowId: string): Promise<WorkflowLog[]>;
   createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog>;
   updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined>;
+  clearWorkflows(businessId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -817,6 +818,21 @@ export class DatabaseStorage implements IStorage {
       .where(eq(workflowLogs.id, id))
       .returning();
     return updated || undefined;
+  }
+
+  async clearWorkflows(businessId: string): Promise<void> {
+    // Delete workflow logs first due to foreign key constraints
+    const businessWorkflows = await db
+      .select({ id: workflows.id })
+      .from(workflows)
+      .where(eq(workflows.businessId, businessId));
+    
+    for (const wf of businessWorkflows) {
+      await db.delete(workflowLogs).where(eq(workflowLogs.workflowId, wf.id));
+    }
+    
+    // Delete the workflows
+    await db.delete(workflows).where(eq(workflows.businessId, businessId));
   }
 }
 

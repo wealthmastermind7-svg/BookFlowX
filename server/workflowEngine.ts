@@ -427,6 +427,10 @@ export async function initializeIndustryBlueprints(
   businessId: string,
   industry: string
 ): Promise<void> {
+  // Clear existing workflows for this business to prevent duplication
+  console.log(`[Workflow] Clearing existing workflows for business: ${businessId} before initialization`);
+  await storage.clearWorkflows(businessId);
+
   const blueprints = getIndustryBlueprints(industry);
   if (!blueprints || blueprints.length === 0) {
     console.log(`[Workflow] No blueprints found for industry: "${industry}"`);
