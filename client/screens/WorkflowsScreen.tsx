@@ -463,7 +463,7 @@ export default function WorkflowsScreen() {
   return (
     <ThemedView style={[styles.container, { paddingTop: headerHeight }]}>
       {workflows.length > 0 ? (
-        <>
+        <View style={{ flex: 1 }}>
           <View style={styles.header}>
             <ThemedText style={styles.headerTitle}>Automation Workflows</ThemedText>
             <Pressable
@@ -483,9 +483,11 @@ export default function WorkflowsScreen() {
             contentContainerStyle={styles.listContent}
             showsVerticalScrollIndicator={false}
           />
-        </>
+        </View>
       ) : (
-        renderEmptyState()
+        <View style={{ flex: 1 }}>
+          {renderEmptyState()}
+        </View>
       )}
       {renderBlueprintModal()}
 
@@ -508,6 +510,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   comingSoonOverlay: {
+    ...StyleSheet.absoluteFillObject,
     justifyContent: "center",
     alignItems: "center",
     padding: Spacing.xl,
