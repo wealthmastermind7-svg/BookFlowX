@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system/legacy";
-import { View, FlatList, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
+import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -9,11 +9,11 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
 import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, Business, EmbedCode } from "@/lib/api";
 import { getBookingDomain } from "@/lib/query-client";
-import { SettingsRow } from "@/components/SettingsRow";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
@@ -29,6 +29,9 @@ import { CURRENCY_OPTIONS } from "@/lib/currency";
 type EmbedType = "inline" | "popup-button" | "popup-text";
 
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
+
+const ACCENT_GOLD = "#D4AF37";
+const ACCENT_SILVER = "#C0C0C0";
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
@@ -60,7 +63,6 @@ export default function SettingsScreen() {
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [currencyLoading, setCurrencyLoading] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
-
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -204,6 +206,11 @@ export default function SettingsScreen() {
     return currency ? `${currency.symbol} ${currency.label}` : "$ US Dollar";
   };
 
+  const getCurrentCurrencyShort = (): string => {
+    const currency = CURRENCY_OPTIONS.find(c => c.id === (business?.currency || "USD"));
+    return currency ? `${currency.id} ${currency.symbol}` : "USD $";
+  };
+
   const handleOpenSharePreview = () => {
     if (!business) return;
     
@@ -279,7 +286,6 @@ export default function SettingsScreen() {
       const filename = `${business.slug}-booking-qr.png`;
       const fileUri = `${FileSystem.cacheDirectory}${filename}`;
       
-      // The qrCode from api.getQRCode() is a base64 data URI
       const base64Data = qrCode.split("base64,")[1];
       
       await FileSystem.writeAsStringAsync(fileUri, base64Data, {
@@ -402,11 +408,11 @@ export default function SettingsScreen() {
     return name
       .toLowerCase()
       .trim()
-      .replace(/[^a-z0-9\s-]/g, "") // Remove special characters
-      .replace(/\s+/g, "-") // Replace spaces with hyphens
-      .replace(/-+/g, "-") // Replace multiple hyphens with single hyphen
-      .replace(/^-+|-+$/g, "") // Remove leading/trailing hyphens
-      .slice(0, 50); // Truncate to 50 chars max
+      .replace(/[^a-z0-9\s-]/g, "")
+      .replace(/\s+/g, "-")
+      .replace(/-+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 50);
   };
 
   const validateSlug = (slug: string): string | null => {
@@ -421,7 +427,6 @@ export default function SettingsScreen() {
   const handleSaveBusinessField = async () => {
     if (!business || !editingField) return;
     
-    // Validate slug format
     if (editingField === "slug") {
       const slugError = validateSlug(editValue);
       if (slugError) {
@@ -434,27 +439,20 @@ export default function SettingsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Dismiss keyboard first (critical on iOS)
       Keyboard.dismiss();
       
-      // Give iOS time to commit any pending operations
       await new Promise(resolve => setTimeout(resolve, 100));
       
       const updates: Partial<Business> = { [editingField]: editValue };
       
-      // Auto-generate slug from business name when saving name
       if (editingField === "name" && editValue.trim()) {
         const generatedSlug = generateSlugFromName(editValue);
         updates.slug = generatedSlug;
-        console.log("Auto-generated slug from name:", generatedSlug);
       }
       
-      console.log("Saving field:", editingField, "with value:", editValue);
       const updated = await api.updateBusiness(updates);
-      console.log("Save successful:", updated);
       setBusiness(updated);
       
-      // Only close modal AFTER persistence completes
       setEditModalVisible(false);
       setEditingField(null);
       setEditValue("");
@@ -471,278 +469,244 @@ export default function SettingsScreen() {
     }
   };
 
-  const settingsItems = [
-    {
-      section: "Premium",
-      items: [
-        {
-          icon: "star" as const,
-          title: "Upgrade to Premium",
-          subtitle: isPremium ? "You are a Premium member" : "Unlock all features",
-          onPress: () => showPaywall("soft_upsell"),
-          showChevron: true,
-        },
-        {
-          icon: "refresh-cw" as const,
-          title: "Restore Purchases",
-          subtitle: "Restore your previous Pro subscription",
-          onPress: handleRestorePurchases,
-          showChevron: true,
-          disabled: restoreLoading,
-        },
-      ],
-    },
-    {
-      section: "Business Settings",
-      items: [
-        {
-          icon: "briefcase" as const,
-          title: "Business Name",
-          subtitle: "Tap to edit",
-          value: business?.name || "My Business",
-          onPress: () => handleEditBusinessField("name"),
-          showChevron: true,
-        },
-        {
-          icon: "globe" as const,
-          title: "Website",
-          subtitle: "Tap to edit",
-          value: business?.website || "Not set",
-          onPress: () => handleEditBusinessField("website"),
-          showChevron: true,
-        },
-        {
-          icon: "phone" as const,
-          title: "Phone",
-          subtitle: "Tap to edit",
-          value: business?.phone || "Not set",
-          onPress: () => handleEditBusinessField("phone"),
-          showChevron: true,
-        },
-        {
-          icon: "dollar-sign" as const,
-          title: "Currency",
-          subtitle: "Set your business currency",
-          value: getCurrentCurrencyLabel(),
-          onPress: handleShowCurrencyModal,
-          showChevron: true,
-          disabled: currencyLoading,
-        },
-      ],
-    },
-    {
-      section: "Payments",
-      items: [
-        {
-          icon: "credit-card" as const,
-          title: "Quick Sale",
-          subtitle: "Coming Soon",
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            Alert.alert("Coming Soon", "Quick Sale with Stripe Connect will be available in v1.1");
-          },
-          showChevron: true,
-          disabled: true,
-        },
-      ],
-    },
-    {
-      section: "Booking Link",
-      items: [
-        {
-          icon: "link-2" as const,
-          title: "Business Link ID",
-          subtitle: "Used for your booking link",
-          value: business?.slug || "demo-business",
-          onPress: () => handleEditBusinessField("slug"),
-          showChevron: true,
-        },
-        {
-          icon: "link" as const,
-          title: "Share Booking Link",
-          subtitle: business?.bookingUrl || (business?.slug ? `${getBookingDomain()}/book/${business.slug}` : "Loading..."),
-          onPress: handleOpenSharePreview,
-          showChevron: true,
-        },
-        {
-          icon: "grid" as const,
-          title: "Show QR Code",
-          subtitle: "Display QR code for customers to scan",
-          onPress: handleShowQRCode,
-          showChevron: true,
-        },
-        {
-          icon: "code" as const,
-          title: "Embed Widget",
-          subtitle: "Add booking widget to your website",
-          onPress: handleShowEmbedModal,
-          showChevron: true,
-        },
-        {
-          icon: "message-circle" as const,
-          title: "Booking Assistant",
-          subtitle: "Coming Soon",
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            Alert.alert("Coming Soon", "AI booking assistant will be available in v1.1");
-          },
-          showChevron: true,
-        },
-      ],
-    },
-    {
-      section: "Automation",
-      items: [
-        {
-          icon: "zap" as const,
-          title: "Workflows",
-          subtitle: "Automate confirmations & reminders",
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            navigation.navigate("Workflows");
-          },
-          showChevron: true,
-        },
-        {
-          icon: "settings" as const,
-          title: "Widget Theming",
-          subtitle: "Customize your booking widget appearance",
-          onPress: () => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-            Alert.alert("Coming Soon", "Theme customization will be available in v1.2");
-          },
-          showChevron: true,
-        },
-      ],
-    },
-    {
-      section: "Data Management",
-      items: [
-        {
-          icon: "refresh-cw" as const,
-          title: "Load Demo Data",
-          subtitle: "Choose business type to showcase",
-          onPress: handleShowDemoTypeModal,
-          disabled: demoDataLoading,
-        },
-        {
-          icon: "trash-2" as const,
-          title: "Clear All Data",
-          subtitle: "Delete all services, bookings, and customers",
-          onPress: handleClearAllData,
-          destructive: true,
-          disabled: clearDataLoading,
-        },
-      ],
-    },
-    {
-      section: "Legal",
-      items: [
-        {
-          icon: "shield" as const,
-          title: "Privacy Policy",
-          subtitle: "How we handle your data",
-          onPress: () => Linking.openURL("https://confirmbooking.online/privacy-policy"),
-          showChevron: true,
-        },
-        {
-          icon: "file-text" as const,
-          title: "Terms of Use",
-          subtitle: "App terms and conditions",
-          onPress: () => Linking.openURL("https://confirmbooking.online/terms"),
-          showChevron: true,
-        },
-      ],
-    },
-  ];
+  const handleCopyBookingLink = async () => {
+    if (!business) return;
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+    await Clipboard.setStringAsync(bookingLink);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert("Copied", "Booking link copied to clipboard");
+  };
+
+  const GlassCard = ({ children, style, onPress }: { children: React.ReactNode; style?: any; onPress?: () => void }) => {
+    const content = (
+      <View style={[styles.glassCard, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }, style]}>
+        {children}
+      </View>
+    );
+    
+    if (onPress) {
+      return (
+        <Pressable onPress={onPress} style={({ pressed }) => [pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }]}>
+          {content}
+        </Pressable>
+      );
+    }
+    return content;
+  };
+
+  const SectionTitle = ({ children, badge }: { children: string; badge?: string }) => (
+    <View style={styles.sectionTitleRow}>
+      <ThemedText style={[styles.sectionTitle, { fontStyle: "italic" }]}>{children}</ThemedText>
+      {badge && (
+        <View style={[styles.badge, { backgroundColor: `${ACCENT_GOLD}15`, borderColor: `${ACCENT_GOLD}30` }]}>
+          <ThemedText style={[styles.badgeText, { color: ACCENT_GOLD }]}>{badge}</ThemedText>
+        </View>
+      )}
+    </View>
+  );
+
+  const PremiumRow = ({ icon, title, subtitle, onPress, isGold = false, disabled = false }: any) => (
+    <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
+      <View style={[styles.premiumIconBox, { backgroundColor: isGold ? `${ACCENT_GOLD}20` : `${ACCENT_SILVER}15` }]}>
+        <Feather name={icon} size={22} color={isGold ? ACCENT_GOLD : ACCENT_SILVER} />
+      </View>
+      <View style={{ flex: 1 }}>
+        <ThemedText style={styles.premiumRowTitle}>{title}</ThemedText>
+        <ThemedText style={[styles.premiumRowSubtitle, { fontStyle: "italic" }]}>{subtitle}</ThemedText>
+      </View>
+      {disabled ? (
+        <ActivityIndicator size="small" color={theme.textTertiary} />
+      ) : (
+        <Feather name="chevron-right" size={20} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+      )}
+    </GlassCard>
+  );
+
+  const InfoRow = ({ icon, label, value, onPress }: any) => (
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.infoRow, pressed && { opacity: 0.7 }]}>
+      <Feather name={icon} size={18} color={ACCENT_GOLD} style={{ opacity: 0.6 }} />
+      <View style={{ flex: 1, marginLeft: Spacing.md }}>
+        <ThemedText style={styles.infoLabel}>{label}</ThemedText>
+        <ThemedText style={styles.infoValue}>{value}</ThemedText>
+      </View>
+      <Feather name="edit-2" size={14} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+    </Pressable>
+  );
+
+  const CompactRow = ({ icon, title, subtitle, onPress, disabled = false, destructive = false, comingSoon = false }: any) => (
+    <Pressable 
+      onPress={disabled ? undefined : onPress} 
+      style={({ pressed }) => [styles.compactRow, pressed && !disabled && { opacity: 0.7 }, disabled && { opacity: 0.5 }]}
+    >
+      <Feather name={icon} size={20} color={destructive ? "#EF4444" : theme.text} style={{ opacity: destructive ? 0.6 : 0.8 }} />
+      <View style={{ flex: 1, marginLeft: Spacing.md }}>
+        <ThemedText style={[styles.compactRowTitle, destructive && { color: "#EF4444" }]}>{title}</ThemedText>
+        {subtitle && <ThemedText style={styles.compactRowSubtitle}>{subtitle}</ThemedText>}
+      </View>
+      {comingSoon ? (
+        <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+          <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
+        </View>
+      ) : (
+        <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+      )}
+    </Pressable>
+  );
 
   return (
     <ThemedView style={styles.container}>
-      <FlatList
-        scrollEnabled={true}
+      <ScrollView
+        showsVerticalScrollIndicator={false}
         contentContainerStyle={{
           paddingTop: headerHeight + Spacing.xl,
-          paddingBottom: tabBarHeight + Spacing.xl,
+          paddingBottom: tabBarHeight + Spacing["4xl"],
           paddingHorizontal: Spacing.lg,
         }}
-        data={settingsItems}
-        renderItem={({ item: section }) => (
-          <View key={section.section} style={styles.section}>
-            <ThemedText type="h4" style={styles.sectionTitle}>
-              {section.section}
-            </ThemedText>
-            {section.items.map((item: any, idx: number) => (
-              <View key={idx} style={idx < section.items.length - 1 ? styles.itemGap : {}}>
-                <SettingsRow
-                  icon={item.icon}
-                  title={item.title}
-                  subtitle={item.subtitle}
-                  value={item.value}
-                  hasToggle={item.hasToggle}
-                  toggleValue={item.toggleValue}
-                  onToggle={item.onToggle}
-                  onPress={!item.disabled ? item.onPress : undefined}
-                  destructive={item.destructive}
-                  disabled={item.disabled}
-                />
-              </View>
-            ))}
-          </View>
-        )}
-        keyExtractor={(item) => item.section}
-      />
-
-      <Modal
-        visible={editModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setEditModalVisible(false)}
       >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">
-                {editingField === "name" && "Business Name"}
-                {editingField === "website" && "Website"}
-                {editingField === "phone" && "Phone"}
-                {editingField === "slug" && "Business Link ID"}
-              </ThemedText>
-              <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeButton}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
+        {/* Premium Section */}
+        <SectionTitle badge={isPremium ? "Member" : undefined}>Premium</SectionTitle>
+        <View style={styles.sectionContent}>
+          <PremiumRow
+            icon="star"
+            title="Upgrade Plan"
+            subtitle={isPremium ? "You're a Pro member" : "Access premium tools"}
+            onPress={() => showPaywall("soft_upsell")}
+            isGold
+          />
+          <PremiumRow
+            icon="rotate-ccw"
+            title="Restore"
+            subtitle="Previous purchases"
+            onPress={handleRestorePurchases}
+            disabled={restoreLoading}
+          />
+        </View>
+
+        {/* Business Section */}
+        <SectionTitle>Business</SectionTitle>
+        <View style={styles.gridRow}>
+          <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
+            <View style={[styles.gridIconCircle, { backgroundColor: `${ACCENT_GOLD}15` }]}>
+              <Feather name="briefcase" size={16} color={ACCENT_GOLD} />
             </View>
-            {editingField === "slug" && (
-              <ThemedText type="small" style={styles.slugHelper}>
-                URL: {getBookingDomain()}/book/{editValue || "your-link-id"}
-              </ThemedText>
-            )}
-            {editingField === "name" && (
-              <ThemedText type="small" style={styles.slugHelper}>
-                Your link ID will be auto-generated: "{generateSlugFromName(editValue)}"
-              </ThemedText>
-            )}
-            <TextInput
-              value={editValue}
-              onChangeText={setEditValue}
-              placeholder={editingField === "name" ? "Business name" : editingField === "website" ? "Website URL" : editingField === "phone" ? "Phone number" : "my-booking-link"}
-              autoCapitalize={editingField === "slug" ? "none" : "words"}
-              keyboardType={editingField === "phone" ? "phone-pad" : editingField === "website" ? "url" : "default"}
-              style={[
-                styles.editInput,
-                { backgroundColor: theme.backgroundSecondary, color: theme.text, borderColor: theme.backgroundTertiary }
-              ]}
-              placeholderTextColor={theme.textSecondary}
-              editable={!editLoading}
-            />
-            <View style={styles.modalActions}>
-              <Button onPress={handleSaveBusinessField} disabled={editLoading || !editValue.trim()}>
-                {editLoading ? "Saving..." : "Save"}
-              </Button>
+            <View style={styles.gridCardContent}>
+              <ThemedText style={styles.gridLabel}>Entity</ThemedText>
+              <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
+            </View>
+          </GlassCard>
+          <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
+            <View style={[styles.gridIconCircle, { backgroundColor: `${ACCENT_SILVER}15` }]}>
+              <Feather name="dollar-sign" size={16} color={ACCENT_SILVER} />
+            </View>
+            <View style={styles.gridCardContent}>
+              <ThemedText style={styles.gridLabel}>Currency</ThemedText>
+              <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
+            </View>
+          </GlassCard>
+        </View>
+        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
+          <InfoRow icon="globe" label="Website" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
+          <InfoRow icon="phone" label="Support Line" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+        </GlassCard>
+
+        {/* Automation Section */}
+        <SectionTitle>Automation</SectionTitle>
+        <GlassCard style={styles.workflowCard} onPress={() => navigation.navigate("Workflows")}>
+          <View style={styles.workflowIconContainer}>
+            <View style={[styles.workflowIconCircle, { borderColor: `${ACCENT_GOLD}30` }]}>
+              <Feather name="zap" size={28} color={ACCENT_GOLD} />
             </View>
           </View>
-        </View>
-      </Modal>
+          <View style={{ flex: 1 }}>
+            <ThemedText style={styles.workflowTitle}>Workflows</ThemedText>
+            <ThemedText style={styles.workflowSubtitle}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
+            <ThemedText style={[styles.workflowCta, { color: ACCENT_GOLD }]}>Configure</ThemedText>
+          </View>
+        </GlassCard>
+        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
+          <View style={styles.compactInnerRow}>
+            <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+              <Feather name="sliders" size={18} color={ACCENT_SILVER} />
+            </View>
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.compactRowTitle}>Widget Theming</ThemedText>
+              <ThemedText style={styles.compactRowSubtitle}>Visual appearance</ThemedText>
+            </View>
+            <Feather name="settings" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+          </View>
+        </GlassCard>
 
+        {/* Booking Section */}
+        <SectionTitle>Booking</SectionTitle>
+        <GlassCard style={{ marginBottom: Spacing.md }}>
+          <View style={styles.bookingLinkHeader}>
+            <View style={{ flex: 1 }}>
+              <ThemedText style={styles.bookingLinkTitle}>Booking Link</ThemedText>
+              <ThemedText style={[styles.bookingLinkUrl, { color: ACCENT_GOLD }]} numberOfLines={1}>
+                {getBookingDomain()}/book/{business?.slug || "..."}
+              </ThemedText>
+            </View>
+            <Pressable 
+              onPress={handleCopyBookingLink}
+              style={[styles.copyButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
+            >
+              <Feather name="copy" size={16} color={theme.text} />
+            </Pressable>
+          </View>
+          <View style={styles.bookingActions}>
+            <Pressable 
+              onPress={handleOpenSharePreview}
+              style={[styles.shareButton, { backgroundColor: ACCENT_GOLD }]}
+            >
+              <ThemedText style={[styles.shareButtonText, { color: "#0A0A0B" }]}>Share Link</ThemedText>
+            </Pressable>
+            <Pressable 
+              onPress={handleShowQRCode}
+              style={[styles.qrButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
+            >
+              <Feather name="grid" size={20} color={theme.text} />
+            </Pressable>
+          </View>
+        </GlassCard>
+        <GlassCard style={{ marginBottom: Spacing["2xl"], opacity: 0.6 }}>
+          <View style={styles.compactInnerRow}>
+            <Feather name="shopping-bag" size={20} color={theme.text} />
+            <ThemedText style={[styles.compactRowTitle, { marginLeft: Spacing.md, flex: 1 }]}>Quick Sale</ThemedText>
+            <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+              <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
+            </View>
+          </View>
+        </GlassCard>
+
+        {/* Security Section */}
+        <SectionTitle>Security</SectionTitle>
+        <View style={styles.gridRow}>
+          <GlassCard style={styles.securityCard} onPress={handleShowDemoTypeModal}>
+            <Feather name="download-cloud" size={22} color={ACCENT_GOLD} style={{ marginBottom: Spacing.sm }} />
+            <ThemedText style={styles.securityCardTitle}>Demo Data</ThemedText>
+            <ThemedText style={styles.securityCardSubtitle}>Load samples</ThemedText>
+          </GlassCard>
+          <GlassCard style={[styles.securityCard, { borderColor: "rgba(239,68,68,0.2)" }]} onPress={handleClearAllData}>
+            <Feather name="trash-2" size={22} color="#EF4444" style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
+            <ThemedText style={styles.securityCardTitle}>Wipe Cloud</ThemedText>
+            <ThemedText style={styles.securityCardSubtitle}>Clear all data</ThemedText>
+          </GlassCard>
+        </View>
+        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
+          <CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} />
+          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
+          <CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} />
+        </GlassCard>
+
+        {/* Footer */}
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>Designed for Excellence • v4.2.0</ThemedText>
+        </View>
+      </ScrollView>
+
+      {/* QR Code Modal */}
       <Modal
         visible={qrModalVisible}
         transparent
@@ -752,34 +716,84 @@ export default function SettingsScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
             <View style={styles.modalHeader}>
-              <ThemedText type="h3">Booking QR Code</ThemedText>
+              <ThemedText style={styles.modalTitle}>Booking QR Code</ThemedText>
               <Pressable onPress={() => setQrModalVisible(false)} style={styles.closeButton}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
-            
-            {qrCode ? (
-              <View style={styles.qrContainer}>
+            <View style={styles.qrContainer}>
+              {qrCode ? (
                 <Image
                   source={{ uri: qrCode }}
                   style={styles.qrImage}
                   contentFit="contain"
                 />
-                <ThemedText type="small" style={styles.qrUrl}>
-                  {bookingUrl}
-                </ThemedText>
-              </View>
-            ) : null}
-            
+              ) : (
+                <ActivityIndicator size="large" color={theme.text} />
+              )}
+              <ThemedText style={styles.qrUrl}>{bookingUrl}</ThemedText>
+            </View>
             <View style={styles.modalActions}>
-              <Button onPress={handleDownloadQRCode}>
-                Share QR Code Image
-              </Button>
+              <Button onPress={handleDownloadQRCode}>Share QR Code Image</Button>
+              <Pressable onPress={() => setQrModalVisible(false)} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
+                <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
+              </Pressable>
             </View>
           </View>
         </View>
       </Modal>
 
+      {/* Edit Field Modal */}
+      <Modal
+        visible={editModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>
+                Edit {editingField === "name" ? "Business Name" : 
+                      editingField === "website" ? "Website" : 
+                      editingField === "phone" ? "Phone" : "Business Link ID"}
+              </ThemedText>
+              <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeButton}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+            {editingField === "slug" && (
+              <ThemedText style={styles.slugHelper}>
+                Your booking link will be: {getBookingDomain()}/book/{editValue || "..."}
+              </ThemedText>
+            )}
+            <TextInput
+              style={[styles.editInput, { 
+                backgroundColor: theme.backgroundSecondary, 
+                color: theme.text,
+                borderColor: theme.border 
+              }]}
+              value={editValue}
+              onChangeText={setEditValue}
+              placeholder={`Enter ${editingField}`}
+              placeholderTextColor={theme.textTertiary}
+              autoCapitalize={editingField === "slug" ? "none" : "sentences"}
+              autoCorrect={editingField !== "slug"}
+              keyboardType={editingField === "phone" ? "phone-pad" : editingField === "website" ? "url" : "default"}
+            />
+            <View style={styles.modalActions}>
+              <Button onPress={handleSaveBusinessField} disabled={editLoading}>
+                {editLoading ? "Saving..." : "Save"}
+              </Button>
+              <Pressable onPress={() => setEditModalVisible(false)} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
+                <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Demo Type Modal */}
       <Modal
         visible={demoTypeModalVisible}
         transparent
@@ -787,87 +801,45 @@ export default function SettingsScreen() {
         onRequestClose={() => setDemoTypeModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault, maxWidth: 400 }]}>
+          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
             <View style={styles.modalHeader}>
-              <ThemedText type="h3">Select Business Type</ThemedText>
+              <ThemedText style={styles.modalTitle}>Choose Business Type</ThemedText>
               <Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.closeButton}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
-            
             <View style={styles.demoTypeGrid}>
               {DEMO_TYPES.map((type) => (
                 <Pressable
                   key={type.id}
-                  onPress={() => {
-                    setSelectedDemoType(type.id);
-                    handleInitializeDemoData(type.id);
-                  }}
                   style={[
                     styles.demoTypeButton,
-                    { backgroundColor: theme.backgroundSecondary }
+                    { backgroundColor: selectedDemoType === type.id ? theme.accent : theme.backgroundSecondary }
                   ]}
+                  onPress={() => setSelectedDemoType(type.id)}
                 >
-                  <ThemedText type="body" style={styles.demoTypeLabel}>
+                  <ThemedText style={[styles.demoTypeLabel, { color: selectedDemoType === type.id ? theme.buttonText : theme.text }]}>
                     {type.label}
                   </ThemedText>
-                  <ThemedText type="small" style={styles.demoTypeDescription}>
+                  <ThemedText style={[styles.demoTypeDescription, { color: selectedDemoType === type.id ? theme.buttonText : theme.textSecondary }]}>
                     {type.description}
                   </ThemedText>
                 </Pressable>
               ))}
             </View>
-          </View>
-        </View>
-      </Modal>
-
-      <Modal
-        visible={currencyModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setCurrencyModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault, maxWidth: 400 }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText type="h3">Select Currency</ThemedText>
-              <Pressable onPress={() => setCurrencyModalVisible(false)} style={styles.closeButton}>
-                <Feather name="x" size={24} color={theme.text} />
+            <View style={styles.modalActions}>
+              <Button onPress={() => handleInitializeDemoData(selectedDemoType)} disabled={demoDataLoading}>
+                {demoDataLoading ? "Loading..." : "Load Demo Data"}
+              </Button>
+              <Pressable onPress={() => setDemoTypeModalVisible(false)} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
+                <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
               </Pressable>
             </View>
-            
-            <ScrollView style={{ maxHeight: 400 }}>
-              <View style={styles.demoTypeGrid}>
-                {CURRENCY_OPTIONS.map((currency) => (
-                  <Pressable
-                    key={currency.id}
-                    onPress={() => handleSelectCurrency(currency.id)}
-                    style={[
-                      styles.demoTypeButton,
-                      { 
-                        backgroundColor: (business?.currency || "USD") === currency.id 
-                          ? theme.text 
-                          : theme.backgroundSecondary 
-                      }
-                    ]}
-                  >
-                    <ThemedText 
-                      type="body" 
-                      style={[
-                        styles.demoTypeLabel,
-                        { color: (business?.currency || "USD") === currency.id ? theme.backgroundDefault : theme.text }
-                      ]}
-                    >
-                      {currency.symbol} {currency.label}
-                    </ThemedText>
-                  </Pressable>
-                ))}
-              </View>
-            </ScrollView>
           </View>
         </View>
       </Modal>
 
+      {/* Embed Code Modal */}
       <Modal
         visible={embedModalVisible}
         transparent
@@ -877,126 +849,108 @@ export default function SettingsScreen() {
         <View style={styles.modalOverlay}>
           <View style={[styles.embedModalContent, { backgroundColor: theme.backgroundDefault }]}>
             <View style={styles.modalHeader}>
-              <ThemedText type="h3">Embed Widget</ThemedText>
+              <ThemedText style={styles.modalTitle}>Embed Widget</ThemedText>
               <Pressable onPress={handleCloseEmbedModal} style={styles.closeButton}>
                 <Feather name="x" size={24} color={theme.text} />
               </Pressable>
             </View>
-            
+
             {embedLoading ? (
               <View style={styles.embedLoading}>
                 <ActivityIndicator size="large" color={theme.text} />
-                <ThemedText type="small" style={styles.embedLoadingText}>
-                  Generating embed code...
-                </ThemedText>
+                <ThemedText style={styles.embedLoadingText}>Generating embed code...</ThemedText>
               </View>
             ) : embedError ? (
               <View style={styles.embedLoading}>
-                <Feather name="alert-circle" size={48} color={theme.text} style={{ opacity: 0.5 }} />
-                <ThemedText type="small" style={styles.embedLoadingText}>
-                  Failed to generate embed code
-                </ThemedText>
-                <View style={styles.modalActions}>
-                  <Button onPress={handleRetryEmbedCode}>
-                    Try Again
-                  </Button>
-                </View>
+                <Feather name="alert-circle" size={48} color={theme.textSecondary} />
+                <ThemedText style={styles.embedLoadingText}>Failed to generate embed code</ThemedText>
+                <Button onPress={handleRetryEmbedCode} style={{ marginTop: Spacing.md }}>Retry</Button>
               </View>
-            ) : embedCode ? (
-              <View>
-                <ThemedText type="small" style={styles.embedDescription}>
-                  Add this booking widget to your website. Choose an embed type:
+            ) : (
+              <>
+                <ThemedText style={styles.embedDescription}>
+                  Add a booking widget to your website. Choose a style below:
                 </ThemedText>
-                
                 <View style={styles.embedTypeTabs}>
-                  <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSelectedEmbedType("inline");
-                      setCopiedCode(false);
-                    }}
-                    style={[
-                      styles.embedTypeTab,
-                      { backgroundColor: selectedEmbedType === "inline" ? theme.text : theme.backgroundSecondary }
-                    ]}
-                  >
-                    <ThemedText
-                      type="small"
+                  {(["inline", "popup-button", "popup-text"] as EmbedType[]).map((type) => (
+                    <Pressable
+                      key={type}
                       style={[
-                        styles.embedTypeTabText,
-                        { color: selectedEmbedType === "inline" ? theme.backgroundDefault : theme.text }
+                        styles.embedTypeTab,
+                        { backgroundColor: selectedEmbedType === type ? theme.accent : theme.backgroundSecondary }
                       ]}
+                      onPress={() => setSelectedEmbedType(type)}
                     >
-                      Inline
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSelectedEmbedType("popup-button");
-                      setCopiedCode(false);
-                    }}
-                    style={[
-                      styles.embedTypeTab,
-                      { backgroundColor: selectedEmbedType === "popup-button" ? theme.text : theme.backgroundSecondary }
-                    ]}
-                  >
-                    <ThemedText
-                      type="small"
-                      style={[
-                        styles.embedTypeTabText,
-                        { color: selectedEmbedType === "popup-button" ? theme.backgroundDefault : theme.text }
-                      ]}
-                    >
-                      Button
-                    </ThemedText>
-                  </Pressable>
-                  <Pressable
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-                      setSelectedEmbedType("popup-text");
-                      setCopiedCode(false);
-                    }}
-                    style={[
-                      styles.embedTypeTab,
-                      { backgroundColor: selectedEmbedType === "popup-text" ? theme.text : theme.backgroundSecondary }
-                    ]}
-                  >
-                    <ThemedText
-                      type="small"
-                      style={[
-                        styles.embedTypeTabText,
-                        { color: selectedEmbedType === "popup-text" ? theme.backgroundDefault : theme.text }
-                      ]}
-                    >
-                      Text Link
-                    </ThemedText>
-                  </Pressable>
+                      <ThemedText style={[styles.embedTypeTabText, { color: selectedEmbedType === type ? theme.buttonText : theme.text }]}>
+                        {type === "inline" ? "Inline" : type === "popup-button" ? "Button" : "Link"}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
                 </View>
-
-                <ThemedText type="small" style={styles.embedTypeHint}>
-                  {selectedEmbedType === "inline" && "Displays the booking form directly on your page"}
-                  {selectedEmbedType === "popup-button" && "Shows a button that opens booking in a popup"}
-                  {selectedEmbedType === "popup-text" && "Creates a text link that opens booking in a popup"}
+                <ThemedText style={styles.embedTypeHint}>
+                  {selectedEmbedType === "inline" ? "Displays booking form directly on your page" :
+                   selectedEmbedType === "popup-button" ? "Button that opens booking in a popup" :
+                   "Text link that opens booking in a popup"}
                 </ThemedText>
-                
-                <ScrollView 
-                  style={[styles.codeContainer, { backgroundColor: theme.backgroundSecondary }]}
-                  horizontal={false}
-                  nestedScrollEnabled
-                >
-                  <ThemedText type="small" style={styles.codeText}>
-                    {getEmbedCodeForType()}
-                  </ThemedText>
+                <ScrollView style={[styles.codeContainer, { backgroundColor: theme.backgroundSecondary }]}>
+                  <ThemedText style={styles.codeText}>{getEmbedCodeForType()}</ThemedText>
                 </ScrollView>
-                
                 <View style={styles.modalActions}>
                   <Button onPress={handleCopyEmbedCode}>
                     {copiedCode ? "Copied!" : "Copy Code"}
                   </Button>
+                  <Pressable onPress={handleCloseEmbedModal} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
+                    <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
+                  </Pressable>
                 </View>
-              </View>
-            ) : null}
+              </>
+            )}
+          </View>
+        </View>
+      </Modal>
+
+      {/* Currency Modal */}
+      <Modal
+        visible={currencyModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.currencyModalContent, { backgroundColor: theme.backgroundDefault }]}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Select Currency</ThemedText>
+              <Pressable onPress={() => setCurrencyModalVisible(false)} style={styles.closeButton}>
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+            <ScrollView style={styles.currencyList} showsVerticalScrollIndicator={false}>
+              {CURRENCY_OPTIONS.map((currency) => (
+                <Pressable
+                  key={currency.id}
+                  style={[
+                    styles.currencyItem,
+                    { backgroundColor: business?.currency === currency.id ? theme.accent : "transparent" }
+                  ]}
+                  onPress={() => handleSelectCurrency(currency.id)}
+                >
+                  <ThemedText style={[styles.currencySymbol, { color: business?.currency === currency.id ? theme.buttonText : theme.text }]}>
+                    {currency.symbol}
+                  </ThemedText>
+                  <View style={{ flex: 1 }}>
+                    <ThemedText style={[styles.currencyLabel, { color: business?.currency === currency.id ? theme.buttonText : theme.text }]}>
+                      {currency.label}
+                    </ThemedText>
+                    <ThemedText style={[styles.currencyCode, { color: business?.currency === currency.id ? theme.buttonText : theme.textSecondary }]}>
+                      {currency.id}
+                    </ThemedText>
+                  </View>
+                  {business?.currency === currency.id && (
+                    <Feather name="check" size={20} color={theme.buttonText} />
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
           </View>
         </View>
       </Modal>
@@ -1008,16 +962,264 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 32,
+    fontWeight: "700",
+    letterSpacing: -1,
+    opacity: 0.9,
+  },
+  badge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: Spacing.xs,
+    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+  },
+  sectionContent: {
+    gap: Spacing.md,
+    marginBottom: Spacing["2xl"],
+  },
+  glassCard: {
+    borderRadius: BorderRadius.xl,
+    borderWidth: 1,
+    padding: Spacing.lg,
+  },
+  premiumRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+  },
+  premiumIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  premiumRowTitle: {
+    fontSize: 17,
+    fontWeight: "700",
+    letterSpacing: -0.3,
+  },
+  premiumRowSubtitle: {
+    fontSize: 13,
+    opacity: 0.5,
+  },
+  gridRow: {
+    flexDirection: "row",
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
+  },
+  gridCard: {
+    flex: 1,
+    height: 140,
+    justifyContent: "space-between",
+  },
+  gridIconCircle: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gridCardContent: {
+    marginTop: "auto",
+  },
+  gridLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    opacity: 0.4,
+    marginBottom: 4,
+  },
+  gridValue: {
+    fontSize: 17,
+    fontWeight: "700",
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+  },
+  infoLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+    opacity: 0.4,
+  },
+  infoValue: {
+    fontSize: 15,
+    fontWeight: "500",
+  },
+  divider: {
+    height: 1,
+    marginVertical: Spacing.sm,
+  },
+  workflowCard: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: Spacing.lg,
+    marginBottom: Spacing.md,
+    padding: Spacing.xl,
+  },
+  workflowIconContainer: {
+    position: "relative",
+  },
+  workflowIconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: BorderRadius.full,
+    borderWidth: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  workflowTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  workflowSubtitle: {
+    fontSize: 13,
+    opacity: 0.5,
+    lineHeight: 18,
+  },
+  workflowCta: {
+    marginTop: Spacing.md,
+    fontSize: 11,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1.5,
+  },
+  compactInnerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  compactIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+    marginRight: Spacing.md,
+  },
+  compactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+  },
+  compactRowTitle: {
+    fontSize: 15,
+    fontWeight: "600",
+  },
+  compactRowSubtitle: {
+    fontSize: 12,
+    opacity: 0.4,
+  },
+  soonBadge: {
+    paddingHorizontal: Spacing.sm,
+    paddingVertical: 4,
+    borderRadius: BorderRadius.sm,
+  },
+  soonBadgeText: {
+    fontSize: 9,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
+  bookingLinkHeader: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    marginBottom: Spacing.md,
+  },
+  bookingLinkTitle: {
+    fontSize: 15,
+    fontWeight: "700",
+    marginBottom: 4,
+  },
+  bookingLinkUrl: {
+    fontSize: 12,
+    fontWeight: "500",
+  },
+  copyButton: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bookingActions: {
+    flexDirection: "row",
+    gap: Spacing.sm,
+  },
+  shareButton: {
+    flex: 1,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+  },
+  shareButtonText: {
+    fontSize: 14,
+    fontWeight: "700",
+  },
+  qrButton: {
+    width: 48,
+    height: 48,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  securityCard: {
+    flex: 1,
+    padding: Spacing.lg,
+  },
+  securityCardTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    marginBottom: 2,
+  },
+  securityCardSubtitle: {
+    fontSize: 9,
+    textTransform: "uppercase",
+    letterSpacing: 0.5,
+    opacity: 0.4,
+  },
+  footer: {
+    alignItems: "center",
+    marginTop: Spacing.xl,
+    marginBottom: Spacing.lg,
+  },
+  footerText: {
+    fontSize: 10,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    letterSpacing: 3,
+    opacity: 0.2,
+    fontStyle: "italic",
+  },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0, 0, 0, 0.6)",
+    backgroundColor: "rgba(0,0,0,0.7)",
     justifyContent: "center",
     alignItems: "center",
-    padding: Spacing.xl,
+    padding: Spacing.lg,
   },
   modalContent: {
     width: "100%",
-    maxWidth: 360,
+    maxWidth: 400,
     borderRadius: BorderRadius.xl,
     padding: Spacing.xl,
   },
@@ -1026,6 +1228,10 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     alignItems: "center",
     marginBottom: Spacing.lg,
+  },
+  modalTitle: {
+    fontSize: 22,
+    fontWeight: "700",
   },
   closeButton: {
     padding: Spacing.sm,
@@ -1045,15 +1251,6 @@ const styles = StyleSheet.create({
   },
   modalActions: {
     gap: Spacing.md,
-  },
-  section: {
-    marginBottom: Spacing["3xl"],
-  },
-  sectionTitle: {
-    marginBottom: Spacing.lg,
-  },
-  itemGap: {
-    marginBottom: Spacing.lg,
   },
   editInput: {
     borderWidth: 1,
@@ -1131,5 +1328,49 @@ const styles = StyleSheet.create({
     fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
     fontSize: 11,
     lineHeight: 16,
+  },
+  currencyModalContent: {
+    width: "100%",
+    maxWidth: 400,
+    maxHeight: "70%",
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+  },
+  currencyList: {
+    maxHeight: 400,
+  },
+  currencyItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.md,
+    borderRadius: BorderRadius.md,
+    marginBottom: Spacing.xs,
+  },
+  currencySymbol: {
+    fontSize: 20,
+    fontWeight: "600",
+    width: 40,
+    textAlign: "center",
+    marginRight: Spacing.md,
+  },
+  currencyLabel: {
+    fontSize: 16,
+    fontWeight: "500",
+  },
+  currencyCode: {
+    fontSize: 12,
+    opacity: 0.6,
+  },
+  secondaryButton: {
+    height: Spacing.buttonHeight,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: Spacing.lg,
+  },
+  secondaryButtonText: {
+    fontSize: 18,
+    fontWeight: "600",
   },
 });
