@@ -634,26 +634,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       let backgroundColor = "#FFFFFF";
       let textColor = "#1A1C1E";
 
-      // If it's the user's specific site, we'll try to match it more closely
-      if (url.includes("cerolauto.com")) {
-        primaryColor = "#1a1a1a"; // Dark primary
-        accentColor = "#FFD700";  // Golden yellow (common for auto luxury/service)
-        backgroundColor = "#ffffff";
-        textColor = "#1a1a1a";
-      } else if (url.includes("mintwash.com")) {
-        // MintWash - car detailing service with mint green branding
-        primaryColor = "#3EB489"; // Mint green (their brand color)
-        accentColor = "#1A1A1A";  // Dark contrast accent
-        backgroundColor = "#ffffff";
-        textColor = "#1A1A1A";
-      } else if (url.includes("auto") || url.includes("wash") || url.includes("detail")) {
-        primaryColor = "#1a1a1a";
-        accentColor = "#e31837";
-        backgroundColor = "#f5f5f5";
-        textColor = "#1a1a1a";
-      } else {
-        // Intelligent scraping for other sites
-        try {
+      // Dynamic color extraction for all websites
+      try {
           const controller = new AbortController();
           const timeoutId = setTimeout(() => controller.abort(), 8000);
           
@@ -822,9 +804,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           
           console.log(`[Theme] Found ${uniqueColors.length} unique branding colors:`, uniqueColors.slice(0, 5));
-        } catch (e) {
-          console.error("[Theme] Scraping failed, using defaults:", e);
-        }
+      } catch (e) {
+        console.error("[Theme] Scraping failed, using defaults:", e);
       }
 
       res.json({
