@@ -218,11 +218,8 @@ export default function WorkflowsScreen() {
       const businessId = api.getBusinessId();
       if (!businessId) throw new Error("No business ID");
 
-      console.log("[Workflow] Starting blueprint init for industry:", industry);
       const ownerToken = await api.getOwnerToken();
-      console.log("[Workflow] Token retrieved length:", ownerToken?.length || 0);
-      
-      const baseUrl = getApiUrl().replace(/\/$/, ''); // Remove trailing slash
+      const baseUrl = getApiUrl().replace(/\/$/, '');
       const url = `${baseUrl}/api/businesses/${businessId}/workflows/initialize`;
       
       const headers: Record<string, string> = {
@@ -240,12 +237,9 @@ export default function WorkflowsScreen() {
           body: JSON.stringify({ industry }),
         }
       );
-
-      console.log("[Workflow] Response status:", response.status, response.statusText);
       
       if (response.ok) {
         const data = await response.json();
-        console.log("[Workflow] Init successful, received", data.length, "workflows");
         setWorkflows(data);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         Alert.alert(
@@ -266,8 +260,7 @@ export default function WorkflowsScreen() {
         throw new Error(errorMessage);
       }
     } catch (error: any) {
-      console.error("[Workflow] Blueprint init failed:", error?.message || "Unknown error");
-      console.error("[Workflow] Error details:", JSON.stringify(error, Object.getOwnPropertyNames(error)));
+      console.error("[Workflow] Blueprint init error:", error?.message || "Unknown error");
       const isNetworkError = error?.message?.includes("Network") || error?.message?.includes("fetch") || error?.message?.includes("Load failed");
       const displayMessage = isNetworkError 
         ? "Could not connect to server. Please check your connection and try again."

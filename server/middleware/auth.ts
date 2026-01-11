@@ -16,6 +16,7 @@ export async function verifyBusinessOwnership(
   next: NextFunction
 ) {
   try {
+    const businessId = req.params.businessId || req.params.id;
     const ownerToken = req.get("x-owner-token") || req.get("x-business-token");
 
     if (!businessId) {
