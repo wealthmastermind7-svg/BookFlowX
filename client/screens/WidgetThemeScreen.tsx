@@ -178,13 +178,11 @@ export default function WidgetThemeScreen() {
         <View style={styles.headerActionRow}>
           <Button 
             onPress={handleFetchWebsiteTheme} 
-            variant="outline" 
-            size="small"
             style={styles.magicButton}
           >
             <View style={styles.magicButtonContent}>
-              <Feather name="zap" size={14} color={appTheme.text} style={{ marginRight: 6 }} />
-              <ThemedText style={styles.magicButtonText}>Match Website</ThemedText>
+              <Feather name="zap" size={14} color={appTheme.backgroundDefault} style={{ marginRight: 6 }} />
+              <ThemedText style={[styles.magicButtonText, { color: appTheme.backgroundDefault }]}>Match Website</ThemedText>
             </View>
           </Button>
         </View>
