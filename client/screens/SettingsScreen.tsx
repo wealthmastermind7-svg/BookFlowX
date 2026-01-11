@@ -625,7 +625,7 @@ export default function SettingsScreen() {
             <ThemedText style={[styles.workflowCta, { color: ACCENT_GOLD }]}>Configure</ThemedText>
           </View>
         </GlassCard>
-        <GlassCard style={{ marginBottom: Spacing["2xl"], opacity: 0.6 }}>
+        <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={() => navigation.navigate("WidgetTheme")}>
           <View style={styles.compactInnerRow}>
             <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
               <Feather name="sliders" size={18} color={ACCENT_SILVER} />
@@ -634,9 +634,7 @@ export default function SettingsScreen() {
               <ThemedText style={styles.compactRowTitle}>Widget Theming</ThemedText>
               <ThemedText style={styles.compactRowSubtitle}>Visual appearance</ThemedText>
             </View>
-            <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
-              <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
-            </View>
+            <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
           </View>
         </GlassCard>
 
@@ -678,7 +676,7 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
         </GlassCard>
-        <GlassCard style={{ marginBottom: Spacing["2xl"], opacity: 0.6 }}>
+        <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={handleShowEmbedModal}>
           <View style={styles.compactInnerRow}>
             <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
               <Feather name="code" size={18} color={theme.text} />
@@ -687,9 +685,7 @@ export default function SettingsScreen() {
               <ThemedText style={styles.compactRowTitle}>Embed Widget</ThemedText>
               <ThemedText style={styles.compactRowSubtitle}>Add to your website</ThemedText>
             </View>
-            <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
-              <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
-            </View>
+            <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
           </View>
         </GlassCard>
 

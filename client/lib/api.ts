@@ -449,6 +449,20 @@ class ApiClient {
     }
   }
 
+  async getWidgetTheme(): Promise<WidgetTheme | null> {
+    try {
+      const res = await fetch(`${getApiBase()}${this.getBusinessPath()}/theme`);
+      if (!res.ok) return null;
+      return res.json();
+    } catch {
+      return null;
+    }
+  }
+
+  async updateWidgetTheme(theme: Partial<WidgetTheme>): Promise<WidgetTheme> {
+    return makeRequest<WidgetTheme>("PUT", `${this.getBusinessPath()}/theme`, theme);
+  }
+
   getBaseUrl(): string {
     return getApiBase();
   }
@@ -465,6 +479,21 @@ export interface EmbedCode {
   popupButtonCode: string;
   popupTextCode: string;
   businessSlug: string;
+}
+
+export interface WidgetTheme {
+  id?: string;
+  businessId?: string;
+  primaryColor: string;
+  accentColor: string;
+  backgroundColor: string;
+  textColor: string;
+  borderRadius: number;
+  glassBlurIntensity: number;
+  fontFamily: string;
+  buttonStyle: "rounded" | "pill" | "square";
+  showPoweredBy: boolean;
+  customCss?: string | null;
 }
 
 export const api = new ApiClient();
