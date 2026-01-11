@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   KeyboardAvoidingView,
@@ -10,21 +10,28 @@ import {
   FlatList,
   ActivityIndicator,
   Keyboard,
+  Share,
+  Alert,
+  Modal,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
+import * as FileSystem from "expo-file-system";
+import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { api, Service } from "@/lib/api";
+import { api, Service, Business } from "@/lib/api";
+import { getBookingDomain } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { Card } from "@/components/Card";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
+import QRCode from "react-native-qrcode-svg";
 
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -49,11 +56,13 @@ export default function ServiceEditorScreen() {
   const [saving, setSaving] = useState(false);
   const [businessReady, setBusinessReady] = useState(!!api.getBusinessId());
   const [currencySymbol, setCurrencySymbol] = useState("$");
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [qrModalVisible, setQrModalVisible] = useState(false);
+  const qrRef = useRef<any>(null);
 
   const serviceId = (route.params as any)?.serviceId;
 
   useEffect(() => {
-    // Wait for business to be ready
     const checkBusinessReady = setInterval(() => {
       if (api.getBusinessId()) {
         setBusinessReady(true);
@@ -71,18 +80,21 @@ export default function ServiceEditorScreen() {
   }, [serviceId, businessReady]);
 
   useEffect(() => {
-    const loadBusinessCurrency = async () => {
+    const loadBusinessData = async () => {
       try {
-        const business = await api.getBusiness();
-        if (business?.currency) {
-          setCurrencySymbol(getCurrencySymbol(business.currency));
+        const biz = await api.getBusiness();
+        if (biz) {
+          setBusiness(biz);
+          if (biz.currency) {
+            setCurrencySymbol(getCurrencySymbol(biz.currency));
+          }
         }
       } catch (error) {
-        console.error("Error loading business currency:", error);
+        console.error("Error loading business:", error);
       }
     };
     if (businessReady) {
-      loadBusinessCurrency();
+      loadBusinessData();
     }
   }, [businessReady]);
 
@@ -100,8 +112,86 @@ export default function ServiceEditorScreen() {
     }
   };
 
+  const getServiceBookingLink = () => {
+    if (!business?.slug || !serviceId) return null;
+    const domain = getBookingDomain();
+    const protocol = domain.includes("localhost") ? "http" : "https";
+    return `${protocol}://${domain}/book/${business.slug}?service=${serviceId}`;
+  };
+
+  const handleCopyServiceLink = async () => {
+    const link = getServiceBookingLink();
+    if (!link) {
+      Alert.alert("Error", "Save the service first to generate a booking link");
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await Clipboard.setStringAsync(link);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    Alert.alert("Copied", "Service booking link copied to clipboard");
+  };
+
+  const handleShareServiceLink = async () => {
+    const link = getServiceBookingLink();
+    if (!link) {
+      Alert.alert("Error", "Save the service first to share a booking link");
+      return;
+    }
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await Share.share({
+        message: `Book ${service.name}:\n${link}\n\nSchedule your appointment now!`,
+        url: link,
+        title: `Book ${service.name}`,
+      });
+    } catch (error) {
+      console.error("Error sharing:", error);
+    }
+  };
+
+  const handleShowQRCode = () => {
+    if (!serviceId) {
+      Alert.alert("Error", "Save the service first to generate a QR code");
+      return;
+    }
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setQrModalVisible(true);
+  };
+
+  const handleDownloadQRCode = async () => {
+    if (!qrRef.current) return;
+    
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      qrRef.current.toDataURL(async (dataURL: string) => {
+        if (Platform.OS === "web") {
+          const link = document.createElement("a");
+          link.href = `data:image/png;base64,${dataURL}`;
+          link.download = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+          link.click();
+          return;
+        }
+
+        const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+        const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+        
+        await FileSystem.writeAsStringAsync(fileUri, dataURL, {
+          encoding: FileSystem.EncodingType.Base64,
+        });
+
+        await Share.share({
+          url: fileUri,
+          title: `${service.name} - Booking QR Code`,
+        });
+      });
+    } catch (error) {
+      console.error("Error sharing QR code:", error);
+      Alert.alert("Error", "Failed to share QR code image");
+    }
+  };
+
   const handleSave = async () => {
-    // Check business is ready
     if (!businessReady || !api.getBusinessId()) {
       alert("Business is not ready. Please wait a moment and try again.");
       return;
@@ -121,10 +211,8 @@ export default function ServiceEditorScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
-      // Dismiss keyboard first (critical on iOS)
       Keyboard.dismiss();
       
-      // Give iOS time to commit any pending operations
       await new Promise(resolve => setTimeout(resolve, 100));
       
       console.log("Saving service with businessId:", api.getBusinessId());
@@ -147,7 +235,6 @@ export default function ServiceEditorScreen() {
       }
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       
-      // Only navigate AFTER persistence completes
       navigation.goBack();
     } catch (error) {
       console.error("Error saving service:", error);
@@ -164,6 +251,8 @@ export default function ServiceEditorScreen() {
       </View>
     );
   }
+
+  const bookingLink = getServiceBookingLink();
 
   return (
     <KeyboardAvoidingView
@@ -341,14 +430,76 @@ export default function ServiceEditorScreen() {
         {/* Links Tab */}
         {activeTab === "links" && (
           <View style={styles.tabContent}>
-            <View style={styles.section}>
-              <ThemedText type="h4" style={styles.sectionTitle}>
-                Coming Soon
-              </ThemedText>
-              <ThemedText type="body" style={styles.comingSoonText}>
-                Link management will be available in the next update
-              </ThemedText>
-            </View>
+            {!serviceId ? (
+              <View style={styles.section}>
+                <ThemedText type="h4" style={styles.sectionTitle}>
+                  Save First
+                </ThemedText>
+                <ThemedText type="body" style={styles.comingSoonText}>
+                  Save this service to generate its unique booking link and QR code
+                </ThemedText>
+              </View>
+            ) : (
+              <>
+                {/* Direct Booking Link */}
+                <View style={styles.section}>
+                  <ThemedText type="h4" style={styles.sectionTitle}>
+                    Direct Booking Link
+                  </ThemedText>
+                  <ThemedText type="body" style={styles.linkDescription}>
+                    Share this link to let customers book this specific service directly
+                  </ThemedText>
+                  
+                  <View style={[styles.linkBox, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}>
+                    <ThemedText type="body" style={styles.linkText} numberOfLines={2}>
+                      {bookingLink || "Loading..."}
+                    </ThemedText>
+                  </View>
+
+                  <View style={styles.linkActions}>
+                    <Pressable
+                      onPress={handleCopyServiceLink}
+                      style={[styles.linkButton, { backgroundColor: theme.text }]}
+                    >
+                      <Feather name="copy" size={18} color={theme.background} />
+                      <ThemedText style={[styles.linkButtonText, { color: theme.background }]}>
+                        Copy Link
+                      </ThemedText>
+                    </Pressable>
+
+                    <Pressable
+                      onPress={handleShareServiceLink}
+                      style={[styles.linkButton, { backgroundColor: theme.backgroundSecondary, borderWidth: 1, borderColor: theme.backgroundTertiary }]}
+                    >
+                      <Feather name="share" size={18} color={theme.text} />
+                      <ThemedText style={[styles.linkButtonText, { color: theme.text }]}>
+                        Share
+                      </ThemedText>
+                    </Pressable>
+                  </View>
+                </View>
+
+                {/* QR Code Section */}
+                <View style={styles.section}>
+                  <ThemedText type="h4" style={styles.sectionTitle}>
+                    QR Code
+                  </ThemedText>
+                  <ThemedText type="body" style={styles.linkDescription}>
+                    Display this QR code for customers to scan and book this service
+                  </ThemedText>
+                  
+                  <Pressable
+                    onPress={handleShowQRCode}
+                    style={[styles.qrPreviewButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
+                  >
+                    <Feather name="maximize" size={24} color={theme.text} />
+                    <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
+                      View QR Code
+                    </ThemedText>
+                  </Pressable>
+                </View>
+              </>
+            )}
           </View>
         )}
 
@@ -385,6 +536,55 @@ export default function ServiceEditorScreen() {
           </Button>
         </View>
       </KeyboardAwareScrollViewCompat>
+
+      {/* QR Code Modal */}
+      <Modal
+        visible={qrModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setQrModalVisible(false)}
+      >
+        <Pressable 
+          style={styles.modalOverlay}
+          onPress={() => setQrModalVisible(false)}
+        >
+          <View style={[styles.qrModalContent, { backgroundColor: theme.background }]}>
+            <View style={styles.qrModalHeader}>
+              <ThemedText type="h3" style={{ flex: 1 }}>
+                {service.name || "Service"} QR Code
+              </ThemedText>
+              <Pressable
+                onPress={() => setQrModalVisible(false)}
+                style={styles.closeButton}
+              >
+                <Feather name="x" size={24} color={theme.text} />
+              </Pressable>
+            </View>
+
+            <View style={styles.qrContainer}>
+              {bookingLink && (
+                <QRCode
+                  value={bookingLink}
+                  size={220}
+                  backgroundColor="white"
+                  color="black"
+                  getRef={(ref: any) => (qrRef.current = ref)}
+                />
+              )}
+            </View>
+
+            <ThemedText type="body" style={styles.qrDescription}>
+              Scan to book {service.name}
+            </ThemedText>
+
+            <View style={styles.qrActions}>
+              <Button onPress={handleDownloadQRCode} style={{ flex: 1 }}>
+                Download QR Code
+              </Button>
+            </View>
+          </View>
+        </Pressable>
+      </Modal>
     </KeyboardAvoidingView>
   );
 }
@@ -457,5 +657,81 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontWeight: "600",
+  },
+  linkDescription: {
+    opacity: 0.7,
+    marginBottom: Spacing.md,
+  },
+  linkBox: {
+    padding: Spacing.md,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    marginBottom: Spacing.md,
+  },
+  linkText: {
+    fontSize: 14,
+    opacity: 0.8,
+  },
+  linkActions: {
+    flexDirection: "row",
+    gap: Spacing.md,
+  },
+  linkButton: {
+    flex: 1,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.full,
+    gap: Spacing.sm,
+  },
+  linkButtonText: {
+    fontWeight: "600",
+  },
+  qrPreviewButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: Spacing.xl,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+  },
+  qrModalContent: {
+    width: "100%",
+    maxWidth: 340,
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+  },
+  qrModalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: Spacing.xl,
+  },
+  closeButton: {
+    padding: Spacing.sm,
+  },
+  qrContainer: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: Spacing.xl,
+    backgroundColor: "white",
+    borderRadius: BorderRadius.lg,
+    marginBottom: Spacing.lg,
+  },
+  qrDescription: {
+    textAlign: "center",
+    opacity: 0.7,
+    marginBottom: Spacing.xl,
+  },
+  qrActions: {
+    flexDirection: "row",
   },
 });
