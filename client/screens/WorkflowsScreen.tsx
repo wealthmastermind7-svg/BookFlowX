@@ -488,6 +488,17 @@ export default function WorkflowsScreen() {
         renderEmptyState()
       )}
       {renderBlueprintModal()}
+
+      {/* Coming Soon Overlay */}
+      <View style={[StyleSheet.absoluteFill, styles.comingSoonOverlay, { backgroundColor: theme.backgroundRoot + "95" }]}>
+        <View style={[styles.comingSoonBadge, { backgroundColor: theme.accent }]}>
+          <Feather name="clock" size={24} color={theme.buttonText} />
+          <ThemedText style={[styles.comingSoonTitle, { color: theme.buttonText }]}>Coming Soon</ThemedText>
+        </View>
+        <ThemedText style={[styles.comingSoonDescription, { color: theme.textSecondary }]}>
+          Intelligent booking automations and custom workflow triggers are currently under development.
+        </ThemedText>
+      </View>
     </ThemedView>
   );
 }
@@ -495,6 +506,31 @@ export default function WorkflowsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+  },
+  comingSoonOverlay: {
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing.xl,
+    zIndex: 10,
+  },
+  comingSoonBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.md,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.full,
+    marginBottom: Spacing.md,
+  },
+  comingSoonTitle: {
+    fontSize: Typography.h4.fontSize,
+    fontWeight: "700",
+  },
+  comingSoonDescription: {
+    fontSize: Typography.body.fontSize,
+    textAlign: "center",
+    maxWidth: 300,
+    lineHeight: 24,
   },
   loadingContainer: {
     flex: 1,
