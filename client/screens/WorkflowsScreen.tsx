@@ -497,6 +497,10 @@ export default function WorkflowsScreen() {
     const config = JSON.parse(previewWorkflow.actionConfig);
     const subject = config.subject || "Booking Confirmation";
     const businessName = business?.name || "Your Business";
+    const serviceName = business?.industry === "contractor" ? "Standard Service" : 
+                       business?.industry === "auto" ? "Oil Change" :
+                       business?.industry === "medical" ? "Consultation" : 
+                       "Express Glow";
     
     return (
       <Modal
@@ -539,7 +543,7 @@ export default function WorkflowsScreen() {
 
                   <View style={[styles.detailsCard, { backgroundColor: theme.backgroundSecondary }]}>
                     <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Confirmation #:</ThemedText> 77104567</ThemedText>
-                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Service:</ThemedText> Express Glow</ThemedText>
+                    <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Service:</ThemedText> {serviceName}</ThemedText>
                     <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Date:</ThemedText> Wednesday, January 21, 2026</ThemedText>
                     <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Time:</ThemedText> 12:30 PM</ThemedText>
                     <ThemedText style={styles.detailItem}><ThemedText style={{ fontWeight: '700' }}>Total Price:</ThemedText> {business?.currency || 'USD'} $45.00</ThemedText>
