@@ -210,21 +210,21 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: -1440,
     },
     {
-      name: "3-Hour Preparation Reminder",
-      description: "Remind clients to prepare space or vehicle",
+      name: "2-Hour Arrival Reminder",
+      description: "Final reminder 2 hours before arrival",
       triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
-        subject: "Service starting in 3 hours",
+        subject: "Service starting in 2 hours",
         templateType: "reminder",
       }),
-      delayMinutes: -180,
+      delayMinutes: -120,
     },
   ],
   contractor: [
     {
-      name: "Job Confirmation",
-      description: "Confirm service visit immediately",
+      name: "Instant Job Confirmation",
+      description: "Confirm service visit immediately after booking",
       triggerType: "booking_created",
       actionType: "send_email",
       actionConfig: JSON.stringify({
@@ -234,8 +234,8 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: 0,
     },
     {
-      name: "24-Hour Access Reminder",
-      description: "Remind customer to ensure access is available",
+      name: "24-Hour Reminder",
+      description: "Ensure access and site readiness 24 hours before",
       triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
@@ -246,7 +246,7 @@ export const INDUSTRY_BLUEPRINTS = {
     },
     {
       name: "2-Hour Arrival Reminder",
-      description: "Technician arriving soon",
+      description: "Technician arriving in 2 hours (best for trades)",
       triggerType: "booking_reminder",
       actionType: "send_email",
       actionConfig: JSON.stringify({
