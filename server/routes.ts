@@ -959,6 +959,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     // Use OG image from assets
     const ogImage = `${baseUrl}/assets/og/booking-preview.png`;
     
+    // Calculate correct URL for canonical/OG
+    const ogUrl = service 
+      ? `${baseUrl}/book/${business.slug}/${service.slug || service.id}`
+      : `${baseUrl}/book/${business.slug}`;
+    
     return `
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
@@ -966,7 +971,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="${baseUrl}/book/${business.slug}" />
+    <meta property="og:url" content="${ogUrl}" />
     <meta property="og:site_name" content="BookFlow" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
@@ -1041,7 +1046,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Find service by slug
       const service = await storage.getServiceBySlug(business.id, req.params.serviceSlug);
-      const highlightedService = service || (services && services.length > 0 ? services[0] : undefined);
+      
+      // If service slug is actually an ID, fallback to finding by ID
+      let highlightedService = service;
+      if (!highlightedService && req.params.serviceSlug) {
+        const allServices = await storage.getServices(business.id);
+        highlightedService = allServices.find(s => s.id === req.params.serviceSlug);
+      }
+      
+      // Fallback to first service only if none found at all
+      if (!highlightedService) {
+        highlightedService = services && services.length > 0 ? services[0] : undefined;
+      }
       
       const ogMeta = generateOpenGraphMeta(business, highlightedService, req, services);
       
