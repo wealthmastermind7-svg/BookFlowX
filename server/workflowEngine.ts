@@ -221,6 +221,41 @@ export const INDUSTRY_BLUEPRINTS = {
       delayMinutes: -180,
     },
   ],
+  contractor: [
+    {
+      name: "Job Confirmation",
+      description: "Confirm service visit immediately",
+      triggerType: "booking_created",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Your service visit is scheduled",
+        templateType: "confirmation",
+      }),
+      delayMinutes: 0,
+    },
+    {
+      name: "24-Hour Access Reminder",
+      description: "Remind customer to ensure access is available",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Reminder: Service visit tomorrow",
+        templateType: "reminder",
+      }),
+      delayMinutes: -1440,
+    },
+    {
+      name: "2-Hour Arrival Reminder",
+      description: "Technician arriving soon",
+      triggerType: "booking_reminder",
+      actionType: "send_email",
+      actionConfig: JSON.stringify({
+        subject: "Technician arriving in 2 hours",
+        templateType: "reminder",
+      }),
+      delayMinutes: -120,
+    },
+  ],
   custom: [],
 };
 
