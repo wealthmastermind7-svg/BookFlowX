@@ -101,14 +101,14 @@ const BUSINESS_TYPES: BusinessType[] = [
     name: "Salons & Beauty",
     icon: "scissors",
     color: "#EC4899",
-    backgroundImage: require("../assets/stock_images/elegant_salon_and_beauty_background.png"),
+    backgroundImage: require("../assets/stock_images/professional_salon_i_ce769037.jpg"),
   },
   {
     id: "medical",
     name: "Dentists & Medical",
     icon: "heart",
     color: "#3B82F6",
-    backgroundImage: require("../assets/stock_images/professional_medical_clinic_background.png"),
+    backgroundImage: require("../assets/stock_images/modern_medical_clini_f45cec4c.jpg"),
   },
   {
     id: "contractor",
@@ -122,14 +122,14 @@ const BUSINESS_TYPES: BusinessType[] = [
     name: "Car Detailers",
     icon: "truck",
     color: "#F59E0B",
-    backgroundImage: require("../assets/stock_images/professional_car_detailing_background.png"),
+    backgroundImage: require("../assets/stock_images/professional_car_det_8f245a62.jpg"),
   },
   {
     id: "fitness",
     name: "Fitness Trainers",
     icon: "zap",
     color: "#10B981",
-    backgroundImage: require("../assets/stock_images/professional_fitness_studio_background.png"),
+    backgroundImage: require("../assets/stock_images/modern_fitness_studi_95f0f1ca.jpg"),
   },
   {
     id: "plumber",
@@ -171,7 +171,7 @@ const BUSINESS_TYPES: BusinessType[] = [
     name: "Photographers",
     icon: "camera",
     color: "#6366F1",
-    backgroundImage: require("../assets/stock_images/professional_photography_studio_background.png"),
+    backgroundImage: require("../assets/stock_images/professional_photogr_f8897356.jpg"),
   },
 ];
 
