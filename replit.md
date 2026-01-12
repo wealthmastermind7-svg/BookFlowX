@@ -34,7 +34,7 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **Dashboard**: Revenue metrics and booking graphs, with a toggle for "This Week" (top 3) or "All" upcoming bookings.
 - **Management**: CRUD for services and customer listings.
 - **Public Booking Flow**: A 4-screen process (Service → Time → Checkout → Confirmation) accessible via unique business slugs.
-- **Demo Data**: Multi-business-type demo data (5 verticals).
+- **Demo Data**: Multi-business-type demo data (14 verticals including contractors).
 - **Utilities**: QR Code Generation for booking links and an embeddable booking widget (Calendly-style).
 - **Future Roadmap**:
     - **Google Business Profile (GBP)**: Sync leads and manage reviews via Google My Business API.
@@ -93,3 +93,12 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Workflow engine automatically marks timestamps when emails are sent
   - BookingCard displays "Booked", "Reminded", "Ready" indicators with green check marks
   - Bucket-based tracking: confirmation (delay=0), early reminders (12h+), final reminders (<12h)
+- **Contractor Support**: Added comprehensive support for contractor and trade businesses
+  - New industry templates: Contractor, Plumber, Electrician, HVAC, Cleaning, Landscaping
+  - Contractor-specific workflow blueprints with visit-focused language
+  - Demo data for each contractor type with realistic services and pricing
+  - All 14 business types now available in Settings demo data selector
+- **Manual Payment Confirmation**: Tap-to-confirm bookings on Dashboard and Calendar
+  - Pending bookings can be tapped to mark as Confirmed (payment received)
+  - Revenue metrics: Confirmed/Completed = Paid, Pending = Unpaid
+  - Haptic feedback on confirmation actions

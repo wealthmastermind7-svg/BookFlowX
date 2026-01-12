@@ -68,9 +68,18 @@ export default function SettingsScreen() {
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
     { id: "autodetailing", label: "Auto Detailing", description: "Car detailing services" },
-    { id: "solar", label: "Solar Installation", description: "Solar energy services" },
-    { id: "coaching", label: "Coaching", description: "Personal & executive coaching" },
     { id: "fitness", label: "Fitness", description: "Gym & fitness training" },
+    { id: "coaching", label: "Coaching", description: "Personal & executive coaching" },
+    { id: "medical", label: "Medical", description: "Healthcare & clinics" },
+    { id: "contractor", label: "Contractor", description: "General home services" },
+    { id: "plumber", label: "Plumber", description: "Plumbing services" },
+    { id: "electrician", label: "Electrician", description: "Electrical services" },
+    { id: "hvac", label: "HVAC", description: "Heating & cooling" },
+    { id: "cleaning", label: "Cleaning", description: "Home & office cleaning" },
+    { id: "landscaping", label: "Landscaping", description: "Lawn & garden care" },
+    { id: "photography", label: "Photography", description: "Photo & video services" },
+    { id: "consulting", label: "Consulting", description: "Business consulting" },
+    { id: "veterinary", label: "Veterinary", description: "Pet care services" },
   ];
 
   useEffect(() => {

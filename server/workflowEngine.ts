@@ -546,7 +546,24 @@ export async function processReminders(): Promise<void> {
 function getIndustryBlueprints(industry: string) {
   if (!industry) return [];
   const normalized = industry.toLowerCase().trim();
-  return INDUSTRY_BLUEPRINTS[normalized as keyof typeof INDUSTRY_BLUEPRINTS] || [];
+  
+  // Direct match first
+  if (INDUSTRY_BLUEPRINTS[normalized as keyof typeof INDUSTRY_BLUEPRINTS]) {
+    return INDUSTRY_BLUEPRINTS[normalized as keyof typeof INDUSTRY_BLUEPRINTS];
+  }
+  
+  // Contractor-related industries use contractor blueprint
+  const contractorIndustries = ["plumber", "electrician", "hvac", "cleaning", "landscaping", "handyman", "pest", "pool", "junk", "appliance"];
+  if (contractorIndustries.some(c => normalized.includes(c))) {
+    return INDUSTRY_BLUEPRINTS.contractor;
+  }
+  
+  // Auto-related industries use auto blueprint
+  if (normalized.includes("auto") || normalized.includes("car") || normalized.includes("vehicle")) {
+    return INDUSTRY_BLUEPRINTS.auto;
+  }
+  
+  return [];
 }
 
 export async function initializeIndustryBlueprints(

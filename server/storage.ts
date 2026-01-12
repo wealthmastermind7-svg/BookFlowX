@@ -659,6 +659,96 @@ export class DatabaseStorage implements IStorage {
           { name: "Eric Stewart", email: "eric-vet@example.com", phone: "555-0804" },
         ],
       },
+      contractor: {
+        name: "Pro Home Services",
+        services: [
+          { name: "Inspection Visit", duration: 60, price: 7500, description: "On-site inspection and quote" },
+          { name: "Standard Repair", duration: 120, price: 15000, description: "Common repair job" },
+          { name: "Emergency Call-out", duration: 90, price: 22500, description: "Urgent same-day service" },
+          { name: "Installation Service", duration: 180, price: 35000, description: "New installation or replacement" },
+        ],
+        customers: [
+          { name: "John Mitchell", email: "john-contractor@example.com", phone: "555-0901" },
+          { name: "Lisa Walker", email: "lisa-contractor@example.com", phone: "555-0902" },
+          { name: "David Robinson", email: "david-contractor@example.com", phone: "555-0903" },
+          { name: "Amy Turner", email: "amy-contractor@example.com", phone: "555-0904" },
+        ],
+      },
+      plumber: {
+        name: "Quick Plumbing Solutions",
+        services: [
+          { name: "Drain Inspection", duration: 45, price: 8500, description: "Camera inspection and diagnosis" },
+          { name: "Leak Repair", duration: 90, price: 14500, description: "Fix leaking pipes or fixtures" },
+          { name: "Water Heater Service", duration: 120, price: 25000, description: "Water heater repair or replacement" },
+          { name: "Emergency Plumbing", duration: 60, price: 19500, description: "24/7 emergency call-out" },
+        ],
+        customers: [
+          { name: "Robert Barnes", email: "robert-plumb@example.com", phone: "555-1001" },
+          { name: "Sandra Cox", email: "sandra-plumb@example.com", phone: "555-1002" },
+          { name: "William Price", email: "william-plumb@example.com", phone: "555-1003" },
+          { name: "Emily Bell", email: "emily-plumb@example.com", phone: "555-1004" },
+        ],
+      },
+      electrician: {
+        name: "Spark Electric Co",
+        services: [
+          { name: "Electrical Inspection", duration: 60, price: 9500, description: "Safety inspection and report" },
+          { name: "Outlet/Switch Repair", duration: 45, price: 8500, description: "Fix faulty outlets or switches" },
+          { name: "Panel Upgrade", duration: 240, price: 45000, description: "Electrical panel replacement" },
+          { name: "Emergency Electrical", duration: 90, price: 22000, description: "Urgent electrical repair" },
+        ],
+        customers: [
+          { name: "Charles Reed", email: "charles-elec@example.com", phone: "555-1101" },
+          { name: "Nancy Morgan", email: "nancy-elec@example.com", phone: "555-1102" },
+          { name: "George Perry", email: "george-elec@example.com", phone: "555-1103" },
+          { name: "Helen Butler", email: "helen-elec@example.com", phone: "555-1104" },
+        ],
+      },
+      hvac: {
+        name: "Climate Control Pros",
+        services: [
+          { name: "AC Tune-Up", duration: 60, price: 12500, description: "Seasonal maintenance service" },
+          { name: "Heating Repair", duration: 90, price: 18000, description: "Furnace or heat pump repair" },
+          { name: "System Installation", duration: 480, price: 85000, description: "New HVAC system install" },
+          { name: "Emergency HVAC", duration: 120, price: 28000, description: "24/7 emergency service" },
+        ],
+        customers: [
+          { name: "Frank Howard", email: "frank-hvac@example.com", phone: "555-1201" },
+          { name: "Dorothy Ward", email: "dorothy-hvac@example.com", phone: "555-1202" },
+          { name: "Ray Torres", email: "ray-hvac@example.com", phone: "555-1203" },
+          { name: "Carol Peterson", email: "carol-hvac@example.com", phone: "555-1204" },
+        ],
+      },
+      cleaning: {
+        name: "Sparkle Clean Services",
+        services: [
+          { name: "Standard Cleaning", duration: 120, price: 12000, description: "Regular home cleaning" },
+          { name: "Deep Cleaning", duration: 240, price: 28000, description: "Thorough deep clean" },
+          { name: "Move-In/Out Clean", duration: 300, price: 35000, description: "Complete property cleaning" },
+          { name: "Office Cleaning", duration: 180, price: 22000, description: "Commercial space cleaning" },
+        ],
+        customers: [
+          { name: "Angela Foster", email: "angela-clean@example.com", phone: "555-1301" },
+          { name: "Richard Sanders", email: "richard-clean@example.com", phone: "555-1302" },
+          { name: "Martha Ross", email: "martha-clean@example.com", phone: "555-1303" },
+          { name: "Peter Gray", email: "peter-clean@example.com", phone: "555-1304" },
+        ],
+      },
+      landscaping: {
+        name: "Green Thumb Landscaping",
+        services: [
+          { name: "Lawn Maintenance", duration: 90, price: 8500, description: "Mowing, edging, and cleanup" },
+          { name: "Garden Design", duration: 120, price: 25000, description: "Custom garden planning" },
+          { name: "Tree Trimming", duration: 180, price: 35000, description: "Professional tree care" },
+          { name: "Irrigation Install", duration: 240, price: 45000, description: "Sprinkler system installation" },
+        ],
+        customers: [
+          { name: "Victor Hughes", email: "victor-land@example.com", phone: "555-1401" },
+          { name: "Janet Kelly", email: "janet-land@example.com", phone: "555-1402" },
+          { name: "Larry Brooks", email: "larry-land@example.com", phone: "555-1403" },
+          { name: "Diane Bennett", email: "diane-land@example.com", phone: "555-1404" },
+        ],
+      },
     };
 
     const template = demoDataTemplates[businessType] || demoDataTemplates.salon;
