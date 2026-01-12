@@ -287,8 +287,16 @@ async function initStripe() {
   }
 }
 
+import cron from "node-cron";
+import { processReminders } from "./workflowEngine";
+
 (async () => {
   setupCors(app);
+  
+  // Start background reminder processing every 15 minutes
+  cron.schedule("*/15 * * * *", () => {
+    processReminders().catch(err => console.error("[Cron] Reminder error:", err));
+  });
 
   app.post(
     "/api/stripe/webhook",

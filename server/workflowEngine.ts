@@ -1,6 +1,9 @@
 import { storage } from "./storage";
 import { sendBookingConfirmation } from "./email";
 import type { Booking, Service, Customer, Business, Workflow } from "@shared/schema";
+import { db } from "./db";
+import { businesses, workflowLogs } from "@shared/schema";
+import { eq, and } from "drizzle-orm";
 
 interface WorkflowContext {
   booking?: Booking;
@@ -403,17 +406,88 @@ export async function triggerWorkflows(
   console.log(`[Workflow] Found ${workflows.length} active workflows for trigger: ${triggerType}`);
 
   for (const workflow of workflows) {
-    // Handle delayed workflows (for now, execute immediately - future: use job queue)
-    if (workflow.delayMinutes && workflow.delayMinutes > 0) {
-      console.log(`[Workflow] Delayed execution (${workflow.delayMinutes}min) for: ${workflow.name}`);
-      // In production, this would schedule a job
-      setTimeout(
-        () => executeWorkflow(workflow, { ...context, business }),
-        workflow.delayMinutes * 60 * 1000
-      );
+    // Handle delayed workflows
+    if (workflow.delayMinutes && workflow.delayMinutes !== 0) {
+      // In production/reminder mode, we only execute if the time is right
+      // This is a simplified version of a job queue
+      if (triggerType === "booking_reminder") {
+        // Reminders are triggered by the cron job, so we execute them
+        await executeWorkflow(workflow, { ...context, business });
+      } else if (workflow.delayMinutes > 0) {
+        console.log(`[Workflow] Delayed execution (${workflow.delayMinutes}min) for: ${workflow.name}`);
+        setTimeout(
+          () => executeWorkflow(workflow, { ...context, business }),
+          workflow.delayMinutes * 60 * 1000
+        );
+      }
     } else {
       await executeWorkflow(workflow, { ...context, business });
     }
+  }
+}
+
+export async function processReminders(): Promise<void> {
+  console.log("[Workflow] Checking for scheduled reminders...");
+  const now = new Date();
+  
+  try {
+    // Get all businesses to check their workflows
+    // In a real high-scale app, we'd query by trigger_type in a smarter way
+    const allBusinesses = await db.select().from(businesses);
+    
+    for (const business of allBusinesses) {
+      const reminderWorkflows = await storage.getWorkflowsByTrigger(business.id, "booking_reminder");
+      if (reminderWorkflows.length === 0) continue;
+
+      const allBookings = await storage.getBookings(business.id);
+      
+      for (const workflow of reminderWorkflows) {
+        const delay = workflow.delayMinutes || 0; // e.g., -1440 for 24h before
+        
+        for (const booking of allBookings) {
+          if (booking.status === "cancelled" || booking.status === "completed") continue;
+
+          // Parse booking date and time
+          // Example: date="2026-01-21", time="12:30 PM"
+          const [timeStr, ampm] = booking.time.split(" ");
+          let [hours, minutes] = timeStr.split(":").map(Number);
+          if (ampm === "PM" && hours < 12) hours += 12;
+          if (ampm === "AM" && hours === 12) hours = 0;
+          
+          const bookingDate = new Date(`${booking.date}T${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}:00`);
+          
+          // Target time is bookingDate + delayMinutes
+          const targetTime = new Date(bookingDate.getTime() + (delay * 60 * 1000));
+          
+          // If targetTime is within the last 15 minutes (our cron interval), trigger it
+          const fifteenMinsAgo = new Date(now.getTime() - 15 * 60 * 1000);
+          
+          if (targetTime <= now && targetTime > fifteenMinsAgo) {
+            // Check if we already sent this reminder
+            const existingLogs = await db.select().from(workflowLogs).where(
+              and(
+                eq(workflowLogs.workflowId, workflow.id),
+                eq(workflowLogs.bookingId, booking.id),
+                eq(workflowLogs.status, "completed")
+              )
+            );
+
+            if (existingLogs.length === 0) {
+              const service = await storage.getService(booking.serviceId);
+              const customer = await storage.getCustomer(booking.customerId);
+              
+              await triggerWorkflows("booking_reminder", business.id, {
+                booking,
+                service: service || undefined,
+                customer: customer || undefined
+              });
+            }
+          }
+        }
+      }
+    }
+  } catch (error) {
+    console.error("[Workflow] Error processing reminders:", error);
   }
 }
 
