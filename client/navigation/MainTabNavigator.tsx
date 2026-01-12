@@ -63,7 +63,7 @@ export default function MainTabNavigator() {
         name="CalendarTab"
         component={CalendarStackNavigator}
         options={{
-          title: "Schedule",
+          title: "Calendar",
           tabBarIcon: ({ color, size }) => (
             <Feather name="calendar" size={size} color={color} />
           ),
@@ -73,7 +73,7 @@ export default function MainTabNavigator() {
         name="ServicesTab"
         component={ServicesStackNavigator}
         options={{
-          title: "Job Types",
+          title: "Services",
           tabBarIcon: ({ color, size }) => (
             <Feather name="grid" size={size} color={color} />
           ),

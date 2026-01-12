@@ -148,7 +148,7 @@ export default function DashboardScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <ThemedText type="h3" style={styles.sectionTitle}>
-                Schedule & Reminders
+                Bookings & Reminders
               </ThemedText>
               <Pressable
                 onPress={() => setShowAllBookings(!showAllBookings)}
@@ -196,7 +196,7 @@ export default function DashboardScreen() {
             ) : (
               <View style={styles.emptyState}>
                 <ThemedText type="body" style={{ color: theme.textSecondary, textAlign: "center" }}>
-                  No upcoming jobs
+                  No upcoming bookings
                 </ThemedText>
               </View>
             )}

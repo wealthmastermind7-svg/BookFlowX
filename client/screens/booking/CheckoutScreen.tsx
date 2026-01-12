@@ -29,7 +29,6 @@ export default function CheckoutScreen() {
   const [customerName, setCustomerName] = useState("");
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
-  const [jobNotes, setJobNotes] = useState("");
   const [service, setService] = useState<Service | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -91,7 +90,6 @@ export default function CheckoutScreen() {
         time,
         status: "confirmed",
         totalPrice: service?.price || 0,
-        notes: jobNotes.trim(),
         createdAt: new Date().toISOString(),
       };
 
@@ -197,26 +195,6 @@ export default function CheckoutScreen() {
               value={customerPhone}
               onChangeText={setCustomerPhone}
               keyboardType="phone-pad"
-            />
-          </View>
-
-          <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>DESCRIBE THE ISSUE (OPTIONAL)</ThemedText>
-            <TextInput
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
-                  minHeight: 80,
-                },
-              ]}
-              placeholder="e.g. leaky faucet in the kitchen"
-              placeholderTextColor={theme.textTertiary}
-              value={jobNotes}
-              onChangeText={setJobNotes}
-              multiline
-              textAlignVertical="top"
             />
           </View>
         </Animated.View>
