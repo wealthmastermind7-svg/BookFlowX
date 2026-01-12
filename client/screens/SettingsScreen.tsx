@@ -758,7 +758,7 @@ Need help? Contact support at bookings@confirmbooking.online
           <GlassCard style={styles.securityCard} onPress={handleShowDemoTypeModal}>
             <Feather name="download-cloud" size={22} color={ACCENT_GOLD} style={{ marginBottom: Spacing.sm }} />
             <ThemedText style={styles.securityCardTitle}>Demo Data</ThemedText>
-            <ThemedText style={styles.securityCardSubtitle}>Load samples</ThemedText>
+            <ThemedText style={styles.securityCardSubtitle}>LOAD SAMPLES</ThemedText>
           </GlassCard>
           <GlassCard style={[styles.securityCard, { borderColor: "rgba(239,68,68,0.2)" }]} onPress={handleClearAllData}>
             <Feather name="trash-2" size={22} color="#EF4444" style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
