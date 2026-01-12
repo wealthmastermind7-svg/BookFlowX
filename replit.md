@@ -82,3 +82,9 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Currency selection available in Settings screen
   - Dashboard, Services, and Quick Sale screens now display prices in business currency
   - Known limitation: Prices are stored assuming 2 decimal places; currencies with 0 or 3 decimal places (JPY, KWD) may display incorrectly
+- **Blocked Time Slots**: Added ability to block specific time slots on specific dates
+  - New `blocked_slots` table in database schema
+  - Protected API endpoints for blocking/unblocking slots
+  - New "Block Times" button in Calendar screen that opens BlockedSlotsScreen
+  - Blocked slots are excluded from public booking availability
+  - Visual feedback for blocked vs available vs booked slots
