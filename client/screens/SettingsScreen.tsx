@@ -813,6 +813,9 @@ Need help? Contact support at bookings@confirmbooking.online
                 <ActivityIndicator size="large" color={theme.text} />
               )}
               <ThemedText style={styles.qrUrl}>{bookingUrl}</ThemedText>
+              <ThemedText style={styles.qrHelperText}>
+                Place this at your counter, van, invoices, or website
+              </ThemedText>
             </View>
             <View style={styles.modalActions}>
               <Button onPress={handleDownloadQRCode}>Share QR Code Image</Button>
@@ -1467,9 +1470,12 @@ const styles = StyleSheet.create({
     height: 250,
     marginBottom: Spacing.md,
   },
-  qrUrl: {
+  qrHelperText: {
     textAlign: "center",
-    opacity: 0.7,
+    opacity: 0.5,
+    fontSize: 12,
+    marginTop: Spacing.sm,
+    fontStyle: "italic",
   },
   modalActions: {
     gap: Spacing.md,
