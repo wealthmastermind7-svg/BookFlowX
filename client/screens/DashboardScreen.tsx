@@ -148,7 +148,7 @@ export default function DashboardScreen() {
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
               <ThemedText type="h3" style={styles.sectionTitle}>
-                Upcoming Bookings
+                Bookings & Reminders
               </ThemedText>
               <Pressable
                 onPress={() => setShowAllBookings(!showAllBookings)}
