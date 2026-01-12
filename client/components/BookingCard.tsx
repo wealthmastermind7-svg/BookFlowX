@@ -126,7 +126,7 @@ export function BookingCard({
             <Feather name="check" size={10} color={confirmationSentAt ? "#fff" : theme.textTertiary} />
           </View>
           <ThemedText type="small" style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}>
-            Booked
+            Confirmation
           </ThemedText>
         </View>
         <View style={styles.progressItem}>
@@ -134,7 +134,7 @@ export function BookingCard({
             <Feather name="check" size={10} color={reminder24hSentAt ? "#fff" : theme.textTertiary} />
           </View>
           <ThemedText type="small" style={[styles.progressLabel, reminder24hSentAt && styles.progressLabelActive]}>
-            Reminded
+            24-Hour
           </ThemedText>
         </View>
         <View style={styles.progressItem}>
@@ -142,7 +142,7 @@ export function BookingCard({
             <Feather name="check" size={10} color={reminder2hSentAt ? "#fff" : theme.textTertiary} />
           </View>
           <ThemedText type="small" style={[styles.progressLabel, reminder2hSentAt && styles.progressLabelActive]}>
-            Ready
+            2-Hour
           </ThemedText>
         </View>
       </View>
