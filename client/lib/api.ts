@@ -129,6 +129,9 @@ export interface Booking {
   status: string;
   totalPrice: number;
   notes?: string | null;
+  paymentStatus?: string | null;
+  stripePaymentIntentId?: string | null;
+  stripeCheckoutSessionId?: string | null;
   confirmationSentAt?: string | null;
   reminder24hSentAt?: string | null;
   reminder2hSentAt?: string | null;

@@ -93,8 +93,8 @@ export default function DashboardScreen() {
     .slice(0, showAllBookings ? undefined : 3);
 
   const graphData = stats?.weeklyData?.map((d) => ({
-    label: d.label,
-    value: d.value,
+    label: d.day,
+    value: d.revenue * 100,
   })) || [
     { label: "Mon", value: 0 },
     { label: "Tue", value: 0 },
