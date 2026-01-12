@@ -83,8 +83,8 @@ export default function DashboardScreen() {
     }
   };
 
-  const paidCount = bookings.filter((b) => b.paymentStatus === "paid").length;
-  const unpaidCount = bookings.filter((b) => b.paymentStatus !== "paid").length;
+  const paidCount = bookings.filter((b) => b.status === "confirmed" || b.status === "completed" || b.paymentStatus === "paid").length;
+  const unpaidCount = bookings.filter((b) => b.status === "pending").length;
   const totalRevenue = stats?.totalRevenue || 0;
 
   const upcomingBookings = bookings
