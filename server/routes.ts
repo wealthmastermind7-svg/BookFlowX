@@ -990,8 +990,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const services = await storage.getServices(business.id);
       
-      // Check for specific service highlight via query param
-      const targetServiceId = req.query.serviceId as string;
+      // Check for specific service highlight via query param (supports both 'serviceId' and legacy 'service')
+      const targetServiceId = (req.query.serviceId || req.query.service) as string;
       let highlightedService = services && services.length > 0 ? services[0] : undefined;
       
       if (targetServiceId) {
@@ -1007,6 +1007,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         req, 
         services
       );
+      
+      // Insert Open Graph meta tags into the HTML before the closing </head> tag
+      const htmlWithMeta = bookingHtmlContent.replace(
+        '</head>',
+        `${ogMeta}\n  </head>`
+      );
+      
+      res.type("text/html").send(htmlWithMeta);
+    } catch (error) {
+      console.error("Error serving booking page:", error);
+      if (bookingHtmlContent) {
+        res.type("text/html").send(bookingHtmlContent);
+      } else {
+        res.status(500).json({ error: "Booking page not available" });
+      }
+    }
+  });
+  
+  // Handle service-specific booking URLs: /book/:businessSlug/:serviceSlug
+  app.get("/book/:slug/:serviceSlug", async (req: Request, res: Response) => {
+    try {
+      if (!bookingHtmlContent) {
+        return res.status(500).json({ error: "Booking page not available" });
+      }
+      
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      
+      const services = await storage.getServices(business.id);
+      
+      // Find service by slug
+      const service = await storage.getServiceBySlug(business.id, req.params.serviceSlug);
+      const highlightedService = service || (services && services.length > 0 ? services[0] : undefined);
+      
+      const ogMeta = generateOpenGraphMeta(business, highlightedService, req, services);
       
       // Insert Open Graph meta tags into the HTML before the closing </head> tag
       const htmlWithMeta = bookingHtmlContent.replace(

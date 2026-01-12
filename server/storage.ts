@@ -58,6 +58,7 @@ export interface IStorage {
   // Services
   getServices(businessId: string): Promise<Service[]>;
   getService(id: string): Promise<Service | undefined>;
+  getServiceBySlug(businessId: string, slug: string): Promise<Service | undefined>;
   createService(service: InsertService): Promise<Service>;
   updateService(id: string, updates: Partial<InsertService>): Promise<Service | undefined>;
   deleteService(id: string): Promise<void>;
@@ -189,15 +190,64 @@ export class DatabaseStorage implements IStorage {
     return service || undefined;
   }
 
+  async getServiceBySlug(businessId: string, slug: string): Promise<Service | undefined> {
+    const [service] = await db
+      .select()
+      .from(services)
+      .where(and(eq(services.businessId, businessId), eq(services.slug, slug)));
+    return service || undefined;
+  }
+
+  private generateSlug(name: string): string {
+    return name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s-]/g, '')
+      .replace(/\s+/g, '-')
+      .replace(/-+/g, '-')
+      .trim();
+  }
+
+  private async generateUniqueServiceSlug(businessId: string, name: string, excludeId?: string): Promise<string> {
+    const baseSlug = this.generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (true) {
+      const existing = await db
+        .select()
+        .from(services)
+        .where(and(eq(services.businessId, businessId), eq(services.slug, slug)));
+      
+      if (existing.length === 0 || (excludeId && existing.length === 1 && existing[0].id === excludeId)) {
+        break;
+      }
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return slug;
+  }
+
   async createService(service: InsertService): Promise<Service> {
-    const [created] = await db.insert(services).values(service).returning();
+    const slug = await this.generateUniqueServiceSlug(service.businessId, service.name);
+    const [created] = await db.insert(services).values({ ...service, slug }).returning();
     return created;
   }
 
   async updateService(id: string, updates: Partial<InsertService>): Promise<Service | undefined> {
+    let finalUpdates = { ...updates };
+    
+    if (updates.name) {
+      const existing = await this.getService(id);
+      if (existing) {
+        const slug = await this.generateUniqueServiceSlug(existing.businessId, updates.name, id);
+        finalUpdates = { ...finalUpdates, slug };
+      }
+    }
+    
     const [updated] = await db
       .update(services)
-      .set(updates)
+      .set(finalUpdates)
       .where(eq(services.id, id))
       .returning();
     return updated || undefined;

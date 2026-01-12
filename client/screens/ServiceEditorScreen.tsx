@@ -116,7 +116,9 @@ export default function ServiceEditorScreen() {
     if (!business?.slug || !serviceId) return null;
     const domain = getBookingDomain();
     const protocol = domain.includes("localhost") ? "http" : "https";
-    return `${protocol}://${domain}/book/${business.slug}?service=${serviceId}`;
+    const serviceSlug = (service as Service).slug 
+      || (service.name ? service.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() : serviceId);
+    return `${protocol}://${domain}/book/${business.slug}/${serviceSlug}`;
   };
 
   const handleCopyServiceLink = async () => {

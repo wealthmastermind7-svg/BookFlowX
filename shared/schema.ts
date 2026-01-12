@@ -52,6 +52,7 @@ export const services = pgTable("services", {
     .notNull()
     .references(() => businesses.id, { onDelete: "cascade" }),
   name: text("name").notNull(),
+  slug: text("slug"),
   description: text("description"),
   duration: integer("duration").notNull(),
   price: integer("price").notNull(),

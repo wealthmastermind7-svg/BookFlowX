@@ -99,6 +99,7 @@ export interface Service {
   id: string;
   businessId: string;
   name: string;
+  slug?: string | null;
   description?: string | null;
   duration: number;
   price: number;
