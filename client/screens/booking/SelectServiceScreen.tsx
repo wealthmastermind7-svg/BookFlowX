@@ -234,7 +234,7 @@ export default function SelectServiceScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <ThemedText style={styles.businessLabel}>BookFlowX</ThemedText>
-            <ThemedText style={styles.headerTitle}>Services</ThemedText>
+            <ThemedText style={styles.headerTitle}>Job Types</ThemedText>
           </View>
           <ProgressRing step={1} total={3} />
         </View>

@@ -204,10 +204,10 @@ export default function CalendarScreen() {
           <View style={styles.bookingsTitleContainer}>
             <ThemedText type="h4" style={styles.bookingsTitle}>
               {bookingsForSelectedDate.length > 0
-                ? `${bookingsForSelectedDate.length} booking${
+                ? `${bookingsForSelectedDate.length} job${
                     bookingsForSelectedDate.length !== 1 ? "s" : ""
                   }`
-                : "No bookings"}
+                : "No jobs"}
             </ThemedText>
             {!loading && (
               <ThemedText type="small" style={styles.selectedDateLabel}>
@@ -257,7 +257,7 @@ export default function CalendarScreen() {
           />
         ) : (
           <ThemedText type="body" style={styles.emptyBookingsText}>
-            No bookings scheduled for this date
+            No jobs scheduled for this date
           </ThemedText>
         )}
       </View>

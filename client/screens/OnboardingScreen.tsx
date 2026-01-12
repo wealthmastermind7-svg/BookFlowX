@@ -65,7 +65,7 @@ const PAGES = [
     id: "1",
     headline: "Booking Made",
     highlightText: "Effortless",
-    description: "Beautiful appointment scheduling for every business type. No accounts. No waiting.",
+    description: "No phone calls. No back-and-forth. Customer books while you are on a job.",
     buttonText: "Get Started",
     showSkip: false,
   },

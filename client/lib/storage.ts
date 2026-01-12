@@ -42,6 +42,7 @@ export interface Booking {
   time: string;
   status: BookingStatus;
   totalPrice: number;
+  notes?: string;
   createdAt: string;
 }
 
