@@ -564,6 +564,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bookings = await storage.getBookingsByDate(businessId, date);
       const bookedTimes = bookings.map(b => b.time);
       
+      // Get blocked slots for this date
+      const blockedSlots = await storage.getBlockedSlotsByDate(businessId, date);
+      const blockedTimes = blockedSlots.map(b => b.time);
+      
       // Generate time slots
       const slots = [];
       const [startHour] = dayAvailability.startTime.split(":").map(Number);
@@ -575,11 +579,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
         
         slots.push({
           time,
-          available: !bookedTimes.includes(time),
+          available: !bookedTimes.includes(time) && !blockedTimes.includes(time),
+          isBlocked: blockedTimes.includes(time),
         });
         slots.push({
           time: time30,
-          available: !bookedTimes.includes(time30),
+          available: !bookedTimes.includes(time30) && !blockedTimes.includes(time30),
+          isBlocked: blockedTimes.includes(time30),
         });
       }
       
@@ -587,6 +593,76 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error getting slots:", error);
       res.status(500).json({ error: "Failed to get slots" });
+    }
+  });
+
+  // === BLOCKED SLOTS ===
+  
+  // Get blocked slots for a business (PROTECTED)
+  app.get("/api/businesses/:businessId/blocked-slots", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const blockedSlots = await storage.getBlockedSlots(req.params.businessId);
+      res.json(blockedSlots);
+    } catch (error) {
+      console.error("Error getting blocked slots:", error);
+      res.status(500).json({ error: "Failed to get blocked slots" });
+    }
+  });
+
+  // Get blocked slots for a specific date (PROTECTED)
+  app.get("/api/businesses/:businessId/blocked-slots/:date", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const blockedSlots = await storage.getBlockedSlotsByDate(req.params.businessId, req.params.date);
+      res.json(blockedSlots);
+    } catch (error) {
+      console.error("Error getting blocked slots:", error);
+      res.status(500).json({ error: "Failed to get blocked slots" });
+    }
+  });
+
+  // Block a time slot (PROTECTED)
+  app.post("/api/businesses/:businessId/blocked-slots", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { date, time, reason } = req.body;
+      
+      if (!date || !time) {
+        return res.status(400).json({ error: "Date and time are required" });
+      }
+      
+      const blockedSlot = await storage.createBlockedSlot({
+        businessId: req.params.businessId,
+        date,
+        time,
+        reason: reason || null,
+      });
+      
+      res.status(201).json(blockedSlot);
+    } catch (error) {
+      console.error("Error blocking slot:", error);
+      res.status(500).json({ error: "Failed to block slot" });
+    }
+  });
+
+  // Unblock a time slot by ID (PROTECTED)
+  app.delete("/api/businesses/:businessId/blocked-slots/:slotId", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      await storage.deleteBlockedSlot(req.params.slotId);
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error unblocking slot:", error);
+      res.status(500).json({ error: "Failed to unblock slot" });
+    }
+  });
+
+  // Unblock a time slot by date and time (PROTECTED)
+  app.delete("/api/businesses/:businessId/blocked-slots/:date/:time", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { date, time } = req.params;
+      await storage.deleteBlockedSlotByDateTime(req.params.businessId, date, decodeURIComponent(time));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error unblocking slot:", error);
+      res.status(500).json({ error: "Failed to unblock slot" });
     }
   });
 

@@ -111,6 +111,11 @@ export default function CalendarScreen() {
     navigation.navigate("AvailabilityEditor");
   };
 
+  const handleOpenBlockedSlots = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    navigation.navigate("BlockedSlots", { date: selectedDateStr });
+  };
+
   const monthName = currentMonth.toLocaleDateString("en-US", {
     month: "long",
     year: "numeric",
@@ -195,19 +200,30 @@ export default function CalendarScreen() {
           { paddingBottom: tabBarHeight + Spacing.xl },
         ]}
       >
-        <View style={styles.bookingsTitleContainer}>
-          <ThemedText type="h4" style={styles.bookingsTitle}>
-            {bookingsForSelectedDate.length > 0
-              ? `${bookingsForSelectedDate.length} booking${
-                  bookingsForSelectedDate.length !== 1 ? "s" : ""
-                }`
-              : "No bookings"}
-          </ThemedText>
-          {!loading && (
-            <ThemedText type="small" style={styles.selectedDateLabel}>
-              {formatDateForDisplay(selectedDateStr)}
+        <View style={styles.bookingsHeader}>
+          <View style={styles.bookingsTitleContainer}>
+            <ThemedText type="h4" style={styles.bookingsTitle}>
+              {bookingsForSelectedDate.length > 0
+                ? `${bookingsForSelectedDate.length} booking${
+                    bookingsForSelectedDate.length !== 1 ? "s" : ""
+                  }`
+                : "No bookings"}
             </ThemedText>
-          )}
+            {!loading && (
+              <ThemedText type="small" style={styles.selectedDateLabel}>
+                {formatDateForDisplay(selectedDateStr)}
+              </ThemedText>
+            )}
+          </View>
+          <Pressable
+            onPress={handleOpenBlockedSlots}
+            style={[styles.blockButton, { backgroundColor: theme.backgroundSecondary }]}
+          >
+            <Feather name="slash" size={14} color={theme.text} />
+            <ThemedText type="small" style={styles.blockButtonText}>
+              Block Times
+            </ThemedText>
+          </Pressable>
         </View>
         {bookingsForSelectedDate.length > 0 ? (
           <FlatList
@@ -295,8 +311,23 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: "rgba(0,0,0,0.1)",
   },
-  bookingsTitleContainer: {
+  bookingsHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "flex-start",
     marginBottom: Spacing.lg,
+  },
+  bookingsTitleContainer: {},
+  blockButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.sm,
+    borderRadius: BorderRadius.xs,
+    gap: Spacing.xs,
+  },
+  blockButtonText: {
+    fontWeight: "500",
   },
   bookingsTitle: {
     marginBottom: Spacing.xs,

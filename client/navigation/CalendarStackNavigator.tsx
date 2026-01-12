@@ -2,11 +2,13 @@ import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import CalendarScreen from "@/screens/CalendarScreen";
 import AvailabilityEditorScreen from "@/screens/AvailabilityEditorScreen";
+import BlockedSlotsScreen from "@/screens/BlockedSlotsScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type CalendarStackParamList = {
   CalendarMain: undefined;
   AvailabilityEditor: undefined;
+  BlockedSlots: { date: string };
 };
 
 const Stack = createNativeStackNavigator<CalendarStackParamList>();
@@ -28,6 +30,13 @@ export default function CalendarStackNavigator() {
         component={AvailabilityEditorScreen}
         options={{
           headerTitle: "Business Hours",
+        }}
+      />
+      <Stack.Screen
+        name="BlockedSlots"
+        component={BlockedSlotsScreen}
+        options={{
+          headerTitle: "Block Time Slots",
         }}
       />
     </Stack.Navigator>

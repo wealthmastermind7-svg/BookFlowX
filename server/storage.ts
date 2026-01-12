@@ -5,6 +5,7 @@ import {
   customers,
   bookings,
   availability,
+  blockedSlots,
   pushTokens,
   quickSales,
   workflows,
@@ -23,6 +24,8 @@ import {
   type InsertBooking,
   type Availability,
   type InsertAvailability,
+  type BlockedSlot,
+  type InsertBlockedSlot,
   type PushToken,
   type InsertPushToken,
   type QuickSale,
@@ -77,6 +80,13 @@ export interface IStorage {
   getAvailability(businessId: string): Promise<Availability[]>;
   setAvailability(availability: InsertAvailability): Promise<Availability>;
   updateOrCreateAvailability(availability: InsertAvailability): Promise<Availability>;
+  
+  // Blocked Slots
+  getBlockedSlots(businessId: string): Promise<BlockedSlot[]>;
+  getBlockedSlotsByDate(businessId: string, date: string): Promise<BlockedSlot[]>;
+  createBlockedSlot(blockedSlot: InsertBlockedSlot): Promise<BlockedSlot>;
+  deleteBlockedSlot(id: string): Promise<void>;
+  deleteBlockedSlotByDateTime(businessId: string, date: string, time: string): Promise<void>;
   
   // Demo Data
   initializeDemoData(businessId: string): Promise<void>;
@@ -359,6 +369,39 @@ export class DatabaseStorage implements IStorage {
       const [created] = await db.insert(availability).values(avail).returning();
       return created;
     }
+  }
+
+  // Blocked Slots
+  async getBlockedSlots(businessId: string): Promise<BlockedSlot[]> {
+    return db.select().from(blockedSlots).where(eq(blockedSlots.businessId, businessId));
+  }
+
+  async getBlockedSlotsByDate(businessId: string, date: string): Promise<BlockedSlot[]> {
+    return db
+      .select()
+      .from(blockedSlots)
+      .where(and(eq(blockedSlots.businessId, businessId), eq(blockedSlots.date, date)));
+  }
+
+  async createBlockedSlot(blockedSlot: InsertBlockedSlot): Promise<BlockedSlot> {
+    const [created] = await db.insert(blockedSlots).values(blockedSlot).returning();
+    return created;
+  }
+
+  async deleteBlockedSlot(id: string): Promise<void> {
+    await db.delete(blockedSlots).where(eq(blockedSlots.id, id));
+  }
+
+  async deleteBlockedSlotByDateTime(businessId: string, date: string, time: string): Promise<void> {
+    await db
+      .delete(blockedSlots)
+      .where(
+        and(
+          eq(blockedSlots.businessId, businessId),
+          eq(blockedSlots.date, date),
+          eq(blockedSlots.time, time)
+        )
+      );
   }
 
   // Push Tokens

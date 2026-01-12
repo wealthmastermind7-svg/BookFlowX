@@ -147,6 +147,16 @@ export interface DashboardStats {
 export interface TimeSlot {
   time: string;
   available: boolean;
+  isBlocked?: boolean;
+}
+
+export interface BlockedSlot {
+  id: string;
+  businessId: string;
+  date: string;
+  time: string;
+  reason?: string | null;
+  createdAt?: string | null;
 }
 
 export interface Availability {
@@ -437,6 +447,38 @@ class ApiClient {
 
   async bulkUpdateAvailability(schedules: AvailabilitySchedule[]): Promise<Availability[]> {
     return makeRequest<Availability[]>("PUT", `${this.getBusinessPath()}/availability`, { schedules });
+  }
+
+  async getBlockedSlots(): Promise<BlockedSlot[]> {
+    try {
+      const res = await fetch(`${getApiBase()}${this.getBusinessPath()}/blocked-slots`, {
+        headers: { "x-business-token": (await getSecureToken()) || "" },
+      });
+      if (!res.ok) return [];
+      return res.json();
+    } catch {
+      return [];
+    }
+  }
+
+  async getBlockedSlotsByDate(date: string): Promise<BlockedSlot[]> {
+    try {
+      const res = await fetch(`${getApiBase()}${this.getBusinessPath()}/blocked-slots/${date}`, {
+        headers: { "x-business-token": (await getSecureToken()) || "" },
+      });
+      if (!res.ok) return [];
+      return res.json();
+    } catch {
+      return [];
+    }
+  }
+
+  async blockSlot(date: string, time: string, reason?: string): Promise<BlockedSlot> {
+    return makeRequest<BlockedSlot>("POST", `${this.getBusinessPath()}/blocked-slots`, { date, time, reason });
+  }
+
+  async unblockSlot(date: string, time: string): Promise<void> {
+    return makeRequest<void>("DELETE", `${this.getBusinessPath()}/blocked-slots/${date}/${encodeURIComponent(time)}`);
   }
 
   async getEmbedCode(): Promise<EmbedCode | null> {

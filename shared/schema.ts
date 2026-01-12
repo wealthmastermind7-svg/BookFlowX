@@ -209,6 +209,20 @@ export const workflowLogs = pgTable("workflow_logs", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+// Blocked time slots table (for date-specific time blocking)
+export const blockedSlots = pgTable("blocked_slots", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  date: text("date").notNull(), // YYYY-MM-DD format
+  time: text("time").notNull(), // Time slot like "9:00 AM"
+  reason: text("reason"), // Optional reason for blocking
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Push tokens table (for Expo Push Notifications)
 export const pushTokens = pgTable("push_tokens", {
   id: varchar("id")
@@ -232,11 +246,19 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   customers: many(customers),
   bookings: many(bookings),
   availability: many(availability),
+  blockedSlots: many(blockedSlots),
   pushTokens: many(pushTokens),
   quickSales: many(quickSales),
   workflows: many(workflows),
   theme: one(businessThemes),
   apiKeys: many(apiKeys),
+}));
+
+export const blockedSlotsRelations = relations(blockedSlots, ({ one }) => ({
+  business: one(businesses, {
+    fields: [blockedSlots.businessId],
+    references: [businesses.id],
+  }),
 }));
 
 export const quickSalesRelations = relations(quickSales, ({ one }) => ({
@@ -364,6 +386,11 @@ export const insertAvailabilitySchema = createInsertSchema(availability).omit({
   id: true,
 });
 
+export const insertBlockedSlotSchema = createInsertSchema(blockedSlots).omit({
+  id: true,
+  createdAt: true,
+});
+
 export const insertPushTokenSchema = createInsertSchema(pushTokens).omit({
   id: true,
   createdAt: true,
@@ -411,6 +438,9 @@ export type Booking = typeof bookings.$inferSelect;
 export type InsertBooking = z.infer<typeof insertBookingSchema>;
 export type Availability = typeof availability.$inferSelect;
 export type InsertAvailability = z.infer<typeof insertAvailabilitySchema>;
+
+export type BlockedSlot = typeof blockedSlots.$inferSelect;
+export type InsertBlockedSlot = z.infer<typeof insertBlockedSlotSchema>;
 
 export type PushToken = typeof pushTokens.$inferSelect;
 export type InsertPushToken = z.infer<typeof insertPushTokenSchema>;
