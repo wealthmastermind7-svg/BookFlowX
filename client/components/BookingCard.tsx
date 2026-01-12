@@ -19,6 +19,9 @@ interface BookingCardProps {
   date: string;
   time: string;
   status: BookingStatus;
+  confirmationSentAt?: string | null;
+  reminder24hSentAt?: string | null;
+  reminder2hSentAt?: string | null;
   onPress?: () => void;
 }
 
@@ -28,6 +31,9 @@ export function BookingCard({
   date,
   time,
   status,
+  confirmationSentAt,
+  reminder24hSentAt,
+  reminder2hSentAt,
   onPress,
 }: BookingCardProps) {
   const { theme } = useTheme();
@@ -114,6 +120,38 @@ export function BookingCard({
           </ThemedText>
         </View>
       </View>
+      {(confirmationSentAt || reminder24hSentAt || reminder2hSentAt) && (
+        <View style={styles.progressRow}>
+          <View style={styles.progressItem}>
+            <View style={[styles.progressTick, confirmationSentAt ? styles.progressTickActive : styles.progressTickInactive]}>
+              <Feather name="check" size={10} color={confirmationSentAt ? "#fff" : theme.textTertiary} />
+            </View>
+            <ThemedText type="small" style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}>
+              Booked
+            </ThemedText>
+          </View>
+          {reminder24hSentAt && (
+            <View style={styles.progressItem}>
+              <View style={[styles.progressTick, styles.progressTickActive]}>
+                <Feather name="check" size={10} color="#fff" />
+              </View>
+              <ThemedText type="small" style={[styles.progressLabel, styles.progressLabelActive]}>
+                Reminded
+              </ThemedText>
+            </View>
+          )}
+          {reminder2hSentAt && (
+            <View style={styles.progressItem}>
+              <View style={[styles.progressTick, styles.progressTickActive]}>
+                <Feather name="check" size={10} color="#fff" />
+              </View>
+              <ThemedText type="small" style={[styles.progressLabel, styles.progressLabelActive]}>
+                Ready
+              </ThemedText>
+            </View>
+          )}
+        </View>
+      )}
       </Pressable>
     </Animated.View>
   );
@@ -157,5 +195,39 @@ const styles = StyleSheet.create({
   },
   dateTimeText: {
     opacity: 0.6,
+  },
+  progressRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.lg,
+    marginTop: Spacing.md,
+    paddingTop: Spacing.md,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(0,0,0,0.05)",
+  },
+  progressItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.xs,
+  },
+  progressTick: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  progressTickActive: {
+    backgroundColor: "#22C55E",
+  },
+  progressTickInactive: {
+    backgroundColor: "rgba(0,0,0,0.1)",
+  },
+  progressLabel: {
+    opacity: 0.5,
+    fontSize: 11,
+  },
+  progressLabelActive: {
+    opacity: 0.8,
   },
 });

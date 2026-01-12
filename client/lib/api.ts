@@ -128,6 +128,9 @@ export interface Booking {
   status: string;
   totalPrice: number;
   notes?: string | null;
+  confirmationSentAt?: string | null;
+  reminder24hSentAt?: string | null;
+  reminder2hSentAt?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
   customerName?: string;

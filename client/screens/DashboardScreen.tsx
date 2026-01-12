@@ -177,6 +177,9 @@ export default function DashboardScreen() {
                   date={booking.date}
                   time={booking.time}
                   status={booking.status as "pending" | "confirmed" | "completed" | "cancelled"}
+                  confirmationSentAt={booking.confirmationSentAt}
+                  reminder24hSentAt={booking.reminder24hSentAt}
+                  reminder2hSentAt={booking.reminder2hSentAt}
                 />
               ))
             ) : (

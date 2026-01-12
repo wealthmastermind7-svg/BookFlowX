@@ -2,7 +2,7 @@ import { storage } from "./storage";
 import { sendBookingConfirmation } from "./email";
 import type { Booking, Service, Customer, Business, Workflow } from "@shared/schema";
 import { db } from "./db";
-import { businesses, workflowLogs } from "@shared/schema";
+import { businesses, workflowLogs, bookings } from "@shared/schema";
 import { eq, and } from "drizzle-orm";
 
 interface WorkflowContext {
@@ -272,7 +272,8 @@ function evaluateConditions(
 
 async function executeEmailAction(
   config: EmailActionConfig,
-  context: WorkflowContext
+  context: WorkflowContext,
+  delayMinutes?: number
 ): Promise<{ success: boolean; message: string }> {
   if (!context.booking || !context.customer || !context.service) {
     return { success: false, message: "Missing required context for email" };
@@ -290,6 +291,22 @@ async function executeEmailAction(
       currency: context.business.currency || "USD",
       confirmationNumber: context.booking.id.split("-")[0].toUpperCase(),
     });
+
+    // Mark email sent timestamp on booking based on reminder timing
+    const now = new Date();
+    if (delayMinutes === 0 || delayMinutes === undefined) {
+      // Confirmation email (no delay or immediate send)
+      await db.update(bookings).set({ confirmationSentAt: now }).where(eq(bookings.id, context.booking.id));
+      console.log(`[Workflow] Marked confirmationSentAt for booking ${context.booking.id}`);
+    } else if (delayMinutes <= -720) {
+      // Long-range reminders (12h+ before): -720, -1440, -2880, etc. -> 24h bucket
+      await db.update(bookings).set({ reminder24hSentAt: now }).where(eq(bookings.id, context.booking.id));
+      console.log(`[Workflow] Marked reminder24hSentAt for booking ${context.booking.id} (delay: ${delayMinutes}min)`);
+    } else if (delayMinutes < 0) {
+      // Short-range reminders (< 12h before): -60, -120, -180, etc. -> 2h bucket
+      await db.update(bookings).set({ reminder2hSentAt: now }).where(eq(bookings.id, context.booking.id));
+      console.log(`[Workflow] Marked reminder2hSentAt for booking ${context.booking.id} (delay: ${delayMinutes}min)`);
+    }
 
     return { success: true, message: "Email sent successfully" };
   } catch (error) {
@@ -362,7 +379,7 @@ export async function executeWorkflow(
 
     switch (workflow.actionType) {
       case "send_email":
-        result = await executeEmailAction(actionConfig as EmailActionConfig, context);
+        result = await executeEmailAction(actionConfig as EmailActionConfig, context, workflow.delayMinutes ?? 0);
         break;
       case "webhook":
         result = await executeWebhookAction(actionConfig as WebhookActionConfig, context);

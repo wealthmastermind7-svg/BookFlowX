@@ -96,6 +96,9 @@ export const bookings = pgTable("bookings", {
   paymentStatus: text("payment_status").default("unpaid"),
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   stripeCheckoutSessionId: text("stripe_checkout_session_id"),
+  confirmationSentAt: timestamp("confirmation_sent_at"),
+  reminder24hSentAt: timestamp("reminder_24h_sent_at"),
+  reminder2hSentAt: timestamp("reminder_2h_sent_at"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });

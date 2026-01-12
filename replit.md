@@ -88,3 +88,8 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - New "Block Times" button in Calendar screen that opens BlockedSlotsScreen
   - Blocked slots are excluded from public booking availability
   - Visual feedback for blocked vs available vs booked slots
+- **Email Progress Tracking**: Dashboard now shows green progress ticks for booking email status
+  - New columns on `bookings` table: `confirmationSentAt`, `reminder24hSentAt`, `reminder2hSentAt`
+  - Workflow engine automatically marks timestamps when emails are sent
+  - BookingCard displays "Booked", "Reminded", "Ready" indicators with green check marks
+  - Bucket-based tracking: confirmation (delay=0), early reminders (12h+), final reminders (<12h)
