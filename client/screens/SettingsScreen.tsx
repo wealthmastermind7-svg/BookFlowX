@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system/legacy";
-import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView } from "react-native";
+import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView, KeyboardAvoidingView } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -878,45 +878,61 @@ Need help? Contact support at bookings@confirmbooking.online
       <Modal
         visible={demoTypeModalVisible}
         transparent
-        animationType="fade"
+        animationType="slide"
         onRequestClose={() => setDemoTypeModalVisible(false)}
       >
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Choose Business Type</ThemedText>
-              <Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.closeButton}>
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-            <View style={styles.demoTypeGrid}>
-              {DEMO_TYPES.map((type) => (
-                <Pressable
-                  key={type.id}
-                  style={[
-                    styles.demoTypeButton,
-                    { backgroundColor: selectedDemoType === type.id ? theme.accent : theme.backgroundSecondary }
-                  ]}
-                  onPress={() => setSelectedDemoType(type.id)}
-                >
-                  <ThemedText style={[styles.demoTypeLabel, { color: selectedDemoType === type.id ? theme.buttonText : theme.text }]}>
-                    {type.label}
-                  </ThemedText>
-                  <ThemedText style={[styles.demoTypeDescription, { color: selectedDemoType === type.id ? theme.buttonText : theme.textSecondary }]}>
-                    {type.description}
-                  </ThemedText>
+          <KeyboardAvoidingView 
+            behavior={Platform.OS === "ios" ? "padding" : "height"}
+            style={{ flex: 1, width: '100%', justifyContent: 'flex-end' }}
+          >
+            <View style={[styles.modalContent, { backgroundColor: theme.backgroundDefault, maxHeight: '80%' }]}>
+              <View style={styles.modalHeader}>
+                <ThemedText style={styles.modalTitle}>Choose Business Type</ThemedText>
+                <Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.closeButton}>
+                  <Feather name="x" size={24} color={theme.text} />
                 </Pressable>
-              ))}
+              </View>
+              
+              <ScrollView 
+                style={{ flex: 1 }}
+                contentContainerStyle={{ paddingBottom: Spacing.xl }}
+                showsVerticalScrollIndicator={true}
+              >
+                <View style={styles.demoTypeGrid}>
+                  {DEMO_TYPES.map((type) => (
+                    <Pressable
+                      key={type.id}
+                      style={[
+                        styles.demoTypeButton,
+                        { 
+                          backgroundColor: selectedDemoType === type.id ? theme.text : theme.backgroundSecondary,
+                          borderColor: selectedDemoType === type.id ? theme.text : theme.border
+                        }
+                      ]}
+                      onPress={() => setSelectedDemoType(type.id)}
+                    >
+                      <ThemedText style={[styles.demoTypeLabel, { color: selectedDemoType === type.id ? theme.backgroundDefault : theme.text }]}>
+                        {type.label}
+                      </ThemedText>
+                      <ThemedText style={[styles.demoTypeDescription, { color: selectedDemoType === type.id ? theme.backgroundDefault : theme.textSecondary, opacity: 0.8 }]}>
+                        {type.description}
+                      </ThemedText>
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
+
+              <View style={[styles.modalActions, { borderTopWidth: 1, borderTopColor: theme.border, paddingTop: Spacing.md }]}>
+                <Button onPress={() => handleInitializeDemoData(selectedDemoType)} disabled={demoDataLoading}>
+                  {demoDataLoading ? "Loading..." : "Load Demo Data"}
+                </Button>
+                <Pressable onPress={() => setDemoTypeModalVisible(false)} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
+                  <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
+                </Pressable>
+              </View>
             </View>
-            <View style={styles.modalActions}>
-              <Button onPress={() => handleInitializeDemoData(selectedDemoType)} disabled={demoDataLoading}>
-                {demoDataLoading ? "Loading..." : "Load Demo Data"}
-              </Button>
-              <Pressable onPress={() => setDemoTypeModalVisible(false)} style={[styles.secondaryButton, { backgroundColor: theme.backgroundSecondary }]}>
-                <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
-              </Pressable>
-            </View>
-          </View>
+          </KeyboardAvoidingView>
         </View>
       </Modal>
 
