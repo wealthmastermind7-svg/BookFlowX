@@ -120,38 +120,32 @@ export function BookingCard({
           </ThemedText>
         </View>
       </View>
-      {(confirmationSentAt || reminder24hSentAt || reminder2hSentAt) && (
-        <View style={styles.progressRow}>
-          <View style={styles.progressItem}>
-            <View style={[styles.progressTick, confirmationSentAt ? styles.progressTickActive : styles.progressTickInactive]}>
-              <Feather name="check" size={10} color={confirmationSentAt ? "#fff" : theme.textTertiary} />
-            </View>
-            <ThemedText type="small" style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}>
-              Booked
-            </ThemedText>
+      <View style={styles.progressRow}>
+        <View style={styles.progressItem}>
+          <View style={[styles.progressTick, confirmationSentAt ? styles.progressTickActive : styles.progressTickInactive]}>
+            <Feather name="check" size={10} color={confirmationSentAt ? "#fff" : theme.textTertiary} />
           </View>
-          {reminder24hSentAt && (
-            <View style={styles.progressItem}>
-              <View style={[styles.progressTick, styles.progressTickActive]}>
-                <Feather name="check" size={10} color="#fff" />
-              </View>
-              <ThemedText type="small" style={[styles.progressLabel, styles.progressLabelActive]}>
-                Reminded
-              </ThemedText>
-            </View>
-          )}
-          {reminder2hSentAt && (
-            <View style={styles.progressItem}>
-              <View style={[styles.progressTick, styles.progressTickActive]}>
-                <Feather name="check" size={10} color="#fff" />
-              </View>
-              <ThemedText type="small" style={[styles.progressLabel, styles.progressLabelActive]}>
-                Ready
-              </ThemedText>
-            </View>
-          )}
+          <ThemedText type="small" style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}>
+            Booked
+          </ThemedText>
         </View>
-      )}
+        <View style={styles.progressItem}>
+          <View style={[styles.progressTick, reminder24hSentAt ? styles.progressTickActive : styles.progressTickInactive]}>
+            <Feather name="check" size={10} color={reminder24hSentAt ? "#fff" : theme.textTertiary} />
+          </View>
+          <ThemedText type="small" style={[styles.progressLabel, reminder24hSentAt && styles.progressLabelActive]}>
+            Reminded
+          </ThemedText>
+        </View>
+        <View style={styles.progressItem}>
+          <View style={[styles.progressTick, reminder2hSentAt ? styles.progressTickActive : styles.progressTickInactive]}>
+            <Feather name="check" size={10} color={reminder2hSentAt ? "#fff" : theme.textTertiary} />
+          </View>
+          <ThemedText type="small" style={[styles.progressLabel, reminder2hSentAt && styles.progressLabelActive]}>
+            Ready
+          </ThemedText>
+        </View>
+      </View>
       </Pressable>
     </Animated.View>
   );
