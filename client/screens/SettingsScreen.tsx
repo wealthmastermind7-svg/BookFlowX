@@ -1470,6 +1470,10 @@ const styles = StyleSheet.create({
     height: 250,
     marginBottom: Spacing.md,
   },
+  qrUrl: {
+    textAlign: "center",
+    opacity: 0.7,
+  },
   qrHelperText: {
     textAlign: "center",
     opacity: 0.5,
