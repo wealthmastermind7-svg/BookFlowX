@@ -406,8 +406,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
           businessName: business?.name || "Business",
           currency: business?.currency || "USD"
         })
-        .then(success => {
-          if (success) console.log(`[Booking] Email sent successfully to ${customerEmail}`);
+        .then(async success => {
+          if (success) {
+            console.log(`[Booking] Email sent successfully to ${customerEmail}`);
+            try {
+              await storage.updateBooking(booking.id, { confirmationSentAt: new Date() });
+              console.log(`[Booking] Updated confirmationSentAt for booking ${booking.id}`);
+            } catch (updateErr) {
+              console.error("[Booking] Error updating confirmationSentAt:", updateErr);
+            }
+          }
           else console.error(`[Booking] Failed to send email to ${customerEmail}`);
         })
         .catch(err => console.error("[Booking] Critical error in email confirmation:", err));

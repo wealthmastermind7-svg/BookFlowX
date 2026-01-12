@@ -307,6 +307,9 @@ export class DatabaseStorage implements IStorage {
         paymentStatus: bookings.paymentStatus,
         stripePaymentIntentId: bookings.stripePaymentIntentId,
         stripeCheckoutSessionId: bookings.stripeCheckoutSessionId,
+        confirmationSentAt: bookings.confirmationSentAt,
+        reminder24hSentAt: bookings.reminder24hSentAt,
+        reminder2hSentAt: bookings.reminder2hSentAt,
         customerName: customers.name,
         serviceName: services.name,
       })
@@ -345,6 +348,9 @@ export class DatabaseStorage implements IStorage {
         paymentStatus: bookings.paymentStatus,
         stripePaymentIntentId: bookings.stripePaymentIntentId,
         stripeCheckoutSessionId: bookings.stripeCheckoutSessionId,
+        confirmationSentAt: bookings.confirmationSentAt,
+        reminder24hSentAt: bookings.reminder24hSentAt,
+        reminder2hSentAt: bookings.reminder2hSentAt,
         customerName: customers.name,
         serviceName: services.name,
       })
