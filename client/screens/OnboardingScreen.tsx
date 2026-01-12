@@ -48,6 +48,12 @@ const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
   education: "coaching",
   photography: "photography",
   consulting: "consulting",
+  contractor: "contractor",
+  plumber: "plumber",
+  electrician: "electrician",
+  hvac: "hvac",
+  cleaning: "cleaning",
+  landscaping: "landscaping",
 };
 
 interface OnboardingScreenProps {
@@ -67,7 +73,7 @@ const PAGES = [
     id: "2",
     headline: "Built for How",
     highlightText: "You Work",
-    description: "From salons to clinics, coaches to car care. One powerful dashboard for every appointment.",
+    description: "From trades to clinics, salons to studios. One powerful dashboard for every appointment.",
     buttonText: "Continue",
     showSkip: true,
   },
@@ -105,6 +111,13 @@ const BUSINESS_TYPES: BusinessType[] = [
     backgroundImage: require("../assets/stock_images/professional_medical_clinic_background.png"),
   },
   {
+    id: "contractor",
+    name: "Home Contractors",
+    icon: "home",
+    color: "#8B5CF6",
+    backgroundImage: require("../assets/stock_images/professional_contrac_02057d6b.jpg"),
+  },
+  {
     id: "automotive",
     name: "Car Detailers",
     icon: "truck",
@@ -119,32 +132,46 @@ const BUSINESS_TYPES: BusinessType[] = [
     backgroundImage: require("../assets/stock_images/professional_fitness_studio_background.png"),
   },
   {
-    id: "veterinary",
-    name: "Veterinary Clinics",
-    icon: "activity",
-    color: "#8B5CF6",
-    backgroundImage: require("../assets/stock_images/professional_veterinary_clinic_background.png"),
+    id: "plumber",
+    name: "Plumbing Services",
+    icon: "droplet",
+    color: "#3B82F6",
+    backgroundImage: require("../assets/stock_images/professional_plumbin_7edb24e5.jpg"),
   },
   {
-    id: "education",
-    name: "Tutoring & Coaching",
-    icon: "book",
+    id: "electrician",
+    name: "Electricians",
+    icon: "battery-charging",
+    color: "#F59E0B",
+    backgroundImage: require("../assets/stock_images/professional_electri_ccc62b5b.jpg"),
+  },
+  {
+    id: "hvac",
+    name: "HVAC Experts",
+    icon: "wind",
     color: "#06B6D4",
-    backgroundImage: require("../assets/stock_images/professional_tutoring_studio_background.png"),
+    backgroundImage: require("../assets/stock_images/professional_hvac_te_f815c946.jpg"),
+  },
+  {
+    id: "cleaning",
+    name: "Cleaning Pros",
+    icon: "star",
+    color: "#10B981",
+    backgroundImage: require("../assets/stock_images/professional_cleanin_126975e0.jpg"),
+  },
+  {
+    id: "landscaping",
+    name: "Landscapers",
+    icon: "sun",
+    color: "#14B8A6",
+    backgroundImage: require("../assets/stock_images/professional_landsca_8ea97a28.jpg"),
   },
   {
     id: "photography",
-    name: "Photography Studios",
+    name: "Photographers",
     icon: "camera",
     color: "#6366F1",
     backgroundImage: require("../assets/stock_images/professional_photography_studio_background.png"),
-  },
-  {
-    id: "consulting",
-    name: "Consulting & Services",
-    icon: "briefcase",
-    color: "#14B8A6",
-    backgroundImage: require("../assets/stock_images/professional_consulting_office_background.png"),
   },
 ];
 
@@ -376,13 +403,13 @@ function Page2Content() {
           styles.industryChip,
           {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 80,
+            top: 40,
             left: 20,
           },
         ]}
       >
-        <Feather name="heart" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Wellness & Salon</Text>
+        <Feather name="home" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Home Contractors</Text>
       </Animated.View>
 
       <Animated.View
@@ -391,13 +418,13 @@ function Page2Content() {
           styles.industryChip,
           {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 130,
-            right: 60,
+            top: 100,
+            right: 40,
           },
         ]}
       >
-        <Feather name="activity" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Clinics</Text>
+        <Feather name="droplet" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Plumbing & Trades</Text>
       </Animated.View>
 
       <Animated.View
@@ -406,17 +433,32 @@ function Page2Content() {
           styles.industryChip,
           {
             backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 180,
-            right: 30,
+            top: 160,
+            left: 50,
           },
         ]}
       >
-        <Feather name="target" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Fitness Coaches</Text>
+        <Feather name="scissors" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Salons & Beauty</Text>
       </Animated.View>
 
       <Animated.View
         entering={FadeIn.delay(750).springify()}
+        style={[
+          styles.industryChip,
+          {
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 220,
+            right: 20,
+          },
+        ]}
+      >
+        <Feather name="zap" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Fitness Trainers</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(900).springify()}
         style={[
           styles.industryChip,
           {
@@ -427,7 +469,22 @@ function Page2Content() {
         ]}
       >
         <Feather name="truck" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Auto Detailing</Text>
+        <Text style={[styles.industryText, { color: colors.text }]}>Auto Detailers</Text>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(1050).springify()}
+        style={[
+          styles.industryChip,
+          {
+            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
+            top: 340,
+            right: 50,
+          },
+        ]}
+      >
+        <Feather name="sun" size={14} color={colors.text} />
+        <Text style={[styles.industryText, { color: colors.text }]}>Landscapers</Text>
       </Animated.View>
     </View>
   );
