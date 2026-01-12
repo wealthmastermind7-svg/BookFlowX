@@ -200,7 +200,7 @@ export function PaywallModal({
                   Unlock Full Access
                 </Text>
                 <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                  Experience the next level of booking tools and premium features.
+                  BookFlow gives you a booking link and QR code so customers can book you instantly, with automatic confirmations and reminders.
                 </Text>
               </View>
 
