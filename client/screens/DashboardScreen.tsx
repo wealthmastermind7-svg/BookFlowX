@@ -180,6 +180,17 @@ export default function DashboardScreen() {
                   confirmationSentAt={booking.confirmationSentAt}
                   reminder24hSentAt={booking.reminder24hSentAt}
                   reminder2hSentAt={booking.reminder2hSentAt}
+                  onPress={async () => {
+                    if (booking.status === "pending") {
+                      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                      try {
+                        await api.updateBooking(booking.id, { status: "confirmed" });
+                        loadData();
+                      } catch (error) {
+                        console.error("Error confirming booking:", error);
+                      }
+                    }
+                  }}
                 />
               ))
             ) : (

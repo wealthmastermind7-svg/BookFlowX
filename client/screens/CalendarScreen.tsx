@@ -236,6 +236,20 @@ export default function CalendarScreen() {
                 date={item.date}
                 time={item.time}
                 status={item.status as "pending" | "confirmed" | "completed" | "cancelled"}
+                confirmationSentAt={item.confirmationSentAt}
+                reminder24hSentAt={item.reminder24hSentAt}
+                reminder2hSentAt={item.reminder2hSentAt}
+                onPress={async () => {
+                  if (item.status === "pending") {
+                    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+                    try {
+                      await api.updateBooking(item.id, { status: "confirmed" });
+                      loadBookings();
+                    } catch (error) {
+                      console.error("Error confirming booking:", error);
+                    }
+                  }
+                }}
               />
             )}
             keyExtractor={(item) => item.id}
