@@ -83,8 +83,8 @@ export default function DashboardScreen() {
     }
   };
 
-  const confirmedCount = bookings.filter((b) => b.status === "confirmed").length;
-  const pendingCount = bookings.filter((b) => b.status === "pending").length;
+  const paidCount = bookings.filter((b) => b.paymentStatus === "paid").length;
+  const unpaidCount = bookings.filter((b) => b.paymentStatus !== "paid").length;
   const totalRevenue = stats?.totalRevenue || 0;
 
   const upcomingBookings = bookings
@@ -93,8 +93,8 @@ export default function DashboardScreen() {
     .slice(0, showAllBookings ? undefined : 3);
 
   const graphData = stats?.weeklyData?.map((d) => ({
-    label: d.day,
-    value: d.revenue * 100,
+    label: d.label,
+    value: d.value,
   })) || [
     { label: "Mon", value: 0 },
     { label: "Tue", value: 0 },
@@ -118,18 +118,18 @@ export default function DashboardScreen() {
             <View style={styles.metersContainer}>
               <View style={styles.meterColumn}>
                 <CircularMeter
-                  value={confirmedCount}
-                  maxValue={Math.max(confirmedCount + pendingCount, 1)}
+                  value={paidCount}
+                  maxValue={Math.max(paidCount + unpaidCount, 1)}
                   size={100}
-                  label="Confirmed"
+                  label="Paid"
                 />
               </View>
               <View style={styles.meterColumn}>
                 <CircularMeter
-                  value={pendingCount}
-                  maxValue={Math.max(confirmedCount + pendingCount, 1)}
+                  value={unpaidCount}
+                  maxValue={Math.max(paidCount + unpaidCount, 1)}
                   size={100}
-                  label="Pending"
+                  label="Unpaid"
                 />
               </View>
             </View>
