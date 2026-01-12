@@ -450,33 +450,37 @@ export default function ServiceEditorScreen() {
                     Share this link to let customers book this specific service directly
                   </ThemedText>
                   
-                  <View style={[styles.linkBox, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}>
-                    <ThemedText type="body" style={styles.linkText} numberOfLines={2}>
-                      {bookingLink || "Loading..."}
+                  <Pressable
+                    onPress={handleCopyServiceLink}
+                    style={[styles.linkCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
+                  >
+                    <View style={styles.linkCardContent}>
+                      <View style={[styles.linkIconBadge, { backgroundColor: theme.backgroundTertiary }]}>
+                        <Feather name="link" size={20} color={theme.text} />
+                      </View>
+                      <View style={styles.linkCardText}>
+                        <ThemedText type="body" style={styles.linkUrl} numberOfLines={1}>
+                          {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
+                        </ThemedText>
+                        <ThemedText type="small" style={styles.linkHint}>
+                          Tap to copy
+                        </ThemedText>
+                      </View>
+                      <View style={[styles.copyBadge, { backgroundColor: theme.text }]}>
+                        <Feather name="copy" size={14} color={theme.backgroundDefault} />
+                      </View>
+                    </View>
+                  </Pressable>
+
+                  <Pressable
+                    onPress={handleShareServiceLink}
+                    style={[styles.shareButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
+                  >
+                    <Feather name="share" size={18} color={theme.text} />
+                    <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>
+                      Share Link
                     </ThemedText>
-                  </View>
-
-                  <View style={styles.linkActions}>
-                    <Pressable
-                      onPress={handleCopyServiceLink}
-                      style={[styles.linkButton, { backgroundColor: theme.text }]}
-                    >
-                      <Feather name="copy" size={18} color={theme.background} />
-                      <ThemedText style={[styles.linkButtonText, { color: theme.background }]}>
-                        Copy Link
-                      </ThemedText>
-                    </Pressable>
-
-                    <Pressable
-                      onPress={handleShareServiceLink}
-                      style={[styles.linkButton, { backgroundColor: theme.backgroundSecondary, borderWidth: 1, borderColor: theme.backgroundTertiary }]}
-                    >
-                      <Feather name="share" size={18} color={theme.text} />
-                      <ThemedText style={[styles.linkButtonText, { color: theme.text }]}>
-                        Share
-                      </ThemedText>
-                    </Pressable>
-                  </View>
+                  </Pressable>
                 </View>
 
                 {/* QR Code Section */}
@@ -548,7 +552,7 @@ export default function ServiceEditorScreen() {
           style={styles.modalOverlay}
           onPress={() => setQrModalVisible(false)}
         >
-          <View style={[styles.qrModalContent, { backgroundColor: theme.background }]}>
+          <View style={[styles.qrModalContent, { backgroundColor: theme.backgroundDefault }]}>
             <View style={styles.qrModalHeader}>
               <ThemedText type="h3" style={{ flex: 1 }}>
                 {service.name || "Service"} QR Code
@@ -660,33 +664,56 @@ const styles = StyleSheet.create({
   },
   linkDescription: {
     opacity: 0.7,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing.lg,
   },
-  linkBox: {
-    padding: Spacing.md,
+  linkCard: {
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
     marginBottom: Spacing.md,
+    overflow: "hidden",
   },
-  linkText: {
-    fontSize: 14,
-    opacity: 0.8,
-  },
-  linkActions: {
+  linkCardContent: {
     flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.md,
     gap: Spacing.md,
   },
-  linkButton: {
+  linkIconBadge: {
+    width: 40,
+    height: 40,
+    borderRadius: BorderRadius.md,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  linkCardText: {
     flex: 1,
+  },
+  linkUrl: {
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  linkHint: {
+    opacity: 0.5,
+    marginTop: 2,
+  },
+  copyBadge: {
+    width: 32,
+    height: 32,
+    borderRadius: BorderRadius.full,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  shareButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     paddingVertical: Spacing.md,
     paddingHorizontal: Spacing.lg,
     borderRadius: BorderRadius.full,
+    borderWidth: 1,
     gap: Spacing.sm,
   },
-  linkButtonText: {
+  shareButtonText: {
     fontWeight: "600",
   },
   qrPreviewButton: {
