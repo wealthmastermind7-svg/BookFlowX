@@ -65,7 +65,7 @@ export function PaywallModal({
   const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");
-  const [freeTrialEnabled, setFreeTrialEnabled] = useState(true);
+  const [freeTrialEnabled, setFreeTrialEnabled] = useState(false);
 
   const floatY = useSharedValue(0);
   const glowOpacity = useSharedValue(0.3);
