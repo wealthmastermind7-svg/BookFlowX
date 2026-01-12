@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
 import { Alert, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
-import { PaywallType } from "@/components/PaywallModal";
+import { PaywallType, PlanType } from "@/components/PaywallModal";
 import {
   initializeRevenueCat,
   checkPremiumStatus,
@@ -30,7 +30,7 @@ interface PremiumContextType {
   checkShareAccess: () => boolean;
   checkQrAccess: () => boolean;
   checkEmbedAccess: () => boolean;
-  handleUpgrade: (plan: "monthly" | "yearly") => Promise<void>;
+  handleUpgrade: (plan: PlanType) => Promise<void>;
   purchaseProduct: (pkg: PurchasesPackage) => Promise<boolean>;
   restoreSubscription: () => Promise<boolean>;
   updatePremiumState: (state: Partial<PremiumState>) => void;
@@ -153,7 +153,7 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
     }
   }, [hidePaywall]);
 
-  const handleUpgrade = useCallback(async (plan: "monthly" | "yearly") => {
+  const handleUpgrade = useCallback(async (plan: PlanType) => {
     if (Platform.OS === "web") {
       Alert.alert(
         "Mobile Only",
@@ -176,6 +176,8 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
       const identifier = pkg.identifier.toLowerCase();
       if (plan === "yearly") {
         return identifier.includes("annual") || identifier.includes("yearly") || identifier.includes("year");
+      } else if (plan === "lifetime") {
+        return identifier.includes("lifetime") || identifier.includes("forever") || identifier.includes("one-time");
       } else {
         return identifier.includes("monthly") || identifier.includes("month");
       }
