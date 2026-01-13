@@ -344,7 +344,7 @@ import { processReminders } from "./workflowEngine";
   };
 
   // Inline fallback content for production when files aren't available
-  const privacyPolicyFallback = `<!DOCTYPE html>
+    const privacyPolicyFallback = `<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -370,8 +370,6 @@ import { processReminders } from "./workflowEngine";
     <p>We use the information we collect to facilitate bookings, communicate with you about your appointments, and improve our services. We do not sell your personal information to third parties.</p>
     <h2>3. Data Security</h2>
     <p>We implement a variety of security measures to maintain the safety of your personal information. Your data is stored securely using industry-standard encryption.</p>
-    <h2>4. Contact Us</h2>
-    <p>If you have any questions about this Privacy Policy, please contact us at <strong>admin@cerolauto.com</strong>.</p>
     <footer>&copy; 2026 BookFlow. All rights reserved.</footer>
 </body>
 </html>`;
@@ -404,8 +402,6 @@ import { processReminders } from "./workflowEngine";
     <p>Premium features are available through subscription tiers. All payments are processed securely, and subscriptions can be managed through the app settings.</p>
     <h2>4. Limitation of Liability</h2>
     <p>BookFlow shall not be liable for any indirect, incidental, or consequential damages resulting from the use or inability to use our services.</p>
-    <h2>5. Contact Us</h2>
-    <p>For any questions regarding these terms, please contact us at <strong>admin@cerolauto.com</strong>.</p>
     <footer>&copy; 2026 BookFlow. All rights reserved.</footer>
 </body>
 </html>`;
