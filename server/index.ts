@@ -198,7 +198,7 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/manifest" && req.path !== "/home") {
+    if (req.path !== "/" && req.path !== "/manifest") {
       return next();
     }
 
@@ -207,7 +207,7 @@ function configureExpoAndLanding(app: express.Application) {
       return serveExpoManifest(platform, res);
     }
 
-    if (req.path === "/home") {
+    if (req.path === "/") {
       return serveLandingPage({
         req,
         res,
