@@ -1,6 +1,10 @@
 {
+  "cli": {
+    "appVersionSource": "remote"
+  },
   "build": {
     "production": {
+      "node": "18",
       "ios": {
         "autoIncrement": true,
         "resourceClass": "m-medium"

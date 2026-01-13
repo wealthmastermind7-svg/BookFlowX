@@ -1,0 +1,155 @@
+This is now a **different and much simpler issue**, and importantly it is **not related** to the `ReadableStream.tee()` error anymore.
+
+Your build is failing because **the EAS project is not initialised**, and you are trying to run EAS in **non-interactive mode**.
+
+Let’s resolve this cleanly and correctly.
+
+---
+
+## What the error actually means
+
+```
+EAS project not configured.
+Must configure EAS project by running 'eas init' before this command can be run in non-interactive mode.
+```
+
+EAS needs a project ID and ownership metadata stored in:
+
+* `app.json` (or `app.config.ts`)
+* `.expo` directory
+* EAS backend
+
+Right now:
+
+* `eas.json` exists
+* But the project is **not registered with Expo’s EAS service**
+
+So the build cannot proceed.
+
+---
+
+## The warning about `cli.appVersionSource`
+
+This is only a **future-facing warning**, not the cause of failure:
+
+```
+The field "cli.appVersionSource" is not set
+```
+
+Defaulting to `"local"` is fine for now. We will set it properly later.
+
+---
+
+## Required fix (mandatory)
+
+You **must** run `eas init` once.
+
+### Run this locally (interactive)
+
+From the project root:
+
+```bash
+npx expo login
+npx eas init
+```
+
+You will be prompted to:
+
+1. Link or create an Expo project
+2. Choose an account
+3. Generate a project ID
+
+This will:
+
+* Create `.expo/`
+* Add `extra.eas.projectId` to `app.json`
+* Register the project with EAS
+
+This step cannot be skipped.
+
+---
+
+## What `eas init` will change (expected)
+
+### `app.json` will gain something like:
+
+```json
+{
+  "expo": {
+    "extra": {
+      "eas": {
+        "projectId": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+      }
+    }
+  }
+}
+```
+
+### `.expo` directory will be created
+
+Do **not** delete it.
+
+---
+
+## After `eas init`, do this immediately
+
+Clean and rebuild to avoid cached state from earlier failures:
+
+```bash
+npx expo prebuild --clean
+npx expo-doctor
+npx expo install --fix
+npx eas build -p ios --clear-cache
+```
+
+---
+
+## Optional but recommended: set `appVersionSource` now
+
+To silence the warning and future-proof the project, update `eas.json`:
+
+```json
+{
+  "cli": {
+    "appVersionSource": "remote"
+  },
+  "build": {
+    "production": {
+      "node": "18"
+    }
+  }
+}
+```
+
+This tells EAS to manage versioning instead of reading local files.
+
+---
+
+## Why this happened
+
+You likely did one of the following (very common):
+
+* Ran `eas build` in CI or non-interactive mode first
+* Deleted `.expo/` at some point
+* Cloned the repo onto a new machine
+* Created `eas.json` manually without `eas init`
+
+EAS is strict about project registration.
+
+---
+
+## Summary of actions (do these in order)
+
+1. `npx expo login`
+2. `npx eas init`
+3. Verify `projectId` exists in `app.json`
+4. `npx eas build -p ios --clear-cache`
+
+Once this is done:
+
+* The EAS project error will be gone
+* The previous stream error will not reappear unless a dependency reintroduces it
+
+---
+
+If you hit **any prompt during `eas init`** that you are unsure about, paste it here verbatim and I will tell you exactly what to select.
