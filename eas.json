@@ -5,9 +5,15 @@
   "build": {
     "production": {
       "node": "18.18.0",
+      "env": {
+        "EXPO_USE_WORKER_RUNTIME": "false"
+      },
       "ios": {
         "autoIncrement": true,
         "resourceClass": "m-medium"
+      },
+      "android": {
+        "autoIncrement": true
       }
     }
   },
