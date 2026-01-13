@@ -209,6 +209,7 @@
         border: 1px solid var(--border);
         background: #fff;
         max-width: 300px;
+        position: relative;
       }
       
       .image-container img {
@@ -221,10 +222,14 @@
         border-radius: 12px;
         overflow: hidden;
         border: 1px solid var(--border);
+        background: #fff;
+        height: 240px;
       }
       
       .step-image img {
         width: 100%;
+        height: 100%;
+        object-fit: cover;
         display: block;
       }
     </style>
@@ -254,34 +259,34 @@
         <div class="grid">
           <div class="card">
             <span class="step-num">Step 1</span>
-            <h3>Create your booking page</h3>
-            <p>Add services, prices, and available times. No website required.</p>
+            <h3>Set your availability</h3>
+            <p>Add your services, pricing, and when you're free to work.</p>
             <div class="step-image">
-              <img src="/static/marketing/services.png" alt="Create Services">
+              <img src="/static/marketing/services.png" alt="Availability and Services">
             </div>
           </div>
           <div class="card">
             <span class="step-num">Step 2</span>
-            <h3>Share your booking link</h3>
-            <p>QR code for your shop, van, or counter. Link for Instagram, WhatsApp, or SMS.</p>
+            <h3>Get your link & QR code</h3>
+            <p>BookFlow gives you a professional link and a ready-to-print QR code.</p>
             <div class="step-image">
-              <img src="/static/marketing/whatsapp.jpg" alt="Share Link">
+              <img src="/static/marketing/qr-code.png" alt="QR Code & Link">
             </div>
           </div>
           <div class="card">
             <span class="step-num">Step 3</span>
-            <h3>Customers book instantly</h3>
-            <p>No accounts needed. Simple selection of service and time on any device.</p>
+            <h3>Customers book you</h3>
+            <p>They pick a time, enter their details, and book instantly on any device.</p>
             <div class="step-image">
-              <img src="/static/marketing/booking-slots.png" alt="Booking Slots">
+              <img src="/static/marketing/booking-slots.png" alt="Customer Booking">
             </div>
           </div>
           <div class="card">
             <span class="step-num">Step 4</span>
             <h3>Automatic reminders</h3>
-            <p>Instant confirmation and reminders before the appointment to reduce no-shows.</p>
+            <p>We send confirmations and reminders to reduce no-shows automatically.</p>
             <div class="step-image">
-              <img src="/static/marketing/confirmation.png" alt="Booking Confirmation">
+              <img src="/static/marketing/confirmation.png" alt="Reminders & Confirmations">
             </div>
           </div>
         </div>
