@@ -7,6 +7,10 @@
     "icon": "./assets/images/icon.png",
     "scheme": "bookflow",
     "userInterfaceStyle": "automatic",
+    "platforms": [
+      "ios",
+      "android"
+    ],
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.bookflow.app",
@@ -20,14 +24,8 @@
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/icon.png"
       },
-      "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false,
       "package": "com.bookflow.app",
       "versionCode": 1
-    },
-    "web": {
-      "output": "single",
-      "favicon": "./assets/images/favicon.png"
     },
     "plugins": [
       [

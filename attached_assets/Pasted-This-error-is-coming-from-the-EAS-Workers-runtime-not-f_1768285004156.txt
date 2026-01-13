@@ -1,0 +1,250 @@
+This error is coming from the **EAS Workers runtime**, not from Expo Go itself, and it is almost always caused by **server-side code or a dependency that clones large request or response bodies** during build-time execution.
+
+The key point is that **EAS Build executes parts of your project in a Cloudflare Workers–like environment**, which has strict memory limits for streams.
+
+Below is a **practical, ordered fix path** tailored to an Expo + EAS setup like **BookFlowX**.
+
+---
+
+## What the error actually means
+
+```
+ReadableStream.tee() buffer limit exceeded
+```
+
+This happens when:
+
+* A `Request` or `Response` is cloned (`.clone()`)
+* Or a stream is split using `ReadableStream.tee()`
+* And **only one copy is consumed**
+* The runtime buffers the entire stream in memory
+* Memory limit is exceeded and the worker crashes
+
+EAS does **not tolerate unused clones**, even indirectly through libraries.
+
+---
+
+## The most common causes in Expo + EAS projects
+
+### 1. Server code accidentally included in the mobile bundle
+
+If your repo contains:
+
+* API routes
+* Edge / Worker code
+* Node server utilities
+* Supabase admin code
+* Web-only fetch middleware
+
+and they are imported anywhere in the app graph, EAS will attempt to bundle them.
+
+**This is the number one cause.**
+
+---
+
+### 2. Fetch wrappers that clone responses
+
+Libraries or custom code that do this will break EAS:
+
+```ts
+const res = await fetch(url);
+const clone = res.clone(); // ❌
+await res.json();          // clone never consumed
+```
+
+or
+
+```ts
+const [a, b] = res.body.tee(); // ❌
+```
+
+Even logging middleware can trigger this.
+
+---
+
+### 3. Supabase / auth middleware used incorrectly
+
+Common offender:
+
+* Using **Supabase service role client**
+* Importing **supabase-js middleware intended for Edge**
+* Logging or retry wrappers that clone responses
+
+---
+
+### 4. Expo Web accidentally enabled
+
+If `expo.web` is active and your app imports web-only tooling, EAS may run Workers-style code paths.
+
+---
+
+## Immediate fixes (do these first)
+
+### 1. Ensure NO server code is imported into the app
+
+Search your repo for:
+
+* `/api`
+* `/server`
+* `/edge`
+* `/workers`
+* `/middleware`
+* `supabaseAdmin`
+* `service_role`
+* `Request.clone`
+* `ReadableStream`
+* `.tee(`
+
+Anything found **must not be imported by the mobile app**.
+
+If you need shared logic:
+
+* Move server-only code to `/server`
+* Create `/shared` with **pure functions only**
+* Never import server code into `app/` or `src/`
+
+---
+
+### 2. Lock platform imports explicitly
+
+In any fetch or Supabase client file:
+
+```ts
+import { Platform } from 'react-native';
+
+if (Platform.OS === 'web') {
+  // web-only logic
+}
+```
+
+Better: **split files entirely**
+
+```text
+supabase.native.ts
+supabase.web.ts
+```
+
+Expo will tree-shake correctly.
+
+---
+
+### 3. Disable Expo Web (strongly recommended)
+
+In `app.json` or `app.config.ts`:
+
+```json
+{
+  "expo": {
+    "platforms": ["ios", "android"]
+  }
+}
+```
+
+This alone fixes many EAS Workers crashes.
+
+---
+
+## If you are using Supabase (very likely)
+
+### Correct mobile client setup
+
+```ts
+import { createClient } from '@supabase/supabase-js';
+
+export const supabase = createClient(
+  process.env.EXPO_PUBLIC_SUPABASE_URL!,
+  process.env.EXPO_PUBLIC_SUPABASE_ANON_KEY!,
+  {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: false // CRITICAL
+    }
+  }
+);
+```
+
+Never:
+
+* Use service role keys
+* Use edge middleware helpers
+* Use `@supabase/auth-helpers-nextjs`
+* Use `@supabase/auth-helpers-remix`
+
+Those are server-only.
+
+---
+
+## If the error persists
+
+### Force Node runtime (last resort)
+
+In `eas.json`:
+
+```json
+{
+  "build": {
+    "production": {
+      "env": {
+        "EXPO_USE_WORKER_RUNTIME": "false"
+      }
+    }
+  }
+}
+```
+
+Or explicitly:
+
+```json
+{
+  "build": {
+    "production": {
+      "node": "18"
+    }
+  }
+}
+```
+
+This prevents Workers-style execution.
+
+---
+
+## Sanity checklist before rebuilding
+
+Confirm all of the following are true:
+
+* No `Request.clone()` in your code
+* No `ReadableStream.tee()`
+* No server or edge middleware imported
+* No Supabase admin client
+* Expo Web disabled
+* Separate `.native.ts` and `.web.ts` files
+* Only `anon` Supabase key used
+* No logging fetch wrappers
+
+Then run:
+
+```bash
+npx expo prebuild --clean
+npx expo-doctor
+npx expo install --fix
+eas build -p ios --clear-cache
+```
+
+---
+
+## If you want, next step
+
+If you want a **precise fix**, I can:
+
+* Review the repo structure and tell you exactly which import is triggering this
+* Identify the specific file that causes the stream clone
+* Provide a refactored Supabase or fetch client that is EAS-safe
+
+Tell me:
+
+1. Are you using Supabase or another backend?
+2. Does the app include any `/api`, `/edge`, or middleware folders?
+3. Is this failing on iOS, Android, or both?
+
+I will narrow it down to the exact line.
