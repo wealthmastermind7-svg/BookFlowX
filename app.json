@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "BookFlowX",
-    "slug": "BookFlowX",
+    "slug": "bookflowx",
     "version": "1.0.1",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -51,7 +51,7 @@
     "extra": {
       "apiDomain": "confirmbooking.online",
       "eas": {
-        "projectId": "7c1a20a7-68b3-4610-8588-4447493a6c22"
+        "projectId": "cb4181d2-5ab3-4376-9238-e983cbb85e24"
       }
     },
     "owner": "cerolauto"
