@@ -47,7 +47,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     return false;
   }
 
-  console.log(`[Resend] Preparing email for ${data.customerEmail} from admin@cerolauto.com`);
+  console.log(`[Resend] Preparing email for ${data.customerEmail} from bookings@confirmbooking.online`);
   
   try {
     const formattedDate = new Date(data.date).toLocaleDateString('en-US', {
@@ -58,7 +58,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     });
 
     const response = await resend.emails.send({
-      from: `${data.businessName} <admin@cerolauto.com>`,
+      from: `${data.businessName} <bookings@confirmbooking.online>`,
       to: data.customerEmail,
       subject: `Booking Confirmed - ${data.businessName}`,
       html: `
