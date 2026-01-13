@@ -438,7 +438,7 @@ STEP 3: Paste the code where you want the widget or button to appear.
 STEP 4: Save and publish your website.
 
 
-Need help? Contact support at bookings@confirmbooking.online
+   Need help? Contact support at admin@cerolauto.com
       `.trim();
 
       if (Platform.OS === "web") {

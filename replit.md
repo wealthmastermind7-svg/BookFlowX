@@ -68,7 +68,7 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **Drizzle ORM**: Database ORM.
 - **RevenueCat**: In-app purchase & subscription management.
 - **Resend**: Email service for booking confirmations.
-  - Sender: `bookings@confirmbooking.online` (verified domain)
+  - Sender: `admin@cerolauto.com` (verified domain)
   - Triggers on booking creation when customer name and email are provided
   - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
 
