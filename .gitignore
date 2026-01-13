@@ -41,3 +41,12 @@ app-example
 # generated native folders
 /ios
 /android
+
+# Attached assets (user uploads, logs, build artifacts)
+attached_assets/
+!attached_assets/stock_images/
+
+# Build logs and large files
+*.log
+*.zip
+xcode-build-*.log
