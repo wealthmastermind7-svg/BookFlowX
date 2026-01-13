@@ -73,32 +73,20 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
 
 ## Recent Changes (January 2026)
+- **Marketing Overhaul**: Completely rewrote the landing page at `confirmbooking.online/marketing` to align with the core product offering.
+  - Focused on "Booking Link & QR Code" positioning.
+  - Removed misleading claims about live payments, HIPAA, and scale.
+  - Structured for trust and App Store review success.
+- **Contractor Reminder Defaults**: Updated industry templates for contractors and field services.
+  - Default reminders: Instant confirmation, 24h before, 2h before.
+  - Specifically avoided 1-hour reminders to accommodate driving time.
+- **QR Code UX**: Added helper text in Settings for QR code placement ("Place this at your counter, van, invoices, or website").
 - Fixed legal pages (privacy-policy, terms) with inline fallback HTML for production reliability
 - Updated Resend sender email from `onboarding@resend.dev` to `bookings@confirmbooking.online`
 - Added comprehensive logging for email debugging (`[Resend]` and `[Booking]` prefixes)
-- Added test email endpoint for debugging Resend integration
+- Added test endpoint for debugging Resend integration
 - **Multi-Currency Support**: Added support for 75+ world currencies in `client/lib/currency.ts`
-  - Currencies include proper symbols, formatting rules, and decimal separators
-  - Currency selection available in Settings screen
-  - Dashboard, Services, and Quick Sale screens now display prices in business currency
-  - Known limitation: Prices are stored assuming 2 decimal places; currencies with 0 or 3 decimal places (JPY, KWD) may display incorrectly
 - **Blocked Time Slots**: Added ability to block specific time slots on specific dates
-  - New `blocked_slots` table in database schema
-  - Protected API endpoints for blocking/unblocking slots
-  - New "Block Times" button in Calendar screen that opens BlockedSlotsScreen
-  - Blocked slots are excluded from public booking availability
-  - Visual feedback for blocked vs available vs booked slots
 - **Email Progress Tracking**: Dashboard now shows green progress ticks for booking email status
-  - New columns on `bookings` table: `confirmationSentAt`, `reminder24hSentAt`, `reminder2hSentAt`
-  - Workflow engine automatically marks timestamps when emails are sent
-  - BookingCard displays "Booked", "Reminded", "Ready" indicators with green check marks
-  - Bucket-based tracking: confirmation (delay=0), early reminders (12h+), final reminders (<12h)
 - **Contractor Support**: Added comprehensive support for contractor and trade businesses
-  - New industry templates: Contractor, Plumber, Electrician, HVAC, Cleaning, Landscaping
-  - Contractor-specific workflow blueprints with visit-focused language
-  - Demo data for each contractor type with realistic services and pricing
-  - All 14 business types now available in Settings demo data selector
 - **Manual Payment Confirmation**: Tap-to-confirm bookings on Dashboard and Calendar
-  - Pending bookings can be tapped to mark as Confirmed (payment received)
-  - Revenue metrics: Confirmed/Completed = Paid, Pending = Unpaid
-  - Haptic feedback on confirmation actions
