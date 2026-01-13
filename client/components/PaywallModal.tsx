@@ -199,9 +199,24 @@ export function PaywallModal({
                 <Text style={[styles.title, { color: colors.text }]}>
                   Unlock Full Access
                 </Text>
-                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-                  BookFlow gives you a booking link and QR code so customers can book you instantly, with automatic confirmations and reminders.
-                </Text>
+                <View style={styles.featuresList}>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color={colors.text} />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Unlimited booking links</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color={colors.text} />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>QR code booking</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color={colors.text} />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Automated confirmations & reminders</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color={colors.text} />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Business branding</Text>
+                  </View>
+                </View>
               </View>
 
               <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
@@ -210,7 +225,7 @@ export function PaywallModal({
                     Enable 7-day free trial
                   </Text>
                   <Text style={[styles.trialSubtext, { color: colors.textSecondary }]}>
-                    Not sure yet? Cancel anytime.
+                    Free trial applies to subscriptions only. Billing starts after trial ends. Cancel anytime in Apple ID settings.
                   </Text>
                 </View>
                 <Switch
@@ -301,7 +316,7 @@ export function PaywallModal({
                       Lifetime Access
                     </Text>
                     <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      One-time payment
+                      One-time purchase for this app version
                     </Text>
                   </View>
                   <View style={styles.planPriceRight}>
@@ -452,8 +467,23 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     textAlign: "center",
-    marginBottom: Spacing.sm,
+    marginBottom: Spacing.md,
     letterSpacing: -0.5,
+  },
+  featuresList: {
+    width: "100%",
+    paddingHorizontal: Spacing.md,
+    gap: Spacing.xs,
+  },
+  featureItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+    paddingVertical: 2,
+  },
+  featureText: {
+    fontSize: 14,
+    fontWeight: "500",
   },
   subtitle: {
     fontSize: 14,
