@@ -207,7 +207,7 @@ function configureExpoAndLanding(app: express.Application) {
       return serveExpoManifest(platform, res);
     }
 
-    if (req.path === "/") {
+    if (req.path === "/home") {
       return serveLandingPage({
         req,
         res,
