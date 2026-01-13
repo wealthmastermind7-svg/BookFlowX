@@ -47,7 +47,11 @@
       "reactCompiler": true
     },
     "extra": {
-      "apiDomain": "confirmbooking.online"
-    }
+      "apiDomain": "confirmbooking.online",
+      "eas": {
+        "projectId": "d25a7d70-37ef-48da-b532-07e33f5bf9ce"
+      }
+    },
+    "owner": "cerolauto"
   }
 }
