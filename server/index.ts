@@ -410,15 +410,6 @@ import { processReminders } from "./workflowEngine";
 </body>
 </html>`;
 
-  app.get("/marketing", (_req: Request, res: Response) => {
-    const templatePath = findTemplate("marketing-page.html");
-    if (templatePath) {
-      res.sendFile(templatePath);
-    } else {
-      res.status(404).send("Marketing page not found");
-    }
-  });
-
   app.get("/alternatives", (_req: Request, res: Response) => {
     const templatePath = findTemplate("alternatives.html");
     if (templatePath) {

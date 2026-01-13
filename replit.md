@@ -73,10 +73,7 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
 
 ## Recent Changes (January 2026)
-- **Marketing Overhaul**: Completely rewrote the landing page at `confirmbooking.online/marketing` to align with the core product offering.
-  - Focused on "Booking Link & QR Code" positioning.
-  - Removed misleading claims about live payments, HIPAA, and scale.
-  - Structured for trust and App Store review success.
+- **Marketing Page Removal**: Removed the `/marketing` page and related template files as requested.
 - **Contractor Reminder Defaults**: Updated industry templates for contractors and field services.
   - Default reminders: Instant confirmation, 24h before, 2h before.
   - Specifically avoided 1-hour reminders to accommodate driving time.
