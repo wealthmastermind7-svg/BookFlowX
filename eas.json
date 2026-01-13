@@ -4,7 +4,7 @@
   },
   "build": {
     "production": {
-      "node": "18",
+      "node": "18.18.0",
       "ios": {
         "autoIncrement": true,
         "resourceClass": "m-medium"
