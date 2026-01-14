@@ -33,6 +33,8 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
 import QRCode from "react-native-qrcode-svg";
 
+import { usePremium } from "@/contexts/PremiumContext";
+
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "ServiceEditor"
@@ -43,6 +45,7 @@ export default function ServiceEditorScreen() {
   const route = useRoute();
   const navigation = useNavigation<EditScreenNavigationProp>();
   const { theme } = useTheme();
+  const { isPremium, checkShareAccess, checkQrAccess } = usePremium();
 
   const [service, setService] = useState<Partial<Service>>({
     name: "",
@@ -122,6 +125,7 @@ export default function ServiceEditorScreen() {
   };
 
   const handleCopyServiceLink = async () => {
+    if (!checkShareAccess()) return;
     const link = getServiceBookingLink();
     if (!link) {
       Alert.alert("Error", "Save the service first to generate a booking link");
@@ -134,6 +138,7 @@ export default function ServiceEditorScreen() {
   };
 
   const handleShareServiceLink = async () => {
+    if (!checkShareAccess()) return;
     const link = getServiceBookingLink();
     if (!link) {
       Alert.alert("Error", "Save the service first to share a booking link");
@@ -152,6 +157,7 @@ export default function ServiceEditorScreen() {
   };
 
   const handleShowQRCode = () => {
+    if (!checkQrAccess()) return;
     if (!serviceId) {
       Alert.alert("Error", "Save the service first to generate a QR code");
       return;
@@ -469,7 +475,7 @@ export default function ServiceEditorScreen() {
                         </ThemedText>
                       </View>
                       <View style={[styles.copyBadge, { backgroundColor: theme.text }]}>
-                        <Feather name="copy" size={14} color={theme.backgroundDefault} />
+                        <Feather name={isPremium ? "copy" : "lock"} size={14} color={theme.backgroundDefault} />
                       </View>
                     </View>
                   </Pressable>
@@ -478,7 +484,7 @@ export default function ServiceEditorScreen() {
                     onPress={handleShareServiceLink}
                     style={[styles.shareButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
                   >
-                    <Feather name="share" size={18} color={theme.text} />
+                    <Feather name={isPremium ? "share" : "lock"} size={18} color={theme.text} />
                     <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>
                       Share Link
                     </ThemedText>
@@ -498,7 +504,7 @@ export default function ServiceEditorScreen() {
                     onPress={handleShowQRCode}
                     style={[styles.qrPreviewButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
                   >
-                    <Feather name="maximize" size={24} color={theme.text} />
+                    <Feather name={isPremium ? "maximize" : "lock"} size={24} color={theme.text} />
                     <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
                       View QR Code
                     </ThemedText>
