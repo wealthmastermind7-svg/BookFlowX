@@ -182,7 +182,12 @@ export default function ServiceEditorScreen() {
         }
 
         const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-        const fileUri = `${FileSystem.documentDirectory}${filename}`;
+        const docDir = FileSystem.documentDirectory;
+        if (!docDir) {
+          Alert.alert("Error", "Unable to access file storage");
+          return;
+        }
+        const fileUri = `${docDir}${filename}`;
         
         await FileSystem.writeAsStringAsync(fileUri, dataURL, {
           encoding: "base64",
