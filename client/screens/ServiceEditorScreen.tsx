@@ -182,7 +182,7 @@ export default function ServiceEditorScreen() {
         }
 
         const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-        const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+        const fileUri = `${FileSystem.documentDirectory}${filename}`;
         
         await FileSystem.writeAsStringAsync(fileUri, dataURL, {
           encoding: FileSystem.EncodingType.Base64,
