@@ -185,7 +185,7 @@ export default function ServiceEditorScreen() {
         const fileUri = `${FileSystem.documentDirectory}${filename}`;
         
         await FileSystem.writeAsStringAsync(fileUri, dataURL, {
-          encoding: FileSystem.EncodingType.Base64,
+          encoding: "base64",
         });
 
         await Share.share({

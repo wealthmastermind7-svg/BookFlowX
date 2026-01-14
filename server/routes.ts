@@ -1000,6 +1000,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
+
+      // Monetization Gate: Check if business is premium
+      if (!business.isPremium) {
+        const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+        if (trialExpiry && trialExpiry < new Date()) {
+          return res.status(402).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Booking Locked | BookFlow</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
+                .card { background: #111; padding: 40px; border-radius: 24px; border: 1px solid #222; max-width: 400px; }
+                h1 { font-size: 24px; margin-bottom: 16px; font-weight: 800; letter-spacing: -0.02em; }
+                p { color: #888; line-height: 1.5; margin-bottom: 24px; font-size: 16px; }
+                .logo { font-weight: 800; font-size: 32px; margin-bottom: 40px; display: block; letter-spacing: -0.05em; }
+                .btn { display: inline-block; padding: 12px 24px; background: #fff; color: #000; text-decoration: none; border-radius: 12px; font-weight: 600; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <span class="logo">BookFlow</span>
+                <h1>Booking link expired</h1>
+                <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
+              </div>
+            </body>
+            </html>
+          `);
+        }
+      }
       
       const services = await storage.getServices(business.id);
       
@@ -1048,6 +1079,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
+      }
+
+      // Monetization Gate: Check if business is premium
+      if (!business.isPremium) {
+        const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+        if (trialExpiry && trialExpiry < new Date()) {
+          return res.status(402).send(`
+            <!DOCTYPE html>
+            <html>
+            <head>
+              <title>Booking Locked | BookFlow</title>
+              <meta name="viewport" content="width=device-width, initial-scale=1">
+              <style>
+                body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
+                .card { background: #111; padding: 40px; border-radius: 24px; border: 1px solid #222; max-width: 400px; }
+                h1 { font-size: 24px; margin-bottom: 16px; font-weight: 800; letter-spacing: -0.02em; }
+                p { color: #888; line-height: 1.5; margin-bottom: 24px; font-size: 16px; }
+                .logo { font-weight: 800; font-size: 32px; margin-bottom: 40px; display: block; letter-spacing: -0.05em; }
+              </style>
+            </head>
+            <body>
+              <div class="card">
+                <span class="logo">BookFlow</span>
+                <h1>Booking link expired</h1>
+                <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
+              </div>
+            </body>
+            </html>
+          `);
+        }
       }
       
       const services = await storage.getServices(business.id);
