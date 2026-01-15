@@ -60,6 +60,28 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
         
         const currentOfferings = await getOfferings();
         setOfferings(currentOfferings);
+      } else {
+        // Fallback for web or Expo Go
+        try {
+          const business = await api.getBusiness();
+          if (business && business.createdAt) {
+            const created = new Date(business.createdAt).getTime();
+            const now = new Date().getTime();
+            const trialDays = 7;
+            const msPerDay = 24 * 60 * 60 * 1000;
+            const isTrialActive = now - created < trialDays * msPerDay;
+            
+            // In trial, we consider them premium for gating purposes if not on web
+            if (isTrialActive && Platform.OS !== "web") {
+              setIsPremium(true);
+            } else if (!isTrialActive) {
+              // Trial expired, strictly check premium status (already false by default)
+              setIsPremium(false);
+            }
+          }
+        } catch (error) {
+          console.error("Error checking trial status:", error);
+        }
       }
     }
     initPurchases();
