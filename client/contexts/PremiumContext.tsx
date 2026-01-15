@@ -63,20 +63,23 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
       } else {
         // Fallback for web or Expo Go
         try {
-          const business = await api.getBusiness();
-          if (business && business.createdAt) {
-            const created = new Date(business.createdAt).getTime();
-            const now = new Date().getTime();
-            const trialDays = 7;
-            const msPerDay = 24 * 60 * 60 * 1000;
-            const isTrialActive = now - created < trialDays * msPerDay;
-            
-            // In trial, we consider them premium for gating purposes if not on web
-            if (isTrialActive && Platform.OS !== "web") {
-              setIsPremium(true);
-            } else if (!isTrialActive) {
-              // Trial expired, strictly check premium status (already false by default)
-              setIsPremium(false);
+          const businessId = await api.loadBusinessId();
+          if (businessId) {
+            const business = await api.getBusiness();
+            if (business && business.createdAt) {
+              const createdDate = new Date(business.createdAt);
+              const now = new Date();
+              const trialDays = 7;
+              const msPerDay = 24 * 60 * 60 * 1000;
+              const isTrialActive = now.getTime() - createdDate.getTime() < trialDays * msPerDay;
+              
+              // In trial, we consider them premium for gating purposes if not on web
+              if (isTrialActive && Platform.OS !== "web") {
+                setIsPremium(true);
+              } else {
+                // Trial expired or on web, strictly check premium status
+                setIsPremium(false);
+              }
             }
           }
         } catch (error) {
