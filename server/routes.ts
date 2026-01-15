@@ -1004,7 +1004,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Monetization Gate: Check if business is premium
       if (!business.isPremium) {
         const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
-        if (trialExpiry && trialExpiry < new Date()) {
+        const now = new Date();
+        const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const isWithinTrial = (now.getTime() - createdAt.getTime()) < sevenDaysMs;
+
+        if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
           return res.status(402).send(`
             <!DOCTYPE html>
             <html>
@@ -1084,7 +1089,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Monetization Gate: Check if business is premium
       if (!business.isPremium) {
         const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
-        if (trialExpiry && trialExpiry < new Date()) {
+        const now = new Date();
+        const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
+        const isWithinTrial = (now.getTime() - createdAt.getTime()) < sevenDaysMs;
+
+        if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
           return res.status(402).send(`
             <!DOCTYPE html>
             <html>
