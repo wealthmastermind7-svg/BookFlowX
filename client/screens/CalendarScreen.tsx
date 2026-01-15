@@ -172,7 +172,7 @@ export default function CalendarScreen() {
             >
               <Feather name="clock" size={16} color={theme.text} />
               <ThemedText type="small" style={styles.hoursButtonText}>
-                Hours
+                Set Hours
               </ThemedText>
             </Pressable>
           </View>
