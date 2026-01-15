@@ -2,6 +2,7 @@ import React, { createContext, useContext, useState, useCallback, useEffect, Rea
 import { Alert, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { PaywallType, PlanType } from "@/components/PaywallModal";
+import { api } from "@/lib/api";
 import {
   initializeRevenueCat,
   checkPremiumStatus,
