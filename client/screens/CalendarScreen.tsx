@@ -159,11 +159,13 @@ export default function CalendarScreen() {
     <ThemedView style={styles.container}>
       <View style={[styles.header, { paddingTop: headerHeight + Spacing.lg }]}>
         <View style={styles.headerRow}>
-          <ThemedText type="h3" style={styles.monthTitle}>
-            {monthName}
-          </ThemedText>
+          <View style={styles.monthTitleContainer}>
+            <ThemedText type="h3" style={styles.monthTitle}>
+              {monthName}
+            </ThemedText>
+            <ThemedText type="tiny" style={styles.setupText}>Set up your business hours</ThemedText>
+          </View>
           <View style={styles.headerActions}>
-            <ThemedText type="small" style={styles.setupText}>Set up your business hours</ThemedText>
             <Pressable
               onPress={handleOpenAvailability}
               style={[styles.hoursButton, { backgroundColor: theme.backgroundSecondary }]}
@@ -279,11 +281,17 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginBottom: Spacing.lg,
   },
-  monthTitle: {},
+  monthTitle: {
+    marginBottom: 2,
+  },
+  monthTitleContainer: {
+    flex: 1,
+  },
   headerActions: {
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.sm,
+    marginLeft: Spacing.md,
   },
   setupText: {
     opacity: 0.6,
