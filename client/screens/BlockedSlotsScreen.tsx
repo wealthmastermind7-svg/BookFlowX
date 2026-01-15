@@ -134,9 +134,10 @@ export default function BlockedSlotsScreen() {
     <ThemedView style={styles.container}>
       <ScrollView
         style={styles.scrollView}
+        scrollIndicatorInsets={{ bottom: insets.bottom }}
         contentContainerStyle={[
           styles.content,
-          { paddingBottom: insets.bottom + Spacing.xl },
+          { paddingTop: Spacing.xl, paddingBottom: insets.bottom + Spacing.xl },
         ]}
       >
         <ThemedText type="h4" style={styles.dateTitle}>
