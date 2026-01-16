@@ -173,30 +173,35 @@ export default function ServiceEditorScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       
       qrRef.current.toDataURL(async (dataURL: string) => {
-        if (Platform.OS === "web") {
-          const link = document.createElement("a");
-          link.href = `data:image/png;base64,${dataURL}`;
-          link.download = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-          link.click();
-          return;
-        }
+        try {
+          if (Platform.OS === "web") {
+            const link = document.createElement("a");
+            link.href = `data:image/png;base64,${dataURL}`;
+            link.download = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+            link.click();
+            return;
+          }
 
-        const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-        const docDir = FileSystem.documentDirectory;
-        if (!docDir) {
-          Alert.alert("Error", "Unable to access file storage");
-          return;
-        }
-        const fileUri = `${docDir}${filename}`;
-        
-        await FileSystem.writeAsStringAsync(fileUri, dataURL, {
-          encoding: "base64",
-        });
+          const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+          const docDir = FileSystem.documentDirectory;
+          if (!docDir) {
+            Alert.alert("Error", "Unable to access file storage");
+            return;
+          }
+          const fileUri = `${docDir}${filename}`;
+          
+          await FileSystem.writeAsStringAsync(fileUri, dataURL, {
+            encoding: "base64",
+          });
 
-        await Share.share({
-          url: fileUri,
-          title: `${service.name} - Booking QR Code`,
-        });
+          await Share.share({
+            url: fileUri,
+            title: `${service.name} - Booking QR Code`,
+          });
+        } catch (innerError) {
+          console.error("Error processing QR code data:", innerError);
+          Alert.alert("Error", "Failed to process QR code image");
+        }
       });
     } catch (error) {
       console.error("Error sharing QR code:", error);
@@ -580,13 +585,15 @@ export default function ServiceEditorScreen() {
 
             <View style={styles.qrContainer}>
               {bookingLink && (
-                <QRCode
-                  value={bookingLink}
-                  size={220}
-                  backgroundColor="white"
-                  color="black"
-                  getRef={(ref: any) => (qrRef.current = ref)}
-                />
+                <View style={{ padding: 10, backgroundColor: 'white' }}>
+                  <QRCode
+                    value={bookingLink}
+                    size={220}
+                    backgroundColor="white"
+                    color="black"
+                    getRef={(ref: any) => (qrRef.current = ref)}
+                  />
+                </View>
               )}
             </View>
 
