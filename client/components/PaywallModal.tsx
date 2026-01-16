@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -9,9 +9,24 @@ import {
   ActivityIndicator,
   ScrollView,
   Switch,
+  Platform,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
+
+const safeHaptic = async (type: "light" | "medium" | "warning" = "light") => {
+  try {
+    if (type === "warning") {
+      await Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    } else if (type === "medium") {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    } else {
+      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    }
+  } catch {
+    // Ignore haptic errors
+  }
+};
 import * as WebBrowser from "expo-web-browser";
 import Animated, {
   FadeIn,
@@ -99,32 +114,32 @@ export function PaywallModal({
     opacity: glowOpacity.value,
   }));
 
-  const handleUpgrade = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+  const handleUpgrade = useCallback(async () => {
+    safeHaptic("medium");
     onUpgrade(selectedPlan);
-  };
+  }, [onUpgrade, selectedPlan]);
 
-  const handleClose = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleClose = useCallback(async () => {
+    safeHaptic("light");
     onClose();
-  };
+  }, [onClose]);
 
-  const handleRestore = async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleRestore = useCallback(async () => {
+    safeHaptic("light");
     if (onRestore) {
       onRestore();
     }
-  };
+  }, [onRestore]);
 
-  const handlePlanSelect = async (plan: PlanType) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handlePlanSelect = useCallback(async (plan: PlanType) => {
+    safeHaptic("light");
     setSelectedPlan(plan);
-  };
+  }, []);
 
-  const handleTrialToggle = async (value: boolean) => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+  const handleTrialToggle = useCallback(async (value: boolean) => {
+    safeHaptic("light");
     setFreeTrialEnabled(value);
-  };
+  }, []);
 
   const yearlyPrice = "$69.99";
   const yearlyMonthly = "$5.83";
@@ -155,11 +170,15 @@ export function PaywallModal({
           exiting={FadeOut.duration(200)}
           style={StyleSheet.absoluteFill}
         >
-          <BlurView
-            intensity={isDark ? 40 : 60}
-            tint={isDark ? "dark" : "light"}
-            style={StyleSheet.absoluteFill}
-          />
+          {Platform.OS === "ios" ? (
+            <BlurView
+              intensity={isDark ? 40 : 60}
+              tint={isDark ? "dark" : "light"}
+              style={StyleSheet.absoluteFill}
+            />
+          ) : (
+            <View style={[StyleSheet.absoluteFill, { backgroundColor: isDark ? "rgba(0,0,0,0.85)" : "rgba(0,0,0,0.5)" }]} />
+          )}
           <Pressable style={StyleSheet.absoluteFill} onPress={handleClose} />
         </Animated.View>
 

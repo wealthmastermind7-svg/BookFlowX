@@ -131,9 +131,9 @@ export default function ServiceEditorScreen() {
       Alert.alert("Error", "Save the service first to generate a booking link");
       return;
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); } catch {}
     await Clipboard.setStringAsync(link);
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {}); } catch {}
     Alert.alert("Copied", "Service booking link copied to clipboard");
   };
 
@@ -145,7 +145,7 @@ export default function ServiceEditorScreen() {
       return;
     }
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); } catch {}
       await Share.share({
         message: `Book ${service.name}:\n${link}\n\nSchedule your appointment now!`,
         url: link,
@@ -162,7 +162,11 @@ export default function ServiceEditorScreen() {
       Alert.alert("Error", "Save the service first to generate a QR code");
       return;
     }
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+    } catch {
+      // Ignore haptic errors
+    }
     setQrModalVisible(true);
   };
 
@@ -170,7 +174,7 @@ export default function ServiceEditorScreen() {
     if (!qrRef.current) return;
     
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); } catch {}
       
       qrRef.current.toDataURL(async (dataURL: string) => {
         try {

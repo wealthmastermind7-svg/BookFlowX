@@ -96,7 +96,11 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   const canUseEmbeds = isPremium;
 
   const showPaywall = useCallback((type: PaywallType) => {
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+    try {
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
+    } catch (e) {
+      // Ignore haptic errors
+    }
     setPaywallType(type);
     setPaywallVisible(true);
   }, []);
