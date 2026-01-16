@@ -18,7 +18,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
-import * as FileSystem from "expo-file-system";
+import { Paths, File as ExpoFile } from "expo-file-system";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
@@ -183,19 +183,13 @@ export default function ServiceEditorScreen() {
           }
 
           const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-          const docDir = FileSystem.documentDirectory;
-          if (!docDir) {
-            Alert.alert("Error", "Unable to access file storage");
-            return;
-          }
-          const fileUri = `${docDir}${filename}`;
+          const file = new ExpoFile(Paths.cache, filename);
           
-          await FileSystem.writeAsStringAsync(fileUri, dataURL, {
-            encoding: "base64",
-          });
+          const binaryData = Uint8Array.from(atob(dataURL), c => c.charCodeAt(0));
+          await file.write(binaryData);
 
           await Share.share({
-            url: fileUri,
+            url: file.uri,
             title: `${service.name} - Booking QR Code`,
           });
         } catch (innerError) {
