@@ -77,6 +77,7 @@ export function PaywallModal({
   offerings,
   onRestore,
 }: PaywallModalProps) {
+  console.log("[PaywallModal] render, visible:", visible, "type:", type);
   const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   const [selectedPlan, setSelectedPlan] = useState<PlanType>("yearly");

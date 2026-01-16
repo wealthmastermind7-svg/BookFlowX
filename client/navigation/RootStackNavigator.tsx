@@ -10,6 +10,8 @@ import { HeaderButton } from "@react-navigation/elements";
 import { useTheme } from "@/hooks/useTheme";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { PaywallModal } from "@/components/PaywallModal";
+import { usePremium } from "@/contexts/PremiumContext";
 
 export type RootStackParamList = {
   Onboarding: undefined;
@@ -32,6 +34,21 @@ function OnboardingScreenWrapper() {
   }, [navigation]);
 
   return <OnboardingScreen onComplete={handleComplete} />;
+}
+
+function PaywallContainer() {
+  const { paywallVisible, paywallType, hidePaywall, handleUpgrade, isLoading, offerings, restoreSubscription } = usePremium();
+  return (
+    <PaywallModal
+      visible={paywallVisible}
+      type={paywallType}
+      onClose={hidePaywall}
+      onUpgrade={handleUpgrade}
+      isLoading={isLoading}
+      offerings={offerings}
+      onRestore={restoreSubscription}
+    />
+  );
 }
 
 export default function RootStackNavigator() {
@@ -59,6 +76,7 @@ export default function RootStackNavigator() {
   }
 
   return (
+    <>
     <Stack.Navigator screenOptions={screenOptions} initialRouteName={showOnboarding ? "Onboarding" : "Main"}>
       <Stack.Screen
         name="Onboarding"
@@ -115,6 +133,8 @@ export default function RootStackNavigator() {
         })}
       />
     </Stack.Navigator>
+    <PaywallContainer />
+    </>
   );
 }
 

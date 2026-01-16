@@ -157,7 +157,10 @@ export default function ServiceEditorScreen() {
   };
 
   const handleShowQRCode = () => {
-    if (!checkQrAccess()) return;
+    console.log("[ServiceEditor] handleShowQRCode called, isPremium:", isPremium);
+    const hasAccess = checkQrAccess();
+    console.log("[ServiceEditor] checkQrAccess returned:", hasAccess);
+    if (!hasAccess) return;
     if (!serviceId) {
       Alert.alert("Error", "Save the service first to generate a QR code");
       return;

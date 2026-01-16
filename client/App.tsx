@@ -13,23 +13,6 @@ import { api } from "@/lib/api";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PremiumProvider } from "@/contexts/PremiumContext";
-import { PaywallModal } from "@/components/PaywallModal";
-import { usePremium } from "@/contexts/PremiumContext";
-
-function PaywallContainer() {
-  const { paywallVisible, paywallType, hidePaywall, handleUpgrade, isLoading, offerings, restoreSubscription } = usePremium();
-  return (
-    <PaywallModal
-      visible={paywallVisible}
-      type={paywallType}
-      onClose={hidePaywall}
-      onUpgrade={handleUpgrade}
-      isLoading={isLoading}
-      offerings={offerings}
-      onRestore={restoreSubscription}
-    />
-  );
-}
 
 export default function App() {
   useEffect(() => {
@@ -57,7 +40,6 @@ export default function App() {
                 <NavigationContainer>
                   <RootStackNavigator />
                 </NavigationContainer>
-                <PaywallContainer />
               </PremiumProvider>
               <StatusBar style="auto" />
             </KeyboardProvider>
