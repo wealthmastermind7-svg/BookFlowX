@@ -96,7 +96,6 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   const canUseEmbeds = isPremium;
 
   const showPaywall = useCallback((type: PaywallType) => {
-    console.log("[Premium] showPaywall called with type:", type);
     try {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning).catch(() => {});
     } catch (e) {
@@ -104,7 +103,6 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
     }
     setPaywallType(type);
     setPaywallVisible(true);
-    console.log("[Premium] paywallVisible set to true");
   }, []);
 
   const hidePaywall = useCallback(() => {
@@ -118,7 +116,6 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   }, [isPremium, showPaywall]);
 
   const checkQrAccess = useCallback((): boolean => {
-    console.log("[Premium] checkQrAccess called, isPremium:", isPremium);
     if (isPremium) return true;
     showPaywall("qr_limit");
     return false;
