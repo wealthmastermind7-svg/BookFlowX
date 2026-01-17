@@ -313,6 +313,37 @@ export default function SettingsScreen() {
           <Text style={styles.hugeTitle}>Premium{"\n"}Business</Text>
         </View>
 
+        {/* Premium Section */}
+        <SectionTitle>Premium</SectionTitle>
+        <View style={{ gap: 16, marginBottom: 16 }}>
+          <MetallicCard onPress={() => showPaywall("soft_upsell")} style={styles.premiumRow}>
+            <View style={styles.premiumIconBox}>
+              <Feather name="star" size={22} color="#222" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.premiumRowTitle}>Upgrade Plan</Text>
+              <Text style={styles.premiumRowSubtitle}>{isPremium ? "You're a Pro member" : "Access premium tools"}</Text>
+            </View>
+            <Feather name="chevron-right" size={20} color="#222" style={{ opacity: 0.3 }} />
+          </MetallicCard>
+
+          <MetallicCard onPress={handleRestorePurchases} style={styles.premiumRow}>
+            <View style={styles.premiumIconBox}>
+              <Feather name="rotate-ccw" size={22} color="#222" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.premiumRowTitle}>Restore</Text>
+              <Text style={styles.premiumRowSubtitle}>Previous purchases</Text>
+            </View>
+            {restoreLoading ? (
+              <ActivityIndicator size="small" color="#222" />
+            ) : (
+              <Feather name="chevron-right" size={20} color="#222" style={{ opacity: 0.3 }} />
+            )}
+          </MetallicCard>
+        </View>
+
+        <SectionTitle>Business</SectionTitle>
         <View style={styles.row}>
           <MetallicCard onPress={() => handleEditBusinessField("name")} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>ENTITY</Text>
@@ -468,6 +499,29 @@ const styles = StyleSheet.create({
   automationText: { flex: 1 },
   metallicButton: { height: 50, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16 },
   metallicButtonText: { fontSize: 15, fontWeight: "600", color: "#222" },
+  premiumRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+    gap: 16,
+  },
+  premiumIconBox: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "rgba(0,0,0,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  premiumRowTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#222",
+  },
+  premiumRowSubtitle: {
+    fontSize: 14,
+    color: "#666",
+  },
   securityCard: { height: 144, padding: 12, alignItems: "center", justifyContent: "space-between" },
   ringChart: { width: 60, height: 60, borderRadius: 30, borderWidth: 6, borderColor: "rgba(0,0,0,0.05)", borderTopColor: "#333", alignItems: "center", justifyContent: "center" },
   securityInnerBtn: { height: 28, paddingHorizontal: 12, borderRadius: 8, borderWidth: 1, borderColor: "#333", alignItems: 'center', justifyContent: 'center' },
