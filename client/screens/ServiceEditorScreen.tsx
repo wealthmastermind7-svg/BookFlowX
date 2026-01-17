@@ -313,9 +313,7 @@ export default function ServiceEditorScreen() {
                 Details
               </Text>
             </Pressable>
-            <Pressable 
-              onPress={() => setActiveTab("links")}
-            >
+            <Pressable onPress={() => setActiveTab("links")}>
               <Text style={[
                 styles.carouselItem,
                 activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
@@ -564,13 +562,12 @@ const styles = StyleSheet.create({
   carouselItemActive: {
     fontSize: 48,
     color: "#fff",
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
+    fontWeight: "600",
   },
   carouselItemInactive: {
     fontSize: 32,
     color: "rgba(255,255,255,0.4)",
+    fontWeight: "600",
   },
   formContainer: {
     paddingHorizontal: 24,
