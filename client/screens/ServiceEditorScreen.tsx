@@ -67,6 +67,8 @@ export default function ServiceEditorScreen() {
   const navigation = useNavigation<EditScreenNavigationProp>();
   const { isPremium, checkShareAccess, checkQrAccess, showPaywall } = usePremium();
 
+  const isActuallyPremium = isPremium;
+
   const [service, setService] = useState<Partial<Service>>({
     name: "",
     duration: 30,
@@ -316,7 +318,8 @@ export default function ServiceEditorScreen() {
             <Pressable onPress={() => setActiveTab("links")}>
               <Text style={[
                 styles.carouselItem,
-                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
+                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive,
+                !isActuallyPremium && { opacity: 0.3 }
               ]}>
                 Links
               </Text>
@@ -401,20 +404,28 @@ export default function ServiceEditorScreen() {
                       </Text>
                       
                       <Pressable 
-                        onPress={handleCopyServiceLink} 
+                        onPress={() => {
+                          if (checkShareAccess()) {
+                            handleCopyServiceLink();
+                          }
+                        }} 
                         style={styles.linkUrlContainer}
                       >
                         <Text style={styles.linkUrl} numberOfLines={1}>
                           {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
                         </Text>
-                        <Feather name="copy" size={18} color="rgba(255,255,255,0.6)" />
+                        <Feather name={isActuallyPremium ? "copy" : "lock"} size={18} color="rgba(255,255,255,0.6)" />
                       </Pressable>
 
                       <Pressable 
-                        onPress={handleShareServiceLink} 
+                        onPress={() => {
+                          if (checkShareAccess()) {
+                            handleShareServiceLink();
+                          }
+                        }} 
                         style={styles.linkButton}
                       >
-                        <Feather name="share" size={18} color="#fff" />
+                        <Feather name={isActuallyPremium ? "share" : "lock"} size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>Share Link</Text>
                       </Pressable>
                     </GlassPanel>
@@ -426,10 +437,14 @@ export default function ServiceEditorScreen() {
                       </Text>
 
                       <Pressable 
-                        onPress={handleShowQRCode} 
+                        onPress={() => {
+                          if (checkQrAccess()) {
+                            handleShowQRCode();
+                          }
+                        }} 
                         style={styles.linkButton}
                       >
-                        <Feather name="maximize" size={18} color="#fff" />
+                        <Feather name={isActuallyPremium ? "maximize" : "lock"} size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>View QR Code</Text>
                       </Pressable>
                     </GlassPanel>
