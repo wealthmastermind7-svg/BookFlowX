@@ -22,7 +22,7 @@ export default function CalendarStackNavigator() {
         name="CalendarMain"
         component={CalendarScreen}
         options={{
-          headerTitle: "Calendar",
+          headerShown: false,
         }}
       />
       <Stack.Screen
