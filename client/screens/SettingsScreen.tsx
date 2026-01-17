@@ -182,7 +182,7 @@ export default function SettingsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const data = await api.getQRCode();
-      if (data) {
+      if (data && business) {
         const domain = getBookingDomain();
         const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
         const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
