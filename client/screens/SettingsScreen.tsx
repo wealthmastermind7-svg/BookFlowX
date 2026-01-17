@@ -169,6 +169,7 @@ export default function SettingsScreen() {
     const domain = getBookingDomain();
     const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
     const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
+    console.log("[Booking] Share link generated:", bookingLink);
     navigation.navigate("SharePreview", {
       businessName: business.name,
       bookingUrl: bookingLink,
@@ -185,6 +186,7 @@ export default function SettingsScreen() {
         const domain = getBookingDomain();
         const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
         const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
+        console.log("[Booking] QR link generated:", bookingLink);
         setQrCode(data.qrCode);
         setBookingUrl(bookingLink);
         setQrModalVisible(true);

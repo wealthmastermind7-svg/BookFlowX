@@ -43,6 +43,8 @@ export function getApiUrl(): string {
     if (isExpoGo) {
       const packagerHostname = process.env.REACT_NATIVE_PACKAGER_HOSTNAME;
       if (packagerHostname && !packagerHostname.includes("$")) {
+        // Log the detected hostname for debugging
+        console.log(`[Domain] Expo Go detected, using packager hostname: ${packagerHostname}`);
         return `http://${packagerHostname}:5000/`;
       }
     }
