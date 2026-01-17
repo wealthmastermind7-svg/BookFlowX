@@ -1,6 +1,21 @@
 import React, { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system/legacy";
-import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView, KeyboardAvoidingView } from "react-native";
+import { 
+  View, 
+  StyleSheet, 
+  Alert, 
+  Share, 
+  Platform, 
+  Modal, 
+  Pressable, 
+  ActivityIndicator, 
+  TextInput, 
+  Linking, 
+  Keyboard, 
+  ScrollView, 
+  KeyboardAvoidingView,
+  ImageBackground
+} from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -32,6 +47,8 @@ type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & Roo
 
 const ACCENT_GOLD = "#FFFFFF";
 const ACCENT_SILVER = "#FFFFFF";
+
+const silkBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
@@ -564,7 +581,7 @@ Need help? Contact support at bookings@confirmbooking.online
 
   const GlassCard = ({ children, style, onPress }: { children: React.ReactNode; style?: any; onPress?: () => void }) => {
     const content = (
-      <View style={[styles.glassCard, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }, style]}>
+      <View style={[styles.glassCard, { backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }, style]}>
         {children}
       </View>
     );
@@ -583,8 +600,8 @@ Need help? Contact support at bookings@confirmbooking.online
     <View style={styles.sectionTitleRow}>
       <ThemedText style={[styles.sectionTitle]}>{children}</ThemedText>
       {badge && (
-        <View style={[styles.badge, { backgroundColor: theme.text + "15", borderColor: theme.text + "30" }]}>
-          <ThemedText style={[styles.badgeText, { color: theme.text }]}>{badge}</ThemedText>
+        <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.2)" }]}>
+          <ThemedText style={[styles.badgeText, { color: "#fff" }]}>{badge}</ThemedText>
         </View>
       )}
     </View>
@@ -592,31 +609,689 @@ Need help? Contact support at bookings@confirmbooking.online
 
   const PremiumRow = ({ icon, title, subtitle, onPress, isGold = false, disabled = false }: any) => (
     <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
-      <View style={[styles.premiumIconBox, { backgroundColor: theme.text + "15" }]}>
-        <Feather name={icon} size={22} color={theme.text} />
+      <View style={[styles.premiumIconBox, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
+        <Feather name={icon} size={22} color="#fff" />
       </View>
       <View style={{ flex: 1 }}>
         <ThemedText style={styles.premiumRowTitle}>{title}</ThemedText>
         <ThemedText style={[styles.premiumRowSubtitle]}>{subtitle}</ThemedText>
       </View>
       {disabled ? (
-        <ActivityIndicator size="small" color={theme.textTertiary} />
+        <ActivityIndicator size="small" color="#fff" />
       ) : (
-        <Feather name="chevron-right" size={20} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+        <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
       )}
     </GlassCard>
   );
 
   const InfoRow = ({ icon, label, value, onPress }: any) => (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.infoRow, pressed && { opacity: 0.7 }]}>
-      <Feather name={icon} size={18} color={theme.text} style={{ opacity: 0.6 }} />
+      <Feather name={icon} size={18} color="#fff" style={{ opacity: 0.6 }} />
       <View style={{ flex: 1, marginLeft: Spacing.md }}>
         <ThemedText style={styles.infoLabel}>{label}</ThemedText>
         <ThemedText style={styles.infoValue}>{value}</ThemedText>
       </View>
-      <Feather name="edit-2" size={14} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+      <Feather name="edit-2" size={14} color="rgba(255,255,255,0.4)" />
     </Pressable>
   );
+
+  return (
+    <ImageBackground source={silkBackground} style={styles.container} resizeMode="cover">
+      <View style={styles.overlay} />
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{
+          paddingTop: headerHeight + Spacing.lg,
+          paddingBottom: tabBarHeight + Spacing.xl * 2,
+          paddingHorizontal: 24,
+        }}
+      >
+        <SectionTitle badge={isPremium ? "Member" : undefined}>Premium</SectionTitle>
+        <View style={styles.sectionSpace}>
+          <PremiumRow 
+            icon="star" 
+            title="Upgrade Plan" 
+            subtitle={isPremium ? "You're a Pro member" : "Unlock all features"}
+            onPress={() => showPaywall("soft_upsell")}
+          />
+          <PremiumRow 
+            icon="history" 
+            title="Restore" 
+            subtitle="Previous purchases"
+            onPress={handleRestorePurchases}
+            disabled={restoreLoading}
+          />
+        </View>
+
+        <SectionTitle>Business</SectionTitle>
+        <View style={styles.sectionSpace}>
+          <View style={styles.gridRow}>
+            <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
+              <View style={styles.gridIconCircle}>
+                <Feather name="briefcase" size={20} color="#fff" />
+              </View>
+              <ThemedText style={styles.gridLabel}>ENTITY</ThemedText>
+              <ThemedText style={styles.gridValue}>{business?.name || "Not set"}</ThemedText>
+            </GlassCard>
+            <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
+              <View style={styles.gridIconCircle}>
+                <Feather name="dollar-sign" size={20} color="#fff" />
+              </View>
+              <ThemedText style={styles.gridLabel}>CURRENCY</ThemedText>
+              <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
+            </GlassCard>
+          </View>
+
+          <GlassCard style={styles.multiRowCard}>
+            <InfoRow 
+              icon="globe" 
+              label="WEBSITE" 
+              value={business?.website || "Not set"} 
+              onPress={() => handleEditBusinessField("website")}
+            />
+            <View style={styles.rowDivider} />
+            <InfoRow 
+              icon="phone" 
+              label="SUPPORT LINE" 
+              value={business?.phone || "Not set"} 
+              onPress={() => handleEditBusinessField("phone")}
+            />
+          </GlassCard>
+        </View>
+
+        <SectionTitle>Automation</SectionTitle>
+        <View style={styles.sectionSpace}>
+          <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("SettingsWorkflows")}>
+            <View style={styles.automationIconOverlay}>
+              <Feather name="zap" size={160} color="rgba(255,255,255,0.05)" style={styles.parallaxIcon} />
+            </View>
+            <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
+            <ThemedText style={styles.automationDesc}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
+            <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
+          </GlassCard>
+        </View>
+
+        <SectionTitle>Booking</SectionTitle>
+        <View style={styles.sectionSpace}>
+          <GlassCard style={styles.bookingCard}>
+            <View style={styles.bookingHeader}>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.bookingTitle}>Booking Link</ThemedText>
+                <ThemedText style={styles.bookingLinkText} numberOfLines={1}>
+                  {business?.bookingUrl || `confirmbooking.online/book/${business?.slug || '...'}`}
+                </ThemedText>
+              </View>
+              <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}>
+                <Feather name="copy" size={16} color="rgba(255,255,255,0.6)" />
+              </Pressable>
+            </View>
+            <View style={styles.bookingActions}>
+              <Pressable onPress={handleShareBookingLink} style={styles.shareLinkBtn}>
+                <Feather name="share" size={18} color="#fff" />
+                <ThemedText style={styles.shareBtnText}>Share Link</ThemedText>
+              </Pressable>
+              <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}>
+                <Feather name="grid" size={18} color="#000" />
+                <ThemedText style={styles.shareQrText}>Share QR</ThemedText>
+              </Pressable>
+            </View>
+          </GlassCard>
+
+          <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
+            <View style={styles.embedIconBox}>
+              <Feather name="code" size={20} color="rgba(255,255,255,0.6)" />
+            </View>
+            <View style={{ flex: 1, marginLeft: 16 }}>
+              <ThemedText style={styles.embedTitle}>Embed Widget</ThemedText>
+              <ThemedText style={styles.embedDesc}>Add to your website</ThemedText>
+            </View>
+            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+          </GlassCard>
+        </View>
+
+        <SectionTitle>Security</SectionTitle>
+        <View style={styles.sectionSpace}>
+          <View style={styles.gridRow}>
+            <GlassCard style={styles.securityGridCard} onPress={handleShowDemoTypeModal}>
+              <Feather name="download-cloud" size={24} color="rgba(255,255,255,0.4)" />
+              <ThemedText style={styles.securityTitle}>Demo Data</ThemedText>
+              <ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText>
+            </GlassCard>
+            <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}>
+              <Feather name="trash-2" size={24} color="rgba(255,75,75,0.6)" />
+              <ThemedText style={styles.securityTitle}>Wipe Cloud</ThemedText>
+              <ThemedText style={[styles.securityAction, { color: "rgba(255,75,75,0.6)" }]}>CLEAR ALL DATA</ThemedText>
+            </GlassCard>
+          </View>
+
+          <GlassCard style={styles.multiRowCard}>
+            <Pressable onPress={() => navigation.navigate("PrivacyPolicy")} style={styles.infoRow}>
+              <Feather name="shield" size={18} color="#fff" style={{ opacity: 0.6 }} />
+              <ThemedText style={styles.legalLabel}>Privacy Protocol</ThemedText>
+              <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+            </Pressable>
+            <View style={styles.rowDivider} />
+            <Pressable onPress={() => navigation.navigate("TermsOfUse")} style={styles.infoRow}>
+              <Feather name="file-text" size={18} color="#fff" style={{ opacity: 0.6 }} />
+              <ThemedText style={styles.legalLabel}>Terms of Use</ThemedText>
+              <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+            </Pressable>
+          </GlassCard>
+        </View>
+
+        <View style={styles.footer}>
+          <ThemedText style={styles.footerText}>DESIGNED FOR EXCELLENCE • V4.2.0</ThemedText>
+        </View>
+      </ScrollView>
+
+      {/* QR Code Modal */}
+      <Modal
+        visible={qrModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setQrModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setQrModalVisible(false)}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>QR Code</ThemedText>
+              <Pressable onPress={() => setQrModalVisible(false)} style={styles.closeBtn}>
+                <Feather name="x" size={24} color="#fff" />
+              </Pressable>
+            </View>
+            <View style={styles.qrBox}>
+              {qrCode && (
+                <Image source={{ uri: qrCode }} style={{ width: 220, height: 220 }} />
+              )}
+            </View>
+            <ThemedText style={styles.qrDesc}>Scan to book an appointment</ThemedText>
+            <Button 
+              title="Download QR" 
+              onPress={handleDownloadQRCode} 
+              style={styles.modalBtn}
+            />
+          </View>
+        </Pressable>
+      </Modal>
+
+      {/* Field Edit Modal */}
+      <Modal
+        visible={editModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setEditModalVisible(false)}
+      >
+        <KeyboardAvoidingView 
+          behavior={Platform.OS === "ios" ? "padding" : "height"} 
+          style={styles.modalOverlay}
+        >
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Edit {editingField}</ThemedText>
+              <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeBtn}>
+                <Feather name="x" size={24} color="#fff" />
+              </Pressable>
+            </View>
+            <TextInput
+              style={styles.modalInput}
+              value={editValue}
+              onChangeText={setEditValue}
+              placeholder={`Enter ${editingField}`}
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              autoFocus
+              autoCapitalize={editingField === "slug" ? "none" : "words"}
+            />
+            <Button 
+              title={editLoading ? "Saving..." : "Save"} 
+              onPress={handleSaveBusinessField} 
+              disabled={editLoading}
+              style={styles.modalBtn}
+            />
+          </View>
+        </KeyboardAvoidingView>
+      </Modal>
+
+      {/* Currency Modal */}
+      <Modal
+        visible={currencyModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCurrencyModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Currency</ThemedText>
+              <Pressable onPress={() => setCurrencyModalVisible(false)} style={styles.closeBtn}>
+                <Feather name="x" size={24} color="#fff" />
+              </Pressable>
+            </View>
+            <ScrollView style={{ maxHeight: 400 }}>
+              {CURRENCY_OPTIONS.map((opt) => (
+                <Pressable 
+                  key={opt.id} 
+                  onPress={() => handleSelectCurrency(opt.id)}
+                  style={({ pressed }) => [styles.currencyRow, pressed && { backgroundColor: "rgba(255,255,255,0.05)" }]}
+                >
+                  <ThemedText style={styles.currencyLabel}>{opt.label}</ThemedText>
+                  <ThemedText style={styles.currencySymbol}>{opt.symbol}</ThemedText>
+                  {business?.currency === opt.id && (
+                    <Feather name="check" size={20} color="#fff" />
+                  )}
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+
+      {/* Demo Data Modal */}
+      <Modal
+        visible={demoTypeModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setDemoTypeModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContent}>
+            <View style={styles.modalHeader}>
+              <ThemedText style={styles.modalTitle}>Choose Vertical</ThemedText>
+              <Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.closeBtn}>
+                <Feather name="x" size={24} color="#fff" />
+              </Pressable>
+            </View>
+            <ScrollView style={{ maxHeight: 500 }}>
+              {DEMO_TYPES.map((type) => (
+                <Pressable 
+                  key={type.id} 
+                  onPress={() => handleInitializeDemoData(type.id)}
+                  style={({ pressed }) => [styles.demoRow, pressed && { backgroundColor: "rgba(255,255,255,0.05)" }]}
+                >
+                  <View style={{ flex: 1 }}>
+                    <ThemedText style={styles.demoLabel}>{type.label}</ThemedText>
+                    <ThemedText style={styles.demoDesc}>{type.description}</ThemedText>
+                  </View>
+                  <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+                </Pressable>
+              ))}
+            </ScrollView>
+          </View>
+        </View>
+      </Modal>
+    </ImageBackground>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
+  },
+  sectionTitleRow: {
+    flexDirection: "row",
+    alignItems: "flex-end",
+    justifyContent: "space-between",
+    marginBottom: 24,
+    marginTop: 48,
+  },
+  sectionTitle: {
+    fontSize: 72,
+    fontWeight: "600",
+    color: "#fff",
+    letterSpacing: -4,
+    lineHeight: 64,
+  },
+  badge: {
+    paddingHorizontal: 12,
+    paddingVertical: 4,
+    borderRadius: 999,
+    borderWidth: 1,
+    marginBottom: 8,
+  },
+  badgeText: {
+    fontSize: 10,
+    fontWeight: "700",
+    letterSpacing: 2,
+    textTransform: "uppercase",
+  },
+  sectionSpace: {
+    gap: 16,
+  },
+  glassCard: {
+    borderRadius: 32,
+    borderWidth: 1,
+    overflow: "hidden",
+  },
+  premiumRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 24,
+    gap: 16,
+  },
+  premiumIconBox: {
+    width: 56,
+    height: 56,
+    borderRadius: 20,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  premiumRowTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  premiumRowSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
+  gridRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  gridCard: {
+    flex: 1,
+    padding: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  gridIconCircle: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 24,
+  },
+  gridLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 2,
+    marginBottom: 4,
+  },
+  gridValue: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  multiRowCard: {
+    paddingVertical: 8,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 24,
+  },
+  rowDivider: {
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    marginHorizontal: 24,
+  },
+  infoLabel: {
+    fontSize: 10,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 2,
+  },
+  infoValue: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+    marginTop: 2,
+  },
+  automationCard: {
+    padding: 32,
+    minHeight: 180,
+    justifyContent: "center",
+  },
+  automationIconOverlay: {
+    position: "absolute",
+    right: -20,
+    top: -20,
+  },
+  parallaxIcon: {
+    opacity: 0.1,
+  },
+  automationTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  automationDesc: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.4)",
+    maxWidth: "80%",
+    lineHeight: 24,
+    marginBottom: 24,
+  },
+  automationAction: {
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 3,
+    color: "rgba(255,255,255,0.4)",
+  },
+  bookingCard: {
+    padding: 24,
+  },
+  bookingHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  bookingTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  bookingLinkText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.3)",
+  },
+  copyIconBox: {
+    width: 40,
+    height: 40,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bookingActions: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  shareLinkBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#000",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  shareQrBtn: {
+    flex: 1,
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "#fff",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
+  },
+  shareBtnText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  shareQrText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: "#000",
+  },
+  embedCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 24,
+    marginTop: 16,
+  },
+  embedIconBox: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  embedTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  embedDesc: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
+  securityGridCard: {
+    flex: 1,
+    padding: 24,
+    alignItems: "flex-start",
+  },
+  securityTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginTop: 16,
+    marginBottom: 4,
+  },
+  securityAction: {
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 2,
+    color: "rgba(255,255,255,0.4)",
+  },
+  legalLabel: {
+    flex: 1,
+    marginLeft: 16,
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  footer: {
+    marginTop: 48,
+    alignItems: "center",
+  },
+  footerText: {
+    fontSize: 10,
+    fontWeight: "800",
+    letterSpacing: 4,
+    color: "rgba(255,255,255,0.2)",
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.8)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    width: "100%",
+    backgroundColor: "#111",
+    borderRadius: 32,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  closeBtn: {
+    width: 40,
+    height: 40,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  qrBox: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 20,
+    alignSelf: "center",
+    marginBottom: 24,
+  },
+  qrDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    textAlign: "center",
+    marginBottom: 24,
+  },
+  modalBtn: {
+    marginTop: 16,
+  },
+  modalInput: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 16,
+    color: "#fff",
+    fontSize: 17,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  currencyRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 16,
+    paddingHorizontal: 12,
+    borderRadius: 12,
+    gap: 12,
+  },
+  currencyLabel: {
+    flex: 1,
+    fontSize: 16,
+    color: "#fff",
+  },
+  currencySymbol: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  demoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    borderRadius: 16,
+    marginBottom: 8,
+  },
+  demoLabel: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  demoDesc: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
+});
 
   const CompactRow = ({ icon, title, subtitle, onPress, disabled = false, destructive = false, comingSoon = false }: any) => (
     <Pressable 
