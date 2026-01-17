@@ -182,8 +182,10 @@ export default function CalendarScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Animated.Text style={styles.giantMonth}>{monthName}</Animated.Text>
-            <Animated.Text style={styles.hugeYear}>{yearName}</Animated.Text>
+            <View style={styles.headerTitleRow}>
+              <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit>{monthName}</Animated.Text>
+              <Animated.Text style={styles.hugeYear}>{yearName}</Animated.Text>
+            </View>
             <View style={styles.headerControls}>
               <Animated.Text style={styles.setupText}>Set up your business hours</Animated.Text>
               <Pressable onPress={handleOpenAvailability} style={styles.glassButtonSmall}>
@@ -286,13 +288,18 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 24,
   },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 12,
+    flexWrap: "nowrap",
+  },
   giantMonth: {
     fontSize: 72,
     fontWeight: "300",
     color: "#fff",
     letterSpacing: -2,
     lineHeight: 80,
-    flexShrink: 1,
   },
   hugeYear: {
     fontSize: 56,
