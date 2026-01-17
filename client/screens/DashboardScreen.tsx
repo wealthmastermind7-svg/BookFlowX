@@ -29,7 +29,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { api, Booking, DashboardStats, Business } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
 import { usePremium } from "@/contexts/PremiumContext";
-import { Spacing } from "@/constants/theme";
+import { Spacing, BorderRadius } from "@/constants/theme";
 
 const smokeBackground = require("../../attached_assets/generated_images/abstract_dark_smoke_fluid_motion.png");
 
@@ -333,7 +333,7 @@ function BookingCardGlass({
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const { showPaywall } = usePremium();
+  const { isPremium, showPaywall } = usePremium();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -450,6 +450,23 @@ export default function DashboardScreen() {
               {formatPrice(Math.round(totalRevenue * 100), business?.currency || "USD")}
             </Animated.Text>
           </GlassPanel>
+
+          {!isPremium && (
+            <Pressable onPress={() => showPaywall(true)}>
+              <GlassPanel style={styles.premiumBanner}>
+                <View style={styles.premiumIconContainer}>
+                  <Feather name="zap" size={16} color="white" />
+                </View>
+                <View style={styles.premiumContent}>
+                  <Animated.Text style={styles.premiumTitle}>Grow faster with Premium</Animated.Text>
+                  <Animated.Text style={styles.premiumSubtitle}>
+                    Unlimited booking links, QR codes, and website embeds
+                  </Animated.Text>
+                </View>
+                <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+              </GlassPanel>
+            </Pressable>
+          )}
 
           <View style={styles.metersRow}>
             <GlassPanel style={styles.meterCard}>
@@ -582,6 +599,35 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(255,255,255,0.2)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
+  },
+  premiumBanner: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 20,
+    gap: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  premiumIconContainer: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#06B6D4",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  premiumContent: {
+    flex: 1,
+  },
+  premiumTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  premiumSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.6)",
+    lineHeight: 18,
   },
   metersRow: {
     flexDirection: "row",
