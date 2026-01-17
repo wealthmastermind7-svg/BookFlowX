@@ -75,12 +75,10 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
               const isTrialActive = now.getTime() - createdDate.getTime() < trialDays * msPerDay;
               
               // In trial, we consider them premium for gating purposes if not on web
-              if (isTrialActive && Platform.OS !== "web") {
-                setIsPremium(true);
-              } else {
-                // Trial expired or on web, strictly check premium status
-                setIsPremium(false);
-              }
+              // However, the user wants the banner to show even in Expo Go to encourage upgrade
+              // So we should check if they are actually premium via checkPremiumStatus
+              // and only use trial as a secondary fallback if needed.
+              setIsPremium(false);
             }
           }
         } catch (error) {
