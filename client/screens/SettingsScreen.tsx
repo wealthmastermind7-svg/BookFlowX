@@ -342,8 +342,8 @@ export default function SettingsScreen() {
 
         <SectionTitle>Booking</SectionTitle>
         <View style={styles.row}>
-          <MetallicButton title="Share Link" icon="upload" onPress={handleOpenSharePreview} />
-          <MetallicButton title="Share QR" icon="grid" onPress={handleShowQRCode} />
+          <MetallicButton title="Share Link" icon="share-2" onPress={handleOpenSharePreview} />
+          <MetallicButton title="Share QR" icon="maximize" onPress={handleShowQRCode} />
         </View>
 
         <SectionTitle small>Subscription</SectionTitle>
