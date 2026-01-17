@@ -235,19 +235,6 @@ export default function AvailabilityEditorScreen() {
                       </View>
                       <Animated.Text style={styles.statusText}>Open</Animated.Text>
                     </View>
-                    <View style={styles.durationRow}>
-                      <View style={styles.knobIcon}>
-                        <View style={styles.knobInner} />
-                      </View>
-                      <Animated.Text style={styles.durationText}>
-                        {(() => {
-                          const start = parseInt(schedule.startTime.split(":")[0]);
-                          const end = parseInt(schedule.endTime.split(":")[0]);
-                          const diff = end - start;
-                          return `${diff} HOURS`;
-                        })()}
-                      </Animated.Text>
-                    </View>
                   </View>
 
                   <View style={styles.timeRow}>
@@ -419,34 +406,6 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#333",
-  },
-  durationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  knobIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  knobInner: {
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#eee",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.05)",
-  },
-  durationText: {
-    fontSize: 18,
-    fontWeight: "400",
     color: "#333",
   },
   timeRow: {
