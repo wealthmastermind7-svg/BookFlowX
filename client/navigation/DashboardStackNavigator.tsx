@@ -19,7 +19,7 @@ export default function DashboardStackNavigator() {
         name="Dashboard"
         component={DashboardScreen}
         options={{
-          headerTitle: () => <HeaderTitle title="BookFlow" />,
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
