@@ -313,14 +313,14 @@ export default function ServiceEditorScreen() {
                 Details
               </Text>
             </Pressable>
-            <Pressable onPress={() => setActiveTab("links")}>
+            <View style={{ opacity: 0.3 }}>
               <Text style={[
                 styles.carouselItem,
-                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
+                styles.carouselItemInactive
               ]}>
                 Links
               </Text>
-            </Pressable>
+            </View>
           </View>
 
           <KeyboardAwareScrollViewCompat
