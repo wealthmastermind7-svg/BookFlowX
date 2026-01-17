@@ -7,12 +7,12 @@ import {
   TextInput,
   Pressable,
   ScrollView,
-  FlatList,
   ActivityIndicator,
   Keyboard,
   Share,
   Alert,
   Modal,
+  ImageBackground,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, useNavigation } from "@react-navigation/native";
@@ -21,30 +21,49 @@ import * as Haptics from "expo-haptics";
 import { Paths, File as ExpoFile } from "expo-file-system";
 import * as Clipboard from "expo-clipboard";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
+import { BlurView } from "expo-blur";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, Service, Business } from "@/lib/api";
 import { getBookingDomain } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
-import { Card } from "@/components/Card";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
 import QRCode from "react-native-qrcode-svg";
 
 import { usePremium } from "@/contexts/PremiumContext";
 
+const silkBackground = require("../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,
   "ServiceEditor"
 >;
 
+function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
+  if (Platform.OS === "ios") {
+    return (
+      <BlurView intensity={30} tint="dark" style={[styles.glassPanel, style]}>
+        {children}
+      </BlurView>
+    );
+  }
+  return (
+    <View style={[styles.glassPanel, styles.glassPanelAndroid, style]}>
+      {children}
+    </View>
+  );
+}
+
 export default function ServiceEditorScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<EditScreenNavigationProp>();
-  const { theme } = useTheme();
   const { isPremium, checkShareAccess, checkQrAccess } = usePremium();
 
   const [service, setService] = useState<Partial<Service>>({
@@ -63,7 +82,12 @@ export default function ServiceEditorScreen() {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const qrRef = useRef<any>(null);
 
+  const fadeIn = useSharedValue(0);
   const serviceId = (route.params as any)?.serviceId;
+
+  useEffect(() => {
+    fadeIn.value = withTiming(1, { duration: 600 });
+  }, []);
 
   useEffect(() => {
     const checkBusinessReady = setInterval(() => {
@@ -162,11 +186,7 @@ export default function ServiceEditorScreen() {
       Alert.alert("Error", "Save the service first to generate a QR code");
       return;
     }
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-    } catch {
-      // Ignore haptic errors
-    }
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); } catch {}
     setQrModalVisible(true);
   };
 
@@ -225,15 +245,12 @@ export default function ServiceEditorScreen() {
 
     setSaving(true);
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
       
       Keyboard.dismiss();
-      
       await new Promise(resolve => setTimeout(resolve, 100));
       
-      console.log("Saving service with businessId:", api.getBusinessId());
       if (serviceId) {
-        console.log("Updating service:", serviceId);
         await api.updateService(serviceId, {
           name: service.name,
           duration: service.duration,
@@ -241,7 +258,6 @@ export default function ServiceEditorScreen() {
           description: service.description,
         });
       } else {
-        console.log("Creating new service");
         await api.createService({
           name: service.name,
           duration: service.duration,
@@ -249,7 +265,7 @@ export default function ServiceEditorScreen() {
           description: service.description,
         });
       }
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
       
       navigation.goBack();
     } catch (error) {
@@ -260,10 +276,14 @@ export default function ServiceEditorScreen() {
     }
   };
 
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }));
+
   if (loading) {
     return (
-      <View style={[styles.container, { backgroundColor: theme.backgroundRoot, justifyContent: "center", alignItems: "center" }]}>
-        <ActivityIndicator size="large" color={theme.text} />
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
       </View>
     );
   }
@@ -271,512 +291,470 @@ export default function ServiceEditorScreen() {
   const bookingLink = getServiceBookingLink();
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      style={[styles.container, { backgroundColor: theme.backgroundRoot }]}
-    >
-      <KeyboardAwareScrollViewCompat
-        contentContainerStyle={{
-          paddingBottom: insets.bottom + Spacing.xl,
-        }}
+    <ImageBackground source={silkBackground} style={styles.background} resizeMode="cover">
+      <View style={styles.gradientOverlay} />
+      <KeyboardAvoidingView
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={styles.container}
       >
-        {/* Tab Navigation */}
-        <View style={[styles.tabBar, { borderBottomColor: theme.backgroundSecondary }]}>
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setActiveTab("details");
-            }}
-            style={[
-              styles.tab,
-              activeTab === "details" && [
-                styles.activeTab,
-                { borderBottomColor: theme.text },
-              ],
-            ]}
-          >
-            <ThemedText
-              type="body"
-              style={[
-                styles.tabText,
-                activeTab === "details" && styles.activeTabText,
-              ]}
+        <Animated.View style={[styles.contentContainer, containerStyle]}>
+          <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={({ pressed }) => [styles.backButton, { opacity: pressed ? 0.5 : 1 }]}
             >
-              Details
-            </ThemedText>
-          </Pressable>
-
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              setActiveTab("links");
-            }}
-            style={[
-              styles.tab,
-              activeTab === "links" && [
-                styles.activeTab,
-                { borderBottomColor: theme.text },
-              ],
-            ]}
-          >
-            <ThemedText
-              type="body"
-              style={[
-                styles.tabText,
-                activeTab === "links" && styles.activeTabText,
-              ]}
-            >
-              Links
-            </ThemedText>
-          </Pressable>
-        </View>
-
-        {/* Details Tab */}
-        {activeTab === "details" && (
-          <View style={styles.tabContent}>
-            {/* Service Name */}
-            <View style={styles.section}>
-              <ThemedText type="h4" style={styles.sectionTitle}>
-                Service Name
-              </ThemedText>
-              <TextInput
-                value={service.name}
-                onChangeText={(text) =>
-                  setService((prev) => ({ ...prev, name: text }))
-                }
-                placeholder="Enter service name"
-                placeholderTextColor={theme.textSecondary}
-                editable={!saving}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.backgroundSecondary,
-                    color: theme.text,
-                    borderColor: theme.backgroundTertiary,
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Duration */}
-            <View style={styles.section}>
-              <ThemedText type="h4" style={styles.sectionTitle}>
-                Duration (minutes)
-              </ThemedText>
-              <TextInput
-                value={String(service.duration)}
-                onChangeText={(text) =>
-                  setService((prev) => ({
-                    ...prev,
-                    duration: parseInt(text) || 0,
-                  }))
-                }
-                placeholder="30"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="number-pad"
-                editable={!saving}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.backgroundSecondary,
-                    color: theme.text,
-                    borderColor: theme.backgroundTertiary,
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Price */}
-            <View style={styles.section}>
-              <ThemedText type="h4" style={styles.sectionTitle}>
-                Price ({currencySymbol})
-              </ThemedText>
-              <TextInput
-                value={String((service.price || 0) / 100)}
-                onChangeText={(text) =>
-                  setService((prev) => ({
-                    ...prev,
-                    price: Math.round((parseFloat(text) || 0) * 100),
-                  }))
-                }
-                placeholder="0.00"
-                placeholderTextColor={theme.textSecondary}
-                keyboardType="decimal-pad"
-                editable={!saving}
-                style={[
-                  styles.input,
-                  {
-                    backgroundColor: theme.backgroundSecondary,
-                    color: theme.text,
-                    borderColor: theme.backgroundTertiary,
-                  },
-                ]}
-              />
-            </View>
-
-            {/* Description */}
-            <View style={styles.section}>
-              <ThemedText type="h4" style={styles.sectionTitle}>
-                Description
-              </ThemedText>
-              <TextInput
-                value={service.description || ""}
-                onChangeText={(text) =>
-                  setService((prev) => ({ ...prev, description: text }))
-                }
-                placeholder="Enter service description"
-                placeholderTextColor={theme.textSecondary}
-                multiline
-                numberOfLines={4}
-                editable={!saving}
-                style={[
-                  styles.input,
-                  styles.descriptionInput,
-                  {
-                    backgroundColor: theme.backgroundSecondary,
-                    color: theme.text,
-                    borderColor: theme.backgroundTertiary,
-                  },
-                ]}
-              />
-            </View>
+              <Feather name="arrow-left" size={24} color="#fff" />
+            </Pressable>
+            <Animated.Text style={styles.headerTitle}>Edit Service</Animated.Text>
+            <View style={styles.headerSpacer} />
           </View>
-        )}
 
-        {/* Links Tab */}
-        {activeTab === "links" && (
-          <View style={styles.tabContent}>
-            {!serviceId ? (
-              <View style={styles.section}>
-                <ThemedText type="h4" style={styles.sectionTitle}>
-                  Save First
-                </ThemedText>
-                <ThemedText type="body" style={styles.comingSoonText}>
-                  Save this service to generate its unique booking link and QR code
-                </ThemedText>
-              </View>
-            ) : (
-              <>
-                {/* Direct Booking Link */}
-                <View style={styles.section}>
-                  <ThemedText type="h4" style={styles.sectionTitle}>
-                    Direct Booking Link
-                  </ThemedText>
-                  <ThemedText type="body" style={styles.linkDescription}>
-                    Share this link to let customers book this specific service directly
-                  </ThemedText>
-                  
-                  <Pressable
-                    onPress={handleCopyServiceLink}
-                    style={[styles.linkCard, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
-                  >
-                    <View style={styles.linkCardContent}>
-                      <View style={[styles.linkIconBadge, { backgroundColor: theme.backgroundTertiary }]}>
-                        <Feather name="link" size={20} color={theme.text} />
-                      </View>
-                      <View style={styles.linkCardText}>
-                        <ThemedText type="body" style={styles.linkUrl} numberOfLines={1}>
-                          {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
-                        </ThemedText>
-                        <ThemedText type="small" style={styles.linkHint}>
-                          Tap to copy
-                        </ThemedText>
-                      </View>
-                      <View style={[styles.copyBadge, { backgroundColor: theme.text }]}>
-                        <Feather name={isPremium ? "copy" : "lock"} size={14} color={theme.backgroundDefault} />
-                      </View>
-                    </View>
-                  </Pressable>
-
-                  <Pressable
-                    onPress={handleShareServiceLink}
-                    style={[styles.shareButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
-                  >
-                    <Feather name={isPremium ? "share" : "lock"} size={18} color={theme.text} />
-                    <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>
-                      Share Link
-                    </ThemedText>
-                  </Pressable>
-                </View>
-
-                {/* QR Code Section */}
-                <View style={styles.section}>
-                  <ThemedText type="h4" style={styles.sectionTitle}>
-                    QR Code
-                  </ThemedText>
-                  <ThemedText type="body" style={styles.linkDescription}>
-                    Display this QR code for customers to scan and book this service
-                  </ThemedText>
-                  
-                  <Pressable
-                    onPress={handleShowQRCode}
-                    style={[styles.qrPreviewButton, { backgroundColor: theme.backgroundSecondary, borderColor: theme.backgroundTertiary }]}
-                  >
-                    <Feather name={isPremium ? "maximize" : "lock"} size={24} color={theme.text} />
-                    <ThemedText type="body" style={{ marginLeft: Spacing.md }}>
-                      View QR Code
-                    </ThemedText>
-                  </Pressable>
-                </View>
-              </>
-            )}
+          <View style={styles.tabCarousel}>
+            <Pressable onPress={() => setActiveTab("details")}>
+              <Animated.Text style={[
+                styles.carouselItem,
+                activeTab === "details" ? styles.carouselItemActive : styles.carouselItemInactive
+              ]}>
+                Details
+              </Animated.Text>
+            </Pressable>
+            <Pressable onPress={() => setActiveTab("links")}>
+              <Animated.Text style={[
+                styles.carouselItem,
+                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
+              ]}>
+                Links
+              </Animated.Text>
+            </Pressable>
           </View>
-        )}
 
-        {/* Action Buttons */}
-        <View
-          style={[
-            styles.actionButtons,
-            { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl },
-          ]}
-        >
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              navigation.goBack();
-            }}
-            disabled={saving}
-            style={[
-              styles.cancelButton,
-              { backgroundColor: theme.backgroundSecondary },
-              saving && { opacity: 0.5 },
-            ]}
+          <KeyboardAwareScrollViewCompat
+            contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
+            showsVerticalScrollIndicator={false}
           >
-            <ThemedText type="body" style={styles.cancelButtonText}>
-              Cancel
-            </ThemedText>
-          </Pressable>
-
-          <Button
-            onPress={handleSave}
-            disabled={saving}
-            style={{ flex: 1, marginLeft: Spacing.md }}
-          >
-            {saving ? "Saving..." : "Save Service"}
-          </Button>
-        </View>
-      </KeyboardAwareScrollViewCompat>
-
-      {/* QR Code Modal */}
-      <Modal
-        visible={qrModalVisible}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setQrModalVisible(false)}
-      >
-        <Pressable 
-          style={styles.modalOverlay}
-          onPress={() => setQrModalVisible(false)}
-        >
-          <View style={[styles.qrModalContent, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={styles.qrModalHeader}>
-              <ThemedText type="h3" style={{ flex: 1 }}>
-                {service.name || "Service"} QR Code
-              </ThemedText>
-              <Pressable
-                onPress={() => setQrModalVisible(false)}
-                style={styles.closeButton}
-              >
-                <Feather name="x" size={24} color={theme.text} />
-              </Pressable>
-            </View>
-
-            <View style={styles.qrContainer}>
-              {bookingLink && (
-                <View style={{ padding: 10, backgroundColor: 'white' }}>
-                  <QRCode
-                    value={bookingLink}
-                    size={220}
-                    backgroundColor="white"
-                    color="black"
-                    getRef={(ref: any) => (qrRef.current = ref)}
+            {activeTab === "details" && (
+              <View style={styles.formContainer}>
+                <View style={styles.inputGroup}>
+                  <Animated.Text style={styles.inputLabel}>Service Name</Animated.Text>
+                  <TextInput
+                    value={service.name}
+                    onChangeText={(text) => setService((prev) => ({ ...prev, name: text }))}
+                    placeholder="Enter service name"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    editable={!saving}
+                    style={styles.inputPrimary}
                   />
                 </View>
-              )}
-            </View>
 
-            <ThemedText type="body" style={styles.qrDescription}>
-              Scan to book {service.name}
-            </ThemedText>
+                <View style={styles.inputGroup}>
+                  <Animated.Text style={styles.inputLabel}>Duration (minutes)</Animated.Text>
+                  <TextInput
+                    value={String(service.duration)}
+                    onChangeText={(text) => setService((prev) => ({ ...prev, duration: parseInt(text) || 0 }))}
+                    placeholder="30"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    keyboardType="number-pad"
+                    editable={!saving}
+                    style={styles.inputSecondary}
+                  />
+                </View>
 
-            <View style={styles.qrActions}>
-              <Button onPress={handleDownloadQRCode} style={{ flex: 1 }}>
-                Download QR Code
-              </Button>
-            </View>
+                <View style={styles.inputGroup}>
+                  <Animated.Text style={styles.inputLabel}>Price ({currencySymbol})</Animated.Text>
+                  <TextInput
+                    value={String((service.price || 0) / 100)}
+                    onChangeText={(text) => setService((prev) => ({ ...prev, price: Math.round((parseFloat(text) || 0) * 100) }))}
+                    placeholder="0.00"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    keyboardType="decimal-pad"
+                    editable={!saving}
+                    style={styles.inputSecondary}
+                  />
+                </View>
+
+                <View style={styles.inputGroup}>
+                  <Animated.Text style={styles.inputLabel}>Description</Animated.Text>
+                  <TextInput
+                    value={service.description || ""}
+                    onChangeText={(text) => setService((prev) => ({ ...prev, description: text }))}
+                    placeholder="Enter service description"
+                    placeholderTextColor="rgba(255,255,255,0.4)"
+                    multiline
+                    numberOfLines={4}
+                    editable={!saving}
+                    style={[styles.inputSecondary, styles.textArea]}
+                  />
+                </View>
+              </View>
+            )}
+
+            {activeTab === "links" && (
+              <View style={styles.linksContainer}>
+                {!serviceId ? (
+                  <GlassPanel style={styles.linkCard}>
+                    <Animated.Text style={styles.linkCardTitle}>Save First</Animated.Text>
+                    <Animated.Text style={styles.linkCardDesc}>
+                      Save this service to generate its unique booking link and QR code
+                    </Animated.Text>
+                  </GlassPanel>
+                ) : (
+                  <>
+                    <GlassPanel style={styles.linkCard}>
+                      <Animated.Text style={styles.linkCardTitle}>Direct Booking Link</Animated.Text>
+                      <Animated.Text style={styles.linkCardDesc}>
+                        Share this link to let customers book directly
+                      </Animated.Text>
+                      
+                      <Pressable onPress={handleCopyServiceLink} style={styles.linkUrlContainer}>
+                        <Animated.Text style={styles.linkUrl} numberOfLines={1}>
+                          {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
+                        </Animated.Text>
+                        <Feather name={isPremium ? "copy" : "lock"} size={18} color="rgba(255,255,255,0.6)" />
+                      </Pressable>
+
+                      <Pressable onPress={handleShareServiceLink} style={styles.linkButton}>
+                        <Feather name={isPremium ? "share" : "lock"} size={18} color="#fff" />
+                        <Animated.Text style={styles.linkButtonText}>Share Link</Animated.Text>
+                      </Pressable>
+                    </GlassPanel>
+
+                    <GlassPanel style={styles.linkCard}>
+                      <Animated.Text style={styles.linkCardTitle}>QR Code</Animated.Text>
+                      <Animated.Text style={styles.linkCardDesc}>
+                        Display this QR code for customers to scan and book
+                      </Animated.Text>
+
+                      <Pressable onPress={handleShowQRCode} style={styles.linkButton}>
+                        <Feather name={isPremium ? "maximize" : "lock"} size={18} color="#fff" />
+                        <Animated.Text style={styles.linkButtonText}>View QR Code</Animated.Text>
+                      </Pressable>
+                    </GlassPanel>
+                  </>
+                )}
+              </View>
+            )}
+          </KeyboardAwareScrollViewCompat>
+
+          <View style={[styles.footer, { paddingBottom: insets.bottom + 16 }]}>
+            <Pressable
+              onPress={() => { try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {} navigation.goBack(); }}
+              disabled={saving}
+              style={({ pressed }) => [styles.cancelButton, { opacity: pressed ? 0.7 : saving ? 0.5 : 1 }]}
+            >
+              <Animated.Text style={styles.cancelButtonText}>Cancel</Animated.Text>
+            </Pressable>
+
+            <Pressable
+              onPress={handleSave}
+              disabled={saving}
+              style={({ pressed }) => [styles.saveButton, { opacity: pressed ? 0.9 : saving ? 0.5 : 1 }]}
+            >
+              <Animated.Text style={styles.saveButtonText}>
+                {saving ? "Saving..." : "Save Service"}
+              </Animated.Text>
+            </Pressable>
           </View>
-        </Pressable>
-      </Modal>
-    </KeyboardAvoidingView>
+        </Animated.View>
+
+        <Modal
+          visible={qrModalVisible}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setQrModalVisible(false)}
+        >
+          <Pressable style={styles.modalOverlay} onPress={() => setQrModalVisible(false)}>
+            <View style={styles.qrModalContent}>
+              <View style={styles.qrModalHeader}>
+                <Animated.Text style={styles.qrModalTitle}>
+                  {service.name || "Service"} QR Code
+                </Animated.Text>
+                <Pressable onPress={() => setQrModalVisible(false)} style={styles.closeButton}>
+                  <Feather name="x" size={24} color="#fff" />
+                </Pressable>
+              </View>
+
+              <View style={styles.qrContainer}>
+                {bookingLink && (
+                  <View style={{ padding: 16, backgroundColor: 'white', borderRadius: 16 }}>
+                    <QRCode
+                      value={bookingLink}
+                      size={200}
+                      backgroundColor="white"
+                      color="black"
+                      getRef={(ref: any) => (qrRef.current = ref)}
+                    />
+                  </View>
+                )}
+              </View>
+
+              <Animated.Text style={styles.qrDescription}>
+                Scan to book {service.name}
+              </Animated.Text>
+
+              <Pressable onPress={handleDownloadQRCode} style={styles.downloadButton}>
+                <Animated.Text style={styles.downloadButtonText}>Download QR Code</Animated.Text>
+              </Pressable>
+            </View>
+          </Pressable>
+        </Modal>
+      </KeyboardAvoidingView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  gradientOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.5)",
+  },
   container: {
     flex: 1,
   },
-  tabBar: {
-    flexDirection: "row",
-    borderBottomWidth: 1,
-    paddingHorizontal: Spacing.lg,
-  },
-  tab: {
+  contentContainer: {
     flex: 1,
-    paddingVertical: Spacing.lg,
+  },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: "center",
     alignItems: "center",
-    borderBottomWidth: 2,
-    borderBottomColor: "transparent",
+    backgroundColor: "#000",
   },
-  activeTab: {
-    borderBottomWidth: 2,
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 24,
+    paddingBottom: 16,
   },
-  tabText: {
-    opacity: 0.6,
+  backButton: {
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "flex-start",
+  },
+  headerTitle: {
+    flex: 1,
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "center",
+  },
+  headerSpacer: {
+    width: 44,
+  },
+  tabCarousel: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 40,
+    paddingVertical: 24,
+  },
+  carouselItem: {
+    fontSize: 48,
+    fontWeight: "600",
+  },
+  carouselItemActive: {
+    color: "#fff",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
+  },
+  carouselItemInactive: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 32,
+  },
+  formContainer: {
+    paddingHorizontal: 24,
+  },
+  inputGroup: {
+    marginBottom: 24,
+  },
+  inputLabel: {
+    fontSize: 12,
+    fontWeight: "500",
+    color: "rgba(255,255,255,0.6)",
+    marginBottom: 8,
+    marginLeft: 4,
+  },
+  inputPrimary: {
+    backgroundColor: "#fff",
+    color: "#000",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 17,
     fontWeight: "500",
   },
-  activeTabText: {
-    opacity: 1,
-    fontWeight: "600",
+  inputSecondary: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+    color: "#fff",
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    fontSize: 17,
   },
-  tabContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-  },
-  section: {
-    marginBottom: Spacing.xl,
-  },
-  sectionTitle: {
-    marginBottom: Spacing.md,
-    fontWeight: "600",
-  },
-  input: {
-    borderWidth: 1,
-    borderRadius: BorderRadius.lg,
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.md,
-    fontSize: 16,
-    marginBottom: Spacing.md,
-  },
-  descriptionInput: {
+  textArea: {
+    minHeight: 140,
     textAlignVertical: "top",
-    minHeight: 100,
   },
-  comingSoonText: {
-    opacity: 0.6,
-    fontStyle: "italic",
+  linksContainer: {
+    paddingHorizontal: 24,
   },
-  actionButtons: {
+  glassPanel: {
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    overflow: "hidden",
+  },
+  glassPanelAndroid: {
+    backgroundColor: "rgba(255,255,255,0.08)",
+  },
+  linkCard: {
+    padding: 24,
+    marginBottom: 20,
+  },
+  linkCardTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  linkCardDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    marginBottom: 16,
+    lineHeight: 20,
+  },
+  linkUrlContainer: {
     flexDirection: "row",
     alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.3)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    marginBottom: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  linkUrl: {
+    flex: 1,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.8)",
+    fontFamily: Platform.OS === "ios" ? "Menlo" : "monospace",
+    marginRight: 8,
+  },
+  linkButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+    borderRadius: 12,
+    paddingVertical: 14,
+    gap: 8,
+  },
+  linkButtonText: {
+    fontSize: 15,
+    fontWeight: "500",
+    color: "#fff",
+  },
+  footer: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    flexDirection: "row",
+    paddingHorizontal: 24,
+    paddingTop: 16,
+    gap: 16,
+    backgroundColor: "rgba(0,0,0,0.8)",
   },
   cancelButton: {
     flex: 1,
-    height: Spacing.buttonHeight,
-    borderRadius: BorderRadius.full,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Spacing.lg,
   },
   cancelButtonText: {
-    fontWeight: "600",
-  },
-  linkDescription: {
-    opacity: 0.7,
-    marginBottom: Spacing.lg,
-  },
-  linkCard: {
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-    marginBottom: Spacing.md,
-    overflow: "hidden",
-  },
-  linkCardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: Spacing.md,
-    gap: Spacing.md,
-  },
-  linkIconBadge: {
-    width: 40,
-    height: 40,
-    borderRadius: BorderRadius.md,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  linkCardText: {
-    flex: 1,
-  },
-  linkUrl: {
-    fontSize: 14,
+    fontSize: 17,
     fontWeight: "500",
+    color: "#fff",
   },
-  linkHint: {
-    opacity: 0.5,
-    marginTop: 2,
-  },
-  copyBadge: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.full,
+  saveButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
-    justifyContent: "center",
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.15,
+    shadowRadius: 10,
   },
-  shareButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.lg,
-    borderRadius: BorderRadius.full,
-    borderWidth: 1,
-    gap: Spacing.sm,
-  },
-  shareButtonText: {
-    fontWeight: "600",
-  },
-  qrPreviewButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: Spacing.xl,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
+  saveButtonText: {
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#000",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: "rgba(0,0,0,0.85)",
     justifyContent: "center",
     alignItems: "center",
-    padding: Spacing.xl,
+    padding: 24,
   },
   qrModalContent: {
+    backgroundColor: "rgba(30,30,30,0.95)",
+    borderRadius: 32,
+    padding: 24,
     width: "100%",
     maxWidth: 340,
-    borderRadius: BorderRadius.xl,
-    padding: Spacing.xl,
+    alignItems: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
   },
   qrModalHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing.xl,
+    width: "100%",
+    marginBottom: 24,
+  },
+  qrModalTitle: {
+    flex: 1,
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
   },
   closeButton: {
-    padding: Spacing.sm,
+    width: 32,
+    height: 32,
+    justifyContent: "center",
+    alignItems: "center",
   },
   qrContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing.xl,
-    backgroundColor: "white",
-    borderRadius: BorderRadius.lg,
-    marginBottom: Spacing.lg,
+    marginBottom: 16,
   },
   qrDescription: {
-    textAlign: "center",
-    opacity: 0.7,
-    marginBottom: Spacing.xl,
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    marginBottom: 24,
   },
-  qrActions: {
-    flexDirection: "row",
+  downloadButton: {
+    backgroundColor: "#fff",
+    borderRadius: 16,
+    paddingVertical: 14,
+    paddingHorizontal: 32,
+    width: "100%",
+    alignItems: "center",
+  },
+  downloadButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#000",
   },
 });

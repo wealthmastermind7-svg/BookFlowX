@@ -18,7 +18,7 @@ export default function ServicesStackNavigator() {
         name="ServicesList"
         component={ServicesScreen}
         options={{
-          headerTitle: "Services",
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

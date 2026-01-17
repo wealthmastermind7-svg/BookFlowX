@@ -99,24 +99,10 @@ export default function RootStackNavigator() {
       <Stack.Screen
         name="ServiceEditor"
         component={ServiceEditorScreen}
-        options={({ navigation, route }) => ({
-          ...opaqueScreenOptions,
+        options={{
+          headerShown: false,
           presentation: "modal",
-          headerTitle: route.params?.serviceId ? "Edit Service" : "New Service",
-          headerLeft: () => (
-            <HeaderButton onPress={() => navigation.goBack()}>
-              Cancel
-            </HeaderButton>
-          ),
-          headerRight: () => (
-            <HeaderButton
-              onPress={() => {}}
-              tintColor={theme.accent}
-            >
-              Save
-            </HeaderButton>
-          ),
-        })}
+        }}
       />
       <Stack.Screen
         name="QuickSale"
