@@ -168,6 +168,15 @@ export default function BlockedSlotsScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={({ pressed }) => [
+                styles.backButton,
+                { opacity: pressed ? 0.5 : 1 }
+              ]}
+            >
+              <Feather name="arrow-left" size={24} color="#fff" />
+            </Pressable>
             <Animated.Text style={styles.hugeTitle}>BLOCK SLOTS</Animated.Text>
             <Animated.Text style={styles.dateSubtitle}>
               {new Date(date).toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
@@ -268,6 +277,18 @@ const styles = StyleSheet.create({
   header: {
     marginBottom: 40,
     alignItems: "center",
+    position: "relative",
+    width: "100%",
+  },
+  backButton: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
   },
   hugeTitle: {
     fontSize: 56,
