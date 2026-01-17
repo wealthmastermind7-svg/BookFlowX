@@ -296,15 +296,18 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: -2,
     textAlign: "center",
-    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowColor: "rgba(0,0,0,0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
   },
   dateSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#fff",
     marginTop: 8,
     textAlign: "center",
+    textShadowColor: "rgba(0,0,0,0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 4,
   },
   slotsGrid: {
     flexDirection: "row",
@@ -323,37 +326,40 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.5)",
+    borderColor: "rgba(255,255,255,0.4)",
     overflow: "hidden",
   },
   glassPanelBlocked: {
-    backgroundColor: "#000",
+    backgroundColor: "rgba(0,0,0,0.85)",
     borderColor: "rgba(255,255,255,0.2)",
   },
   glassPanelBooked: {
-    opacity: 0.6,
+    opacity: 0.8,
     borderColor: "rgba(255,255,255,0.1)",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   glassPanelBlockedAndroid: {
-    backgroundColor: "#000",
+    backgroundColor: "rgba(0,0,0,0.9)",
   },
   glassPanelBookedAndroid: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   slotTime: {
     fontSize: 24,
     fontWeight: "600",
     color: "#fff",
     marginBottom: 8,
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   textBlocked: {
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.8)",
   },
   textBooked: {
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.6)",
   },
   statusRow: {
     flexDirection: "row",
@@ -364,14 +370,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "#fff",
     fontWeight: "500",
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   statusTextBlocked: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.8)",
   },
   statusTextBooked: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.6)",
   },
   emptyCard: {
     padding: 48,
