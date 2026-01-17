@@ -108,22 +108,16 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   }, []);
 
   const checkShareAccess = useCallback((): boolean => {
-    if (isPremium) return true;
-    showPaywall("share_limit");
-    return false;
-  }, [isPremium, showPaywall]);
+    return isPremium;
+  }, [isPremium]);
 
   const checkQrAccess = useCallback((): boolean => {
-    if (isPremium) return true;
-    showPaywall("qr_limit");
-    return false;
-  }, [isPremium, showPaywall]);
+    return isPremium;
+  }, [isPremium]);
 
   const checkEmbedAccess = useCallback((): boolean => {
-    if (isPremium) return true;
-    showPaywall("embed_locked");
-    return false;
-  }, [isPremium, showPaywall]);
+    return isPremium;
+  }, [isPremium]);
 
   const purchaseProduct = useCallback(async (pkg: PurchasesPackage): Promise<boolean> => {
     if (Platform.OS === "web") {

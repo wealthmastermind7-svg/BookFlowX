@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   View,
   Text,
@@ -135,18 +135,21 @@ export default function ServiceEditorScreen() {
     }
   };
 
-  const getServiceBookingLink = () => {
+  const bookingLink = useMemo(() => {
     if (!business?.slug || !serviceId) return null;
     const domain = getBookingDomain();
     const protocol = domain.includes("localhost") ? "http" : "https";
     const serviceSlug = (service as Service).slug 
       || (service.name ? service.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() : serviceId);
     return `${protocol}://${domain}/book/${business.slug}/${serviceSlug}`;
-  };
+  }, [business?.slug, serviceId, service.name, service.slug]);
 
   const handleCopyServiceLink = async () => {
-    if (!checkShareAccess()) return;
-    const link = getServiceBookingLink();
+    if (!checkShareAccess()) {
+      showPaywall("share_limit");
+      return;
+    }
+    const link = bookingLink;
     if (!link) {
       Alert.alert("Error", "Save the service first to generate a booking link");
       return;
@@ -158,8 +161,11 @@ export default function ServiceEditorScreen() {
   };
 
   const handleShareServiceLink = async () => {
-    if (!checkShareAccess()) return;
-    const link = getServiceBookingLink();
+    if (!checkShareAccess()) {
+      showPaywall("share_limit");
+      return;
+    }
+    const link = bookingLink;
     if (!link) {
       Alert.alert("Error", "Save the service first to share a booking link");
       return;
@@ -177,7 +183,10 @@ export default function ServiceEditorScreen() {
   };
 
   const handleShowQRCode = () => {
-    if (!checkQrAccess()) return;
+    if (!checkQrAccess()) {
+      showPaywall("qr_limit");
+      return;
+    }
     if (!serviceId) {
       Alert.alert("Error", "Save the service first to generate a QR code");
       return;
@@ -279,8 +288,6 @@ export default function ServiceEditorScreen() {
       </View>
     );
   }
-
-  const bookingLink = getServiceBookingLink();
 
   return (
     <ImageBackground source={silkBackground} style={styles.background} resizeMode="cover">
@@ -625,6 +632,12 @@ const styles = StyleSheet.create({
     color: "#fff",
     marginBottom: 8,
   },
+  linkCardTitleSmall: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 4,
+  },
   linkCardDesc: {
     fontSize: 14,
     color: "rgba(255,255,255,0.6)",
@@ -701,37 +714,38 @@ const styles = StyleSheet.create({
   },
   saveButtonText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "600",
     color: "#000",
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
+    backgroundColor: "rgba(0,0,0,0.9)",
     justifyContent: "center",
     alignItems: "center",
     padding: 24,
   },
   qrModalContent: {
-    backgroundColor: "rgba(30,30,30,0.95)",
+    width: "100%",
+    maxWidth: 400,
+    backgroundColor: "#1C1C1E",
     borderRadius: 32,
     padding: 24,
-    width: "100%",
-    maxWidth: 340,
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
   qrModalHeader: {
     flexDirection: "row",
-    alignItems: "center",
     width: "100%",
+    justifyContent: "space-between",
+    alignItems: "center",
     marginBottom: 24,
   },
   qrModalTitle: {
-    flex: 1,
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "600",
     color: "#fff",
+    flex: 1,
   },
   closeButton: {
     width: 32,
@@ -740,24 +754,29 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   qrContainer: {
-    marginBottom: 16,
+    marginBottom: 24,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 5,
   },
   qrDescription: {
-    fontSize: 14,
+    fontSize: 16,
     color: "rgba(255,255,255,0.6)",
-    marginBottom: 24,
+    marginBottom: 32,
+    textAlign: "center",
   },
   downloadButton: {
-    backgroundColor: "#fff",
-    borderRadius: 16,
-    paddingVertical: 14,
-    paddingHorizontal: 32,
     width: "100%",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    borderRadius: 16,
+    paddingVertical: 16,
     alignItems: "center",
   },
   downloadButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000",
+    color: "#fff",
   },
 });
