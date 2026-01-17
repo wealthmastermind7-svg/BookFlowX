@@ -452,7 +452,7 @@ export default function DashboardScreen() {
           </GlassPanel>
 
           {!isPremium && (
-            <Pressable onPress={() => showPaywall(true)}>
+            <Pressable onPress={() => showPaywall("soft_upsell")}>
               <GlassPanel style={styles.premiumBanner}>
                 <View style={styles.premiumIconContainer}>
                   <Feather name="zap" size={16} color="white" />
