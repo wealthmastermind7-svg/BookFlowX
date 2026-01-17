@@ -6,19 +6,27 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
+  ImageBackground,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
+import { BlurView } from "expo-blur";
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from "react-native-reanimated";
+
 import { api, TimeSlot, BlockedSlot } from "@/lib/api";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Card } from "@/components/Card";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
+import { Spacing, BorderRadius } from "@/constants/theme";
+
+const shadowBackground = require("../../attached_assets/generated_images/abstract_black_and_white_shifting_shadows_background_for_block_slots.png");
 
 type BlockedSlotsNavigationProp = NativeStackNavigationProp<
   CalendarStackParamList,
@@ -27,29 +35,40 @@ type BlockedSlotsNavigationProp = NativeStackNavigationProp<
 
 type BlockedSlotsRouteProp = RouteProp<CalendarStackParamList, "BlockedSlots">;
 
-function formatTime12Hour(time24: string): string {
-  const [hours, minutes] = time24.split(":").map(Number);
-  const period = hours >= 12 ? "PM" : "AM";
-  const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
-}
-
-function formatDateForDisplay(dateStr: string): string {
-  const [year, month, day] = dateStr.split("-");
-  const date = new Date(`${year}-${month}-${day}`);
-  return date.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
+function GlassPanel({ children, style, type = "default" }: { children: React.ReactNode; style?: any; type?: "default" | "blocked" | "booked" }) {
+  if (Platform.OS === "ios") {
+    return (
+      <BlurView 
+        intensity={type === "blocked" ? 40 : 20} 
+        tint={type === "blocked" ? "dark" : "light"} 
+        style={[
+          styles.glassPanel, 
+          type === "blocked" && styles.glassPanelBlocked,
+          type === "booked" && styles.glassPanelBooked,
+          style
+        ]}
+      >
+        {children}
+      </BlurView>
+    );
+  }
+  return (
+    <View style={[
+      styles.glassPanel, 
+      styles.glassPanelAndroid, 
+      type === "blocked" && styles.glassPanelBlockedAndroid,
+      type === "booked" && styles.glassPanelBookedAndroid,
+      style
+    ]}>
+      {children}
+    </View>
+  );
 }
 
 export default function BlockedSlotsScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<BlockedSlotsNavigationProp>();
   const route = useRoute<BlockedSlotsRouteProp>();
-  const { theme } = useTheme();
   const { date } = route.params;
 
   const [slots, setSlots] = useState<TimeSlot[]>([]);
@@ -57,7 +76,10 @@ export default function BlockedSlotsScreen() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const fadeIn = useSharedValue(0);
+
   useEffect(() => {
+    fadeIn.value = withTiming(1, { duration: 800 });
     loadData();
   }, [date]);
 
@@ -78,7 +100,7 @@ export default function BlockedSlotsScreen() {
   };
 
   const handleToggleSlot = async (time: string, isCurrentlyBlocked: boolean) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
     setUpdating(time);
     
     try {
@@ -99,10 +121,10 @@ export default function BlockedSlotsScreen() {
           )
         );
       }
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     } catch (error) {
       console.error("Error toggling slot:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); } catch {}
       Alert.alert(
         "Error",
         isCurrentlyBlocked
@@ -122,43 +144,36 @@ export default function BlockedSlotsScreen() {
     return !slot.available && !isSlotBlocked(slot.time);
   };
 
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }));
+
   if (loading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.text} />
-      </ThemedView>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        scrollIndicatorInsets={{ bottom: insets.bottom }}
-        contentContainerStyle={[
-          styles.content,
-          { paddingTop: Spacing.xl, paddingBottom: insets.bottom + Spacing.xl },
-        ]}
-      >
-        <ThemedText type="h4" style={styles.dateTitle}>
-          {formatDateForDisplay(date)}
-        </ThemedText>
-        
-        <ThemedText type="body" style={styles.description}>
-          Tap a time slot to block or unblock it. Blocked slots will not be available for customers to book.
-        </ThemedText>
+    <ImageBackground source={shadowBackground} style={styles.background} resizeMode="cover">
+      <Animated.View style={[styles.container, containerStyle]}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.content,
+            { paddingTop: insets.top + 20, paddingBottom: insets.bottom + 40 },
+          ]}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.header}>
+            <Animated.Text style={styles.hugeTitle}>BLOCK SLOTS</Animated.Text>
+            <Animated.Text style={styles.dateSubtitle}>
+              {new Date(date).toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
+            </Animated.Text>
+          </View>
 
-        {slots.length === 0 ? (
-          <Card style={styles.emptyCard}>
-            <Feather name="calendar" size={48} color={theme.textSecondary} />
-            <ThemedText type="body" style={styles.emptyText}>
-              No time slots available for this day.
-            </ThemedText>
-            <ThemedText type="small" style={styles.emptySubtext}>
-              Check your business hours settings.
-            </ThemedText>
-          </Card>
-        ) : (
           <View style={styles.slotsGrid}>
             {slots.map((slot) => {
               const blocked = isSlotBlocked(slot.time);
@@ -174,99 +189,67 @@ export default function BlockedSlotsScreen() {
                     }
                   }}
                   disabled={booked || isUpdating}
-                  style={[
-                    styles.slotButton,
-                    {
-                      backgroundColor: blocked
-                        ? theme.error || "#DC2626"
-                        : booked
-                        ? theme.backgroundSecondary
-                        : theme.backgroundRoot,
-                      borderColor: blocked
-                        ? theme.error || "#DC2626"
-                        : booked
-                        ? theme.borderLight
-                        : theme.border,
-                      opacity: booked ? 0.5 : 1,
-                    },
-                  ]}
+                  style={styles.slotButton}
                 >
-                  {isUpdating ? (
-                    <ActivityIndicator size="small" color={blocked ? "#fff" : theme.text} />
-                  ) : (
-                    <>
-                      <ThemedText
-                        type="body"
-                        style={[
+                  <GlassPanel 
+                    type={blocked ? "blocked" : booked ? "booked" : "default"}
+                    style={styles.slotPanel}
+                  >
+                    {isUpdating ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <>
+                        <Animated.Text style={[
                           styles.slotTime,
-                          { color: blocked ? "#fff" : theme.text },
-                        ]}
-                      >
-                        {slot.time}
-                      </ThemedText>
-                      <View style={styles.slotStatus}>
-                        {blocked ? (
-                          <>
-                            <Feather name="x-circle" size={14} color="#fff" />
-                            <ThemedText
-                              type="small"
-                              style={[styles.slotStatusText, { color: "#fff" }]}
-                            >
-                              Blocked
-                            </ThemedText>
-                          </>
-                        ) : booked ? (
-                          <>
-                            <Feather name="user" size={14} color={theme.textSecondary} />
-                            <ThemedText
-                              type="small"
-                              style={[
-                                styles.slotStatusText,
-                                { color: theme.textSecondary },
-                              ]}
-                            >
-                              Booked
-                            </ThemedText>
-                          </>
-                        ) : (
-                          <>
-                            <Feather name="check-circle" size={14} color={theme.success || "#10B981"} />
-                            <ThemedText
-                              type="small"
-                              style={[
-                                styles.slotStatusText,
-                                { color: theme.success || "#10B981" },
-                              ]}
-                            >
-                              Available
-                            </ThemedText>
-                          </>
-                        )}
-                      </View>
-                    </>
-                  )}
+                          blocked && styles.textBlocked,
+                          booked && styles.textBooked
+                        ]}>
+                          {slot.time}
+                        </Animated.Text>
+                        <View style={styles.statusRow}>
+                          {blocked ? (
+                            <>
+                              <Feather name="x-circle" size={14} color="rgba(255,255,255,0.6)" />
+                              <Animated.Text style={styles.statusTextBlocked}>Blocked</Animated.Text>
+                            </>
+                          ) : booked ? (
+                            <>
+                              <Feather name="user" size={14} color="rgba(255,255,255,0.4)" />
+                              <Animated.Text style={styles.statusTextBooked}>Booked</Animated.Text>
+                            </>
+                          ) : (
+                            <>
+                              <Feather name="check-circle" size={14} color="#fff" />
+                              <Animated.Text style={styles.statusTextAvailable}>Available</Animated.Text>
+                            </>
+                          )}
+                        </View>
+                      </>
+                    )}
+                  </GlassPanel>
                 </Pressable>
               );
             })}
           </View>
-        )}
 
-        {blockedSlots.length > 0 && (
-          <View style={styles.summarySection}>
-            <ThemedText type="h4" style={styles.summaryTitle}>
-              Blocked Time Slots
-            </ThemedText>
-            <ThemedText type="body" style={styles.summaryCount}>
-              {blockedSlots.length} slot{blockedSlots.length !== 1 ? "s" : ""} blocked for this day
-            </ThemedText>
-          </View>
-        )}
-      </ScrollView>
-    </ThemedView>
+          {slots.length === 0 && (
+            <GlassPanel style={styles.emptyCard}>
+              <Feather name="calendar" size={48} color="rgba(255,255,255,0.2)" />
+              <Animated.Text style={styles.emptyText}>No time slots available for this day.</Animated.Text>
+              <Animated.Text style={styles.emptySubtext}>Check your business hours settings.</Animated.Text>
+            </GlassPanel>
+          )}
+        </ScrollView>
+      </Animated.View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   container: {
     flex: 1,
   },
@@ -274,70 +257,116 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#000",
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    paddingHorizontal: 24,
   },
-  dateTitle: {
-    marginBottom: Spacing.sm,
-  },
-  description: {
-    marginBottom: Spacing.xl,
-    opacity: 0.7,
-  },
-  emptyCard: {
+  header: {
+    marginBottom: 40,
     alignItems: "center",
-    justifyContent: "center",
-    padding: Spacing["3xl"],
   },
-  emptyText: {
-    marginTop: Spacing.lg,
+  hugeTitle: {
+    fontSize: 56,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: -2,
     textAlign: "center",
-    opacity: 0.7,
+    textShadowColor: "rgba(0,0,0,0.8)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
   },
-  emptySubtext: {
-    marginTop: Spacing.sm,
+  dateSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    marginTop: 8,
     textAlign: "center",
-    opacity: 0.5,
   },
   slotsGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: Spacing.md,
+    justifyContent: "space-between",
+    gap: 16,
   },
   slotButton: {
     width: "47%",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
+  },
+  slotPanel: {
+    paddingVertical: 24,
     alignItems: "center",
+    justifyContent: "center",
+  },
+  glassPanel: {
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: "rgba(255,255,255,0.5)",
+    overflow: "hidden",
+  },
+  glassPanelBlocked: {
+    backgroundColor: "#000",
+    borderColor: "rgba(255,255,255,0.2)",
+  },
+  glassPanelBooked: {
+    opacity: 0.6,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  glassPanelAndroid: {
+    backgroundColor: "rgba(255,255,255,0.15)",
+  },
+  glassPanelBlockedAndroid: {
+    backgroundColor: "#000",
+  },
+  glassPanelBookedAndroid: {
+    backgroundColor: "rgba(255,255,255,0.05)",
   },
   slotTime: {
+    fontSize: 24,
     fontWeight: "600",
-    marginBottom: Spacing.xs,
+    color: "#fff",
+    marginBottom: 8,
   },
-  slotStatus: {
+  textBlocked: {
+    color: "rgba(255,255,255,0.6)",
+  },
+  textBooked: {
+    color: "rgba(255,255,255,0.4)",
+  },
+  statusRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.xs,
+    gap: 6,
   },
-  slotStatusText: {
+  statusTextAvailable: {
     fontSize: 12,
+    color: "#fff",
+    fontWeight: "500",
   },
-  summarySection: {
-    marginTop: Spacing["3xl"],
-    paddingTop: Spacing.xl,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.1)",
+  statusTextBlocked: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
   },
-  summaryTitle: {
-    marginBottom: Spacing.sm,
+  statusTextBooked: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
   },
-  summaryCount: {
-    opacity: 0.7,
+  emptyCard: {
+    padding: 48,
+    alignItems: "center",
+    marginTop: 20,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.6)",
+    textAlign: "center",
+    marginTop: 16,
+  },
+  emptySubtext: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    textAlign: "center",
+    marginTop: 8,
   },
 });

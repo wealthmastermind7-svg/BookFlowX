@@ -36,7 +36,7 @@ export default function CalendarStackNavigator() {
         name="BlockedSlots"
         component={BlockedSlotsScreen}
         options={{
-          headerTitle: "Block Time Slots",
+          headerShown: false,
         }}
       />
     </Stack.Navigator>
