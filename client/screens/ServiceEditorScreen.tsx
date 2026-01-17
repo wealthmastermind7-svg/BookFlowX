@@ -25,7 +25,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
 
-const silkBackground = require("../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("@assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

@@ -27,7 +27,7 @@ const SPRING_CONFIG = {
   overshootClamping: true,
 };
 
-const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("@assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 interface ServiceCardProps {
   service: Service;
