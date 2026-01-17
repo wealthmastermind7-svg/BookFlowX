@@ -10,7 +10,6 @@ module.exports = function (api) {
           alias: {
             "@": "./client",
             "@shared": "./shared",
-            "@assets": "./attached_assets",
           },
           extensions: [".ios.js", ".android.js", ".js", ".ts", ".tsx", ".json"],
         },

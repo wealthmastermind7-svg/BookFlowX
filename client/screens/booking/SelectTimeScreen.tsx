@@ -35,7 +35,7 @@ const TIME_SLOTS = [
   "4:30 PM", "5:00 PM",
 ];
 
-const silkBackground = require("@assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 interface TimeSlotProps {
   time: string;
@@ -216,7 +216,7 @@ export default function SelectTimeScreen() {
           entering={FadeInDown.delay(0).springify()}
           style={styles.header}
         >
-          <Text style={styles.brandTitle}>BOOKFLOW</Text>
+          <Text style={styles.brandTitle}>BLACK EDITION</Text>
           <Text style={styles.brandSubtitle}>PREMIUM BOOKING</Text>
         </Animated.View>
 

@@ -16,7 +16,7 @@ type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
-const silkBackground = require("@assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
@@ -119,8 +119,8 @@ export default function CheckoutScreen() {
         }}
       >
         <Animated.View entering={FadeInDown.springify()} style={styles.header}>
-          <Text style={styles.brandTitle}>{service?.name || "Booking"}</Text>
-          <Text style={styles.brandSubtitle}>Checkout</Text>
+          <Text style={styles.brandTitle}>Black Edition</Text>
+          <Text style={styles.brandSubtitle}>Premium Booking</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.formSection}>

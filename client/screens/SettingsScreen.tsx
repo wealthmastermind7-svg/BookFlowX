@@ -166,10 +166,7 @@ export default function SettingsScreen() {
   const handleOpenSharePreview = () => {
     if (!business || !checkShareAccess()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const domain = getBookingDomain();
-    const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
-    const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
-    console.log("[Booking] Share link generated:", bookingLink);
+    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
     navigation.navigate("SharePreview", {
       businessName: business.name,
       bookingUrl: bookingLink,
@@ -182,13 +179,9 @@ export default function SettingsScreen() {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const data = await api.getQRCode();
-      if (data && business) {
-        const domain = getBookingDomain();
-        const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
-        const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
-        console.log("[Booking] QR link generated:", bookingLink);
+      if (data) {
         setQrCode(data.qrCode);
-        setBookingUrl(bookingLink);
+        setBookingUrl(data.bookingUrl);
         setQrModalVisible(true);
       }
     } catch (error) {
@@ -325,7 +318,7 @@ export default function SettingsScreen() {
         <View style={styles.row}>
           <MetallicCard onPress={() => handleEditBusinessField("name")} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>BUSINESS NAME</Text>
-            <Text style={styles.cardValueLarge}>{business?.name || "My Business"}</Text>
+            <Text style={styles.cardValueLarge}>{business?.name || "Enter Name"}</Text>
           </MetallicCard>
           <MetallicCard onPress={handleShowCurrencyModal} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>CURRENCY</Text>
@@ -349,8 +342,8 @@ export default function SettingsScreen() {
 
         <SectionTitle>Booking</SectionTitle>
         <View style={styles.row}>
-          <MetallicButton title="Share Link" icon="share-2" onPress={handleOpenSharePreview} />
-          <MetallicButton title="Share QR" icon="maximize" onPress={handleShowQRCode} />
+          <MetallicButton title="Share Link" icon="upload" onPress={handleOpenSharePreview} />
+          <MetallicButton title="Share QR" icon="grid" onPress={handleShowQRCode} />
         </View>
 
         <SectionTitle small>Subscription</SectionTitle>
@@ -424,15 +417,7 @@ export default function SettingsScreen() {
             <View style={styles.qrContainer}>
               {qrCode ? <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" /> : <ActivityIndicator size="large" color="#222" />}
             </View>
-            <Pressable 
-              onPress={handleDownloadQRCode}
-              style={({ pressed }) => [
-                styles.modalPrimaryButton,
-                { backgroundColor: '#000', opacity: pressed ? 0.8 : 1 }
-              ]}
-            >
-              <Text style={styles.modalPrimaryButtonText}>Share QR</Text>
-            </Pressable>
+            <Button title="Share QR" onPress={handleDownloadQRCode} />
           </MetallicCard>
         </View>
       </Modal>
@@ -486,20 +471,7 @@ export default function SettingsScreen() {
                 </Pressable>
               ))}
             </ScrollView>
-            <Pressable 
-              onPress={() => handleInitializeDemoData(selectedDemoType)}
-              disabled={demoDataLoading}
-              style={({ pressed }) => [
-                styles.modalPrimaryButton,
-                { backgroundColor: '#000', opacity: pressed || demoDataLoading ? 0.8 : 1, marginTop: 20 }
-              ]}
-            >
-              {demoDataLoading ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Text style={styles.modalPrimaryButtonText}>Load</Text>
-              )}
-            </Pressable>
+            <Button title="Load" onPress={() => handleInitializeDemoData(selectedDemoType)} disabled={demoDataLoading} />
           </MetallicCard>
         </View>
       </Modal>

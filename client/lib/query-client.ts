@@ -35,20 +35,6 @@ export function getApiUrl(): string {
   // First try expo-constants (works for TestFlight/production builds)
   try {
     const Constants = require("expo-constants").default;
-    
-    // In Expo Go, check if we're debugging against a local/dev server
-    // hostUri is present when running in Expo Go
-    const isExpoGo = Constants?.expoConfig?.hostUri || Constants?.manifest?.hostUri || Constants?.manifest2?.extra?.expoClient?.hostUri;
-    
-    if (isExpoGo) {
-      const packagerHostname = process.env.REACT_NATIVE_PACKAGER_HOSTNAME;
-      if (packagerHostname && !packagerHostname.includes("$")) {
-        // Log the detected hostname for debugging
-        console.log(`[Domain] Expo Go detected, using packager hostname: ${packagerHostname}`);
-        return `http://${packagerHostname}:5000/`;
-      }
-    }
-
     // Try multiple paths for different Expo SDK versions
     const apiDomain = 
       Constants?.expoConfig?.extra?.apiDomain ||
@@ -57,7 +43,7 @@ export function getApiUrl(): string {
       "";
     
     if (apiDomain && apiDomain.length > 0) {
-      const protocol = apiDomain.includes("localhost") || apiDomain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
+      const protocol = apiDomain.includes("localhost") ? "http" : "https";
       return `${protocol}://${apiDomain}/`;
     }
   } catch (e) {
@@ -109,7 +95,7 @@ export function getBookingDomain(): string {
     
     // If running on Replit domain, use localhost for development
     if (currentHost.includes("replit.dev") || currentHost.includes("replit.app")) {
-      return `${currentHost}:5000`;
+      return "localhost:5000";
     }
     
     // If running on custom production domain or localhost, use it
@@ -127,17 +113,6 @@ export function getBookingDomain(): string {
   // First try expo-constants (works for TestFlight/production builds)
   try {
     const Constants = require("expo-constants").default;
-    
-    // In Expo Go, check if we're debugging against a local/dev server
-    const isExpoGo = Constants?.expoConfig?.hostUri || Constants?.manifest?.hostUri || Constants?.manifest2?.extra?.expoClient?.hostUri;
-    
-    if (isExpoGo) {
-      const packagerHostname = process.env.REACT_NATIVE_PACKAGER_HOSTNAME;
-      if (packagerHostname && !packagerHostname.includes("$")) {
-        return `${packagerHostname}:5000`;
-      }
-    }
-
     // Try multiple paths for different Expo SDK versions
     const apiDomain = 
       Constants?.expoConfig?.extra?.apiDomain ||

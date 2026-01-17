@@ -27,7 +27,7 @@ const SPRING_CONFIG = {
   overshootClamping: true,
 };
 
-const silkBackground = require("@assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 interface ServiceCardProps {
   service: Service;
@@ -146,8 +146,8 @@ export default function SelectServiceScreen() {
           entering={FadeInDown.delay(0).springify()}
           style={styles.header}
         >
-          <Text style={styles.brandTitle}>Select Service</Text>
-          <Text style={styles.brandSubtitle}>Premium Experience</Text>
+          <Text style={styles.brandTitle}>Black Edition</Text>
+          <Text style={styles.brandSubtitle}>Premium Booking</Text>
         </Animated.View>
 
         <View style={styles.servicesList}>
