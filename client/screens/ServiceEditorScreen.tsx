@@ -316,7 +316,7 @@ export default function ServiceEditorScreen() {
             <Pressable 
               onPress={() => {
                 if (!isPremium) {
-                  showPaywall("Service links require a subscription");
+                  showPaywall("soft_upsell");
                   return;
                 }
                 setActiveTab("links");
@@ -412,7 +412,7 @@ export default function ServiceEditorScreen() {
                       <Pressable 
                         onPress={() => {
                           if (!isPremium) {
-                            showPaywall("Copying links is a premium feature");
+                            showPaywall("share_limit");
                             return;
                           }
                           handleCopyServiceLink();
@@ -428,7 +428,7 @@ export default function ServiceEditorScreen() {
                       <Pressable 
                         onPress={() => {
                           if (!isPremium) {
-                            showPaywall("Sharing links is a premium feature");
+                            showPaywall("share_limit");
                             return;
                           }
                           handleShareServiceLink();
@@ -449,7 +449,7 @@ export default function ServiceEditorScreen() {
                       <Pressable 
                         onPress={() => {
                           if (!isPremium) {
-                            showPaywall("QR codes are a premium feature");
+                            showPaywall("qr_limit");
                             return;
                           }
                           handleShowQRCode();
