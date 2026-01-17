@@ -74,11 +74,8 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
               const msPerDay = 24 * 60 * 60 * 1000;
               const isTrialActive = now.getTime() - createdDate.getTime() < trialDays * msPerDay;
               
-              // In trial, we consider them premium for gating purposes if not on web
-              // However, the user wants the banner to show even in Expo Go to encourage upgrade
-              // So we should check if they are actually premium via checkPremiumStatus
-              // and only use trial as a secondary fallback if needed.
-              setIsPremium(false);
+              // In trial, we consider them premium for gating purposes to allow testing in Expo Go
+              setIsPremium(isTrialActive);
             }
           }
         } catch (error) {
