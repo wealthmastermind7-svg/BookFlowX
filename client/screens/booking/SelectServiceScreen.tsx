@@ -1,23 +1,18 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Dimensions } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, Dimensions, ImageBackground, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
-import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   FadeInDown,
 } from "react-native-reanimated";
-import Svg, { Circle } from "react-native-svg";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { StorageService, Service } from "@/lib/storage";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { formatPrice } from "@/lib/currency";
 
@@ -32,53 +27,15 @@ const SPRING_CONFIG = {
   overshootClamping: true,
 };
 
-function ProgressRing({ step, total }: { step: number; total: number }) {
-  const { theme, isDark } = useTheme();
-  const radius = 20;
-  const strokeWidth = 2.5;
-  const circumference = 2 * Math.PI * radius;
-  const progress = step / total;
-  const strokeDashoffset = circumference * (1 - progress);
-
-  return (
-    <View style={styles.progressRing}>
-      <Svg width={48} height={48}>
-        <Circle
-          cx={24}
-          cy={24}
-          r={radius}
-          stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
-          strokeWidth={strokeWidth}
-          fill="transparent"
-        />
-        <Circle
-          cx={24}
-          cy={24}
-          r={radius}
-          stroke={theme.text}
-          strokeWidth={strokeWidth}
-          fill="transparent"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-          rotation={-90}
-          origin="24, 24"
-        />
-      </Svg>
-      <ThemedText style={styles.progressText}>{step}/{total}</ThemedText>
-    </View>
-  );
-}
+const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
 
 interface ServiceCardProps {
   service: Service;
   index: number;
-  isPopular?: boolean;
   onPress: () => void;
 }
 
-function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCardProps) {
-  const { theme, isDark } = useTheme();
+function GlassServiceCard({ service, index, onPress }: ServiceCardProps) {
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -94,18 +51,8 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
   };
 
   const handlePress = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     onPress();
-  };
-
-  const getCategoryIcon = (idx: number): keyof typeof Feather.glyphMap => {
-    const icons: (keyof typeof Feather.glyphMap)[] = ["zap", "star", "award"];
-    return icons[idx % icons.length];
-  };
-
-  const getCategoryLabel = (idx: number): string => {
-    const labels = ["Essentials", "Signature", "Premium"];
-    return labels[idx % labels.length];
   };
 
   const formatDuration = (minutes: number): string => {
@@ -117,8 +64,23 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
     return `${minutes} min`;
   };
 
+  const CardContent = () => (
+    <View style={styles.cardContent}>
+      <Text style={styles.serviceName}>{service.name}</Text>
+      <View style={styles.priceRow}>
+        <Text style={styles.servicePrice}>{formatPrice(service.price)}</Text>
+        <Text style={styles.serviceDuration}>{formatDuration(service.duration)}</Text>
+      </View>
+      {service.description && (
+        <Text style={styles.serviceDescription} numberOfLines={2}>
+          {service.description}
+        </Text>
+      )}
+    </View>
+  );
+
   return (
-    <Animated.View 
+    <Animated.View
       style={animatedStyle}
       entering={FadeInDown.delay(index * 100).springify()}
     >
@@ -126,76 +88,30 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={styles.serviceCardWrapper}
+        style={styles.cardWrapper}
       >
-        <BlurView
-          intensity={isDark ? 40 : 60}
-          tint={isDark ? "dark" : "light"}
-          style={[
-            styles.serviceCard,
-            {
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-              backgroundColor: isDark ? "rgba(20,20,20,0.6)" : "rgba(255,255,255,0.7)",
-            },
-          ]}
-        >
-          {isPopular && (
-            <View style={[styles.popularBadge, { backgroundColor: theme.text }]}>
-              <ThemedText style={[styles.popularBadgeText, { color: theme.buttonText }]}>
-                Most Popular
-              </ThemedText>
-            </View>
-          )}
-
-          <View style={styles.serviceCardContent}>
-            <View style={styles.serviceCardLeft}>
-              <View style={styles.categoryRow}>
-                <Feather name={getCategoryIcon(index)} size={12} color={theme.text} />
-                <ThemedText style={styles.categoryLabel}>
-                  {getCategoryLabel(index)}
-                </ThemedText>
-              </View>
-
-              <ThemedText style={styles.serviceName}>{service.name}</ThemedText>
-
-              {service.description && (
-                <ThemedText style={styles.serviceDescription} numberOfLines={2}>
-                  {service.description}
-                </ThemedText>
-              )}
-
-              <View style={styles.durationRow}>
-                <Feather name="clock" size={12} color={theme.textSecondary} />
-                <ThemedText style={styles.durationText}>
-                  {formatDuration(service.duration)}
-                </ThemedText>
-              </View>
-            </View>
-
-            <View style={styles.serviceCardRight}>
-              <ThemedText style={styles.servicePrice}>
-                {formatPrice(service.price)}
-              </ThemedText>
-
-              <View style={[styles.arrowButton, { backgroundColor: theme.text }]}>
-                <Feather name="chevron-right" size={20} color={theme.buttonText} />
-              </View>
-            </View>
+        {Platform.OS === "ios" ? (
+          <BlurView intensity={20} tint="dark" style={styles.glassCard}>
+            <CardContent />
+          </BlurView>
+        ) : (
+          <View style={[styles.glassCard, styles.glassCardAndroid]}>
+            <CardContent />
           </View>
-        </BlurView>
+        )}
       </Pressable>
     </Animated.View>
   );
 }
 
+import { Text } from "react-native";
+
 export default function SelectServiceScreen() {
   const insets = useSafeAreaInsets();
-  const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   useEffect(() => {
     loadServices();
@@ -211,252 +127,140 @@ export default function SelectServiceScreen() {
   };
 
   const handleSelectService = (service: Service) => {
-    setSelectedService(service);
     navigation.navigate("SelectTime", { serviceId: service.id });
   };
 
   return (
-    <ThemedView style={styles.container}>
-      <View style={[styles.oversizedTextContainer, { top: insets.top + 60 }]}>
-        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.03 : 0.04 }]}>
-          SELECT
-        </ThemedText>
-      </View>
-
+    <ImageBackground source={silkBackground} style={styles.container} resizeMode="cover">
+      <View style={styles.overlay} />
+      
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + Spacing.lg,
-          paddingBottom: insets.bottom + 120,
+          paddingTop: insets.top + 40,
+          paddingBottom: insets.bottom + 40,
           paddingHorizontal: Spacing.lg,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.header}>
-          <View style={styles.headerLeft}>
-            <ThemedText style={styles.businessLabel}>BookFlowX</ThemedText>
-            <ThemedText style={styles.headerTitle}>Services</ThemedText>
-          </View>
-          <ProgressRing step={1} total={3} />
-        </View>
-
-        <ThemedText style={styles.subtitle}>
-          Select your preferred treatment to begin.
-        </ThemedText>
+        <Animated.View 
+          entering={FadeInDown.delay(0).springify()}
+          style={styles.header}
+        >
+          <Text style={styles.brandTitle}>Black Edition</Text>
+          <Text style={styles.brandSubtitle}>Premium Booking</Text>
+        </Animated.View>
 
         <View style={styles.servicesList}>
           {services.map((service, index) => (
-            <CinematicServiceCard
+            <GlassServiceCard
               key={service.id}
               service={service}
               index={index}
-              isPopular={index === 1}
               onPress={() => handleSelectService(service)}
             />
           ))}
 
           {services.length === 0 && !loading && (
             <View style={styles.emptyState}>
-              <ThemedText style={styles.emptyText}>
-                No services available
-              </ThemedText>
+              <Text style={styles.emptyText}>No services available</Text>
             </View>
           )}
         </View>
       </ScrollView>
-
-      <View 
-        style={[
-          styles.bottomGradient, 
-          { 
-            paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: isDark ? "rgba(0,0,0,0.9)" : "rgba(255,255,255,0.9)",
-          }
-        ]}
-      >
-        <View style={styles.progressIndicator}>
-          <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.text }]} />
-          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-        </View>
-      </View>
-    </ThemedView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
-  oversizedTextContainer: {
-    position: "absolute",
-    left: -10,
-    width: SCREEN_WIDTH + 20,
-    overflow: "hidden",
-    pointerEvents: "none",
-    zIndex: 0,
-  },
-  oversizedText: {
-    fontSize: 96,
-    fontWeight: "900",
-    letterSpacing: -6,
-    lineHeight: 90,
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-start",
-    marginBottom: Spacing["2xl"],
-    zIndex: 10,
-  },
-  headerLeft: {
-    flex: 1,
-  },
-  businessLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 2,
-    opacity: 0.5,
-    marginBottom: Spacing.xs,
-  },
-  headerTitle: {
-    fontSize: 32,
-    fontWeight: "800",
-    letterSpacing: -1,
-  },
-  progressRing: {
-    width: 48,
-    height: 48,
     alignItems: "center",
-    justifyContent: "center",
+    marginBottom: 80,
   },
-  progressText: {
-    position: "absolute",
-    fontSize: 10,
-    fontWeight: "700",
+  brandTitle: {
+    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
+    fontSize: 64,
+    fontWeight: "400",
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: 1,
+    lineHeight: 72,
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "500",
-    opacity: 0.6,
-    marginBottom: Spacing["3xl"],
-    maxWidth: 250,
-    lineHeight: 26,
+  brandSubtitle: {
+    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
+    fontSize: 20,
+    fontWeight: "400",
+    color: "rgba(255,255,255,0.8)",
+    textAlign: "center",
+    letterSpacing: 2,
+    marginTop: 8,
+    fontStyle: "italic",
   },
   servicesList: {
     gap: Spacing.lg,
   },
-  serviceCardWrapper: {
-    borderRadius: BorderRadius["2xl"],
+  cardWrapper: {
+    borderRadius: 20,
     overflow: "hidden",
   },
-  serviceCard: {
-    borderRadius: BorderRadius["2xl"],
+  glassCard: {
+    borderRadius: 20,
     borderWidth: 1,
-    padding: Spacing.xl,
+    borderColor: "rgba(255,255,255,0.4)",
+    padding: Spacing["2xl"],
     overflow: "hidden",
   },
-  popularBadge: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: 6,
-    borderBottomLeftRadius: BorderRadius.lg,
+  glassCardAndroid: {
+    backgroundColor: "rgba(255,255,255,0.08)",
   },
-  popularBadgeText: {
-    fontSize: 9,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
-  },
-  serviceCardContent: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "flex-end",
-  },
-  serviceCardLeft: {
-    flex: 1,
-    paddingRight: Spacing.lg,
-  },
-  categoryRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    marginBottom: 4,
-  },
-  categoryLabel: {
-    fontSize: 10,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    letterSpacing: 1.5,
-    opacity: 0.4,
+  cardContent: {
+    gap: 8,
   },
   serviceName: {
-    fontSize: 24,
-    fontWeight: "700",
-    marginBottom: 8,
-    letterSpacing: -0.5,
+    fontSize: 16,
+    fontWeight: "400",
+    color: "rgba(255,255,255,0.9)",
+    letterSpacing: 0.5,
+    marginBottom: 4,
+  },
+  priceRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    gap: 16,
+    marginVertical: 8,
+  },
+  servicePrice: {
+    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
+    fontSize: 48,
+    fontWeight: "500",
+    color: "#fff",
+    letterSpacing: -1,
+  },
+  serviceDuration: {
+    fontSize: 14,
+    fontWeight: "300",
+    color: "rgba(255,255,255,0.6)",
   },
   serviceDescription: {
     fontSize: 14,
-    opacity: 0.6,
+    fontWeight: "300",
+    color: "rgba(255,255,255,0.5)",
     lineHeight: 20,
-    marginBottom: Spacing.lg,
-    maxWidth: 200,
-  },
-  durationRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  durationText: {
-    fontSize: 12,
-    fontWeight: "500",
-    opacity: 0.6,
-  },
-  serviceCardRight: {
-    alignItems: "flex-end",
-  },
-  servicePrice: {
-    fontSize: 24,
-    fontWeight: "900",
-    marginBottom: Spacing.sm,
-    letterSpacing: -0.5,
-  },
-  arrowButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bottomGradient: {
-    position: "absolute",
-    bottom: 0,
-    left: 0,
-    right: 0,
-    paddingTop: Spacing["3xl"],
-    alignItems: "center",
-  },
-  progressIndicator: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  progressDot: {
-    height: 4,
-    width: 8,
-    borderRadius: 2,
-  },
-  progressDotActive: {
-    width: 32,
+    marginTop: 4,
   },
   emptyState: {
     padding: Spacing["3xl"],
     alignItems: "center",
   },
   emptyText: {
-    opacity: 0.5,
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 16,
   },
 });

@@ -1,17 +1,13 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, TextInput, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, Dimensions, Text, Platform, ImageBackground } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
-import { Feather } from "@expo/vector-icons";
 import Animated, { FadeInDown, FadeInUp } from "react-native-reanimated";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
-import { ThemedView } from "@/components/ThemedView";
-import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Service, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
@@ -20,9 +16,10 @@ type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
-  const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -58,11 +55,10 @@ export default function CheckoutScreen() {
 
   const formatDate = () => {
     return date.toLocaleDateString("en-US", {
-      weekday: "short",
-      month: "short",
-      day: "numeric",
       year: "numeric",
-    });
+      month: "2-digit",
+      day: "2-digit",
+    }).replace(/\//g, "-");
   };
 
   const isValidEmail = (email: string) => {
@@ -71,12 +67,12 @@ export default function CheckoutScreen() {
 
   const handleBooking = async () => {
     if (!customerName.trim() || !customerEmail.trim() || !isValidEmail(customerEmail)) {
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); } catch {}
       return;
     }
 
     setIsSubmitting(true);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
 
     try {
       const bookingId = `booking_${Date.now()}`;
@@ -98,63 +94,42 @@ export default function CheckoutScreen() {
       navigation.navigate("Confirmation", { bookingId });
     } catch (error) {
       console.error("Booking error:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); } catch {}
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleBack = () => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     navigation.goBack();
   };
 
+  const isFormValid = customerName.trim() && customerEmail.trim() && isValidEmail(customerEmail);
+
   return (
-    <ThemedView style={styles.container}>
-      <View style={[styles.oversizedTextContainer, { top: insets.top + 20 }]}>
-        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.03 : 0.04 }]}>
-          RESERVE
-        </ThemedText>
-      </View>
+    <ImageBackground source={silkBackground} style={styles.container} resizeMode="cover">
+      <View style={styles.overlay} />
 
       <KeyboardAwareScrollViewCompat
         contentContainerStyle={{
-          paddingTop: insets.top + Spacing.lg,
+          paddingTop: insets.top + 40,
           paddingBottom: insets.bottom + 180,
           paddingHorizontal: Spacing.lg,
         }}
       >
         <Animated.View entering={FadeInDown.springify()} style={styles.header}>
-          <Pressable onPress={handleBack} style={styles.backButton}>
-            <Feather name="chevron-left" size={24} color={theme.text} />
-          </Pressable>
-          <View style={styles.progressBar}>
-            <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-            <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-            <View style={[styles.progressSegment, styles.progressSegmentActive, { backgroundColor: theme.text }]} />
-          </View>
+          <Text style={styles.brandTitle}>Black Edition</Text>
+          <Text style={styles.brandSubtitle}>Premium Booking</Text>
         </Animated.View>
 
-        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.titleSection}>
-          <ThemedText style={styles.headerTitle}>Your Details</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Complete your reservation for the {service?.name || "service"}.
-          </ThemedText>
-        </Animated.View>
-
-        <Animated.View entering={FadeInUp.delay(150).springify()} style={styles.formSection}>
+        <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.formSection}>
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>FULL NAME</ThemedText>
+            <Text style={styles.inputLabel}>FULL NAME</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
-                },
-              ]}
+              style={styles.input}
               placeholder="John Smith"
-              placeholderTextColor={theme.textTertiary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={customerName}
               onChangeText={setCustomerName}
               autoCapitalize="words"
@@ -162,17 +137,11 @@ export default function CheckoutScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>EMAIL ADDRESS</ThemedText>
+            <Text style={styles.inputLabel}>EMAIL ADDRESS</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
-                },
-              ]}
+              style={styles.input}
               placeholder="john@example.com"
-              placeholderTextColor={theme.textTertiary}
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={customerEmail}
               onChangeText={setCustomerEmail}
               keyboardType="email-address"
@@ -181,17 +150,11 @@ export default function CheckoutScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>PHONE NUMBER</ThemedText>
+            <Text style={styles.inputLabel}>PHONE NUMBER</Text>
             <TextInput
-              style={[
-                styles.input,
-                {
-                  color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
-                },
-              ]}
-              placeholder="(555) 000-0000"
-              placeholderTextColor={theme.textTertiary}
+              style={styles.input}
+              placeholder="(555) 123-4567"
+              placeholderTextColor="rgba(255,255,255,0.4)"
               value={customerPhone}
               onChangeText={setCustomerPhone}
               keyboardType="phone-pad"
@@ -200,231 +163,182 @@ export default function CheckoutScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200).springify()}>
-          <BlurView
-            intensity={isDark ? 30 : 50}
-            tint={isDark ? "dark" : "light"}
-            style={[
-              styles.summaryCard,
-              {
-                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-                backgroundColor: isDark ? "rgba(30,30,30,0.8)" : "rgba(255,255,255,0.9)",
-              },
-            ]}
-          >
-            <ThemedText style={styles.summaryTitle}>BOOKING SUMMARY</ThemedText>
-
+          <View style={styles.summaryCard}>
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Service</ThemedText>
-              <ThemedText style={styles.summaryValue}>{service?.name || "--"}</ThemedText>
+              <Text style={styles.summaryLabel}>Service</Text>
+              <Text style={styles.summaryValue}>{service?.name || "--"}</Text>
             </View>
 
-            <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Date</ThemedText>
-              <ThemedText style={styles.summaryValue}>{formatDate()}</ThemedText>
-            </View>
+            <View style={styles.summaryDivider} />
 
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Time</ThemedText>
-              <ThemedText style={styles.summaryValue}>{time}</ThemedText>
+              <Text style={styles.summaryLabel}>Date & Time</Text>
+              <Text style={styles.summaryValue}>{formatDate()} at {time}</Text>
             </View>
 
-            <View style={[styles.summaryRow, styles.totalRow]}>
-              <ThemedText style={styles.totalLabel}>Total amount</ThemedText>
-              <ThemedText style={styles.totalValue}>
+            <View style={styles.summaryDivider} />
+
+            <View style={styles.summaryRow}>
+              <Text style={styles.summaryLabel}>Total Amount</Text>
+              <Text style={styles.summaryPrice}>
                 {service ? formatPrice(service.price) : "--"}
-              </ThemedText>
+              </Text>
             </View>
-          </BlurView>
+          </View>
         </Animated.View>
       </KeyboardAwareScrollViewCompat>
 
       <View
         style={[
-          styles.bottomGradient,
-          {
-            paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
-          },
+          styles.bottomSection,
+          { paddingBottom: insets.bottom + Spacing.lg },
         ]}
       >
         <Pressable
           onPress={handleBooking}
-          disabled={!customerName.trim() || !customerEmail.trim() || !isValidEmail(customerEmail) || isSubmitting}
-          style={[
+          disabled={!isFormValid || isSubmitting}
+          style={({ pressed }) => [
             styles.confirmButton,
-            {
-              backgroundColor: theme.text,
-              opacity: customerName.trim() && customerEmail.trim() && isValidEmail(customerEmail) && !isSubmitting ? 1 : 0.4,
-            },
+            { opacity: isFormValid && !isSubmitting ? (pressed ? 0.9 : 1) : 0.4 },
           ]}
         >
-          <ThemedText style={[styles.confirmButtonText, { color: theme.buttonText }]}>
-            Confirm Booking
-          </ThemedText>
-          <Feather name="lock" size={14} color={theme.buttonText} style={{ marginLeft: 8 }} />
+          <Text style={styles.confirmButtonText}>
+            {isSubmitting ? "Processing..." : "Confirm Booking"}
+          </Text>
         </Pressable>
 
-        <Pressable onPress={handleBack} style={styles.secondaryButton}>
-          <ThemedText style={styles.secondaryButtonText}>
-            Review Selections
-          </ThemedText>
+        <Pressable onPress={handleBack} style={styles.backButton}>
+          <Text style={styles.backButtonText}>Back</Text>
         </Pressable>
       </View>
-    </ThemedView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
-  oversizedTextContainer: {
-    position: "absolute",
-    right: -20,
-    overflow: "hidden",
-    pointerEvents: "none",
-    zIndex: 0,
-  },
-  oversizedText: {
-    fontSize: 64,
-    fontWeight: "900",
-    letterSpacing: -3,
-    lineHeight: 64,
-    textTransform: "uppercase",
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.6)",
   },
   header: {
-    flexDirection: "row",
     alignItems: "center",
-    marginBottom: Spacing["3xl"],
-    gap: Spacing.lg,
+    marginBottom: 48,
   },
-  backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    alignItems: "center",
-    justifyContent: "center",
+  brandTitle: {
+    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
+    fontSize: 48,
+    fontWeight: "400",
+    color: "#fff",
+    textAlign: "center",
+    letterSpacing: 1,
+    textShadowColor: "rgba(0,0,0,0.5)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
-  progressBar: {
-    flex: 1,
-    flexDirection: "row",
-    gap: 6,
-  },
-  progressSegment: {
-    height: 5,
-    flex: 1,
-    borderRadius: 3,
-  },
-  progressSegmentActive: {
-    flex: 2,
-  },
-  titleSection: {
-    marginBottom: Spacing["3xl"],
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700",
-    fontStyle: "italic",
-    marginBottom: Spacing.sm,
-    letterSpacing: -1,
-  },
-  subtitle: {
+  brandSubtitle: {
     fontSize: 16,
-    opacity: 0.5,
-    lineHeight: 24,
+    fontWeight: "300",
+    color: "rgba(255,255,255,0.7)",
+    textAlign: "center",
+    letterSpacing: 2,
+    marginTop: 4,
   },
   formSection: {
-    marginBottom: Spacing["3xl"],
-    gap: Spacing["2xl"],
+    marginBottom: 32,
+    gap: 24,
   },
   inputGroup: {},
   inputLabel: {
     fontSize: 11,
-    fontWeight: "700",
+    fontWeight: "600",
     letterSpacing: 2,
-    opacity: 0.4,
-    marginBottom: Spacing.sm,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 8,
+    marginLeft: 4,
   },
   input: {
-    fontSize: 18,
-    paddingVertical: Spacing.md,
-    borderBottomWidth: 1,
+    backgroundColor: "rgba(80,80,80,0.4)",
+    borderRadius: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+    fontSize: 16,
+    color: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
   },
   summaryCard: {
-    borderRadius: BorderRadius.xl,
+    backgroundColor: "rgba(255,255,255,0.15)",
+    borderRadius: 16,
+    padding: 24,
     borderWidth: 1,
-    padding: Spacing["2xl"],
-    overflow: "hidden",
-  },
-  summaryTitle: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 2,
-    opacity: 0.4,
-    marginBottom: Spacing.lg,
-    paddingBottom: Spacing.lg,
-    borderBottomWidth: 1,
-    borderBottomColor: "rgba(128,128,128,0.1)",
+    borderColor: "rgba(255,255,255,0.3)",
   },
   summaryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    paddingVertical: Spacing.md,
+    paddingVertical: 8,
+  },
+  summaryDivider: {
+    height: 1,
+    backgroundColor: "rgba(128,128,128,0.3)",
+    marginVertical: 8,
   },
   summaryLabel: {
-    fontSize: 15,
-    opacity: 0.5,
-    fontWeight: "300",
+    fontSize: 14,
+    fontWeight: "500",
+    color: "#333",
   },
   summaryValue: {
-    fontSize: 15,
-    fontWeight: "500",
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#000",
   },
-  totalRow: {
-    marginTop: Spacing.lg,
-    paddingTop: Spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(128,128,128,0.1)",
-  },
-  totalLabel: {
-    fontSize: 15,
-    opacity: 0.5,
-  },
-  totalValue: {
-    fontSize: 28,
+  summaryPrice: {
+    fontSize: 18,
     fontWeight: "700",
-    fontStyle: "italic",
-    letterSpacing: -1,
+    color: "#000",
   },
-  bottomGradient: {
+  bottomSection: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     paddingTop: Spacing["2xl"],
     paddingHorizontal: Spacing.lg,
-    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.9)",
   },
   confirmButton: {
     width: "100%",
+    backgroundColor: "#000",
+    borderRadius: 100,
     paddingVertical: 18,
-    borderRadius: BorderRadius.full,
-    flexDirection: "row",
     alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Spacing.md,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.3)",
+    marginBottom: 12,
+    shadowColor: "#fff",
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.1,
+    shadowRadius: 10,
   },
   confirmButtonText: {
     fontSize: 17,
-    fontWeight: "700",
+    fontWeight: "600",
+    color: "#fff",
   },
-  secondaryButton: {
-    paddingVertical: Spacing.sm,
+  backButton: {
+    width: "100%",
+    paddingVertical: 14,
+    alignItems: "center",
   },
-  secondaryButtonText: {
+  backButtonText: {
     fontSize: 14,
     fontWeight: "500",
-    opacity: 0.4,
+    color: "rgba(255,255,255,0.5)",
   },
 });
