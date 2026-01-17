@@ -329,12 +329,12 @@ export default function SettingsScreen() {
         </View>
 
         <SectionTitle>Automation</SectionTitle>
-        <MetallicCard onPress={() => navigation.navigate("SharePreview" as any)} style={styles.wideCard}>
+        <MetallicCard onPress={() => navigation.navigate("Workflows" as any)} style={styles.wideCard}>
           <View style={styles.automationRow}>
             <Feather name="zap" size={48} color="#222" />
             <View style={styles.automationText}>
               <Text style={styles.cardValueMedium}>Workflows</Text>
-              <Text style={styles.cardDesc}>Intelligent reminders & cinematic confirmation sequences.</Text>
+              <Text style={styles.cardDesc}>Intelligent reminders & confirmation sequences.</Text>
             </View>
           </View>
         </MetallicCard>
