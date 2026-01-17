@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Pressable, Dimensions, Text, Platform, ImageBackground } from "react-native";
+import { View, StyleSheet, Pressable, Dimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -14,7 +14,10 @@ import Animated, {
   FadeIn,
   FadeInUp,
 } from "react-native-reanimated";
+import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
@@ -29,10 +32,9 @@ const SPRING_CONFIG = {
   stiffness: 100,
 };
 
-const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
-
 export default function ConfirmationScreen() {
   const insets = useSafeAreaInsets();
+  const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -45,7 +47,7 @@ export default function ConfirmationScreen() {
   React.useEffect(() => {
     loadBooking();
     animateCheckmark();
-    try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
   }, []);
 
   const loadBooking = async () => {
@@ -70,7 +72,7 @@ export default function ConfirmationScreen() {
   }));
 
   const handleDone = () => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     const parent = navigation.getParent();
     if (parent) {
       parent.goBack();
@@ -83,64 +85,78 @@ export default function ConfirmationScreen() {
     if (!booking?.date) return "--";
     const date = new Date(booking.date);
     return date.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
       year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-    }).replace(/\//g, "-");
-  };
-
-  const generateBookingCode = () => {
-    return bookingId.replace("booking_", "").slice(0, 8).toUpperCase();
+    });
   };
 
   return (
-    <ImageBackground source={silkBackground} style={styles.container} resizeMode="cover">
-      <View style={styles.overlay} />
-
-      <View style={styles.backgroundTextContainer}>
-        <Text style={styles.backgroundText}>DONE</Text>
+    <ThemedView style={styles.container}>
+      <View style={[styles.oversizedTextContainer, { top: insets.top + 60 }]}>
+        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.02 : 0.03 }]}>
+          CONFIRMED
+        </ThemedText>
       </View>
 
       <View
         style={[
           styles.content,
           {
-            paddingTop: insets.top + 80,
+            paddingTop: insets.top + Spacing["5xl"],
             paddingBottom: insets.bottom + 140,
           },
         ]}
       >
-        <Animated.View style={[styles.checkmarkContainer, checkAnimatedStyle]}>
-          <View style={styles.checkmarkInner}>
-            <Feather name="check" size={40} color="#000" />
-          </View>
+        <Animated.View
+          style={[
+            styles.checkmarkContainer,
+            checkAnimatedStyle,
+            { backgroundColor: theme.text },
+          ]}
+        >
+          <Feather name="check" size={48} color={theme.buttonText} />
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(400).springify()}>
-          <Text style={styles.title}>Confirmed</Text>
+          <ThemedText style={styles.title}>
+            Booking{"\n"}Confirmed!
+          </ThemedText>
+        </Animated.View>
+
+        <Animated.View entering={FadeIn.delay(500)}>
+          <ThemedText style={styles.message}>
+            Your booking has been successfully confirmed. You will receive a confirmation email shortly.
+          </ThemedText>
         </Animated.View>
 
         <Animated.View 
           entering={FadeInUp.delay(600).springify()}
-          style={styles.detailsCard}
+          style={[
+            styles.detailsCard,
+            {
+              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
+              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+            },
+          ]}
         >
-          <View style={styles.detailsInner}>
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>BOOKING ID</Text>
-              <Text style={styles.detailValue}>{generateBookingCode()}</Text>
-            </View>
+          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+            <ThemedText style={styles.detailLabel}>Service</ThemedText>
+            <ThemedText style={styles.detailValue}>{booking?.serviceName || "--"}</ThemedText>
+          </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>SERVICE</Text>
-              <Text style={styles.detailValue}>{booking?.serviceName || "--"}</Text>
-            </View>
+          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+            <ThemedText style={styles.detailLabel}>Date & Time</ThemedText>
+            <ThemedText style={styles.detailValue}>
+              {formatDate()} • {booking?.time || "--"}
+            </ThemedText>
+          </View>
 
-            <View style={styles.detailRow}>
-              <Text style={styles.detailLabel}>TIME</Text>
-              <Text style={styles.detailValue}>
-                {formatDate()} at {booking?.time || "--"}
-              </Text>
-            </View>
+          <View style={styles.detailRow}>
+            <ThemedText style={styles.detailLabel}>Total</ThemedText>
+            <ThemedText style={styles.detailPrice}>
+              {booking ? formatPrice(booking.totalPrice) : "--"}
+            </ThemedText>
           </View>
         </Animated.View>
       </View>
@@ -148,7 +164,10 @@ export default function ConfirmationScreen() {
       <View
         style={[
           styles.bottomSection,
-          { paddingBottom: insets.bottom + Spacing.lg },
+          {
+            paddingBottom: insets.bottom + Spacing.lg,
+            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+          },
         ]}
       >
         <Animated.View 
@@ -157,52 +176,42 @@ export default function ConfirmationScreen() {
         >
           <Pressable
             onPress={handleDone}
-            style={styles.doneButton}
+            style={[styles.doneButton, { backgroundColor: theme.text }]}
           >
-            <Text style={styles.doneButtonText}>Book Another</Text>
+            <ThemedText style={[styles.doneButtonText, { color: theme.buttonText }]}>
+              Done
+            </ThemedText>
           </Pressable>
         </Animated.View>
+
+        <View style={styles.confirmationBadge}>
+          <Feather name="check-circle" size={12} color={theme.textSecondary} />
+          <ThemedText style={styles.confirmationBadgeText}>
+            Confirmation sent to your email
+          </ThemedText>
+        </View>
       </View>
-    </ImageBackground>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.6)",
-  },
-  backgroundTextContainer: {
+  oversizedTextContainer: {
     position: "absolute",
-    top: 20,
-    left: 0,
-    right: 0,
-    alignItems: "center",
+    left: -20,
+    width: SCREEN_WIDTH + 40,
     overflow: "hidden",
     pointerEvents: "none",
+    zIndex: 0,
   },
-  backgroundText: {
-    fontSize: 180,
-    fontWeight: "700",
-    color: "transparent",
-    letterSpacing: -5,
-    textAlign: "center",
-    opacity: 0.5,
-    ...Platform.select({
-      ios: {
-        WebkitTextStroke: "1px rgba(255,255,255,0.3)",
-      },
-      android: {
-        textShadowColor: "rgba(255,255,255,0.15)",
-        textShadowOffset: { width: 1, height: 1 },
-        textShadowRadius: 1,
-        color: "rgba(255,255,255,0.08)",
-      },
-    }),
+  oversizedText: {
+    fontSize: 56,
+    fontWeight: "900",
+    letterSpacing: -3,
+    lineHeight: 56,
   },
   content: {
     flex: 1,
@@ -214,69 +223,51 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     borderRadius: 50,
-    borderWidth: 5,
-    borderColor: "#000",
     alignItems: "center",
     justifyContent: "center",
-    marginBottom: 32,
-    backgroundColor: "transparent",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.15,
-    shadowRadius: 20,
-  },
-  checkmarkInner: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: "transparent",
-    alignItems: "center",
-    justifyContent: "center",
+    marginBottom: Spacing["3xl"],
   },
   title: {
-    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
-    fontSize: 48,
-    fontWeight: "400",
-    color: "#fff",
+    fontSize: 40,
+    fontWeight: "700",
     textAlign: "center",
-    marginBottom: 48,
-    letterSpacing: 1,
-    fontStyle: "italic",
+    marginBottom: Spacing.lg,
+    lineHeight: 48,
+    letterSpacing: -1,
+  },
+  message: {
+    fontSize: 16,
+    textAlign: "center",
+    opacity: 0.6,
+    lineHeight: 24,
+    marginBottom: Spacing["3xl"],
+    maxWidth: 280,
   },
   detailsCard: {
     width: "100%",
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 20,
+    borderRadius: BorderRadius.xl,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-    padding: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-  },
-  detailsInner: {
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
-    borderRadius: 14,
-    padding: 24,
+    padding: Spacing.xl,
   },
   detailRow: {
-    marginBottom: 20,
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: Spacing.lg,
+    borderBottomWidth: 1,
   },
   detailLabel: {
-    fontSize: 11,
-    fontWeight: "300",
-    letterSpacing: 2,
-    color: "rgba(255,255,255,0.5)",
-    marginBottom: 6,
-    textTransform: "uppercase",
+    fontSize: 14,
+    opacity: 0.5,
   },
   detailValue: {
-    fontSize: 18,
-    fontWeight: "400",
-    color: "#fff",
-    letterSpacing: 1,
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  detailPrice: {
+    fontSize: 20,
+    fontWeight: "700",
+    letterSpacing: -0.5,
   },
   bottomSection: {
     position: "absolute",
@@ -285,20 +276,26 @@ const styles = StyleSheet.create({
     right: 0,
     paddingTop: Spacing["2xl"],
     paddingHorizontal: Spacing.lg,
+    alignItems: "center",
   },
   doneButton: {
     width: "100%",
     paddingVertical: 18,
-    borderRadius: 14,
+    borderRadius: BorderRadius.full,
     alignItems: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
-    backgroundColor: "transparent",
+    marginBottom: Spacing.lg,
   },
   doneButtonText: {
     fontSize: 17,
-    fontWeight: "500",
-    color: "#fff",
-    letterSpacing: 1,
+    fontWeight: "700",
+  },
+  confirmationBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  confirmationBadgeText: {
+    fontSize: 12,
+    opacity: 0.5,
   },
 });

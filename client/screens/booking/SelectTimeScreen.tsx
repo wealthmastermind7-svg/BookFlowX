@@ -1,10 +1,11 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Dimensions, Text, Platform, ImageBackground } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, Dimensions } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
+import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -12,10 +13,14 @@ import Animated, {
   FadeInDown,
   FadeInUp,
 } from "react-native-reanimated";
-import { LinearGradient } from "expo-linear-gradient";
+import Svg, { Circle } from "react-native-svg";
+import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { ThemedView } from "@/components/ThemedView";
+import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Service } from "@/lib/storage";
+import { formatPrice } from "@/lib/currency";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -29,22 +34,57 @@ const SPRING_CONFIG = {
 };
 
 const TIME_SLOTS = [
-  "12:00 PM", "12:30 PM", "1:00 PM",
-  "1:30 PM", "2:00 PM", "2:30 PM",
-  "3:00 PM", "3:30 PM", "4:00 PM",
-  "4:30 PM", "5:00 PM",
+  "11:00 AM", "11:30 AM", "12:00 PM",
+  "12:30 PM", "01:00 PM", "01:30 PM",
+  "02:00 PM", "02:30 PM", "03:00 PM",
 ];
 
-const silkBackground = require("../../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+function ProgressRing({ step, total }: { step: number; total: number }) {
+  const { theme, isDark } = useTheme();
+  const radius = 20;
+  const strokeWidth = 2.5;
+  const circumference = 2 * Math.PI * radius;
+  const progress = step / total;
+  const strokeDashoffset = circumference * (1 - progress);
 
-interface TimeSlotProps {
-  time: string;
-  isSelected: boolean;
-  onPress: () => void;
-  index: number;
+  return (
+    <View style={styles.progressRing}>
+      <Svg width={48} height={48}>
+        <Circle
+          cx={24}
+          cy={24}
+          r={radius}
+          stroke={isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.1)"}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <Circle
+          cx={24}
+          cy={24}
+          r={radius}
+          stroke={theme.text}
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+          rotation={-90}
+          origin="24, 24"
+        />
+      </Svg>
+      <ThemedText style={styles.progressText}>{step}/{total}</ThemedText>
+    </View>
+  );
 }
 
-function TimeSlotButton({ time, isSelected, onPress, index }: TimeSlotProps) {
+interface DateCardProps {
+  date: Date;
+  isSelected: boolean;
+  onPress: () => void;
+}
+
+function DateCard({ date, isSelected, onPress }: DateCardProps) {
+  const { theme, isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -60,32 +100,115 @@ function TimeSlotButton({ time, isSelected, onPress, index }: TimeSlotProps) {
   };
 
   const handlePress = () => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    onPress();
+  };
+
+  const monthName = date.toLocaleDateString("en-US", { month: "short" }).toUpperCase();
+  const dayNum = date.getDate();
+  const dayName = date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase();
+
+  return (
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={[
+          styles.dateCard,
+          isSelected
+            ? { backgroundColor: theme.text }
+            : {
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.5)",
+                borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                borderWidth: 1,
+              },
+        ]}
+      >
+        <ThemedText
+          style={[
+            styles.dateMonth,
+            { color: isSelected ? theme.buttonText : theme.textSecondary },
+          ]}
+        >
+          {monthName}
+        </ThemedText>
+        <ThemedText
+          style={[
+            styles.dateDay,
+            { color: isSelected ? theme.buttonText : theme.text },
+          ]}
+        >
+          {dayNum}
+        </ThemedText>
+        <ThemedText
+          style={[
+            styles.dateDayName,
+            { color: isSelected ? theme.buttonText : theme.textSecondary },
+          ]}
+        >
+          {dayName}
+        </ThemedText>
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+interface TimeSlotProps {
+  time: string;
+  isSelected: boolean;
+  onPress: () => void;
+}
+
+function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
+  const { theme, isDark } = useTheme();
+  const scale = useSharedValue(1);
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.95, SPRING_CONFIG);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, SPRING_CONFIG);
+  };
+
+  const handlePress = () => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     onPress();
   };
 
   return (
-    <Animated.View 
-      style={[animatedStyle, styles.timeSlotWrapper]}
-      entering={FadeInUp.delay(100 + index * 30).springify()}
-    >
+    <Animated.View style={[animatedStyle, styles.timeSlotWrapper]}>
       <Pressable
         onPress={handlePress}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         style={[
           styles.timeSlot,
-          isSelected && styles.timeSlotSelected,
+          isSelected
+            ? { backgroundColor: theme.text }
+            : {
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.4)",
+                borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                borderWidth: 1,
+              },
         ]}
       >
-        <Text
+        <ThemedText
           style={[
             styles.timeSlotText,
-            isSelected && styles.timeSlotTextSelected,
+            {
+              color: isSelected ? theme.buttonText : theme.text,
+              fontWeight: isSelected ? "700" : "500",
+            },
           ]}
         >
           {time}
-        </Text>
+        </ThemedText>
       </Pressable>
     </Animated.View>
   );
@@ -93,6 +216,7 @@ function TimeSlotButton({ time, isSelected, onPress, index }: TimeSlotProps) {
 
 export default function SelectTimeScreen() {
   const insets = useSafeAreaInsets();
+  const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -100,7 +224,6 @@ export default function SelectTimeScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [service, setService] = useState<Service | null>(null);
-  const [showDatePicker, setShowDatePicker] = useState(false);
 
   useEffect(() => {
     loadService();
@@ -115,7 +238,7 @@ export default function SelectTimeScreen() {
   const dates = useMemo(() => {
     const result: Date[] = [];
     const today = new Date();
-    for (let i = 0; i < 31; i++) {
+    for (let i = 0; i < 14; i++) {
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       result.push(date);
@@ -123,367 +246,353 @@ export default function SelectTimeScreen() {
     return result;
   }, []);
 
-  const monthName = selectedDate.toLocaleDateString("en-US", { month: "long" }).toUpperCase();
-  const year = selectedDate.getFullYear();
-
   const handleContinue = () => {
     if (selectedTime) {
-      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const timeSlotId = `${selectedDate.toISOString()}_${selectedTime}`;
       navigation.navigate("Checkout", { serviceId, timeSlotId });
     }
   };
 
   const handleBack = () => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
     navigation.goBack();
   };
 
-  const formatSelectedDate = () => {
-    const day = selectedDate.getDate();
+  const formatSelectedSlot = () => {
     const month = selectedDate.toLocaleDateString("en-US", { month: "short" });
-    return `SELECT DATE | ${day} ${month}, ${year}`;
-  };
-
-  const getDaysInMonth = (date: Date) => {
-    const year = date.getFullYear();
-    const month = date.getMonth();
-    const firstDay = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    return { firstDay, daysInMonth };
-  };
-
-  const { firstDay, daysInMonth } = getDaysInMonth(selectedDate);
-
-  const renderCalendar = () => {
-    const days = [];
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<View key={`empty-${i}`} style={styles.calendarDay} />);
-    }
-
-    for (let day = 1; day <= daysInMonth; day++) {
-      const currentDate = new Date(selectedDate.getFullYear(), selectedDate.getMonth(), day);
-      const isSelected = day === selectedDate.getDate();
-      const isPast = currentDate < today;
-
-      days.push(
-        <Pressable
-          key={day}
-          onPress={() => {
-            if (!isPast) {
-              const newDate = new Date(selectedDate);
-              newDate.setDate(day);
-              setSelectedDate(newDate);
-              try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
-            }
-          }}
-          disabled={isPast}
-          style={styles.calendarDay}
-        >
-          <View style={[styles.calendarDayInner, isSelected && styles.calendarDaySelected]}>
-            <Text
-              style={[
-                styles.calendarDayText,
-                isSelected && styles.calendarDayTextSelected,
-                isPast && styles.calendarDayTextPast,
-              ]}
-            >
-              {day}
-            </Text>
-          </View>
-        </Pressable>
-      );
-    }
-
-    return days;
+    const day = selectedDate.getDate();
+    return `${month} ${day} • ${selectedTime || "--:--"}`;
   };
 
   return (
-    <ImageBackground source={silkBackground} style={styles.container} resizeMode="cover">
-      <View style={styles.overlay} />
+    <ThemedView style={styles.container}>
+      <View style={[styles.oversizedTextContainer, { top: insets.top + 80 }]}>
+        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.03 : 0.04 }]}>
+          WHEN
+        </ThemedText>
+      </View>
 
       <ScrollView
         contentContainerStyle={{
-          paddingTop: insets.top + 20,
+          paddingTop: insets.top + Spacing.lg,
           paddingBottom: insets.bottom + 200,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <Animated.View 
-          entering={FadeInDown.delay(0).springify()}
-          style={styles.header}
-        >
-          <Text style={styles.brandTitle}>BLACK EDITION</Text>
-          <Text style={styles.brandSubtitle}>PREMIUM BOOKING</Text>
-        </Animated.View>
-
-        <Animated.View 
-          entering={FadeInDown.delay(100).springify()}
-          style={styles.datePillContainer}
-        >
-          <Pressable 
-            style={styles.datePill}
-            onPress={() => setShowDatePicker(!showDatePicker)}
-          >
-            <Text style={styles.datePillText}>{formatSelectedDate()}</Text>
+        <View style={styles.header}>
+          <Pressable onPress={handleBack} style={styles.backButton}>
+            <Feather name="chevron-left" size={24} color={theme.text} />
           </Pressable>
-        </Animated.View>
+          <ProgressRing step={2} total={3} />
+          <View style={{ width: 40 }} />
+        </View>
 
-        {showDatePicker && (
-          <Animated.View 
-            entering={FadeInDown.springify()}
-            style={styles.calendarContainer}
-          >
-            <Text style={styles.monthTitle}>{monthName}</Text>
-            <Text style={styles.yearTitle}>{year}</Text>
-            <View style={styles.calendarGrid}>
-              {renderCalendar()}
-            </View>
-          </Animated.View>
-        )}
+        <View style={styles.titleSection}>
+          <ThemedText style={styles.headerTitle}>WHEN</ThemedText>
+          <ThemedText style={styles.subtitle}>
+            Select your preferred date & time
+          </ThemedText>
+        </View>
+
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.dateScroller}
+          style={styles.dateScrollerContainer}
+        >
+          {dates.map((date, index) => (
+            <Animated.View
+              key={date.toISOString()}
+              entering={FadeInDown.delay(index * 30).springify()}
+            >
+              <DateCard
+                date={date}
+                isSelected={date.toDateString() === selectedDate.toDateString()}
+                onPress={() => setSelectedDate(date)}
+              />
+            </Animated.View>
+          ))}
+        </ScrollView>
 
         <View style={styles.timesSection}>
-          <Text style={styles.timesLabel}>AVAILABLE TIMES</Text>
+          <ThemedText style={styles.timesLabel}>AVAILABLE TIMES</ThemedText>
           <View style={styles.timesGrid}>
             {TIME_SLOTS.map((time, index) => (
-              <TimeSlotButton
+              <Animated.View
                 key={time}
-                time={time}
-                index={index}
-                isSelected={selectedTime === time}
-                onPress={() => setSelectedTime(time)}
-              />
+                entering={FadeInUp.delay(100 + index * 30).springify()}
+              >
+                <TimeSlotButton
+                  time={time}
+                  isSelected={selectedTime === time}
+                  onPress={() => setSelectedTime(time)}
+                />
+              </Animated.View>
             ))}
           </View>
         </View>
+
+        {selectedTime && (
+          <Animated.View 
+            entering={FadeInUp.springify()}
+            style={styles.summaryContainer}
+          >
+            <BlurView
+              intensity={isDark ? 40 : 60}
+              tint={isDark ? "dark" : "light"}
+              style={[
+                styles.summaryCard,
+                {
+                  borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                  backgroundColor: isDark ? "rgba(20,20,20,0.6)" : "rgba(255,255,255,0.7)",
+                },
+              ]}
+            >
+              <View>
+                <ThemedText style={styles.summaryLabel}>SELECTED SLOT</ThemedText>
+                <ThemedText style={styles.summaryValue}>{formatSelectedSlot()}</ThemedText>
+              </View>
+              <View style={styles.summaryRight}>
+                <ThemedText style={styles.summaryLabel}>EST. PRICE</ThemedText>
+                <ThemedText style={styles.summaryPrice}>
+                  {service ? formatPrice(service.price) : "--"}
+                </ThemedText>
+              </View>
+            </BlurView>
+          </Animated.View>
+        )}
       </ScrollView>
 
       <View
         style={[
-          styles.bottomSection,
-          { paddingBottom: insets.bottom + Spacing.lg },
+          styles.bottomGradient,
+          {
+            paddingBottom: insets.bottom + Spacing.lg,
+            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+          },
         ]}
       >
         <Pressable
           onPress={handleContinue}
           disabled={!selectedTime}
-          style={({ pressed }) => [
+          style={[
             styles.continueButton,
-            { opacity: selectedTime ? (pressed ? 0.9 : 1) : 0.4 },
+            {
+              backgroundColor: theme.text,
+              opacity: selectedTime ? 1 : 0.4,
+            },
           ]}
         >
-          <LinearGradient
-            colors={["#F0F0F0", "#A0A0A0"]}
-            style={styles.continueButtonGradient}
-          >
-            <Text style={styles.continueButtonText}>Continue</Text>
-          </LinearGradient>
+          <ThemedText style={[styles.continueButtonText, { color: theme.buttonText }]}>
+            Continue
+          </ThemedText>
         </Pressable>
 
-        <Pressable onPress={handleBack} style={styles.backButton}>
-          <Text style={styles.backButtonText}>Back</Text>
+        <Pressable onPress={handleBack} style={styles.secondaryButton}>
+          <ThemedText style={styles.secondaryButtonText}>
+            BACK TO SERVICES
+          </ThemedText>
         </Pressable>
+
+        <View style={styles.progressIndicator}>
+          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
+          <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.text }]} />
+          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
+        </View>
       </View>
-    </ImageBackground>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
   },
-  overlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+  oversizedTextContainer: {
+    position: "absolute",
+    left: 0,
+    width: SCREEN_WIDTH,
+    overflow: "hidden",
+    pointerEvents: "none",
+    zIndex: 0,
+    paddingHorizontal: Spacing.lg,
+  },
+  oversizedText: {
+    fontSize: 80,
+    fontWeight: "900",
+    letterSpacing: -5,
+    lineHeight: 80,
   },
   header: {
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 32,
-  },
-  brandTitle: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#fff",
-    letterSpacing: 4,
-    textAlign: "center",
-  },
-  brandSubtitle: {
-    fontSize: 12,
-    fontWeight: "300",
-    color: "rgba(255,255,255,0.7)",
-    letterSpacing: 6,
-    marginTop: 4,
-  },
-  datePillContainer: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 32,
-  },
-  datePill: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 100,
-    paddingVertical: 14,
-    paddingHorizontal: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  datePillText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "#fff",
-    textAlign: "center",
-    letterSpacing: 1,
-  },
-  calendarContainer: {
-    paddingHorizontal: Spacing.lg,
-    marginBottom: 32,
-    alignItems: "center",
-  },
-  monthTitle: {
-    fontSize: 56,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 2,
-    textAlign: "center",
-  },
-  yearTitle: {
-    fontSize: 56,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 2,
-    textAlign: "center",
-    marginTop: -8,
-  },
-  calendarGrid: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    marginTop: 24,
-    width: "100%",
-    maxWidth: 350,
-  },
-  calendarDay: {
-    width: "14.28%",
-    aspectRatio: 1,
+    justifyContent: "space-between",
     alignItems: "center",
-    justifyContent: "center",
-    padding: 4,
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing["2xl"],
   },
-  calendarDayInner: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+  backButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
-  calendarDaySelected: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderWidth: 2,
-    borderColor: "rgba(255,255,255,0.6)",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
+  progressRing: {
+    width: 48,
+    height: 48,
+    alignItems: "center",
+    justifyContent: "center",
   },
-  calendarDayText: {
-    fontSize: 20,
-    fontWeight: "500",
-    color: "#fff",
-  },
-  calendarDayTextSelected: {
+  progressText: {
+    position: "absolute",
+    fontSize: 10,
     fontWeight: "700",
   },
-  calendarDayTextPast: {
-    color: "rgba(255,255,255,0.3)",
+  titleSection: {
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing["3xl"],
+  },
+  headerTitle: {
+    fontSize: 56,
+    fontWeight: "900",
+    letterSpacing: -3,
+    marginBottom: Spacing.sm,
+  },
+  subtitle: {
+    fontSize: 18,
+    fontWeight: "500",
+    opacity: 0.6,
+  },
+  dateScrollerContainer: {
+    marginBottom: Spacing["3xl"],
+  },
+  dateScroller: {
+    paddingHorizontal: Spacing.lg,
+    gap: Spacing.md,
+  },
+  dateCard: {
+    width: 80,
+    aspectRatio: 0.75,
+    borderRadius: BorderRadius.lg,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  dateMonth: {
+    fontSize: 11,
+    fontWeight: "600",
+    letterSpacing: 1,
+    marginBottom: 2,
+  },
+  dateDay: {
+    fontSize: 34,
+    fontWeight: "800",
+    marginVertical: 2,
+  },
+  dateDayName: {
+    fontSize: 12,
+    fontWeight: "600",
+    marginTop: 2,
   },
   timesSection: {
     paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing["2xl"],
   },
   timesLabel: {
-    fontFamily: Platform.OS === "ios" ? "Times New Roman" : "serif",
-    fontSize: 24,
-    fontWeight: "400",
-    color: "#fff",
-    textAlign: "center",
-    letterSpacing: 4,
-    marginBottom: 24,
-    textTransform: "uppercase",
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2,
+    opacity: 0.5,
+    marginBottom: Spacing.lg,
   },
   timesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: 12,
-    justifyContent: "center",
+    gap: Spacing.sm,
   },
   timeSlotWrapper: {
-    width: (SCREEN_WIDTH - Spacing.lg * 2 - 24) / 3,
+    width: (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3,
   },
   timeSlot: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    borderRadius: 12,
-    paddingVertical: 14,
+    paddingVertical: Spacing.xl,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
-  timeSlotSelected: {
-    backgroundColor: "#000",
-    borderWidth: 2,
-    borderColor: "#fff",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-  },
   timeSlotText: {
-    fontSize: 14,
-    fontWeight: "400",
-    color: "rgba(255,255,255,0.8)",
+    fontSize: 15,
   },
-  timeSlotTextSelected: {
+  summaryContainer: {
+    paddingHorizontal: Spacing.lg,
+    marginTop: Spacing.lg,
+  },
+  summaryCard: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+  },
+  summaryLabel: {
+    fontSize: 10,
     fontWeight: "700",
-    color: "#fff",
+    letterSpacing: 1.5,
+    opacity: 0.5,
+    marginBottom: 4,
   },
-  bottomSection: {
+  summaryValue: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  summaryRight: {
+    alignItems: "flex-end",
+  },
+  summaryPrice: {
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  bottomGradient: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
     paddingTop: Spacing["2xl"],
     paddingHorizontal: Spacing.lg,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    alignItems: "center",
   },
   continueButton: {
     width: "100%",
-    borderRadius: 100,
-    overflow: "hidden",
-    marginBottom: 12,
-  },
-  continueButtonGradient: {
     paddingVertical: 18,
+    borderRadius: BorderRadius.lg,
     alignItems: "center",
+    marginBottom: Spacing.md,
   },
   continueButtonText: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#000",
+    fontSize: 17,
+    fontWeight: "700",
   },
-  backButton: {
-    width: "100%",
-    paddingVertical: 16,
+  secondaryButton: {
+    paddingVertical: Spacing.sm,
+    marginBottom: Spacing.lg,
+  },
+  secondaryButtonText: {
+    fontSize: 12,
+    fontWeight: "700",
+    letterSpacing: 1.5,
+    opacity: 0.4,
+  },
+  progressIndicator: {
+    flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.08)",
-    borderRadius: 100,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    gap: 4,
   },
-  backButtonText: {
-    fontSize: 16,
-    fontWeight: "500",
-    color: "#fff",
+  progressDot: {
+    height: 4,
+    width: 8,
+    borderRadius: 2,
+  },
+  progressDotActive: {
+    width: 32,
   },
 });

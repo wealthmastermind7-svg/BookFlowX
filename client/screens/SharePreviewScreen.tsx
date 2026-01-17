@@ -68,7 +68,7 @@ export default function SharePreviewScreen() {
   const { theme, isDark } = useTheme();
   const { checkShareAccess, isPremium } = usePremium();
   
-  const { businessName = "", bookingUrl = "", slug = "" } = route.params || {};
+  const { businessName, bookingUrl, slug } = route.params;
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
