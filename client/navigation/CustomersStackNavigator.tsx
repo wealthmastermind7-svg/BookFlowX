@@ -13,7 +13,12 @@ export default function CustomersStackNavigator() {
   const screenOptions = useScreenOptions();
 
   return (
-    <Stack.Navigator screenOptions={screenOptions}>
+    <Stack.Navigator 
+      screenOptions={{
+        ...screenOptions,
+        headerShown: false,
+      }}
+    >
       <Stack.Screen
         name="CustomersList"
         component={CustomersScreen}
