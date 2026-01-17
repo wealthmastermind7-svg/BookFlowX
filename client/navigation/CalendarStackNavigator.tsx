@@ -29,7 +29,7 @@ export default function CalendarStackNavigator() {
         name="AvailabilityEditor"
         component={AvailabilityEditorScreen}
         options={{
-          headerTitle: "Business Hours",
+          headerShown: false,
         }}
       />
       <Stack.Screen

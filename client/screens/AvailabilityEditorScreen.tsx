@@ -8,28 +8,37 @@ import {
   Switch,
   Keyboard,
   Alert,
+  ImageBackground,
+  Platform,
+  Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import Animated, { 
+  useSharedValue, 
+  useAnimatedStyle, 
+  withTiming, 
+  Easing 
+} from "react-native-reanimated";
+
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { api, Availability, AvailabilitySchedule } from "@/lib/api";
-import { ThemedText } from "@/components/ThemedText";
-import { ThemedView } from "@/components/ThemedView";
-import { Button } from "@/components/Button";
-import { Card } from "@/components/Card";
+import { api, AvailabilitySchedule } from "@/lib/api";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const lightPlayBackground = require("../../attached_assets/generated_images/abstract_black_and_white_cinematic_light_play_background.png");
 
 type AvailabilityNavigationProp = NativeStackNavigationProp<
   CalendarStackParamList,
   "AvailabilityEditor"
 >;
 
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const DAY_SHORT = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_NAMES = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
 const TIME_OPTIONS = [
   "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
@@ -47,7 +56,22 @@ function formatTime(time24: string): string {
   const [hours, minutes] = time24.split(":").map(Number);
   const period = hours >= 12 ? "PM" : "AM";
   const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
-  return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
+  return `${hours12} ${period}`;
+}
+
+function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
+  if (Platform.OS === "ios") {
+    return (
+      <BlurView intensity={30} tint="light" style={[styles.glassPanel, style]}>
+        {children}
+      </BlurView>
+    );
+  }
+  return (
+    <View style={[styles.glassPanel, styles.glassPanelAndroid, style]}>
+      {children}
+    </View>
+  );
 }
 
 export default function AvailabilityEditorScreen() {
@@ -58,10 +82,12 @@ export default function AvailabilityEditorScreen() {
   const [schedules, setSchedules] = useState<DaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [editingDay, setEditingDay] = useState<number | null>(null);
   const [hasChanges, setHasChanges] = useState(false);
 
+  const fadeIn = useSharedValue(0);
+
   useEffect(() => {
+    fadeIn.value = withTiming(1, { duration: 800 });
     loadAvailability();
   }, []);
 
@@ -104,7 +130,7 @@ export default function AvailabilityEditorScreen() {
   };
 
   const handleToggleDay = (dayOfWeek: number) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     setSchedules((prev) =>
       prev.map((s) =>
         s.dayOfWeek === dayOfWeek ? { ...s, isActive: !s.isActive } : s
@@ -114,20 +140,19 @@ export default function AvailabilityEditorScreen() {
   };
 
   const handleUpdateTime = (dayOfWeek: number, field: "startTime" | "endTime", value: string) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     setSchedules((prev) =>
       prev.map((s) =>
         s.dayOfWeek === dayOfWeek ? { ...s, [field]: value } : s
       )
     );
     setHasChanges(true);
-    setEditingDay(null);
   };
 
   const handleSave = async () => {
     setSaving(true);
     try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
       Keyboard.dismiss();
       await new Promise((resolve) => setTimeout(resolve, 100));
 
@@ -140,11 +165,11 @@ export default function AvailabilityEditorScreen() {
 
       await api.bulkUpdateAvailability(availabilitySchedules);
       setHasChanges(false);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
       navigation.goBack();
     } catch (error) {
       console.error("Error saving availability:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error); } catch {}
       Alert.alert(
         "Save Failed",
         "Unable to save your business hours. Please try again.",
@@ -155,150 +180,157 @@ export default function AvailabilityEditorScreen() {
     }
   };
 
+  const containerStyle = useAnimatedStyle(() => ({
+    opacity: fadeIn.value,
+  }));
+
   if (loading) {
     return (
-      <ThemedView style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={theme.text} />
-      </ThemedView>
+      <View style={styles.loadingContainer}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
     );
   }
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        style={styles.scrollView}
-        contentContainerStyle={[
-          styles.content,
-          { paddingBottom: insets.bottom + Spacing["3xl"] },
-        ]}
-      >
-        <ThemedText type="body" style={styles.description}>
-          Set your business hours for each day of the week. Customers can only book during active hours.
-        </ThemedText>
-
-        {schedules.map((schedule) => (
-          <Card key={schedule.dayOfWeek} style={styles.dayCard}>
-            <View style={styles.dayHeader}>
-              <View style={styles.dayInfo}>
-                <ThemedText type="h4" style={styles.dayName}>
-                  {DAY_NAMES[schedule.dayOfWeek]}
-                </ThemedText>
-                <ThemedText type="small" style={[styles.dayStatus, { color: theme.textSecondary }]}>
-                  {schedule.isActive
-                    ? `${formatTime(schedule.startTime)} - ${formatTime(schedule.endTime)}`
-                    : "Closed"}
-                </ThemedText>
-              </View>
-              <Switch
-                value={schedule.isActive}
-                onValueChange={() => handleToggleDay(schedule.dayOfWeek)}
-                trackColor={{ false: theme.borderLight, true: theme.accent }}
-                thumbColor={theme.backgroundRoot}
-              />
-            </View>
-
-            {schedule.isActive ? (
-              <View style={styles.timeContainer}>
-                <View style={styles.timeRow}>
-                  <ThemedText type="body" style={styles.timeLabel}>Opens</ThemedText>
-                  <View style={styles.timeButtons}>
-                    {TIME_OPTIONS.slice(0, 8).map((time) => (
-                      <Pressable
-                        key={`start-${time}`}
-                        onPress={() => handleUpdateTime(schedule.dayOfWeek, "startTime", time)}
-                        style={[
-                          styles.timeButton,
-                          {
-                            backgroundColor:
-                              schedule.startTime === time
-                                ? theme.accent
-                                : theme.backgroundSecondary,
-                          },
-                        ]}
-                      >
-                        <ThemedText
-                          type="small"
-                          style={[
-                            styles.timeButtonText,
-                            {
-                              color:
-                                schedule.startTime === time
-                                  ? theme.buttonText
-                                  : theme.text,
-                            },
-                          ]}
-                        >
-                          {formatTime(time).replace(":00", "")}
-                        </ThemedText>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-
-                <View style={styles.timeRow}>
-                  <ThemedText type="body" style={styles.timeLabel}>Closes</ThemedText>
-                  <View style={styles.timeButtons}>
-                    {TIME_OPTIONS.slice(8).map((time) => (
-                      <Pressable
-                        key={`end-${time}`}
-                        onPress={() => handleUpdateTime(schedule.dayOfWeek, "endTime", time)}
-                        style={[
-                          styles.timeButton,
-                          {
-                            backgroundColor:
-                              schedule.endTime === time
-                                ? theme.accent
-                                : theme.backgroundSecondary,
-                          },
-                        ]}
-                      >
-                        <ThemedText
-                          type="small"
-                          style={[
-                            styles.timeButtonText,
-                            {
-                              color:
-                                schedule.endTime === time
-                                  ? theme.buttonText
-                                  : theme.text,
-                            },
-                          ]}
-                        >
-                          {formatTime(time).replace(":00", "")}
-                        </ThemedText>
-                      </Pressable>
-                    ))}
-                  </View>
-                </View>
-              </View>
-            ) : null}
-          </Card>
-        ))}
-      </ScrollView>
-
-      <View
-        style={[
-          styles.footer,
-          {
-            paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: theme.backgroundRoot,
-            borderTopColor: theme.borderLight,
-          },
-        ]}
-      >
-        <Button
-          onPress={handleSave}
-          disabled={saving || !hasChanges}
-          style={styles.saveButton}
+    <ImageBackground source={lightPlayBackground} style={styles.background} resizeMode="cover">
+      <Animated.View style={[styles.container, containerStyle]}>
+        <ScrollView
+          style={styles.scrollView}
+          contentContainerStyle={[
+            styles.content,
+            { 
+              paddingTop: insets.top + 20,
+              paddingBottom: insets.bottom + 120 
+            },
+          ]}
+          showsVerticalScrollIndicator={false}
         >
-          {saving ? "Saving..." : "Save Changes"}
-        </Button>
-      </View>
-    </ThemedView>
+          <View style={styles.header}>
+            <Animated.Text style={styles.hugeTitle}>BUSINESS</Animated.Text>
+            <Animated.Text style={styles.hugeTitle}>HOURS</Animated.Text>
+          </View>
+
+          {schedules.map((schedule) => (
+            <GlassPanel key={schedule.dayOfWeek} style={styles.dayCard}>
+              <View style={styles.dayHeader}>
+                <Animated.Text style={styles.dayName}>
+                  {DAY_NAMES[schedule.dayOfWeek]}
+                </Animated.Text>
+                <Switch
+                  value={schedule.isActive}
+                  onValueChange={() => handleToggleDay(schedule.dayOfWeek)}
+                  trackColor={{ false: "rgba(0,0,0,0.1)", true: "rgba(0,0,0,0.4)" }}
+                  thumbColor={schedule.isActive ? "#fff" : "#eee"}
+                  ios_backgroundColor="rgba(0,0,0,0.1)"
+                />
+              </View>
+
+              {schedule.isActive && (
+                <View style={styles.timeSection}>
+                  <View style={styles.statsRow}>
+                    <View style={styles.statusBadge}>
+                      <View style={styles.toggleIcon}>
+                        <View style={styles.toggleKnob} />
+                      </View>
+                      <Animated.Text style={styles.statusText}>Open</Animated.Text>
+                    </View>
+                    <View style={styles.durationRow}>
+                      <View style={styles.knobIcon}>
+                        <View style={styles.knobInner} />
+                      </View>
+                      <Animated.Text style={styles.durationText}>
+                        {(() => {
+                          const start = parseInt(schedule.startTime.split(":")[0]);
+                          const end = parseInt(schedule.endTime.split(":")[0]);
+                          const diff = end - start;
+                          return `${diff} HOURS`;
+                        })()}
+                      </Animated.Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.timeRow}>
+                    <Animated.Text style={styles.timeLabel}>OPENS</Animated.Text>
+                    <View style={styles.timeButtons}>
+                      {TIME_OPTIONS.slice(0, 5).map((time) => (
+                        <Pressable
+                          key={`start-${time}`}
+                          onPress={() => handleUpdateTime(schedule.dayOfWeek, "startTime", time)}
+                          style={[
+                            styles.timeButton,
+                            schedule.startTime === time && styles.timeButtonActive,
+                          ]}
+                        >
+                          <Animated.Text
+                            style={[
+                              styles.timeButtonText,
+                              schedule.startTime === time && styles.timeButtonTextActive,
+                            ]}
+                          >
+                            {formatTime(time)}
+                          </Animated.Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+
+                  <View style={styles.timeRow}>
+                    <Animated.Text style={styles.timeLabel}>CLOSES</Animated.Text>
+                    <View style={styles.timeButtons}>
+                      {TIME_OPTIONS.slice(8, 13).map((time) => (
+                        <Pressable
+                          key={`end-${time}`}
+                          onPress={() => handleUpdateTime(schedule.dayOfWeek, "endTime", time)}
+                          style={[
+                            styles.timeButton,
+                            schedule.endTime === time && styles.timeButtonActive,
+                          ]}
+                        >
+                          <Animated.Text
+                            style={[
+                              styles.timeButtonText,
+                              schedule.endTime === time && styles.timeButtonTextActive,
+                            ]}
+                          >
+                            {formatTime(time)}
+                          </Animated.Text>
+                        </Pressable>
+                      ))}
+                    </View>
+                  </View>
+                </View>
+              )}
+            </GlassPanel>
+          ))}
+        </ScrollView>
+
+        <View style={[styles.footer, { paddingBottom: insets.bottom + Spacing.lg }]}>
+          <GlassPanel style={styles.footerInner}>
+            <Pressable
+              onPress={handleSave}
+              disabled={saving || !hasChanges}
+              style={[
+                styles.saveButton,
+                (!hasChanges || saving) && styles.saveButtonDisabled,
+              ]}
+            >
+              <Animated.Text style={styles.saveButtonText}>
+                {saving ? "SAVING..." : "SAVE CHANGES"}
+              </Animated.Text>
+            </Pressable>
+          </GlassPanel>
+        </View>
+      </Animated.View>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
+  background: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
   container: {
     flex: 1,
   },
@@ -306,68 +338,187 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "#000",
   },
   scrollView: {
     flex: 1,
   },
   content: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    paddingHorizontal: 24,
   },
-  description: {
-    marginBottom: Spacing.xl,
-    opacity: 0.7,
+  header: {
+    marginBottom: 40,
+    alignItems: "center",
+  },
+  hugeTitle: {
+    fontSize: 48,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: 2,
+    lineHeight: 56,
+    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 10,
+    textAlign: "center",
+  },
+  glassPanel: {
+    borderRadius: 32,
+    borderWidth: 1,
+    borderColor: "rgba(255, 255, 255, 0.3)",
+    overflow: "hidden",
+  },
+  glassPanelAndroid: {
+    backgroundColor: "rgba(255, 255, 255, 0.7)",
   },
   dayCard: {
-    marginBottom: Spacing.lg,
-    padding: Spacing.lg,
+    marginBottom: 20,
+    padding: 24,
   },
   dayHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
   },
-  dayInfo: {
-    flex: 1,
-  },
   dayName: {
-    marginBottom: Spacing.xs,
+    fontSize: 32,
+    fontWeight: "700",
+    color: "#000",
+    letterSpacing: -1,
   },
-  dayStatus: {
-    opacity: 0.7,
+  timeSection: {
+    marginTop: 20,
   },
-  timeContainer: {
-    marginTop: Spacing.lg,
-    paddingTop: Spacing.lg,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.1)",
+  statsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  statusBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  toggleIcon: {
+    width: 50,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  toggleKnob: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: "#ccc",
+    marginLeft: "auto",
+  },
+  statusText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#333",
+  },
+  durationRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+  },
+  knobIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  knobInner: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: "#eee",
+    borderWidth: 1,
+    borderColor: "rgba(0,0,0,0.05)",
+  },
+  durationText: {
+    fontSize: 18,
+    fontWeight: "400",
+    color: "#333",
   },
   timeRow: {
-    marginBottom: Spacing.md,
+    marginBottom: 20,
   },
   timeLabel: {
-    marginBottom: Spacing.sm,
-    opacity: 0.7,
+    fontSize: 12,
+    fontWeight: "700",
+    color: "#555",
+    letterSpacing: 1,
+    marginBottom: 10,
   },
   timeButtons: {
     flexDirection: "row",
-    flexWrap: "wrap",
-    gap: Spacing.xs,
+    justifyContent: "space-between",
+    gap: 8,
   },
   timeButton: {
-    paddingHorizontal: Spacing.md,
-    paddingVertical: Spacing.sm,
-    borderRadius: BorderRadius.xs,
+    flex: 1,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "#999",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  timeButtonActive: {
+    backgroundColor: "#fff",
+    borderColor: "#fff",
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.2,
+    shadowRadius: 4,
+    elevation: 4,
   },
   timeButtonText: {
-    fontSize: 12,
+    fontSize: 10,
+    fontWeight: "400",
+    color: "#555",
+  },
+  timeButtonTextActive: {
+    color: "#000",
+    fontWeight: "700",
   },
   footer: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.lg,
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+    paddingHorizontal: 0,
+  },
+  footerInner: {
+    borderRadius: 0,
     borderTopWidth: 1,
+    borderBottomWidth: 0,
+    borderLeftWidth: 0,
+    borderRightWidth: 0,
+    backgroundColor: "rgba(255, 255, 255, 0.6)",
   },
   saveButton: {
-    width: "100%",
+    height: 60,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  saveButtonDisabled: {
+    opacity: 0.5,
+  },
+  saveButtonText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+    letterSpacing: 2,
   },
 });
