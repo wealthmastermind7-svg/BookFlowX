@@ -300,6 +300,9 @@ const styles = StyleSheet.create({
     color: "#fff",
     letterSpacing: -2,
     lineHeight: 80,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   hugeYear: {
     fontSize: 56,
@@ -308,6 +311,9 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
     marginTop: -4,
     lineHeight: 60,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
   },
   headerControls: {
     flexDirection: "row",
@@ -317,7 +323,10 @@ const styles = StyleSheet.create({
   },
   setupText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "rgba(255,255,255,0.8)",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   glassButtonSmall: {
     flexDirection: "row",
@@ -347,8 +356,11 @@ const styles = StyleSheet.create({
     width: "14.28%",
     textAlign: "center",
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(255,255,255,0.6)",
     fontWeight: "600",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
   },
   datesGrid: {
     flexDirection: "row",
@@ -378,6 +390,9 @@ const styles = StyleSheet.create({
   dayText: {
     fontSize: 18,
     color: "white",
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 3,
   },
   dayTextSelected: {
     color: "black",
