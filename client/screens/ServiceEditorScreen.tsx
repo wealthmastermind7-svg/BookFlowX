@@ -314,18 +314,11 @@ export default function ServiceEditorScreen() {
               </Text>
             </Pressable>
             <Pressable 
-              onPress={() => {
-                if (!isPremium) {
-                  showPaywall("soft_upsell");
-                  return;
-                }
-                setActiveTab("links");
-              }}
+              onPress={() => setActiveTab("links")}
             >
               <Text style={[
                 styles.carouselItem,
-                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive,
-                !isPremium && { opacity: 0.3 }
+                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
                 Links
               </Text>
@@ -410,32 +403,20 @@ export default function ServiceEditorScreen() {
                       </Text>
                       
                       <Pressable 
-                        onPress={() => {
-                          if (!isPremium) {
-                            showPaywall("share_limit");
-                            return;
-                          }
-                          handleCopyServiceLink();
-                        }} 
+                        onPress={handleCopyServiceLink} 
                         style={styles.linkUrlContainer}
                       >
                         <Text style={styles.linkUrl} numberOfLines={1}>
                           {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
                         </Text>
-                        <Feather name={isPremium ? "copy" : "lock"} size={18} color="rgba(255,255,255,0.6)" />
+                        <Feather name="copy" size={18} color="rgba(255,255,255,0.6)" />
                       </Pressable>
 
                       <Pressable 
-                        onPress={() => {
-                          if (!isPremium) {
-                            showPaywall("share_limit");
-                            return;
-                          }
-                          handleShareServiceLink();
-                        }} 
+                        onPress={handleShareServiceLink} 
                         style={styles.linkButton}
                       >
-                        <Feather name={isPremium ? "share" : "lock"} size={18} color="#fff" />
+                        <Feather name="share" size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>Share Link</Text>
                       </Pressable>
                     </GlassPanel>
@@ -447,16 +428,10 @@ export default function ServiceEditorScreen() {
                       </Text>
 
                       <Pressable 
-                        onPress={() => {
-                          if (!isPremium) {
-                            showPaywall("qr_limit");
-                            return;
-                          }
-                          handleShowQRCode();
-                        }} 
+                        onPress={handleShowQRCode} 
                         style={styles.linkButton}
                       >
-                        <Feather name={isPremium ? "maximize" : "lock"} size={18} color="#fff" />
+                        <Feather name="maximize" size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>View QR Code</Text>
                       </Pressable>
                     </GlassPanel>
