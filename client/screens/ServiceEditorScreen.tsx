@@ -1,12 +1,12 @@
 import React, { useState, useEffect, useRef } from "react";
 import {
   View,
+  Text,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   TextInput,
   Pressable,
-  ScrollView,
   ActivityIndicator,
   Keyboard,
   Share,
@@ -26,6 +26,7 @@ import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
+  FadeIn,
 } from "react-native-reanimated";
 
 import { Spacing, BorderRadius } from "@/constants/theme";
@@ -82,12 +83,7 @@ export default function ServiceEditorScreen() {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const qrRef = useRef<any>(null);
 
-  const fadeIn = useSharedValue(0);
   const serviceId = (route.params as any)?.serviceId;
-
-  useEffect(() => {
-    fadeIn.value = withTiming(1, { duration: 600 });
-  }, []);
 
   useEffect(() => {
     const checkBusinessReady = setInterval(() => {
@@ -276,10 +272,6 @@ export default function ServiceEditorScreen() {
     }
   };
 
-  const containerStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-  }));
-
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
@@ -297,7 +289,10 @@ export default function ServiceEditorScreen() {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={styles.container}
       >
-        <Animated.View style={[styles.contentContainer, containerStyle]}>
+        <Animated.View 
+          entering={FadeIn.duration(400)}
+          style={styles.contentContainer}
+        >
           <View style={[styles.header, { paddingTop: insets.top + 16 }]}>
             <Pressable 
               onPress={() => navigation.goBack()} 
@@ -305,26 +300,26 @@ export default function ServiceEditorScreen() {
             >
               <Feather name="arrow-left" size={24} color="#fff" />
             </Pressable>
-            <Animated.Text style={styles.headerTitle}>Edit Service</Animated.Text>
+            <Text style={styles.headerTitle}>Edit Service</Text>
             <View style={styles.headerSpacer} />
           </View>
 
           <View style={styles.tabCarousel}>
             <Pressable onPress={() => setActiveTab("details")}>
-              <Animated.Text style={[
+              <Text style={[
                 styles.carouselItem,
                 activeTab === "details" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
                 Details
-              </Animated.Text>
+              </Text>
             </Pressable>
             <Pressable onPress={() => setActiveTab("links")}>
-              <Animated.Text style={[
+              <Text style={[
                 styles.carouselItem,
                 activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
                 Links
-              </Animated.Text>
+              </Text>
             </Pressable>
           </View>
 
@@ -335,7 +330,7 @@ export default function ServiceEditorScreen() {
             {activeTab === "details" && (
               <View style={styles.formContainer}>
                 <View style={styles.inputGroup}>
-                  <Animated.Text style={styles.inputLabel}>Service Name</Animated.Text>
+                  <Text style={styles.inputLabel}>Service Name</Text>
                   <TextInput
                     value={service.name}
                     onChangeText={(text) => setService((prev) => ({ ...prev, name: text }))}
@@ -347,7 +342,7 @@ export default function ServiceEditorScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Animated.Text style={styles.inputLabel}>Duration (minutes)</Animated.Text>
+                  <Text style={styles.inputLabel}>Duration (minutes)</Text>
                   <TextInput
                     value={String(service.duration)}
                     onChangeText={(text) => setService((prev) => ({ ...prev, duration: parseInt(text) || 0 }))}
@@ -360,7 +355,7 @@ export default function ServiceEditorScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Animated.Text style={styles.inputLabel}>Price ({currencySymbol})</Animated.Text>
+                  <Text style={styles.inputLabel}>Price ({currencySymbol})</Text>
                   <TextInput
                     value={String((service.price || 0) / 100)}
                     onChangeText={(text) => setService((prev) => ({ ...prev, price: Math.round((parseFloat(text) || 0) * 100) }))}
@@ -373,7 +368,7 @@ export default function ServiceEditorScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Animated.Text style={styles.inputLabel}>Description</Animated.Text>
+                  <Text style={styles.inputLabel}>Description</Text>
                   <TextInput
                     value={service.description || ""}
                     onChangeText={(text) => setService((prev) => ({ ...prev, description: text }))}
@@ -392,41 +387,41 @@ export default function ServiceEditorScreen() {
               <View style={styles.linksContainer}>
                 {!serviceId ? (
                   <GlassPanel style={styles.linkCard}>
-                    <Animated.Text style={styles.linkCardTitle}>Save First</Animated.Text>
-                    <Animated.Text style={styles.linkCardDesc}>
+                    <Text style={styles.linkCardTitle}>Save First</Text>
+                    <Text style={styles.linkCardDesc}>
                       Save this service to generate its unique booking link and QR code
-                    </Animated.Text>
+                    </Text>
                   </GlassPanel>
                 ) : (
                   <>
                     <GlassPanel style={styles.linkCard}>
-                      <Animated.Text style={styles.linkCardTitle}>Direct Booking Link</Animated.Text>
-                      <Animated.Text style={styles.linkCardDesc}>
+                      <Text style={styles.linkCardTitle}>Direct Booking Link</Text>
+                      <Text style={styles.linkCardDesc}>
                         Share this link to let customers book directly
-                      </Animated.Text>
+                      </Text>
                       
                       <Pressable onPress={handleCopyServiceLink} style={styles.linkUrlContainer}>
-                        <Animated.Text style={styles.linkUrl} numberOfLines={1}>
+                        <Text style={styles.linkUrl} numberOfLines={1}>
                           {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
-                        </Animated.Text>
+                        </Text>
                         <Feather name={isPremium ? "copy" : "lock"} size={18} color="rgba(255,255,255,0.6)" />
                       </Pressable>
 
                       <Pressable onPress={handleShareServiceLink} style={styles.linkButton}>
                         <Feather name={isPremium ? "share" : "lock"} size={18} color="#fff" />
-                        <Animated.Text style={styles.linkButtonText}>Share Link</Animated.Text>
+                        <Text style={styles.linkButtonText}>Share Link</Text>
                       </Pressable>
                     </GlassPanel>
 
                     <GlassPanel style={styles.linkCard}>
-                      <Animated.Text style={styles.linkCardTitle}>QR Code</Animated.Text>
-                      <Animated.Text style={styles.linkCardDesc}>
+                      <Text style={styles.linkCardTitle}>QR Code</Text>
+                      <Text style={styles.linkCardDesc}>
                         Display this QR code for customers to scan and book
-                      </Animated.Text>
+                      </Text>
 
                       <Pressable onPress={handleShowQRCode} style={styles.linkButton}>
                         <Feather name={isPremium ? "maximize" : "lock"} size={18} color="#fff" />
-                        <Animated.Text style={styles.linkButtonText}>View QR Code</Animated.Text>
+                        <Text style={styles.linkButtonText}>View QR Code</Text>
                       </Pressable>
                     </GlassPanel>
                   </>
@@ -441,7 +436,7 @@ export default function ServiceEditorScreen() {
               disabled={saving}
               style={({ pressed }) => [styles.cancelButton, { opacity: pressed ? 0.7 : saving ? 0.5 : 1 }]}
             >
-              <Animated.Text style={styles.cancelButtonText}>Cancel</Animated.Text>
+              <Text style={styles.cancelButtonText}>Cancel</Text>
             </Pressable>
 
             <Pressable
@@ -449,9 +444,9 @@ export default function ServiceEditorScreen() {
               disabled={saving}
               style={({ pressed }) => [styles.saveButton, { opacity: pressed ? 0.9 : saving ? 0.5 : 1 }]}
             >
-              <Animated.Text style={styles.saveButtonText}>
+              <Text style={styles.saveButtonText}>
                 {saving ? "Saving..." : "Save Service"}
-              </Animated.Text>
+              </Text>
             </Pressable>
           </View>
         </Animated.View>
@@ -465,9 +460,9 @@ export default function ServiceEditorScreen() {
           <Pressable style={styles.modalOverlay} onPress={() => setQrModalVisible(false)}>
             <View style={styles.qrModalContent}>
               <View style={styles.qrModalHeader}>
-                <Animated.Text style={styles.qrModalTitle}>
+                <Text style={styles.qrModalTitle}>
                   {service.name || "Service"} QR Code
-                </Animated.Text>
+                </Text>
                 <Pressable onPress={() => setQrModalVisible(false)} style={styles.closeButton}>
                   <Feather name="x" size={24} color="#fff" />
                 </Pressable>
@@ -487,12 +482,12 @@ export default function ServiceEditorScreen() {
                 )}
               </View>
 
-              <Animated.Text style={styles.qrDescription}>
+              <Text style={styles.qrDescription}>
                 Scan to book {service.name}
-              </Animated.Text>
+              </Text>
 
               <Pressable onPress={handleDownloadQRCode} style={styles.downloadButton}>
-                <Animated.Text style={styles.downloadButtonText}>Download QR Code</Animated.Text>
+                <Text style={styles.downloadButtonText}>Download QR Code</Text>
               </Pressable>
             </View>
           </Pressable>
@@ -553,18 +548,18 @@ const styles = StyleSheet.create({
     paddingVertical: 24,
   },
   carouselItem: {
-    fontSize: 48,
     fontWeight: "600",
   },
   carouselItemActive: {
+    fontSize: 48,
     color: "#fff",
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
   },
   carouselItemInactive: {
-    color: "rgba(255,255,255,0.4)",
     fontSize: 32,
+    color: "rgba(255,255,255,0.4)",
   },
   formContainer: {
     paddingHorizontal: 24,

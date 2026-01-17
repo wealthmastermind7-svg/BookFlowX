@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import {
   View,
+  Text,
   FlatList,
   StyleSheet,
   Pressable,
   ImageBackground,
   Platform,
-  Dimensions,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -18,8 +18,8 @@ import * as Haptics from "expo-haptics";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
-  withTiming,
   withSpring,
+  FadeIn,
 } from "react-native-reanimated";
 import Svg, { Path, Text as SvgText } from "react-native-svg";
 
@@ -143,15 +143,15 @@ function ServiceCardCinematic({
         <GlassServiceCard>
           <View style={styles.cardContent}>
             <View style={styles.cardLeft}>
-              <Animated.Text style={styles.serviceName}>{name}</Animated.Text>
+              <Text style={styles.serviceName}>{name}</Text>
               <View style={styles.serviceDetails}>
-                <Animated.Text style={styles.durationText}>
+                <Text style={styles.durationText}>
                   {formatDuration(duration)}
-                </Animated.Text>
+                </Text>
                 <View style={styles.dotSeparator} />
-                <Animated.Text style={styles.priceText}>
+                <Text style={styles.priceText}>
                   {formatPriceSimple(price, currency)}
-                </Animated.Text>
+                </Text>
               </View>
             </View>
             <CircularMeter percentage={bookingRate} />
@@ -172,10 +172,7 @@ export default function ServicesScreen() {
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<Business | null>(null);
 
-  const fadeIn = useSharedValue(0);
-
   useEffect(() => {
-    fadeIn.value = withTiming(1, { duration: 800 });
     initializeBusiness();
   }, []);
 
@@ -221,10 +218,6 @@ export default function ServicesScreen() {
     navigation.navigate("ServiceEditor", { serviceId });
   };
 
-  const containerStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-  }));
-
   const renderItem = ({ item }: { item: Service }) => (
     <ServiceCardCinematic
       name={item.name}
@@ -239,19 +232,22 @@ export default function ServicesScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Feather name="layers" size={48} color="rgba(255,255,255,0.2)" />
-      <Animated.Text style={styles.emptyTitle}>No Services Yet</Animated.Text>
-      <Animated.Text style={styles.emptyMessage}>
+      <Text style={styles.emptyTitle}>No Services Yet</Text>
+      <Text style={styles.emptyMessage}>
         Create your first service by tapping the + button
-      </Animated.Text>
+      </Text>
     </View>
   );
 
   return (
     <ImageBackground source={silkBackground} style={styles.background} resizeMode="cover">
       <View style={styles.gradientOverlay} />
-      <Animated.View style={[styles.container, containerStyle]}>
+      <Animated.View 
+        entering={FadeIn.duration(600)}
+        style={styles.container}
+      >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Animated.Text style={styles.hugeTitle}>Services</Animated.Text>
+          <Text style={styles.hugeTitle}>Services</Text>
         </View>
 
         <FlatList
