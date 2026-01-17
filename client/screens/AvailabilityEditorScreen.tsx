@@ -207,8 +207,19 @@ export default function AvailabilityEditorScreen() {
           showsVerticalScrollIndicator={false}
         >
           <View style={styles.header}>
-            <Animated.Text style={styles.hugeTitle}>BUSINESS</Animated.Text>
-            <Animated.Text style={styles.hugeTitle}>HOURS</Animated.Text>
+            <Pressable 
+              onPress={() => navigation.goBack()} 
+              style={({ pressed }) => [
+                styles.backButton,
+                { opacity: pressed ? 0.5 : 1 }
+              ]}
+            >
+              <Feather name="arrow-left" size={24} color="#fff" />
+            </Pressable>
+            <View style={styles.headerText}>
+              <Animated.Text style={styles.hugeTitle}>BUSINESS</Animated.Text>
+              <Animated.Text style={styles.hugeTitle}>HOURS</Animated.Text>
+            </View>
           </View>
 
           {schedules.map((schedule) => (
@@ -335,6 +346,23 @@ const styles = StyleSheet.create({
   },
   header: {
     marginBottom: 40,
+    alignItems: "center",
+    position: "relative",
+    width: "100%",
+    flexDirection: "row",
+    justifyContent: "center",
+  },
+  backButton: {
+    position: "absolute",
+    left: 0,
+    top: 0,
+    width: 44,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  headerText: {
     alignItems: "center",
   },
   hugeTitle: {
