@@ -25,6 +25,7 @@ import Animated, {
   interpolate,
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
+import { useTheme } from "@/hooks/useTheme";
 import { api, Booking, DashboardStats, Business } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
 import { usePremium } from "@/contexts/PremiumContext";
@@ -186,18 +187,27 @@ function RevenueChart({ data }: { data: { label: string; value: number }[] }) {
 function BookingCardGlass({
   customerName,
   serviceName,
+  date,
   time,
   isPremium,
   status,
+  confirmationSentAt,
+  reminder24hSentAt,
+  reminder2hSentAt,
   onPress,
 }: {
   customerName: string;
   serviceName: string;
+  date: string;
   time: string;
   isPremium?: boolean;
   status: string;
+  confirmationSentAt?: string | null;
+  reminder24hSentAt?: string | null;
+  reminder2hSentAt?: string | null;
   onPress?: () => void;
 }) {
+  const { theme } = useTheme();
   const handlePress = () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -216,28 +226,103 @@ function BookingCardGlass({
             <Animated.Text style={styles.bookingName}>{customerName}</Animated.Text>
             <Animated.Text style={styles.bookingService}>{serviceName}</Animated.Text>
           </View>
-          {isPremium && <Feather name="award" size={14} color="#F59E0B" />}
-        </View>
-        <View style={styles.bookingFooter}>
-          <View style={styles.bookingTime}>
-            <Feather name="clock" size={12} color="rgba(255,255,255,0.7)" />
-            <Animated.Text style={styles.bookingTimeText}>{time}</Animated.Text>
+          <View
+            style={[
+              styles.statusBadge,
+              {
+                backgroundColor:
+                  status === "confirmed" || status === "completed"
+                    ? "#22C55E"
+                    : status === "pending"
+                    ? "#F59E0B"
+                    : "#6B7280",
+              },
+            ]}
+          >
+            <Feather
+              name={
+                status === "confirmed"
+                  ? "check-circle"
+                  : status === "pending"
+                  ? "clock"
+                  : status === "completed"
+                  ? "check"
+                  : "x-circle"
+              }
+              size={14}
+              color="white"
+            />
           </View>
-          <View style={styles.bookingStatus}>
-            <Animated.Text style={styles.bookingStatusText}>Status</Animated.Text>
+        </View>
+
+        <View style={styles.bookingDetails}>
+          <View style={styles.bookingDetailItem}>
+            <Feather name="calendar" size={12} color="rgba(255,255,255,0.6)" />
+            <Animated.Text style={styles.bookingDetailText}>{date}</Animated.Text>
+          </View>
+          <View style={styles.bookingDetailItem}>
+            <Feather name="clock" size={12} color="rgba(255,255,255,0.6)" />
+            <Animated.Text style={styles.bookingDetailText}>{time}</Animated.Text>
+          </View>
+        </View>
+
+        <View style={styles.progressRowGlass}>
+          <View style={styles.progressItem}>
             <View
               style={[
-                styles.statusDot,
-                {
-                  backgroundColor:
-                    status === "confirmed" || status === "completed"
-                      ? "#22C55E"
-                      : status === "pending"
-                      ? "#F59E0B"
-                      : "#6B7280",
-                },
+                styles.progressTick,
+                confirmationSentAt ? styles.progressTickActive : styles.progressTickInactive,
               ]}
-            />
+            >
+              <Feather
+                name="check"
+                size={8}
+                color={confirmationSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
+              />
+            </View>
+            <Animated.Text
+              style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}
+            >
+              Conf
+            </Animated.Text>
+          </View>
+          <View style={styles.progressItem}>
+            <View
+              style={[
+                styles.progressTick,
+                reminder24hSentAt ? styles.progressTickActive : styles.progressTickInactive,
+              ]}
+            >
+              <Feather
+                name="check"
+                size={8}
+                color={reminder24hSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
+              />
+            </View>
+            <Animated.Text
+              style={[styles.progressLabel, reminder24hSentAt && styles.progressLabelActive]}
+            >
+              24h
+            </Animated.Text>
+          </View>
+          <View style={styles.progressItem}>
+            <View
+              style={[
+                styles.progressTick,
+                reminder2hSentAt ? styles.progressTickActive : styles.progressTickInactive,
+              ]}
+            >
+              <Feather
+                name="check"
+                size={8}
+                color={reminder2hSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
+              />
+            </View>
+            <Animated.Text
+              style={[styles.progressLabel, reminder2hSentAt && styles.progressLabelActive]}
+            >
+              2h
+            </Animated.Text>
           </View>
         </View>
       </GlassPanel>
@@ -406,9 +491,13 @@ export default function DashboardScreen() {
                     key={booking.id}
                     customerName={booking.customerName || "Customer"}
                     serviceName={booking.serviceName || "Service"}
+                    date={booking.date}
                     time={booking.time}
                     status={booking.status}
                     isPremium={booking.status === "confirmed"}
+                    confirmationSentAt={booking.confirmationSentAt}
+                    reminder24hSentAt={booking.reminder24hSentAt}
+                    reminder2hSentAt={booking.reminder2hSentAt}
                     onPress={async () => {
                       if (booking.status === "pending") {
                         try {
@@ -570,14 +659,14 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   bookingCard: {
-    width: 260,
+    width: 280,
     padding: 16,
   },
   bookingHeader: {
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     gap: 12,
-    marginBottom: 16,
+    marginBottom: 12,
   },
   bookingAvatar: {
     width: 32,
@@ -591,47 +680,67 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   bookingName: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#fff",
-    marginBottom: 2,
   },
   bookingService: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.6)",
   },
-  bookingFooter: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+  statusBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    justifyContent: "center",
     alignItems: "center",
   },
-  bookingTime: {
+  bookingDetails: {
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 12,
+  },
+  bookingDetailItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 6,
+    gap: 4,
   },
-  bookingTimeText: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.9)",
-  },
-  bookingStatus: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  bookingStatusText: {
+  bookingDetailText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
+    color: "rgba(255,255,255,0.8)",
   },
-  statusDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 4,
+  progressRowGlass: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 12,
+    paddingTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  progressItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+  },
+  progressTick: {
+    width: 14,
+    height: 14,
+    borderRadius: 7,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  progressTickActive: {
+    backgroundColor: "#22C55E",
+  },
+  progressTickInactive: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  progressLabel: {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.4)",
+  },
+  progressLabelActive: {
+    color: "rgba(255,255,255,0.8)",
   },
   emptyBookingCard: {
     width: 260,
