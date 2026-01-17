@@ -225,7 +225,7 @@ export default function CustomersScreen() {
 
   return (
     <ImageBackground 
-      source={require("../../attached_assets/generated_images/swirling_ink_smoke_background.png")} 
+      source={require("@assets/generated_images/swirling_ink_smoke_background.png")} 
       style={styles.background} 
       resizeMode="cover"
     >
