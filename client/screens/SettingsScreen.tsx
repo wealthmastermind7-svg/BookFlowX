@@ -585,7 +585,7 @@ Need help? Contact support at bookings@confirmbooking.online
         {children}
       </View>
     );
-    
+
     if (onPress) {
       return (
         <Pressable onPress={onPress} style={({ pressed }) => [pressed && { opacity: 0.8, transform: [{ scale: 0.98 }] }]}>
@@ -607,7 +607,27 @@ Need help? Contact support at bookings@confirmbooking.online
     </View>
   );
 
-  const PremiumRow = ({ icon, title, subtitle, onPress, isGold = false, disabled = false }: any) => (
+  const CompactRow = ({ icon, title, subtitle, onPress, disabled = false, destructive = false, comingSoon = false }: any) => (
+    <Pressable
+      onPress={disabled ? undefined : onPress}
+      style={({ pressed }) => [styles.compactRow, pressed && !disabled && { opacity: 0.7 }, disabled && { opacity: 0.5 }]}
+    >
+      <Feather name={icon} size={20} color={destructive ? "#EF4444" : theme.text} style={{ opacity: destructive ? 0.6 : 0.8 }} />
+      <View style={{ flex: 1, marginLeft: Spacing.md }}>
+        <ThemedText style={[styles.compactRowTitle, destructive && { color: "#EF4444" }]}>{title}</ThemedText>
+        {subtitle && <ThemedText style={styles.compactRowSubtitle}>{subtitle}</ThemedText>}
+      </View>
+      {comingSoon ? (
+        <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+          <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
+        </View>
+      ) : (
+        <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+      )}
+    </Pressable>
+  );
+
+  const PremiumRow = ({ icon, title, subtitle, onPress, disabled = false }: any) => (
     <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
       <View style={[styles.premiumIconBox, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
         <Feather name={icon} size={22} color="#fff" />
@@ -1294,171 +1314,161 @@ const styles = StyleSheet.create({
 });
 
   const CompactRow = ({ icon, title, subtitle, onPress, disabled = false, destructive = false, comingSoon = false }: any) => (
-    <Pressable 
-      onPress={disabled ? undefined : onPress} 
+    <Pressable
+      onPress={disabled ? undefined : onPress}
       style={({ pressed }) => [styles.compactRow, pressed && !disabled && { opacity: 0.7 }, disabled && { opacity: 0.5 }]}
     >
-      <Feather name={icon} size={20} color={destructive ? "#EF4444" : theme.text} style={{ opacity: destructive ? 0.6 : 0.8 }} />
-      <View style={{ flex: 1, marginLeft: Spacing.md }}>
+      <Feather name={icon} size={20} color={destructive ? "#EF4444" : "#fff"} style={{ opacity: destructive ? 0.6 : 0.8 }} />
+      <View style={{ flex: 1, marginLeft: 16 }}>
         <ThemedText style={[styles.compactRowTitle, destructive && { color: "#EF4444" }]}>{title}</ThemedText>
         {subtitle && <ThemedText style={styles.compactRowSubtitle}>{subtitle}</ThemedText>}
       </View>
       {comingSoon ? (
-        <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+        <View style={styles.soonBadge}>
           <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
         </View>
       ) : (
-        <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+        <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
       )}
     </Pressable>
   );
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingTop: headerHeight + Spacing.xl,
-          paddingBottom: tabBarHeight + Spacing["4xl"],
-          paddingHorizontal: Spacing.lg,
-        }}
-      >
-        {/* Premium Section */}
-        <SectionTitle badge={isPremium ? "Member" : undefined}>Premium</SectionTitle>
-        <View style={styles.sectionContent}>
-          <PremiumRow
-            icon="star"
-            title="Upgrade Plan"
-            subtitle={isPremium ? "You're a Pro member" : "Access premium tools"}
-            onPress={() => showPaywall("soft_upsell")}
-            isGold
-          />
-          <PremiumRow
-            icon="rotate-ccw"
-            title="Restore"
-            subtitle="Previous purchases"
-            onPress={handleRestorePurchases}
-            disabled={restoreLoading}
-          />
-        </View>
+    <View style={styles.container}>
+      <ImageBackground source={silkBackground} style={styles.overlay}>
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
+          <ScrollView
+            showsVerticalScrollIndicator={false}
+            contentContainerStyle={{
+              paddingTop: headerHeight + 40,
+              paddingBottom: tabBarHeight + 60,
+              paddingHorizontal: 24,
+            }}
+          >
+            {/* Premium Section */}
+            <SectionTitle badge={isPremium ? "MEMBER" : undefined}>Premium</SectionTitle>
+            <View style={{ marginBottom: 32 }}>
+              <PremiumRow
+                icon="star"
+                title="Upgrade Plan"
+                subtitle={isPremium ? "You're a Pro member" : "Access premium tools"}
+                onPress={() => showPaywall("soft_upsell")}
+              />
+              <View style={{ height: 12 }} />
+              <PremiumRow
+                icon="rotate-ccw"
+                title="Restore"
+                subtitle="Previous purchases"
+                onPress={handleRestorePurchases}
+                disabled={restoreLoading}
+              />
+            </View>
 
-        {/* Business Section */}
-        <SectionTitle>Business</SectionTitle>
-        <View style={styles.gridRow}>
-          <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
-            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
-              <Feather name="briefcase" size={16} color={theme.text} />
+            {/* Business Section */}
+            <SectionTitle>Business</SectionTitle>
+            <View style={{ marginBottom: 32 }}>
+              <View style={styles.gridRow}>
+                <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
+                  <View style={styles.gridIconCircle}>
+                    <Feather name="briefcase" size={16} color="#fff" />
+                  </View>
+                  <ThemedText style={styles.gridLabel}>ENTITY</ThemedText>
+                  <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
+                </GlassCard>
+                <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
+                  <View style={styles.gridIconCircle}>
+                    <Feather name="dollar-sign" size={16} color="#fff" />
+                  </View>
+                  <ThemedText style={styles.gridLabel}>CURRENCY</ThemedText>
+                  <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
+                </GlassCard>
+              </View>
+
+              <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}>
+                <InfoRow icon="globe" label="WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+                <View style={styles.rowDivider} />
+                <InfoRow icon="phone" label="SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+              </GlassCard>
             </View>
-            <View style={styles.gridCardContent}>
-              <ThemedText style={styles.gridLabel}>Entity</ThemedText>
-              <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
-            </View>
-          </GlassCard>
-          <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
-            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
-              <Feather name="dollar-sign" size={16} color={theme.text} />
-            </View>
-            <View style={styles.gridCardContent}>
-              <ThemedText style={styles.gridLabel}>Currency</ThemedText>
-              <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
-            </View>
-          </GlassCard>
-        </View>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
-          <InfoRow icon="globe" label="Website" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
-          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
-          <InfoRow icon="phone" label="Support Line" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
-        </GlassCard>
 
         {/* Automation Section */}
         <SectionTitle>Automation</SectionTitle>
-        <GlassCard style={styles.workflowCard} onPress={() => navigation.navigate("Workflows")}>
-          <View style={styles.workflowIconContainer}>
-            <View style={[styles.workflowIconCircle, { borderColor: `${ACCENT_GOLD}30` }]}>
-              <Feather name="zap" size={28} color={ACCENT_GOLD} />
-            </View>
-          </View>
+        <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
           <View style={{ flex: 1 }}>
-            <ThemedText style={styles.workflowTitle}>Workflows</ThemedText>
-            <ThemedText style={styles.workflowSubtitle}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
-            <ThemedText style={[styles.workflowCta, { color: ACCENT_GOLD }]}>Configure</ThemedText>
+            <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
+            <ThemedText style={styles.automationDesc}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
+            <ThemedText style={[styles.automationAction]}>CONFIGURE</ThemedText>
           </View>
         </GlassCard>
-        
+
         {/* Booking Section */}
         <SectionTitle>Booking</SectionTitle>
-        <GlassCard style={{ marginBottom: Spacing.md }}>
-          <View style={styles.bookingLinkHeader}>
+        <GlassCard style={styles.bookingCard}>
+          <View style={styles.bookingHeader}>
             <View style={{ flex: 1 }}>
-              <ThemedText style={styles.bookingLinkTitle}>Booking Link</ThemedText>
-              <ThemedText style={[styles.bookingLinkUrl, { color: ACCENT_GOLD }]} numberOfLines={1}>
+              <ThemedText style={styles.bookingTitle}>Booking Link</ThemedText>
+              <ThemedText style={styles.bookingLinkText} numberOfLines={1}>
                 {getBookingDomain()}/book/{business?.slug || "..."}
               </ThemedText>
             </View>
-            <Pressable 
+            <Pressable
               onPress={handleCopyBookingLink}
-              style={[styles.copyButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
+              style={styles.copyIconBox}
             >
-              <Feather name="copy" size={16} color={theme.text} />
+              <Feather name="copy" size={16} color="#fff" />
             </Pressable>
           </View>
           <View style={styles.bookingActions}>
-            <Pressable 
+            <Pressable
               onPress={handleOpenSharePreview}
-              style={[styles.shareButton, { backgroundColor: theme.text }]}
+              style={styles.shareLinkBtn}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                <Feather name="share-2" size={18} color={theme.backgroundDefault} />
-                <ThemedText style={[styles.shareButtonText, { color: theme.backgroundDefault }]}>Share Link</ThemedText>
-              </View>
+              <Feather name="share-2" size={18} color="#fff" />
+              <ThemedText style={styles.shareBtnText}>Share Link</ThemedText>
             </Pressable>
-            <Pressable 
+            <Pressable
               onPress={handleShowQRCode}
-              style={[styles.qrButton, { borderColor: theme.text + "30" }]}
+              style={styles.shareQrBtn}
             >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                <Feather name="grid" size={18} color={theme.text} />
-                <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>Share QR</ThemedText>
-              </View>
+              <Feather name="grid" size={18} color="#000" />
+              <ThemedText style={styles.shareQrText}>Share QR</ThemedText>
             </Pressable>
           </View>
         </GlassCard>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={handleShowEmbedModal}>
-          <View style={styles.compactInnerRow}>
-            <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
-              <Feather name="code" size={18} color={theme.text} />
-            </View>
-            <View style={{ flex: 1 }}>
-              <ThemedText style={styles.compactRowTitle}>Embed Widget</ThemedText>
-              <ThemedText style={styles.compactRowSubtitle}>Add to your website</ThemedText>
-            </View>
-            <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+        <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
+          <View style={styles.embedIconBox}>
+            <Feather name="code" size={18} color="#fff" />
           </View>
+          <View style={{ flex: 1, marginLeft: 16 }}>
+            <ThemedText style={styles.embedTitle}>Embed Widget</ThemedText>
+            <ThemedText style={styles.embedDesc}>Add to your website</ThemedText>
+          </View>
+          <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
         </GlassCard>
 
         {/* Security Section */}
         <SectionTitle>Security</SectionTitle>
         <View style={styles.gridRow}>
-          <GlassCard style={styles.securityCard} onPress={handleShowDemoTypeModal}>
-            <Feather name="download-cloud" size={22} color={ACCENT_GOLD} style={{ marginBottom: Spacing.sm }} />
-            <ThemedText style={styles.securityCardTitle}>Demo Data</ThemedText>
-            <ThemedText style={styles.securityCardSubtitle}>LOAD SAMPLES</ThemedText>
+          <GlassCard style={styles.securityGridCard} onPress={handleShowDemoTypeModal}>
+            <Feather name="download-cloud" size={22} color="#fff" />
+            <ThemedText style={styles.securityTitle}>Demo Data</ThemedText>
+            <ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText>
           </GlassCard>
-          <GlassCard style={[styles.securityCard, { borderColor: "rgba(239,68,68,0.2)" }]} onPress={handleClearAllData}>
-            <Feather name="trash-2" size={22} color="#EF4444" style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
-            <ThemedText style={styles.securityCardTitle}>Wipe Cloud</ThemedText>
-            <ThemedText style={styles.securityCardSubtitle}>Clear all data</ThemedText>
+          <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}>
+            <Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} />
+            <ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Wipe Cloud</ThemedText>
+            <ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText>
           </GlassCard>
         </View>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
-          <CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} />
-          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
-          <CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} />
+        <GlassCard style={{ marginTop: 16 }}>
+          <CompactRow icon="shield" title="Privacy Protocol" onPress={() => navigation.navigate("PrivacyPolicy" as any)} />
+          <View style={styles.rowDivider} />
+          <CompactRow icon="file-text" title="Terms of Use" onPress={() => navigation.navigate("TermsOfUse" as any)} />
         </GlassCard>
 
         {/* Footer */}
         <View style={styles.footer}>
-          <ThemedText style={styles.footerText}>Designed for Excellence • v4.2.0</ThemedText>
+          <ThemedText style={styles.footerText}>DESIGNED FOR EXCELLENCE • V4.2.0</ThemedText>
         </View>
       </ScrollView>
 
