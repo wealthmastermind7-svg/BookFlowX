@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import * as FileSystem from "expo-file-system/legacy";
-import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView, KeyboardAvoidingView } from "react-native";
+import { View, StyleSheet, Alert, Share, Platform, Modal, Pressable, ActivityIndicator, TextInput, Linking, Keyboard, ScrollView, KeyboardAvoidingView, ImageBackground } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -32,6 +32,8 @@ type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & Roo
 
 const ACCENT_GOLD = "#FFFFFF";
 const ACCENT_SILVER = "#FFFFFF";
+
+const shadowBackground = require("../../attached_assets/generated_images/abstract_black_and_white_shifting_shadows_background.png");
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
@@ -564,7 +566,7 @@ Need help? Contact support at bookings@confirmbooking.online
 
   const GlassCard = ({ children, style, onPress }: { children: React.ReactNode; style?: any; onPress?: () => void }) => {
     const content = (
-      <View style={[styles.glassCard, { backgroundColor: isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.03)", borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.08)" }, style]}>
+      <View style={[styles.glassCard, style]}>
         {children}
       </View>
     );
@@ -583,8 +585,8 @@ Need help? Contact support at bookings@confirmbooking.online
     <View style={styles.sectionTitleRow}>
       <ThemedText style={[styles.sectionTitle]}>{children}</ThemedText>
       {badge && (
-        <View style={[styles.badge, { backgroundColor: theme.text + "15", borderColor: theme.text + "30" }]}>
-          <ThemedText style={[styles.badgeText, { color: theme.text }]}>{badge}</ThemedText>
+        <View style={[styles.badge, { backgroundColor: "rgba(255,255,255,0.1)", borderColor: "rgba(255,255,255,0.3)" }]}>
+          <ThemedText style={[styles.badgeText, { color: "#fff" }]}>{badge}</ThemedText>
         </View>
       )}
     </View>
@@ -592,29 +594,29 @@ Need help? Contact support at bookings@confirmbooking.online
 
   const PremiumRow = ({ icon, title, subtitle, onPress, isGold = false, disabled = false }: any) => (
     <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
-      <View style={[styles.premiumIconBox, { backgroundColor: theme.text + "15" }]}>
-        <Feather name={icon} size={22} color={theme.text} />
+      <View style={[styles.premiumIconBox, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+        <Feather name={icon} size={22} color="#fff" />
       </View>
       <View style={{ flex: 1 }}>
         <ThemedText style={styles.premiumRowTitle}>{title}</ThemedText>
         <ThemedText style={[styles.premiumRowSubtitle]}>{subtitle}</ThemedText>
       </View>
       {disabled ? (
-        <ActivityIndicator size="small" color={theme.textTertiary} />
+        <ActivityIndicator size="small" color="#fff" />
       ) : (
-        <Feather name="chevron-right" size={20} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+        <Feather name="chevron-right" size={20} color="#fff" style={{ opacity: 0.3 }} />
       )}
     </GlassCard>
   );
 
   const InfoRow = ({ icon, label, value, onPress }: any) => (
     <Pressable onPress={onPress} style={({ pressed }) => [styles.infoRow, pressed && { opacity: 0.7 }]}>
-      <Feather name={icon} size={18} color={theme.text} style={{ opacity: 0.6 }} />
+      <Feather name={icon} size={18} color="#fff" style={{ opacity: 0.6 }} />
       <View style={{ flex: 1, marginLeft: Spacing.md }}>
         <ThemedText style={styles.infoLabel}>{label}</ThemedText>
         <ThemedText style={styles.infoValue}>{value}</ThemedText>
       </View>
-      <Feather name="edit-2" size={14} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+      <Feather name="edit-2" size={14} color="#fff" style={{ opacity: 0.3 }} />
     </Pressable>
   );
 
@@ -623,169 +625,176 @@ Need help? Contact support at bookings@confirmbooking.online
       onPress={disabled ? undefined : onPress} 
       style={({ pressed }) => [styles.compactRow, pressed && !disabled && { opacity: 0.7 }, disabled && { opacity: 0.5 }]}
     >
-      <Feather name={icon} size={20} color={destructive ? "#EF4444" : theme.text} style={{ opacity: destructive ? 0.6 : 0.8 }} />
+      <Feather name={icon} size={20} color={destructive ? "#EF4444" : "#fff"} style={{ opacity: destructive ? 0.6 : 0.8 }} />
       <View style={{ flex: 1, marginLeft: Spacing.md }}>
         <ThemedText style={[styles.compactRowTitle, destructive && { color: "#EF4444" }]}>{title}</ThemedText>
         {subtitle && <ThemedText style={styles.compactRowSubtitle}>{subtitle}</ThemedText>}
       </View>
       {comingSoon ? (
-        <View style={[styles.soonBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)" }]}>
+        <View style={[styles.soonBadge, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
           <ThemedText style={styles.soonBadgeText}>Soon</ThemedText>
         </View>
       ) : (
-        <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+        <Feather name="chevron-right" size={18} color="#fff" style={{ opacity: 0.3 }} />
       )}
     </Pressable>
   );
 
   return (
-    <ThemedView style={styles.container}>
-      <ScrollView
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingTop: headerHeight + Spacing.xl,
-          paddingBottom: tabBarHeight + Spacing["4xl"],
-          paddingHorizontal: Spacing.lg,
-        }}
-      >
-        {/* Premium Section */}
-        <SectionTitle badge={isPremium ? "Member" : undefined}>Premium</SectionTitle>
-        <View style={styles.sectionContent}>
-          <PremiumRow
-            icon="star"
-            title="Upgrade Plan"
-            subtitle={isPremium ? "You're a Pro member" : "Access premium tools"}
-            onPress={() => showPaywall("soft_upsell")}
-            isGold
-          />
-          <PremiumRow
-            icon="rotate-ccw"
-            title="Restore"
-            subtitle="Previous purchases"
-            onPress={handleRestorePurchases}
-            disabled={restoreLoading}
-          />
-        </View>
+    <ImageBackground source={shadowBackground} style={styles.background} resizeMode="cover">
+      <View style={styles.container}>
+        <ScrollView
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={{
+            paddingTop: headerHeight + Spacing.xl,
+            paddingBottom: tabBarHeight + Spacing["4xl"],
+            paddingHorizontal: Spacing.lg,
+          }}
+        >
+          <View style={styles.header}>
+            <ThemedText style={styles.giantTitle}>SETTINGS</ThemedText>
+            <ThemedText style={styles.hugeSubtitle}>Business & Profile</ThemedText>
+          </View>
 
-        {/* Business Section */}
-        <SectionTitle>Business</SectionTitle>
-        <View style={styles.gridRow}>
-          <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
-            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
-              <Feather name="briefcase" size={16} color={theme.text} />
-            </View>
-            <View style={styles.gridCardContent}>
-              <ThemedText style={styles.gridLabel}>Entity</ThemedText>
-              <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
-            </View>
-          </GlassCard>
-          <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
-            <View style={[styles.gridIconCircle, { backgroundColor: theme.text + "15" }]}>
-              <Feather name="dollar-sign" size={16} color={theme.text} />
-            </View>
-            <View style={styles.gridCardContent}>
-              <ThemedText style={styles.gridLabel}>Currency</ThemedText>
-              <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
-            </View>
-          </GlassCard>
-        </View>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
-          <InfoRow icon="globe" label="Website" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
-          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
-          <InfoRow icon="phone" label="Support Line" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
-        </GlassCard>
+          {/* Premium Section */}
+          <SectionTitle badge={isPremium ? "Member" : undefined}>Premium</SectionTitle>
+          <View style={styles.sectionContent}>
+            <PremiumRow
+              icon="star"
+              title="Upgrade Plan"
+              subtitle={isPremium ? "You're a Pro member" : "Access premium tools"}
+              onPress={() => showPaywall("soft_upsell")}
+              isGold
+            />
+            <PremiumRow
+              icon="rotate-ccw"
+              title="Restore"
+              subtitle="Previous purchases"
+              onPress={handleRestorePurchases}
+              disabled={restoreLoading}
+            />
+          </View>
 
-        {/* Automation Section */}
-        <SectionTitle>Automation</SectionTitle>
-        <GlassCard style={styles.workflowCard} onPress={() => navigation.navigate("Workflows")}>
-          <View style={styles.workflowIconContainer}>
-            <View style={[styles.workflowIconCircle, { borderColor: `${ACCENT_GOLD}30` }]}>
-              <Feather name="zap" size={28} color={ACCENT_GOLD} />
-            </View>
-          </View>
-          <View style={{ flex: 1 }}>
-            <ThemedText style={styles.workflowTitle}>Workflows</ThemedText>
-            <ThemedText style={styles.workflowSubtitle}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
-            <ThemedText style={[styles.workflowCta, { color: ACCENT_GOLD }]}>Configure</ThemedText>
-          </View>
-        </GlassCard>
-        
-        {/* Booking Section */}
-        <SectionTitle>Booking</SectionTitle>
-        <GlassCard style={{ marginBottom: Spacing.md }}>
-          <View style={styles.bookingLinkHeader}>
-            <View style={{ flex: 1 }}>
-              <ThemedText style={styles.bookingLinkTitle}>Booking Link</ThemedText>
-              <ThemedText style={[styles.bookingLinkUrl, { color: ACCENT_GOLD }]} numberOfLines={1}>
-                {getBookingDomain()}/book/{business?.slug || "..."}
-              </ThemedText>
-            </View>
-            <Pressable 
-              onPress={handleCopyBookingLink}
-              style={[styles.copyButton, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}
-            >
-              <Feather name="copy" size={16} color={theme.text} />
-            </Pressable>
-          </View>
-          <View style={styles.bookingActions}>
-            <Pressable 
-              onPress={handleOpenSharePreview}
-              style={[styles.shareButton, { backgroundColor: theme.text }]}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                <Feather name="share-2" size={18} color={theme.backgroundDefault} />
-                <ThemedText style={[styles.shareButtonText, { color: theme.backgroundDefault }]}>Share Link</ThemedText>
+          {/* Business Section */}
+          <SectionTitle>Business</SectionTitle>
+          <View style={styles.gridRow}>
+            <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
+              <View style={[styles.gridIconCircle, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                <Feather name="briefcase" size={16} color="#fff" />
               </View>
-            </Pressable>
-            <Pressable 
-              onPress={handleShowQRCode}
-              style={[styles.qrButton, { borderColor: theme.text + "30" }]}
-            >
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
-                <Feather name="grid" size={18} color={theme.text} />
-                <ThemedText style={[styles.shareButtonText, { color: theme.text }]}>Share QR</ThemedText>
+              <View style={styles.gridCardContent}>
+                <ThemedText style={styles.gridLabel}>Entity</ThemedText>
+                <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
               </View>
-            </Pressable>
+            </GlassCard>
+            <GlassCard style={styles.gridCard} onPress={handleShowCurrencyModal}>
+              <View style={[styles.gridIconCircle, { backgroundColor: "rgba(255,255,255,0.15)" }]}>
+                <Feather name="dollar-sign" size={16} color="#fff" />
+              </View>
+              <View style={styles.gridCardContent}>
+                <ThemedText style={styles.gridLabel}>Currency</ThemedText>
+                <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
+              </View>
+            </GlassCard>
           </View>
-        </GlassCard>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={handleShowEmbedModal}>
-          <View style={styles.compactInnerRow}>
-            <View style={[styles.compactIconBox, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
-              <Feather name="code" size={18} color={theme.text} />
+          <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
+            <InfoRow icon="globe" label="Website" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+            <View style={[styles.divider, { backgroundColor: "rgba(255,255,255,0.05)" }]} />
+            <InfoRow icon="phone" label="Support Line" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+          </GlassCard>
+
+          {/* Automation Section */}
+          <SectionTitle>Automation</SectionTitle>
+          <GlassCard style={styles.workflowCard} onPress={() => navigation.navigate("Workflows")}>
+            <View style={styles.workflowIconContainer}>
+              <View style={[styles.workflowIconCircle, { borderColor: "rgba(255,255,255,0.3)" }]}>
+                <Feather name="zap" size={28} color="#fff" />
+              </View>
             </View>
             <View style={{ flex: 1 }}>
-              <ThemedText style={styles.compactRowTitle}>Embed Widget</ThemedText>
-              <ThemedText style={styles.compactRowSubtitle}>Add to your website</ThemedText>
+              <ThemedText style={styles.workflowTitle}>Workflows</ThemedText>
+              <ThemedText style={styles.workflowSubtitle}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
+              <ThemedText style={[styles.workflowCta, { color: "#fff" }]}>Configure</ThemedText>
             </View>
-            <Feather name="chevron-right" size={18} color={theme.textTertiary} style={{ opacity: 0.3 }} />
+          </GlassCard>
+          
+          {/* Booking Section */}
+          <SectionTitle>Booking</SectionTitle>
+          <GlassCard style={{ marginBottom: Spacing.md }}>
+            <View style={styles.bookingLinkHeader}>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.bookingLinkTitle}>Booking Link</ThemedText>
+                <ThemedText style={[styles.bookingLinkUrl, { color: "#fff" }]} numberOfLines={1}>
+                  {getBookingDomain()}/book/{business?.slug || "..."}
+                </ThemedText>
+              </View>
+              <Pressable 
+                onPress={handleCopyBookingLink}
+                style={[styles.copyButton, { backgroundColor: "rgba(255,255,255,0.05)" }]}
+              >
+                <Feather name="copy" size={16} color="#fff" />
+              </Pressable>
+            </View>
+            <View style={styles.bookingActions}>
+              <Pressable 
+                onPress={handleOpenSharePreview}
+                style={[styles.shareButton, { backgroundColor: "#fff" }]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  <Feather name="share-2" size={18} color="#000" />
+                  <ThemedText style={[styles.shareButtonText, { color: "#000" }]}>Share Link</ThemedText>
+                </View>
+              </Pressable>
+              <Pressable 
+                onPress={handleShowQRCode}
+                style={[styles.qrButton, { borderColor: "rgba(255,255,255,0.3)" }]}
+              >
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: Spacing.sm }}>
+                  <Feather name="grid" size={18} color="#fff" />
+                  <ThemedText style={[styles.shareButtonText, { color: "#fff" }]}>Share QR</ThemedText>
+                </View>
+              </Pressable>
+            </View>
+          </GlassCard>
+          <GlassCard style={{ marginBottom: Spacing["2xl"] }} onPress={handleShowEmbedModal}>
+            <View style={styles.compactInnerRow}>
+              <View style={[styles.compactIconBox, { backgroundColor: "rgba(255,255,255,0.05)" }]}>
+                <Feather name="code" size={18} color="#fff" />
+              </View>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.compactRowTitle}>Embed Widget</ThemedText>
+                <ThemedText style={styles.compactRowSubtitle}>Add to your website</ThemedText>
+              </View>
+              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" style={{ opacity: 0.3 }} />
+            </View>
+          </GlassCard>
+
+          {/* Security Section */}
+          <SectionTitle>Security</SectionTitle>
+          <View style={styles.gridRow}>
+            <GlassCard style={styles.securityCard} onPress={handleShowDemoTypeModal}>
+              <Feather name="download-cloud" size={22} color="#fff" style={{ marginBottom: Spacing.sm }} />
+              <ThemedText style={styles.securityCardTitle}>Demo Data</ThemedText>
+              <ThemedText style={styles.securityCardSubtitle}>LOAD SAMPLES</ThemedText>
+            </GlassCard>
+            <GlassCard style={[styles.securityCard, { borderColor: "rgba(239,68,68,0.2)" }]} onPress={handleClearAllData}>
+              <Feather name="trash-2" size={22} color="#EF4444" style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
+              <ThemedText style={styles.securityCardTitle}>Wipe Cloud</ThemedText>
+              <ThemedText style={styles.securityCardSubtitle}>Clear all data</ThemedText>
+            </GlassCard>
           </View>
-        </GlassCard>
-
-        {/* Security Section */}
-        <SectionTitle>Security</SectionTitle>
-        <View style={styles.gridRow}>
-          <GlassCard style={styles.securityCard} onPress={handleShowDemoTypeModal}>
-            <Feather name="download-cloud" size={22} color={ACCENT_GOLD} style={{ marginBottom: Spacing.sm }} />
-            <ThemedText style={styles.securityCardTitle}>Demo Data</ThemedText>
-            <ThemedText style={styles.securityCardSubtitle}>LOAD SAMPLES</ThemedText>
+          <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
+            <CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} />
+            <View style={[styles.divider, { backgroundColor: "rgba(255,255,255,0.05)" }]} />
+            <CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} />
           </GlassCard>
-          <GlassCard style={[styles.securityCard, { borderColor: "rgba(239,68,68,0.2)" }]} onPress={handleClearAllData}>
-            <Feather name="trash-2" size={22} color="#EF4444" style={{ marginBottom: Spacing.sm, opacity: 0.6 }} />
-            <ThemedText style={styles.securityCardTitle}>Wipe Cloud</ThemedText>
-            <ThemedText style={styles.securityCardSubtitle}>Clear all data</ThemedText>
-          </GlassCard>
-        </View>
-        <GlassCard style={{ marginBottom: Spacing["2xl"] }}>
-          <CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} />
-          <View style={[styles.divider, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]} />
-          <CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} />
-        </GlassCard>
 
-        {/* Footer */}
-        <View style={styles.footer}>
-          <ThemedText style={styles.footerText}>Designed for Excellence • v4.2.0</ThemedText>
-        </View>
-      </ScrollView>
+          {/* Footer */}
+          <View style={styles.footer}>
+            <ThemedText style={styles.footerText}>Designed for Excellence • v4.2.0</ThemedText>
+          </View>
+        </ScrollView>
+      </View>
 
       {/* QR Code Modal */}
       <Modal
@@ -1175,7 +1184,7 @@ Need help? Contact support at bookings@confirmbooking.online
           </View>
         </View>
       </Modal>
-    </ThemedView>
+    </ImageBackground>
   );
 }
 
@@ -1194,7 +1203,7 @@ const styles = StyleSheet.create({
     fontSize: 32,
     fontWeight: "700",
     letterSpacing: -1,
-    opacity: 0.9,
+    color: "#fff",
   },
   badge: {
     paddingHorizontal: Spacing.sm,
@@ -1216,6 +1225,8 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     borderWidth: 1,
     padding: Spacing.lg,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderColor: "rgba(255,255,255,0.1)",
   },
   premiumRow: {
     flexDirection: "row",
@@ -1233,6 +1244,7 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "700",
     letterSpacing: -0.3,
+    color: "#fff",
   },
   premiumRowSubtitle: {
     fontSize: 13,
@@ -1269,6 +1281,7 @@ const styles = StyleSheet.create({
   gridValue: {
     fontSize: 17,
     fontWeight: "700",
+    color: "#fff",
   },
   infoRow: {
     flexDirection: "row",
@@ -1285,6 +1298,7 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 15,
     fontWeight: "500",
+    color: "#fff",
   },
   divider: {
     height: 1,
@@ -1312,6 +1326,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 4,
+    color: "#fff",
   },
   workflowSubtitle: {
     fontSize: 13,
@@ -1345,6 +1360,7 @@ const styles = StyleSheet.create({
   compactRowTitle: {
     fontSize: 15,
     fontWeight: "600",
+    color: "#fff",
   },
   compactRowSubtitle: {
     fontSize: 12,
@@ -1370,6 +1386,7 @@ const styles = StyleSheet.create({
     fontSize: 15,
     fontWeight: "700",
     marginBottom: 4,
+    color: "#fff",
   },
   bookingLinkUrl: {
     fontSize: 12,
@@ -1415,6 +1432,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "700",
     marginBottom: 2,
+    color: "#fff",
   },
   securityCardSubtitle: {
     fontSize: 9,
@@ -1441,6 +1459,39 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     padding: Spacing.lg,
+  },
+  background: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  giantTitle: {
+    fontSize: 72,
+    fontWeight: "300",
+    color: "#fff",
+    letterSpacing: -2,
+    lineHeight: 80,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+  },
+  hugeSubtitle: {
+    fontSize: 24,
+    fontWeight: "300",
+    color: "rgba(255,255,255,0.6)",
+    letterSpacing: -0.5,
+    marginTop: -4,
+    textShadowColor: "rgba(0, 0, 0, 0.5)",
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+  },
+  header: {
+    marginBottom: 32,
+  },
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
+    paddingHorizontal: 24,
   },
   modalContent: {
     width: "100%",
