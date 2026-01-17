@@ -166,7 +166,9 @@ export default function SettingsScreen() {
   const handleOpenSharePreview = () => {
     if (!business || !checkShareAccess()) return;
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+    const domain = getBookingDomain();
+    const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
+    const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
     navigation.navigate("SharePreview", {
       businessName: business.name,
       bookingUrl: bookingLink,
@@ -180,8 +182,11 @@ export default function SettingsScreen() {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       const data = await api.getQRCode();
       if (data) {
+        const domain = getBookingDomain();
+        const protocol = domain.includes("localhost") || domain.includes("10.0.2.2") || domain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
+        const bookingLink = `${protocol}://${domain}/book/${business.slug}`;
         setQrCode(data.qrCode);
-        setBookingUrl(data.bookingUrl);
+        setBookingUrl(bookingLink);
         setQrModalVisible(true);
       }
     } catch (error) {

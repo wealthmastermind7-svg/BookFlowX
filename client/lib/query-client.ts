@@ -55,7 +55,7 @@ export function getApiUrl(): string {
       "";
     
     if (apiDomain && apiDomain.length > 0) {
-      const protocol = apiDomain.includes("localhost") ? "http" : "https";
+      const protocol = apiDomain.includes("localhost") || apiDomain.match(/\d+\.\d+\.\d+\.\d+/) ? "http" : "https";
       return `${protocol}://${apiDomain}/`;
     }
   } catch (e) {
