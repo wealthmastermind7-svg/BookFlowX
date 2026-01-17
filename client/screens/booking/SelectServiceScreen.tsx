@@ -146,8 +146,8 @@ export default function SelectServiceScreen() {
           entering={FadeInDown.delay(0).springify()}
           style={styles.header}
         >
-          <Text style={styles.brandTitle}>Black Edition</Text>
-          <Text style={styles.brandSubtitle}>Premium Booking</Text>
+          <Text style={styles.brandTitle}>Select Service</Text>
+          <Text style={styles.brandSubtitle}>Premium Experience</Text>
         </Animated.View>
 
         <View style={styles.servicesList}>

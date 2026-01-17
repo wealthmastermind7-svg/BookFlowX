@@ -119,8 +119,8 @@ export default function CheckoutScreen() {
         }}
       >
         <Animated.View entering={FadeInDown.springify()} style={styles.header}>
-          <Text style={styles.brandTitle}>Black Edition</Text>
-          <Text style={styles.brandSubtitle}>Premium Booking</Text>
+          <Text style={styles.brandTitle}>{service?.name || "Booking"}</Text>
+          <Text style={styles.brandSubtitle}>Checkout</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(100).springify()} style={styles.formSection}>

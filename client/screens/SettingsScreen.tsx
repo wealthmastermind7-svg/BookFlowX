@@ -318,7 +318,7 @@ export default function SettingsScreen() {
         <View style={styles.row}>
           <MetallicCard onPress={() => handleEditBusinessField("name")} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>BUSINESS NAME</Text>
-            <Text style={styles.cardValueLarge}>{business?.name || "Enter Name"}</Text>
+            <Text style={styles.cardValueLarge}>{business?.name || "My Business"}</Text>
           </MetallicCard>
           <MetallicCard onPress={handleShowCurrencyModal} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>CURRENCY</Text>
