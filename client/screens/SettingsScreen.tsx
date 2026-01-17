@@ -314,10 +314,11 @@ export default function SettingsScreen() {
         </View>
 
         <SectionTitle>Business</SectionTitle>
+        <Text style={styles.sectionSubtitle}>Set your business profile and local currency.</Text>
         <View style={styles.row}>
           <MetallicCard onPress={() => handleEditBusinessField("name")} style={styles.squareCard} flex>
-            <Text style={styles.cardLabel}>ENTITY</Text>
-            <Text style={styles.cardValueLarge}>{business?.name || "Black Edition"}</Text>
+            <Text style={styles.cardLabel}>BUSINESS NAME</Text>
+            <Text style={styles.cardValueLarge}>{business?.name || "Enter Name"}</Text>
           </MetallicCard>
           <MetallicCard onPress={handleShowCurrencyModal} style={styles.squareCard} flex>
             <Text style={styles.cardLabel}>CURRENCY</Text>
@@ -429,8 +430,28 @@ export default function SettingsScreen() {
               <ThemedText style={styles.modalTitle}>Edit {editingField}</ThemedText>
               <Pressable onPress={() => setEditModalVisible(false)}><Feather name="x" size={24} color="#222" /></Pressable>
             </View>
-            <TextInput style={styles.editInput} value={editValue} onChangeText={setEditValue} placeholderTextColor="#888" autoFocus />
-            <Button title="Save" onPress={handleSaveBusinessField} disabled={editLoading} />
+            <TextInput 
+              style={styles.editInput} 
+              value={editValue} 
+              onChangeText={setEditValue} 
+              placeholder={editingField === 'name' ? "Enter business name" : `Enter ${editingField}`}
+              placeholderTextColor="#888" 
+              autoFocus 
+            />
+            <Pressable 
+              onPress={handleSaveBusinessField} 
+              disabled={editLoading}
+              style={({ pressed }) => [
+                styles.modalPrimaryButton,
+                { backgroundColor: '#000', opacity: pressed || editLoading ? 0.8 : 1 }
+              ]}
+            >
+              {editLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.modalPrimaryButtonText}>Save Changes</Text>
+              )}
+            </Pressable>
           </MetallicCard>
         </View>
       </Modal>
@@ -493,7 +514,8 @@ const styles = StyleSheet.create({
   cardDesc: { fontSize: 13, color: "#444", lineHeight: 18 },
   cardIconDecor: { position: "absolute", right: 8, bottom: -10, opacity: 0.1 },
   currencyRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between" },
-  sectionTitle: { fontSize: 36, color: "#fff", marginTop: 32, marginBottom: 16, fontWeight: "300" },
+  sectionTitle: { fontSize: 36, color: "#fff", marginTop: 32, marginBottom: 4, fontWeight: "300" },
+  sectionSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)", marginBottom: 16, fontWeight: "400" },
   automationRow: { flexDirection: "row", alignItems: "center", gap: 16 },
   automationText: { flex: 1 },
   metallicButton: { height: 50, flexDirection: "row", alignItems: "center", justifyContent: "space-between", paddingHorizontal: 16 },
@@ -535,6 +557,18 @@ const styles = StyleSheet.create({
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   modalTitle: { fontSize: 20, fontWeight: "700", color: "#222" },
   editInput: { height: 50, backgroundColor: "rgba(0,0,0,0.05)", borderRadius: 12, paddingHorizontal: 16, fontSize: 16, color: "#222", marginBottom: 20 },
+  modalPrimaryButton: {
+    height: 54,
+    borderRadius: 27,
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+  },
+  modalPrimaryButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   qrContainer: { alignItems: "center", justifyContent: "center", padding: 20, backgroundColor: "#fff", borderRadius: 16, marginBottom: 20 },
   qrImage: { width: 200, height: 200 },
   demoItem: { padding: 12, borderBottomWidth: 1, borderBottomColor: '#ccc' },
