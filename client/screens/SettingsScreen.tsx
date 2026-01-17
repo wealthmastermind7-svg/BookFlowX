@@ -417,7 +417,15 @@ export default function SettingsScreen() {
             <View style={styles.qrContainer}>
               {qrCode ? <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" /> : <ActivityIndicator size="large" color="#222" />}
             </View>
-            <Button title="Share QR" onPress={handleDownloadQRCode} />
+            <Pressable 
+              onPress={handleDownloadQRCode}
+              style={({ pressed }) => [
+                styles.modalPrimaryButton,
+                { backgroundColor: '#000', opacity: pressed ? 0.8 : 1 }
+              ]}
+            >
+              <Text style={styles.modalPrimaryButtonText}>Share QR</Text>
+            </Pressable>
           </MetallicCard>
         </View>
       </Modal>
@@ -471,7 +479,20 @@ export default function SettingsScreen() {
                 </Pressable>
               ))}
             </ScrollView>
-            <Button title="Load" onPress={() => handleInitializeDemoData(selectedDemoType)} disabled={demoDataLoading} />
+            <Pressable 
+              onPress={() => handleInitializeDemoData(selectedDemoType)}
+              disabled={demoDataLoading}
+              style={({ pressed }) => [
+                styles.modalPrimaryButton,
+                { backgroundColor: '#000', opacity: pressed || demoDataLoading ? 0.8 : 1, marginTop: 20 }
+              ]}
+            >
+              {demoDataLoading ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.modalPrimaryButtonText}>Load</Text>
+              )}
+            </Pressable>
           </MetallicCard>
         </View>
       </Modal>
