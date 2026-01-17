@@ -260,8 +260,8 @@ export default function SettingsScreen() {
     }
   };
 
-  const SectionTitle = ({ children }: { children: string }) => (
-    <Text style={styles.sectionTitle}>{children}</Text>
+  const SectionTitle = ({ children, small = false }: { children: string; small?: boolean }) => (
+    <Text style={[styles.sectionTitle, small && { fontSize: 24, marginTop: 24 }]}>{children}</Text>
   );
 
   const MetallicCard = ({ children, style, onPress, flex = false }: { children: React.ReactNode; style?: any; onPress?: () => void; flex?: boolean }) => {
@@ -310,37 +310,7 @@ export default function SettingsScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
-          <Text style={styles.hugeTitle}>Premium{"\n"}Business</Text>
-        </View>
-
-        {/* Premium Section */}
-        <SectionTitle>Premium</SectionTitle>
-        <View style={{ gap: 16, marginBottom: 16 }}>
-          <MetallicCard onPress={() => showPaywall("soft_upsell")} style={styles.premiumRow}>
-            <View style={styles.premiumIconBox}>
-              <Feather name="star" size={22} color="#222" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.premiumRowTitle}>Upgrade Plan</Text>
-              <Text style={styles.premiumRowSubtitle}>{isPremium ? "You're a Pro member" : "Access premium tools"}</Text>
-            </View>
-            <Feather name="chevron-right" size={20} color="#222" style={{ opacity: 0.3 }} />
-          </MetallicCard>
-
-          <MetallicCard onPress={handleRestorePurchases} style={styles.premiumRow}>
-            <View style={styles.premiumIconBox}>
-              <Feather name="rotate-ccw" size={22} color="#222" />
-            </View>
-            <View style={{ flex: 1 }}>
-              <Text style={styles.premiumRowTitle}>Restore</Text>
-              <Text style={styles.premiumRowSubtitle}>Previous purchases</Text>
-            </View>
-            {restoreLoading ? (
-              <ActivityIndicator size="small" color="#222" />
-            ) : (
-              <Feather name="chevron-right" size={20} color="#222" style={{ opacity: 0.3 }} />
-            )}
-          </MetallicCard>
+          <Text style={styles.hugeTitle}>Settings</Text>
         </View>
 
         <SectionTitle>Business</SectionTitle>
@@ -375,7 +345,36 @@ export default function SettingsScreen() {
           <MetallicButton title="Share QR" icon="grid" onPress={handleShowQRCode} />
         </View>
 
-        <SectionTitle>Security</SectionTitle>
+        <SectionTitle small>Subscription</SectionTitle>
+        <View style={{ gap: 8, marginBottom: 16 }}>
+          <MetallicCard onPress={() => showPaywall("soft_upsell")} style={styles.premiumRow}>
+            <View style={styles.premiumIconBox}>
+              <Feather name="star" size={16} color="#222" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.premiumRowTitle}>Upgrade Plan</Text>
+              <Text style={styles.premiumRowSubtitle}>{isPremium ? "Pro status active" : "Access premium tools"}</Text>
+            </View>
+            <Feather name="chevron-right" size={14} color="#222" style={{ opacity: 0.2 }} />
+          </MetallicCard>
+
+          <MetallicCard onPress={handleRestorePurchases} style={styles.premiumRow}>
+            <View style={styles.premiumIconBox}>
+              <Feather name="rotate-ccw" size={16} color="#222" />
+            </View>
+            <View style={{ flex: 1 }}>
+              <Text style={styles.premiumRowTitle}>Restore</Text>
+              <Text style={styles.premiumRowSubtitle}>Previous purchases</Text>
+            </View>
+            {restoreLoading ? (
+              <ActivityIndicator size="small" color="#222" />
+            ) : (
+              <Feather name="chevron-right" size={14} color="#222" style={{ opacity: 0.2 }} />
+            )}
+          </MetallicCard>
+        </View>
+
+        <SectionTitle small>System</SectionTitle>
         <View style={styles.row}>
           <MetallicCard style={styles.securityCard} flex>
             <Text style={styles.cardLabel}>Demo Data</Text>
@@ -393,10 +392,10 @@ export default function SettingsScreen() {
           </MetallicCard>
           <View style={styles.securityBtnsColumn}>
             <MetallicCard onPress={() => Linking.openURL(`https://${getBookingDomain()}/privacy-policy`)} style={styles.compactSecurityBtn}>
-              <Text style={styles.compactSecurityText}>Privacy{"\n"}Protocol</Text>
+              <Text style={styles.compactSecurityText}>Privacy</Text>
             </MetallicCard>
             <MetallicCard onPress={() => Linking.openURL(`https://${getBookingDomain()}/terms`)} style={styles.compactSecurityBtn}>
-              <Text style={styles.compactSecurityText}>Terms of{"\n"}Use</Text>
+              <Text style={styles.compactSecurityText}>Terms</Text>
             </MetallicCard>
           </View>
         </View>
@@ -406,7 +405,7 @@ export default function SettingsScreen() {
         </View>
       </ScrollView>
 
-      {/* Modals remain similar but styled with MetallicCard */}
+      {/* Modals */}
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <MetallicCard style={styles.modalContent}>
@@ -430,7 +429,7 @@ export default function SettingsScreen() {
               <ThemedText style={styles.modalTitle}>Edit {editingField}</ThemedText>
               <Pressable onPress={() => setEditModalVisible(false)}><Feather name="x" size={24} color="#222" /></Pressable>
             </View>
-            <TextInput style={styles.editInput} value={editValue} onChangeText={setEditValue} placeholderTextColor="#888" />
+            <TextInput style={styles.editInput} value={editValue} onChangeText={setEditValue} placeholderTextColor="#888" autoFocus />
             <Button title="Save" onPress={handleSaveBusinessField} disabled={editLoading} />
           </MetallicCard>
         </View>
@@ -502,24 +501,24 @@ const styles = StyleSheet.create({
   premiumRow: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 16,
-    gap: 16,
+    padding: 12,
+    gap: 12,
   },
   premiumIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
+    width: 36,
+    height: 36,
+    borderRadius: 10,
     backgroundColor: "rgba(0,0,0,0.05)",
     alignItems: "center",
     justifyContent: "center",
   },
   premiumRowTitle: {
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "700",
     color: "#222",
   },
   premiumRowSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: "#666",
   },
   securityCard: { height: 144, padding: 12, alignItems: "center", justifyContent: "space-between" },
