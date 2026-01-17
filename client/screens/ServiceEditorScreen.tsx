@@ -65,7 +65,7 @@ export default function ServiceEditorScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute();
   const navigation = useNavigation<EditScreenNavigationProp>();
-  const { isPremium, checkShareAccess, checkQrAccess } = usePremium();
+  const { isPremium, checkShareAccess, checkQrAccess, showPaywall } = usePremium();
 
   const [service, setService] = useState<Partial<Service>>({
     name: "",
@@ -313,14 +313,23 @@ export default function ServiceEditorScreen() {
                 Details
               </Text>
             </Pressable>
-            <View style={{ opacity: 0.3 }}>
+            <Pressable 
+              onPress={() => {
+                if (!isPremium) {
+                  showPaywall("Service links require a subscription");
+                  return;
+                }
+                setActiveTab("links");
+              }}
+            >
               <Text style={[
                 styles.carouselItem,
-                styles.carouselItemInactive
+                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive,
+                !isPremium && { opacity: 0.3 }
               ]}>
                 Links
               </Text>
-            </View>
+            </Pressable>
           </View>
 
           <KeyboardAwareScrollViewCompat
@@ -400,14 +409,32 @@ export default function ServiceEditorScreen() {
                         Share this link to let customers book directly
                       </Text>
                       
-                      <Pressable onPress={handleCopyServiceLink} style={styles.linkUrlContainer}>
+                      <Pressable 
+                        onPress={() => {
+                          if (!isPremium) {
+                            showPaywall("Copying links is a premium feature");
+                            return;
+                          }
+                          handleCopyServiceLink();
+                        }} 
+                        style={styles.linkUrlContainer}
+                      >
                         <Text style={styles.linkUrl} numberOfLines={1}>
                           {bookingLink?.replace(/^https?:\/\//, "") || "Loading..."}
                         </Text>
                         <Feather name={isPremium ? "copy" : "lock"} size={18} color="rgba(255,255,255,0.6)" />
                       </Pressable>
 
-                      <Pressable onPress={handleShareServiceLink} style={styles.linkButton}>
+                      <Pressable 
+                        onPress={() => {
+                          if (!isPremium) {
+                            showPaywall("Sharing links is a premium feature");
+                            return;
+                          }
+                          handleShareServiceLink();
+                        }} 
+                        style={styles.linkButton}
+                      >
                         <Feather name={isPremium ? "share" : "lock"} size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>Share Link</Text>
                       </Pressable>
@@ -419,7 +446,16 @@ export default function ServiceEditorScreen() {
                         Display this QR code for customers to scan and book
                       </Text>
 
-                      <Pressable onPress={handleShowQRCode} style={styles.linkButton}>
+                      <Pressable 
+                        onPress={() => {
+                          if (!isPremium) {
+                            showPaywall("QR codes are a premium feature");
+                            return;
+                          }
+                          handleShowQRCode();
+                        }} 
+                        style={styles.linkButton}
+                      >
                         <Feather name={isPremium ? "maximize" : "lock"} size={18} color="#fff" />
                         <Text style={styles.linkButtonText}>View QR Code</Text>
                       </Pressable>
