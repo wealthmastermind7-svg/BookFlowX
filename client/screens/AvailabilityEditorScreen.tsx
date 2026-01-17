@@ -41,8 +41,8 @@ type AvailabilityNavigationProp = NativeStackNavigationProp<
 const DAY_NAMES = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
 
 const TIME_OPTIONS = [
-  "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", "12:00",
-  "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00"
+  "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", 
+  "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"
 ];
 
 interface DaySchedule {
@@ -252,8 +252,8 @@ export default function AvailabilityEditorScreen() {
 
                   <View style={styles.timeRow}>
                     <Animated.Text style={styles.timeLabel}>OPENS</Animated.Text>
-                    <View style={styles.timeButtons}>
-                      {TIME_OPTIONS.slice(0, 5).map((time) => (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.timeButtons}>
+                      {TIME_OPTIONS.map((time) => (
                         <Pressable
                           key={`start-${time}`}
                           onPress={() => handleUpdateTime(schedule.dayOfWeek, "startTime", time)}
@@ -272,13 +272,13 @@ export default function AvailabilityEditorScreen() {
                           </Animated.Text>
                         </Pressable>
                       ))}
-                    </View>
+                    </ScrollView>
                   </View>
 
                   <View style={styles.timeRow}>
                     <Animated.Text style={styles.timeLabel}>CLOSES</Animated.Text>
-                    <View style={styles.timeButtons}>
-                      {TIME_OPTIONS.slice(8, 13).map((time) => (
+                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.timeButtons}>
+                      {TIME_OPTIONS.map((time) => (
                         <Pressable
                           key={`end-${time}`}
                           onPress={() => handleUpdateTime(schedule.dayOfWeek, "endTime", time)}
@@ -297,7 +297,7 @@ export default function AvailabilityEditorScreen() {
                           </Animated.Text>
                         </Pressable>
                       ))}
-                    </View>
+                    </ScrollView>
                   </View>
                 </View>
               )}
@@ -461,12 +461,13 @@ const styles = StyleSheet.create({
   },
   timeButtons: {
     flexDirection: "row",
-    justifyContent: "space-between",
     gap: 8,
+    paddingRight: 16,
   },
   timeButton: {
-    flex: 1,
     height: 40,
+    minWidth: 70,
+    paddingHorizontal: 12,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: "#999",
