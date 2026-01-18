@@ -262,12 +262,10 @@ export default function QuickSaleScreen() {
           try {
             const qrDataUrl = await QRCode.toDataURL(url, {
               errorCorrectionLevel: "H",
-              type: "image/png",
-              quality: 0.95,
               margin: 2,
               width: 300,
-            });
-            setQrCode(qrDataUrl);
+            } as any);
+            setQrCode(qrDataUrl as string);
           } catch (qrError) {
             console.error("Error generating QR code:", qrError);
           }
