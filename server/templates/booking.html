@@ -155,6 +155,27 @@
     .summary-label { color: var(--smoke); }
 
     #date-input { margin-bottom: 24px; width: 100%; }
+    
+    .addon-item {
+      display: flex;
+      align-items: center;
+      padding: 14px;
+      background: rgba(0,0,0,0.02);
+      border-radius: 12px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 2px solid transparent;
+    }
+    .addon-item:hover { background: rgba(0,0,0,0.04); }
+    .addon-item.selected { border-color: var(--black); background: rgba(0,0,0,0.06); }
+    .addon-info { flex: 1; }
+    .addon-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
+    .addon-reason { font-size: 13px; color: var(--smoke); }
+    .addon-price { font-weight: 700; font-size: 18px; margin-left: 12px; }
+    .addon-check { width: 24px; height: 24px; border: 2px solid var(--silver); border-radius: 12px; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
+    .addon-item.selected .addon-check { background: var(--black); border-color: var(--black); }
+    .addon-item.selected .addon-check::after { content: ''; display: block; width: 8px; height: 8px; background: white; border-radius: 4px; }
     .loading-overlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 100; }
   </style>
 </head>
@@ -207,10 +228,17 @@
         </div>
       </div>
       
+      <!-- Add-on Suggestions -->
+      <div id="addons-container" class="glass-card" style="display: none;">
+        <label style="display: block; font-size: 14px; font-weight: 600; color: var(--smoke); margin-bottom: 16px;">RECOMMENDED ADD-ONS</label>
+        <div id="addons-list"></div>
+      </div>
+      
       <div class="glass-card">
         <div class="summary-item"><span class="summary-label">Service</span><span id="summary-service">-</span></div>
+        <div id="summary-addons"></div>
         <div class="summary-item"><span class="summary-label">Date & Time</span><span id="summary-datetime">-</span></div>
-        <div class="summary-item"><span class="summary-label">Total Amount</span><span id="summary-total">$0.00</span></div>
+        <div class="summary-item" style="font-weight: 700;"><span class="summary-label">Total Amount</span><span id="summary-total">$0.00</span></div>
       </div>
       
       <button class="btn" id="btn-confirm">Confirm Booking</button>
@@ -243,6 +271,8 @@
     let selectedService = null;
     let selectedDate = new Date().toISOString().split('T')[0];
     let selectedTime = null;
+    let upsellSuggestions = [];
+    let selectedAddons = [];
 
     const bgText = document.getElementById('bg-text');
     const pathParts = window.location.pathname.split('/');
@@ -319,11 +349,88 @@
       if (step === 2) bgText.textContent = 'TIME';
       if (step === 3) {
         bgText.textContent = 'RESERVE';
-        document.getElementById('summary-service').textContent = selectedService.name;
-        document.getElementById('summary-datetime').textContent = `${selectedDate} at ${selectedTime}`;
-        document.getElementById('summary-total').textContent = `$${(selectedService.price / 100).toFixed(2)}`;
+        selectedAddons = [];
+        updateSummary();
+        loadUpsellSuggestions();
       }
       if (step === 4) bgText.textContent = 'DONE';
+    }
+    
+    async function loadUpsellSuggestions() {
+      const container = document.getElementById('addons-container');
+      const list = document.getElementById('addons-list');
+      
+      try {
+        const res = await fetch('/api/ai/upsell-suggestions', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({
+            serviceName: selectedService.name,
+            serviceDescription: selectedService.description || '',
+            servicePrice: selectedService.price / 100,
+            businessType: business.name,
+            currency: 'USD'
+          })
+        });
+        
+        if (res.ok) {
+          const data = await res.json();
+          upsellSuggestions = data.suggestions || [];
+          
+          if (upsellSuggestions.length > 0) {
+            container.style.display = 'block';
+            list.innerHTML = upsellSuggestions.map((addon, i) => `
+              <div class="addon-item" onclick="toggleAddon(${i})" id="addon-${i}">
+                <div class="addon-check"></div>
+                <div class="addon-info">
+                  <div class="addon-name">${addon.name}</div>
+                  <div class="addon-reason">${addon.reason || addon.description}</div>
+                </div>
+                <div class="addon-price">+$${addon.price.toFixed(2)}</div>
+              </div>
+            `).join('');
+          } else {
+            container.style.display = 'none';
+          }
+        }
+      } catch (e) {
+        console.log('Could not load suggestions');
+        container.style.display = 'none';
+      }
+    }
+    
+    function toggleAddon(index) {
+      const addon = upsellSuggestions[index];
+      const el = document.getElementById(`addon-${index}`);
+      const existingIndex = selectedAddons.findIndex(a => a.name === addon.name);
+      
+      if (existingIndex >= 0) {
+        selectedAddons.splice(existingIndex, 1);
+        el.classList.remove('selected');
+      } else {
+        selectedAddons.push(addon);
+        el.classList.add('selected');
+      }
+      
+      updateSummary();
+    }
+    
+    function updateSummary() {
+      document.getElementById('summary-service').textContent = selectedService.name;
+      document.getElementById('summary-datetime').textContent = `${selectedDate} at ${selectedTime}`;
+      
+      const addonsContainer = document.getElementById('summary-addons');
+      if (selectedAddons.length > 0) {
+        addonsContainer.innerHTML = selectedAddons.map(a => 
+          `<div class="summary-item"><span class="summary-label">+ ${a.name}</span><span>$${a.price.toFixed(2)}</span></div>`
+        ).join('');
+      } else {
+        addonsContainer.innerHTML = '';
+      }
+      
+      const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price, 0);
+      const total = (selectedService.price / 100) + addonsTotal;
+      document.getElementById('summary-total').textContent = `$${total.toFixed(2)}`;
     }
 
     async function confirmBooking() {
@@ -343,6 +450,9 @@
         });
         const customer = await custRes.json();
 
+        const addonsTotal = selectedAddons.reduce((sum, a) => sum + a.price * 100, 0);
+        const totalPrice = selectedService.price + addonsTotal;
+        
         const bookRes = await fetch(`/api/businesses/${business.id}/bookings`, {
           method: 'POST',
           headers: {'Content-Type': 'application/json'},
@@ -352,7 +462,8 @@
             date: selectedDate,
             time: selectedTime,
             status: 'confirmed',
-            totalPrice: selectedService.price
+            totalPrice: totalPrice,
+            notes: selectedAddons.length > 0 ? 'Add-ons: ' + selectedAddons.map(a => a.name).join(', ') : ''
           })
         });
         const booking = await bookRes.json();

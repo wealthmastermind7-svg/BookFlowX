@@ -99,24 +99,30 @@ export default function ServiceEditorScreen() {
     
     try {
       const apiUrl = getApiUrl();
+      console.log("[Upsell] Fetching suggestions for:", service.name);
       const response = await fetch(`${apiUrl}/api/ai/upsell-suggestions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           serviceName: service.name,
-          serviceDescription: service.description,
-          servicePrice: service.price,
+          serviceDescription: service.description || "",
+          servicePrice: (service.price || 0) / 100,
           businessType: business?.name || "Service",
           currency: business?.currency || "USD"
         })
       });
       
-      if (response.ok) {
-        const data = await response.json();
-        setUpsells(data.suggestions || []);
+      console.log("[Upsell] Response status:", response.status);
+      const data = await response.json();
+      console.log("[Upsell] Response data:", JSON.stringify(data));
+      
+      if (response.ok && data.suggestions) {
+        setUpsells(data.suggestions);
+      } else {
+        console.log("[Upsell] No suggestions in response");
       }
     } catch (error) {
-      console.error("Error getting upsells:", error);
+      console.error("[Upsell] Error getting upsells:", error);
     } finally {
       setUpsellLoading(false);
     }
