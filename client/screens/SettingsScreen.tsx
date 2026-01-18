@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import * as FileSystem from "expo-file-system/legacy";
 import { 
   View, 
@@ -11,9 +11,10 @@ import {
   ActivityIndicator, 
   TextInput, 
   Linking, 
-  Keyboard, 
   ScrollView, 
-  ImageBackground
+  ImageBackground,
+  Animated,
+  Dimensions
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
@@ -34,19 +35,82 @@ import { restorePurchases } from "@/lib/revenuecat";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
+import Svg, { Circle } from "react-native-svg";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
-const ACCENT_GOLD = "#FFFFFF";
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
+
+const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { value: number; max: number; size?: number; strokeWidth?: number; label: string }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const progress = Math.min(value / max, 1);
+  const strokeDashoffset = circumference - progress * circumference;
+
+  return (
+    <View style={{ alignItems: "center" }}>
+      <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="rgba(255,255,255,0.1)"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+        />
+        <Circle
+          cx={size / 2}
+          cy={size / 2}
+          r={radius}
+          stroke="#fff"
+          strokeWidth={strokeWidth}
+          fill="transparent"
+          strokeDasharray={circumference}
+          strokeDashoffset={strokeDashoffset}
+          strokeLinecap="round"
+        />
+      </Svg>
+      <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
+        <ThemedText style={{ fontSize: 18, fontWeight: "700", color: "#fff" }}>{value}</ThemedText>
+      </View>
+      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
+    </View>
+  );
+};
+
+const ParallaxIcon = ({ name, delay = 0 }: { name: any; delay?: number }) => {
+  const floatAnim = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(floatAnim, { toValue: 1, duration: 2000, useNativeDriver: true, delay }),
+        Animated.timing(floatAnim, { toValue: 0, duration: 2000, useNativeDriver: true }),
+      ])
+    );
+    animation.start();
+    return () => animation.stop();
+  }, []);
+
+  const translateY = floatAnim.interpolate({ inputRange: [0, 1], outputRange: [0, -8] });
+
+  return (
+    <Animated.View style={{ transform: [{ translateY }] }}>
+      <View style={styles.parallaxIconBox}>
+        <Feather name={name} size={24} color="#fff" />
+      </View>
+    </Animated.View>
+  );
+};
 
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
   const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall } = usePremium();
+  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -60,16 +124,16 @@ export default function SettingsScreen() {
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
-  const [selectedDemoType, setSelectedDemoType] = useState<string>("salon");
   const [embedModalVisible, setEmbedModalVisible] = useState(false);
-  const [embedInstructionsVisible, setEmbedInstructionsVisible] = useState(false);
   const [embedCode, setEmbedCode] = useState<EmbedCode | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
   const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
-  const [copiedCode, setCopiedCode] = useState(false);
-  const copiedTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+
+  const [bookingsCount, setBookingsCount] = useState(0);
+  const [servicesCount, setServicesCount] = useState(0);
+  const [customersCount, setCustomersCount] = useState(0);
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -95,6 +159,7 @@ export default function SettingsScreen() {
   useFocusEffect(
     React.useCallback(() => {
       loadSettings();
+      loadStats();
     }, [])
   );
 
@@ -116,6 +181,21 @@ export default function SettingsScreen() {
       console.error("Error loading settings:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadStats = async () => {
+    try {
+      const [bookings, services, customers] = await Promise.all([
+        api.getBookings(),
+        api.getServices(),
+        api.getCustomers()
+      ]);
+      setBookingsCount(bookings?.length || 0);
+      setServicesCount(services?.length || 0);
+      setCustomersCount(customers?.length || 0);
+    } catch (error) {
+      console.error("Error loading stats:", error);
     }
   };
 
@@ -189,12 +269,6 @@ export default function SettingsScreen() {
       bookingUrl: bookingLink,
       slug: business.slug,
     });
-  };
-
-  const handleShareBookingLink = async () => {
-    if (!business || !checkShareAccess()) return;
-    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
-    await Share.share({ message: bookingLink, url: bookingLink });
   };
 
   const handleShowQRCode = async () => {
@@ -278,8 +352,19 @@ export default function SettingsScreen() {
     }
   };
 
-  const GlassCard = ({ children, style, onPress }: any) => (
-    <Pressable onPress={onPress} style={({ pressed }) => [styles.glassCard, { backgroundColor: "rgba(255,255,255,0.03)", borderColor: "rgba(255,255,255,0.1)" }, style, pressed && onPress && { opacity: 0.8 }]}>
+  const GlassCard = ({ children, style, onPress, highlight }: any) => (
+    <Pressable 
+      onPress={onPress} 
+      style={({ pressed }) => [
+        styles.glassCard, 
+        { 
+          backgroundColor: highlight ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)", 
+          borderColor: highlight ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)" 
+        }, 
+        style, 
+        pressed && onPress && { opacity: 0.85, transform: [{ scale: 0.99 }] }
+      ]}
+    >
       {children}
     </Pressable>
   );
@@ -302,17 +387,6 @@ export default function SettingsScreen() {
     </Pressable>
   );
 
-  const PremiumRow = ({ icon, title, subtitle, onPress, disabled }: any) => (
-    <GlassCard onPress={disabled ? undefined : onPress} style={styles.premiumRow}>
-      <View style={styles.premiumIconBox}><Feather name={icon} size={22} color="#fff" /></View>
-      <View style={{ flex: 1 }}>
-        <ThemedText style={styles.premiumRowTitle}>{title}</ThemedText>
-        <ThemedText style={styles.premiumRowSubtitle}>{subtitle}</ThemedText>
-      </View>
-      {disabled ? <ActivityIndicator size="small" color="#fff" /> : <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />}
-    </GlassCard>
-  );
-
   const InfoRow = ({ icon, label, value, onPress }: any) => (
     <Pressable onPress={onPress} style={styles.infoRow}>
       <Feather name={icon} size={18} color="rgba(255,255,255,0.6)" />
@@ -326,43 +400,125 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={silkBackground} style={styles.overlay}>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
+      <ImageBackground source={silkBackground} style={styles.overlay} resizeMode="cover">
+        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.88)" }}>
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
-            <SectionTitle badge={isPremium ? "MEMBER" : undefined}>Premium</SectionTitle>
-            <View style={{ marginBottom: 32 }}>
-              <PremiumRow icon="star" title="Upgrade Plan" subtitle={isPremium ? "You're a Pro member" : "Access premium tools"} onPress={() => showPaywall("soft_upsell")} />
-              <View style={{ height: 12 }} />
-              <PremiumRow icon="rotate-ccw" title="Restore" subtitle="Previous purchases" onPress={handleRestorePurchases} disabled={restoreLoading} />
-            </View>
+            
+            <SectionTitle badge={isPremium ? "ACTIVE" : undefined}>Premium</SectionTitle>
+            
+            <GlassCard style={styles.premiumBanner} onPress={() => showPaywall("soft_upsell")} highlight>
+              <View style={styles.premiumBannerHeader}>
+                <View style={styles.premiumIconGlow}>
+                  <Feather name="zap" size={28} color="#fff" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 20 }}>
+                  <ThemedText style={styles.premiumBannerTitle}>
+                    {isPremium ? "Premium Active" : "Unlock Premium"}
+                  </ThemedText>
+                  <ThemedText style={styles.premiumBannerSubtitle}>
+                    {isPremium 
+                      ? "All features unlocked" 
+                      : "Smart automation & unlimited tools"}
+                  </ThemedText>
+                </View>
+                <Feather name="chevron-right" size={24} color="rgba(255,255,255,0.5)" />
+              </View>
+              
+              <View style={styles.premiumFeatures}>
+                <View style={styles.featureRow}>
+                  <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                  <ThemedText style={styles.featureText}>Smart reminders that reduce no-shows</ThemedText>
+                </View>
+                <View style={styles.featureRow}>
+                  <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                  <ThemedText style={styles.featureText}>Instant service setup in seconds</ThemedText>
+                </View>
+                <View style={styles.featureRow}>
+                  <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                  <ThemedText style={styles.featureText}>Intelligent upsell suggestions</ThemedText>
+                </View>
+                <View style={styles.featureRow}>
+                  <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                  <ThemedText style={styles.featureText}>Unlimited booking links & QR codes</ThemedText>
+                </View>
+              </View>
+
+              {!isPremium && (
+                <View style={styles.pricingRow}>
+                  <View style={styles.priceOption}>
+                    <ThemedText style={styles.priceAmount}>$7.99</ThemedText>
+                    <ThemedText style={styles.pricePeriod}>/ month</ThemedText>
+                  </View>
+                  <View style={styles.priceDivider} />
+                  <View style={styles.priceOption}>
+                    <ThemedText style={styles.priceAmount}>$69.99</ThemedText>
+                    <ThemedText style={styles.pricePeriod}>/ year</ThemedText>
+                  </View>
+                  <View style={styles.priceDivider} />
+                  <View style={styles.priceOption}>
+                    <ThemedText style={styles.priceAmount}>$149</ThemedText>
+                    <ThemedText style={styles.pricePeriod}>lifetime</ThemedText>
+                  </View>
+                </View>
+              )}
+            </GlassCard>
+            
+            <GlassCard style={styles.restoreRow} onPress={handleRestorePurchases}>
+              <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
+              <ThemedText style={styles.restoreText}>Restore Previous Purchases</ThemedText>
+              {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
+
+            <SectionTitle>Activity</SectionTitle>
+            <GlassCard style={styles.metersCard}>
+              <View style={styles.metersRow}>
+                <CircularMeter value={bookingsCount} max={100} label="BOOKINGS" />
+                <CircularMeter value={servicesCount} max={20} label="SERVICES" />
+                <CircularMeter value={customersCount} max={100} label="CLIENTS" />
+              </View>
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
 
             <SectionTitle>Business</SectionTitle>
-            <View style={{ marginBottom: 32 }}>
-              <View style={styles.gridRow}>
-                <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
-                  <View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View>
-                  <ThemedText style={styles.gridLabel}>ENTITY</ThemedText>
-                  <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
-                </GlassCard>
-                <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}>
-                  <View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View>
-                  <ThemedText style={styles.gridLabel}>CURRENCY</ThemedText>
-                  <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
-                </GlassCard>
-              </View>
-              <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}>
-                <InfoRow icon="globe" label="WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
-                <View style={styles.rowDivider} />
-                <InfoRow icon="phone" label="SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+            <View style={styles.gridRow}>
+              <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
+                <View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View>
+                <ThemedText style={styles.gridLabel}>ENTITY</ThemedText>
+                <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
+              </GlassCard>
+              <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}>
+                <View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View>
+                <ThemedText style={styles.gridLabel}>CURRENCY</ThemedText>
+                <ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText>
               </GlassCard>
             </View>
+            <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}>
+              <InfoRow icon="globe" label="WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+              <View style={styles.rowDivider} />
+              <InfoRow icon="phone" label="SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
 
             <SectionTitle>Automation</SectionTitle>
             <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
+              <View style={styles.automationHeader}>
+                <ParallaxIcon name="cpu" delay={0} />
+                <ParallaxIcon name="zap" delay={300} />
+                <ParallaxIcon name="bell" delay={600} />
+              </View>
               <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
-              <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences.</ThemedText>
-              <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
+              <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences that work quietly in the background.</ThemedText>
+              <View style={styles.automationActionRow}>
+                <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
+                <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
+              </View>
             </GlassCard>
+
+            <View style={{ height: 32 }} />
 
             <SectionTitle>Booking</SectionTitle>
             <GlassCard style={styles.bookingCard}>
@@ -373,6 +529,7 @@ export default function SettingsScreen() {
                 </View>
                 <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={16} color="#fff" /></Pressable>
               </View>
+              <ThemedText style={styles.qrPlacementHint}>Place this at your counter, van, invoices, or website</ThemedText>
               <View style={styles.bookingActions}>
                 <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
                 <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="grid" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Share QR</ThemedText></Pressable>
@@ -387,7 +544,9 @@ export default function SettingsScreen() {
               <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
             </GlassCard>
 
-            <SectionTitle>Security</SectionTitle>
+            <View style={{ height: 32 }} />
+
+            <SectionTitle>Data</SectionTitle>
             <View style={styles.gridRow}>
               <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}>
                 <Feather name="download-cloud" size={22} color="#fff" />
@@ -400,18 +559,24 @@ export default function SettingsScreen() {
                 <ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText>
               </GlassCard>
             </View>
-            <GlassCard style={{ marginTop: 16 }}>
+
+            <View style={{ height: 32 }} />
+
+            <SectionTitle>Legal</SectionTitle>
+            <GlassCard>
               <CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} />
               <View style={styles.rowDivider} />
               <CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} />
             </GlassCard>
 
-            <View style={styles.footer}><ThemedText style={styles.footerText}>DESIGNED FOR EXCELLENCE • V4.2.0</ThemedText></View>
+            <View style={styles.footer}>
+              <ThemedText style={styles.footerText}>DESIGNED FOR EXCELLENCE</ThemedText>
+              <ThemedText style={styles.footerVersion}>V4.2.0</ThemedText>
+            </View>
           </ScrollView>
         </View>
       </ImageBackground>
 
-      {/* Modals simplified for speed/fixing - maintaining core logic */}
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
@@ -476,10 +641,34 @@ const styles = StyleSheet.create({
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
   glassCard: { borderRadius: 32, borderWidth: 1, overflow: "hidden" },
-  premiumRow: { flexDirection: "row", alignItems: "center", padding: 24, gap: 16 },
-  premiumIconBox: { width: 56, height: 56, borderRadius: 20, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(255,255,255,0.1)" },
-  premiumRowTitle: { fontSize: 18, fontWeight: "600", color: "#fff" },
-  premiumRowSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.4)", marginTop: 2 },
+  
+  premiumBanner: { padding: 28, marginBottom: 12 },
+  premiumBannerHeader: { flexDirection: "row", alignItems: "center" },
+  premiumIconGlow: { 
+    width: 64, 
+    height: 64, 
+    borderRadius: 20, 
+    backgroundColor: "rgba(255,255,255,0.1)", 
+    alignItems: "center", 
+    justifyContent: "center",
+  },
+  premiumBannerTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 4 },
+  premiumBannerSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+  premiumFeatures: { marginTop: 24, marginBottom: 20 },
+  featureRow: { flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 12 },
+  featureText: { fontSize: 15, color: "rgba(255,255,255,0.7)" },
+  pricingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingTop: 20, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
+  priceOption: { alignItems: "center" },
+  priceAmount: { fontSize: 22, fontWeight: "800", color: "#fff" },
+  pricePeriod: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
+  priceDivider: { width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.1)" },
+  
+  restoreRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 18, gap: 10 },
+  restoreText: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+
+  metersCard: { padding: 32 },
+  metersRow: { flexDirection: "row", justifyContent: "space-around", alignItems: "center" },
+
   gridRow: { flexDirection: "row", gap: 12 },
   gridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
   gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
@@ -490,14 +679,30 @@ const styles = StyleSheet.create({
   rowDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginHorizontal: 24 },
   infoLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
   infoValue: { fontSize: 15, fontWeight: "600", color: "#fff", marginTop: 2 },
-  automationCard: { padding: 32, minHeight: 180, justifyContent: "center" },
-  automationTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 8 },
-  automationDesc: { fontSize: 16, color: "rgba(255,255,255,0.4)", maxWidth: "80%", lineHeight: 24, marginBottom: 24 },
-  automationAction: { fontSize: 10, fontWeight: "800", letterSpacing: 3, color: "rgba(255,255,255,0.4)" },
+
+  parallaxIconBox: { 
+    width: 56, 
+    height: 56, 
+    borderRadius: 16, 
+    backgroundColor: "rgba(255,255,255,0.08)", 
+    alignItems: "center", 
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+
+  automationCard: { padding: 32 },
+  automationHeader: { flexDirection: "row", gap: 16, marginBottom: 28 },
+  automationTitle: { fontSize: 28, fontWeight: "700", color: "#fff", marginBottom: 12 },
+  automationDesc: { fontSize: 16, color: "rgba(255,255,255,0.4)", lineHeight: 24, marginBottom: 24 },
+  automationActionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  automationAction: { fontSize: 11, fontWeight: "800", letterSpacing: 3, color: "rgba(255,255,255,0.4)" },
+
   bookingCard: { padding: 24 },
-  bookingHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 24 },
+  bookingHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
   bookingTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginBottom: 4 },
   bookingLinkText: { fontSize: 12, color: "rgba(255,255,255,0.3)" },
+  qrPlacementHint: { fontSize: 12, color: "rgba(255,255,255,0.3)", marginBottom: 20, fontStyle: "italic" },
   copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
   bookingActions: { flexDirection: "row", gap: 12 },
   shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#000", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
@@ -508,12 +713,16 @@ const styles = StyleSheet.create({
   embedIconBox: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
   embedTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
   embedDesc: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
+
   securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
   securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
   securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
-  footer: { marginTop: 48, alignItems: "center" },
-  footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.2)" },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.8)", justifyContent: "center", alignItems: "center", padding: 20 },
+
+  footer: { marginTop: 56, alignItems: "center" },
+  footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.15)" },
+  footerVersion: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.1)", marginTop: 4 },
+
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
   modalContent: { width: "100%", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 24 },
   qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center", marginBottom: 24 },
