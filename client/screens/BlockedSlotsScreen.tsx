@@ -66,7 +66,13 @@ function GlassPanel({ children, style, type = "default" }: { children: React.Rea
 }
 
 function formatTime12Hour(time24: string): string {
-  const [hours, minutes] = time24.split(":").map(Number);
+  if (!time24) return "";
+  const parts = time24.split(":");
+  const hours = parseInt(parts[0], 10);
+  const minutes = parts.length > 1 ? parseInt(parts[1], 10) : 0;
+  
+  if (isNaN(hours)) return time24;
+  
   const period = hours >= 12 ? "PM" : "AM";
   const hours12 = hours === 0 ? 12 : hours > 12 ? hours - 12 : hours;
   return `${hours12}:${minutes.toString().padStart(2, "0")} ${period}`;
