@@ -110,6 +110,12 @@ export default function SettingsScreen() {
   const loadSettings = async () => {
     setLoading(true);
     try {
+      // Prioritize business initialization
+      const bizId = await api.loadBusinessId();
+      if (!bizId) {
+        await api.getOrCreateBusiness();
+      }
+      
       const biz = await api.getBusiness();
       if (biz) setBusiness(biz);
     } catch (error) {

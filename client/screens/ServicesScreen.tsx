@@ -194,7 +194,11 @@ export default function ServicesScreen() {
   const [aiStep, setAiStep] = useState<"input" | "review">("input");
 
   useEffect(() => {
-    initializeBusiness();
+    const init = async () => {
+      await api.getOrCreateBusiness();
+      loadServices();
+    };
+    init();
   }, []);
 
   useFocusEffect(
@@ -215,14 +219,15 @@ export default function ServicesScreen() {
   };
 
   const loadServices = async () => {
+    if (loading) return; // Prevent double loads
     setLoading(true);
     try {
-      const [data, biz] = await Promise.all([
-        api.getServices(),
-        api.getBusiness(),
-      ]);
-      setServices(data);
+      // Ensure business is loaded first
+      const biz = await api.getBusiness();
       if (biz) setBusiness(biz);
+      
+      const data = await api.getServices();
+      setServices(data);
     } catch (error) {
       console.error("Error loading services:", error);
     } finally {
@@ -236,6 +241,8 @@ export default function ServicesScreen() {
   };
 
   const handleSelectService = (serviceId: string) => {
+    if (!serviceId) return;
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
     navigation.navigate("ServiceEditor", { serviceId });
   };
 
