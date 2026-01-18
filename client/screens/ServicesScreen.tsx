@@ -286,8 +286,10 @@ export default function ServicesScreen() {
       }
       
       const data = await response.json();
-      console.log("[AI] Generated services:", data.services?.length);
-      setAiServices(data.services || []);
+      console.log("[AI] Generated services:", data.services?.length, JSON.stringify(data.services));
+      const servicesArray = data.services || [];
+      setAiServices(servicesArray);
+      console.log("[AI] Set aiServices to:", servicesArray.length, "items");
       setAiStep("review");
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     } catch (error: any) {
@@ -401,34 +403,36 @@ export default function ServicesScreen() {
               </Pressable>
             </View>
           ) : (
-            <KeyboardAwareScrollView 
-              style={styles.modalScroll}
-              contentContainerStyle={styles.modalScrollContent}
-              keyboardShouldPersistTaps="handled"
-            >
+            <View style={styles.reviewContainer}>
               <Text style={styles.modalSubtitle}>
-                {aiServices.length} services generated
+                {aiServices.length} service{aiServices.length !== 1 ? 's' : ''} generated
               </Text>
-              {aiServices.map((svc, idx) => (
-                <View key={idx} style={styles.aiServiceCard}>
-                  <Text style={styles.aiServiceName}>{svc.name}</Text>
-                  <Text style={styles.aiServiceDesc}>{svc.description}</Text>
-                  <View style={styles.aiServiceDetails}>
-                    <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
-                    <Text style={styles.aiServicePrice}>
-                      {formatPriceSimple(svc.price, business?.currency || "USD")}
-                    </Text>
+              {aiServices.length > 0 ? (
+                aiServices.map((svc, idx) => (
+                  <View key={idx} style={styles.aiServiceCard}>
+                    <Text style={styles.aiServiceName}>{svc.name}</Text>
+                    <Text style={styles.aiServiceDesc}>{svc.description}</Text>
+                    <View style={styles.aiServiceDetails}>
+                      <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
+                      <Text style={styles.aiServicePrice}>
+                        {formatPriceSimple(svc.price, business?.currency || "USD")}
+                      </Text>
+                    </View>
                   </View>
-                </View>
-              ))}
+                ))
+              ) : (
+                <Text style={styles.noServicesText}>
+                  No services could be generated. Please try a different description.
+                </Text>
+              )}
               <View style={styles.aiButtonRow}>
                 <Pressable style={styles.aiBackButton} onPress={() => setAiStep("input")}>
                   <Text style={styles.aiBackText}>Edit</Text>
                 </Pressable>
                 <Pressable
-                  style={styles.aiConfirmButton}
+                  style={[styles.aiConfirmButton, aiServices.length === 0 && styles.buttonDisabled]}
                   onPress={handleAIConfirm}
-                  disabled={aiGenerating}
+                  disabled={aiGenerating || aiServices.length === 0}
                 >
                   {aiGenerating ? (
                     <ActivityIndicator color="#000" />
@@ -437,7 +441,7 @@ export default function ServicesScreen() {
                   )}
                 </Pressable>
               </View>
-            </KeyboardAwareScrollView>
+            </View>
           )}
         </View>
       </KeyboardAvoidingView>
@@ -664,11 +668,14 @@ const styles = StyleSheet.create({
     padding: 24,
     maxHeight: "70%",
   },
-  modalScroll: {
-    flex: 1,
+  reviewContainer: {
+    paddingBottom: 8,
   },
-  modalScrollContent: {
-    paddingBottom: 20,
+  noServicesText: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 16,
+    textAlign: "center",
+    padding: 24,
   },
   inputContainer: {
     marginTop: 8,
