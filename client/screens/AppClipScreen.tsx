@@ -71,7 +71,6 @@ export default function AppClipScreen({
     try {
       await Share.share({
         message: `Book an appointment: ${bookingUrl}`,
-        url: bookingUrl,
       });
     } catch (error) {
       console.error("Error sharing:", error);

@@ -156,7 +156,6 @@ export default function SharePreviewScreen() {
     try {
       await Share.share({
         message: `Book an appointment with ${businessName}:\n${bookingUrl}`,
-        url: bookingUrl,
         title: `${businessName} - Book Now`,
       });
     } catch (error) {

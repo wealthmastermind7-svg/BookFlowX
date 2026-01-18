@@ -373,65 +373,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
       const booking = await storage.createBooking(data);
       
-      // Get business and service for notifications
+      // Get business, service, and customer for notifications/workflows
       const business = await storage.getBusiness(req.params.businessId);
       const service = await storage.getService(data.serviceId);
+      const customer = data.customerId ? await storage.getCustomer(data.customerId) : null;
       const serviceName = service?.name || "Service";
+      const customerName = req.body.customerName || customer?.name || "Customer";
       
-      // Get customer details - from request body or by looking up customerId
-      let customerEmail = req.body.customerEmail;
-      let customerName = req.body.customerName;
-      
-      if (!customerEmail && data.customerId) {
-        console.log(`[Booking] Looking up customer ${data.customerId} for email...`);
-        const customer = await storage.getCustomer(data.customerId);
-        if (customer) {
-          customerEmail = customer.email;
-          customerName = customer.name;
-          console.log(`[Booking] Found customer: ${customerName} (${customerEmail})`);
-        }
-      }
-      
-      // Send email confirmation
-      if (customerEmail && customerName && !booking.confirmationSentAt) {
-        console.log(`[Booking] Triggering email confirmation for ${customerEmail} (${customerName})`);
-        sendBookingConfirmation({
-          customerName: customerName,
-          customerEmail: customerEmail,
-          serviceName,
-          date: data.date,
-          time: data.time,
-          price: data.totalPrice,
-          confirmationNumber: booking.id.slice(0, 8).toUpperCase(),
-          businessName: business?.name || "Business",
-          currency: business?.currency || "USD"
-        })
-        .then(async success => {
-          if (success) {
-            console.log(`[Booking] Email sent successfully to ${customerEmail}`);
-            try {
-              // Fetch fresh booking record before update to ensure we have the most recent state
-              const currentBooking = await storage.getBooking(booking.id);
-              if (currentBooking && !currentBooking.confirmationSentAt) {
-                await storage.updateBooking(booking.id, { confirmationSentAt: new Date() });
-                console.log(`[Booking] Updated confirmationSentAt for booking ${booking.id}`);
-              }
-            } catch (updateErr) {
-              console.error("[Booking] Error updating confirmationSentAt:", updateErr);
-            }
-          }
-          else console.error(`[Booking] Failed to send email to ${customerEmail}`);
-        })
-        .catch(err => console.error("[Booking] Critical error in email confirmation:", err));
-      } else {
-        console.log(`[Booking] Skipping email - details: Email: ${customerEmail}, Name: ${customerName}, Sent: ${!!booking.confirmationSentAt}`);
-      }
+      // Note: Email confirmation is handled by workflow engine via triggerWorkflows("booking_created")
+      // This prevents duplicate emails that were occurring when both routes.ts AND workflowEngine.ts sent emails
       
       // Send push notification to business owner (if notifications are enabled)
       if (business?.notificationsEnabled) {
         sendBookingNotification(
           req.params.businessId,
-          customerName || "Customer",
+          customerName,
           serviceName,
           data.date,
           data.time
@@ -439,7 +395,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Trigger workflow automations for booking_created
-      const customer = await storage.getCustomer(data.customerId);
       triggerWorkflows("booking_created", req.params.businessId, {
         booking,
         service: service || undefined,
