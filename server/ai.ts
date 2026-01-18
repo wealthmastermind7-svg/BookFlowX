@@ -36,14 +36,16 @@ Currency: ${currency || "USD"}
 
 Description: "${description}"
 
-Generate services as JSON array with this structure:
-[{
-  "name": "Service Name",
-  "description": "Brief professional description",
-  "duration": 60,
-  "price": 50,
-  "bufferTime": 15
-}]`;
+Generate services as a JSON object with a "services" key containing an array.
+{
+  "services": [{
+    "name": "Service Name",
+    "description": "Brief professional description",
+    "duration": 60,
+    "price": 50,
+    "bufferTime": 15
+  }]
+}`;
 
   try {
     const response = await openai.chat.completions.create({
@@ -57,14 +59,30 @@ Generate services as JSON array with this structure:
       temperature: 0.7,
     });
 
-    const content = response.choices[0]?.message?.content || "{}";
-    const parsed = JSON.parse(content);
-    
-    if (Array.isArray(parsed)) {
-      return parsed;
+    const content = response.choices[0]?.message?.content || "{\"services\":[]}";
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch (parseErr) {
+      console.error("[AI] JSON parse error:", parseErr, "Content:", content);
+      return [];
     }
+    
+    // Look for services array in the parsed object
     if (parsed.services && Array.isArray(parsed.services)) {
       return parsed.services;
+    }
+    
+    // Fallback: look for any array in the object
+    for (const key in parsed) {
+      if (Array.isArray(parsed[key])) {
+        return parsed[key];
+      }
+    }
+    
+    // Final fallback: if the whole thing is an array (unlikely with json_object mode but safe)
+    if (Array.isArray(parsed)) {
+      return parsed;
     }
     
     return [];

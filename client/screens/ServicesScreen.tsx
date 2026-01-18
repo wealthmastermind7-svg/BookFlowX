@@ -260,7 +260,10 @@ export default function ServicesScreen() {
       
       const response = await fetch(fullUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({
           description: aiDescription,
           businessType: business?.name || "Service business",
@@ -268,10 +271,18 @@ export default function ServicesScreen() {
         }),
       });
       
+      console.log("[AI] Response status:", response.status);
+      
       if (!response.ok) {
-        const errorText = await response.text();
-        console.error("[AI] Server error:", response.status, errorText);
-        throw new Error(`Server error: ${response.status}`);
+        let errorMsg = `Server error: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMsg = errorData.error || errorMsg;
+        } catch (e) {
+          const errorText = await response.text();
+          console.error("[AI] Server error body:", errorText);
+        }
+        throw new Error(errorMsg);
       }
       
       const data = await response.json();
