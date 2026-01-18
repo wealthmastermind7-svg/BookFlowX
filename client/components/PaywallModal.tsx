@@ -267,7 +267,7 @@ export function PaywallModal({
                 />
               </View>
 
-              <View style={styles.planSection}>
+                <View style={styles.planSection}>
                 <Pressable
                   style={[
                     styles.planCard,
@@ -290,14 +290,13 @@ export function PaywallModal({
                       </View>
                     </View>
                     <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      {freeTrialEnabled ? "7-day free trial, then " : ""}{yearlyPrice}/year
+                      {freeTrialEnabled ? "7-day free trial, then " : ""}yearly subscription
                     </Text>
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {yearlyMonthly}
+                      {offerings?.current?.annual?.product.priceString || "Yearly"}
                     </Text>
-                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
                 </Pressable>
 
@@ -323,9 +322,8 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
-                      {monthlyPrice}
+                      {offerings?.current?.monthly?.product.priceString || "Monthly"}
                     </Text>
-                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
                 </Pressable>
 
@@ -346,12 +344,12 @@ export function PaywallModal({
                       Lifetime Access
                     </Text>
                     <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      One-time purchase for this app version
+                      One-time purchase
                     </Text>
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
-                      {lifetimePrice}
+                      {offerings?.current?.lifetime?.product.priceString || "Lifetime"}
                     </Text>
                   </View>
                 </Pressable>

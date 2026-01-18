@@ -471,9 +471,9 @@ export default function DashboardScreen() {
                     Smart reminders, instant setup, upsell suggestions
                   </Animated.Text>
                   <View style={styles.premiumPricing}>
-                    <Animated.Text style={styles.premiumPrice}>$7.99/mo</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>Subscription</Animated.Text>
                     <View style={styles.premiumPriceDot} />
-                    <Animated.Text style={styles.premiumPrice}>$69.99/yr</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>Lifetime Access</Animated.Text>
                   </View>
                 </View>
                 <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />

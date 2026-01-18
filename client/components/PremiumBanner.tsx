@@ -35,9 +35,9 @@ export function PremiumBanner({ onPress }: PremiumBannerProps) {
             Smart reminders, instant setup, upsell suggestions
           </Text>
           <View style={styles.pricingRow}>
-            <Text style={styles.priceText}>$7.99/mo</Text>
+            <Text style={styles.priceText}>Subscription</Text>
             <View style={styles.priceDot} />
-            <Text style={styles.priceText}>$69.99/yr</Text>
+            <Text style={styles.priceText}>Lifetime Access</Text>
           </View>
         </View>
         <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />

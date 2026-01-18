@@ -446,18 +446,13 @@ export default function SettingsScreen() {
               {!isPremium && (
                 <View style={styles.pricingRow}>
                   <View style={styles.priceOption}>
-                    <ThemedText style={styles.priceAmount}>$7.99</ThemedText>
-                    <ThemedText style={styles.pricePeriod}>/ month</ThemedText>
+                    <ThemedText style={styles.priceAmount}>Flexible</ThemedText>
+                    <ThemedText style={styles.pricePeriod}>subscriptions</ThemedText>
                   </View>
                   <View style={styles.priceDivider} />
                   <View style={styles.priceOption}>
-                    <ThemedText style={styles.priceAmount}>$69.99</ThemedText>
-                    <ThemedText style={styles.pricePeriod}>/ year</ThemedText>
-                  </View>
-                  <View style={styles.priceDivider} />
-                  <View style={styles.priceOption}>
-                    <ThemedText style={styles.priceAmount}>$149</ThemedText>
-                    <ThemedText style={styles.pricePeriod}>lifetime</ThemedText>
+                    <ThemedText style={styles.priceAmount}>Lifetime</ThemedText>
+                    <ThemedText style={styles.pricePeriod}>access available</ThemedText>
                   </View>
                 </View>
               )}
