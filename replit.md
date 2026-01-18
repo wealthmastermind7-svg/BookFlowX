@@ -98,3 +98,41 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
 - Avoid: "Fully autonomous", "Runs your business for you", "AI decides", "Predicts behavior"
+
+## App Clips (iOS)
+BookFlow supports iOS App Clips for instant access without full app installation.
+
+### Configuration
+- **Library**: `react-native-app-clip` (v0.6.0+)
+- **Bundle ID Suffix**: `Clip` (full: `com.bookflow.app.Clip`)
+- **Deployment Target**: iOS 16.0 (allows 15MB App Clip size)
+- **Entry Point**: `client/App.clip.tsx`
+
+### Dual-Mode App Clip
+The App Clip supports two modes based on deep link:
+1. **Customer Mode** (default): Quick booking flow
+   - URL: `https://book.confirmbooking.online/{businessSlug}`
+   - Shows available services and time slots
+2. **Owner Quick Mode**: Fast actions for business owners
+   - URL: `https://book.confirmbooking.online/owner/{businessSlug}?token={ownerToken}`
+   - View today's bookings (read-only)
+   - Share booking link/QR code
+
+### Building App Clips
+App Clips require a development build (not Expo Go):
+```bash
+npx expo prebuild
+npx expo run:ios --configuration Release --scheme Clip
+```
+
+### Apple Guidelines
+- App Clips must be under 15MB (iOS 16+) or 10MB (iOS 15)
+- Single-purpose, immediate actions only
+- No complex dashboards or subscription management
+- Always promote full app installation
+
+## Premium Typography System
+- **Headings**: Cormorant Garamond (Bold/Medium) - editorial, architectural feel
+- **Body/Navigation**: Inter (Regular/SemiBold/Light) - modern, screen-optimized
+- **Monospace**: JetBrains Mono - technical precision for IDs, currency
+- **Letter Spacing**: -2px for oversized headings, +2px for uppercase captions
