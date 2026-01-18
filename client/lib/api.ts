@@ -226,7 +226,7 @@ class ApiClient {
 
   private getBusinessPath(): string {
     if (!this.businessId) {
-      return "/api/businesses/none";
+      throw new Error("Business ID not set. Call setBusinessId first.");
     }
     return `/api/businesses/${this.businessId}`;
   }
@@ -262,8 +262,7 @@ class ApiClient {
   }
 
   async getBusiness(): Promise<Business | null> {
-    const bizId = await this.loadBusinessId();
-    if (!bizId) return null;
+    if (!this.businessId) return null;
     try {
       const token = await getSecureToken();
       const headers: Record<string, string> = {};
@@ -271,15 +270,15 @@ class ApiClient {
         headers["x-business-token"] = token;
       }
 
-      const res = await fetch(`${getApiBase()}api/businesses/${bizId}`, {
+      const res = await fetch(`${getApiBase()}api/businesses/${this.businessId}`, {
         headers
       });
       if (!res.ok) return null;
       const business = await res.json();
       
       // Sync Business ID if token belongs to a different one
-      if (business.id !== bizId) {
-        console.warn(`[API] Business ID sync: ${bizId} -> ${business.id}`);
+      if (business.id !== this.businessId) {
+        console.warn(`[API] Business ID sync: ${this.businessId} -> ${business.id}`);
         await this.setBusinessId(business.id);
       }
 
@@ -287,8 +286,7 @@ class ApiClient {
         await setSecureToken(business.ownerToken);
       }
       return business;
-    } catch (error) {
-      console.error("[API] Error fetching business:", error);
+    } catch {
       return null;
     }
   }
@@ -307,9 +305,7 @@ class ApiClient {
 
   async getServices(): Promise<Service[]> {
     try {
-      const bizId = await this.loadBusinessId();
-      if (!bizId) return [];
-      const res = await fetch(`${getApiBase()}api/businesses/${bizId}/services`);
+      const res = await fetch(`${getApiBase()}${this.getBusinessPath()}/services`);
       if (!res.ok) return [];
       return res.json();
     } catch {
