@@ -83,9 +83,63 @@ export default function ServiceEditorScreen() {
   const [currencySymbol, setCurrencySymbol] = useState("$");
   const [business, setBusiness] = useState<Business | null>(null);
   const [qrModalVisible, setQrModalVisible] = useState(false);
+  const [upsellModalVisible, setUpsellModalVisible] = useState(false);
+  const [upsells, setUpsells] = useState<any[]>([]);
+  const [upsellLoading, setUpsellLoading] = useState(false);
   const qrRef = useRef<any>(null);
 
   const serviceId = (route.params as any)?.serviceId;
+
+  const handleGetUpsells = async () => {
+    if (!service.name) return;
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setUpsellModalVisible(true);
+    setUpsellLoading(true);
+    setUpsells([]);
+    
+    try {
+      const apiUrl = api.getApiUrl ? api.getApiUrl() : "";
+      const response = await fetch(`${apiUrl}/api/ai/upsell-suggestions`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          serviceName: service.name,
+          serviceDescription: service.description,
+          servicePrice: service.price,
+          businessType: business?.name || "Service",
+          currency: business?.currency || "USD"
+        })
+      });
+      
+      if (response.ok) {
+        const data = await response.json();
+        setUpsells(data.suggestions || []);
+      }
+    } catch (error) {
+      console.error("Error getting upsells:", error);
+    } finally {
+      setUpsellLoading(false);
+    }
+  };
+
+  const handleAddUpsell = async (upsell: any) => {
+    try {
+      setUpsellLoading(true);
+      await api.createService({
+        name: upsell.name,
+        description: upsell.description,
+        duration: 15, // Default for add-ons
+        price: Math.round(upsell.price * 100),
+      });
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+      setUpsells(prev => prev.filter(u => u.name !== upsell.name));
+    } catch (error) {
+      console.error("Error adding upsell:", error);
+      Alert.alert("Error", "Failed to add upsell service");
+    } finally {
+      setUpsellLoading(false);
+    }
+  };
 
   useEffect(() => {
     const checkBusinessReady = setInterval(() => {
@@ -371,7 +425,15 @@ export default function ServiceEditorScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Description</Text>
+                  <View style={styles.labelRow}>
+                    <Text style={styles.inputLabel}>Description</Text>
+                    {service.name ? (
+                      <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
+                        <Feather name="zap" size={12} color="#fff" />
+                        <Text style={styles.aiUpsellTriggerText}>AI Upsells</Text>
+                      </Pressable>
+                    ) : null}
+                  </View>
                   <TextInput
                     value={service.description || ""}
                     onChangeText={(text) => setService((prev) => ({ ...prev, description: text }))}
@@ -515,6 +577,59 @@ export default function ServiceEditorScreen() {
               </Pressable>
             </View>
           </Pressable>
+        </Modal>
+
+        <Modal
+          visible={upsellModalVisible}
+          transparent
+          animationType="slide"
+          onRequestClose={() => setUpsellModalVisible(false)}
+        >
+          <View style={styles.modalOverlay}>
+            <Pressable style={styles.modalDismiss} onPress={() => setUpsellModalVisible(false)} />
+            <View style={[styles.upsellModalContent, { paddingBottom: insets.bottom + 20 }]}>
+              <View style={styles.modalHeader}>
+                <Text style={styles.modalTitle}>Smart Upsells</Text>
+                <Pressable onPress={() => setUpsellModalVisible(false)}>
+                  <Feather name="x" size={24} color="#fff" />
+                </Pressable>
+              </View>
+              
+              <Text style={styles.modalSubtitle}>
+                AI-powered add-on suggestions for "{service.name}"
+              </Text>
+
+              {upsellLoading && upsells.length === 0 ? (
+                <View style={styles.modalLoading}>
+                  <ActivityIndicator color="#fff" />
+                  <Text style={styles.loadingText}>Thinking...</Text>
+                </View>
+              ) : (
+                <View style={styles.upsellList}>
+                  {upsells.map((item, index) => (
+                    <View key={index} style={styles.upsellCard}>
+                      <View style={styles.upsellCardInfo}>
+                        <Text style={styles.upsellName}>{item.name}</Text>
+                        <Text style={styles.upsellReason}>{item.reason}</Text>
+                        <Text style={styles.upsellPrice}>
+                          {currencySymbol}{item.price}
+                        </Text>
+                      </View>
+                      <Pressable 
+                        style={styles.addUpsellButton}
+                        onPress={() => handleAddUpsell(item)}
+                      >
+                        <Feather name="plus" size={20} color="#000" />
+                      </Pressable>
+                    </View>
+                  ))}
+                  {upsells.length === 0 && !upsellLoading && (
+                    <Text style={styles.emptyText}>No suggestions found</Text>
+                  )}
+                </View>
+              )}
+            </View>
+          </View>
         </Modal>
       </KeyboardAvoidingView>
     </ImageBackground>

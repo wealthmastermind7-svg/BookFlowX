@@ -452,7 +452,18 @@ export default function ServicesScreen() {
         style={styles.container}
       >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
-          <Text style={styles.hugeTitle}>Services</Text>
+          <View style={styles.headerTitleRow}>
+            <Text style={styles.hugeTitle}>Services</Text>
+            <Pressable 
+              style={styles.aiHeaderButton} 
+              onPress={handleAISetup}
+              hitSlop={8}
+            >
+              <BlurView intensity={30} tint="light" style={styles.aiHeaderBlur}>
+                <Feather name="zap" size={18} color="#fff" />
+              </BlurView>
+            </Pressable>
+          </View>
         </View>
 
         <FlatList
@@ -509,6 +520,24 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
+    flex: 1,
+  },
+  headerTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  aiHeaderButton: {
+    borderRadius: 20,
+    overflow: "hidden",
+    marginLeft: 12,
+  },
+  aiHeaderBlur: {
+    width: 40,
+    height: 40,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   glassCard: {
     borderRadius: 24,
@@ -748,5 +777,12 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontWeight: "700",
+  },
+  emptyTitle: {
+    fontSize: 24,
+    fontWeight: "600",
+    color: "#fff",
+    marginTop: 16,
+    marginBottom: 8,
   },
 });
