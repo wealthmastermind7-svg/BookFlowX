@@ -296,6 +296,7 @@ Generate 2-3 add-on suggestions as JSON array:
 }]`;
 
   try {
+    console.log("[AI Upsell] Generating suggestions for:", serviceName);
     const response = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
@@ -308,19 +309,33 @@ Generate 2-3 add-on suggestions as JSON array:
     });
 
     const content = response.choices[0]?.message?.content || "{}";
+    console.log("[AI Upsell] Raw response:", content);
     const parsed = JSON.parse(content);
     
+    // Handle various response formats
+    let suggestions: UpsellSuggestion[] = [];
+    
     if (Array.isArray(parsed)) {
-      return parsed.slice(0, 3);
-    }
-    if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
-      return parsed.suggestions.slice(0, 3);
-    }
-    if (parsed.addons && Array.isArray(parsed.addons)) {
-      return parsed.addons.slice(0, 3);
+      suggestions = parsed;
+    } else if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+      suggestions = parsed.suggestions;
+    } else if (parsed.addons && Array.isArray(parsed.addons)) {
+      suggestions = parsed.addons;
+    } else if (parsed.add_ons && Array.isArray(parsed.add_ons)) {
+      suggestions = parsed.add_ons;
+    } else {
+      // Try to find any array in the response
+      const keys = Object.keys(parsed);
+      for (const key of keys) {
+        if (Array.isArray(parsed[key])) {
+          suggestions = parsed[key];
+          break;
+        }
+      }
     }
     
-    return [];
+    console.log("[AI Upsell] Parsed suggestions:", suggestions.length);
+    return suggestions.slice(0, 3);
   } catch (error) {
     console.error("[AI] Error generating upsell suggestions:", error);
     return [];
