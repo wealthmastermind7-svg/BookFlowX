@@ -183,8 +183,8 @@ export default function CalendarScreen() {
         >
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
-              <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit>{monthName}</Animated.Text>
-              <Animated.Text style={styles.hugeYear}>{yearName}</Animated.Text>
+              <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{monthName}</Animated.Text>
+              <Animated.Text style={styles.hugeYear} numberOfLines={1}>{yearName}</Animated.Text>
             </View>
             <View style={styles.headerControls}>
               <Animated.Text style={styles.setupText}>Set up your business hours</Animated.Text>
@@ -291,26 +291,26 @@ const styles = StyleSheet.create({
   headerTitleRow: {
     flexDirection: "row",
     alignItems: "baseline",
-    gap: 12,
-    flexWrap: "nowrap",
+    gap: 8,
+    flexWrap: "wrap",
   },
   giantMonth: {
-    fontSize: 72,
-    fontWeight: "300",
-    color: "#fff",
-    letterSpacing: -2,
-    lineHeight: 80,
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
-  },
-  hugeYear: {
     fontSize: 56,
     fontWeight: "300",
     color: "#fff",
+    letterSpacing: -2,
+    lineHeight: 64,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    textShadowOffset: { width: 0, height: 2 },
+    textShadowRadius: 4,
+    flexShrink: 1,
+  },
+  hugeYear: {
+    fontSize: 56,
+    fontWeight: "200",
+    color: "rgba(255,255,255,0.6)",
     letterSpacing: -1,
-    marginTop: -4,
-    lineHeight: 60,
+    lineHeight: 64,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
