@@ -953,83 +953,89 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === PUBLIC BOOKING PAGE ===
   
-  // Generate cinematic OG image for link previews
+  // Generate premium cinematic OG image for link previews (inspired by luxury brand aesthetics)
   function generateCinematicOgImage(businessName: string, serviceName?: string, tagline?: string): string {
-    const displayTitle = serviceName ? serviceName.toUpperCase() : 'RESERVE YOUR SPACE';
-    const subtitle = serviceName ? businessName : (tagline || 'Book instantly online');
+    // Premium stacked title layout
+    const titleLines = serviceName 
+      ? [serviceName.toUpperCase()]
+      : ['RESERVE', 'YOUR', 'SPACE'];
     
-    // Create a premium cinematic SVG with architectural gradients and glass effects
+    // Create premium SVG with smoke effects and elegant typography
     return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
       <defs>
-        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+        <!-- Subtle radial gradient for depth -->
+        <radialGradient id="smokeBg" cx="50%" cy="30%" r="80%" fx="50%" fy="30%">
           <stop offset="0%" style="stop-color:#1a1a1a"/>
-          <stop offset="50%" style="stop-color:#000000"/>
-          <stop offset="100%" style="stop-color:#0a0a0a"/>
-        </linearGradient>
-        <linearGradient id="silverText" x1="0%" y1="0%" x2="0%" y2="100%">
-          <stop offset="0%" style="stop-color:#FFFFFF"/>
-          <stop offset="100%" style="stop-color:#A1A1A1"/>
-        </linearGradient>
-        <linearGradient id="accentLine" x1="0%" y1="0%" x2="100%" y2="0%">
-          <stop offset="0%" style="stop-color:rgba(255,255,255,0)"/>
-          <stop offset="50%" style="stop-color:rgba(255,255,255,0.4)"/>
-          <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
-        </linearGradient>
-        <filter id="glow">
-          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-          <feMerge>
-            <feMergeNode in="coloredBlur"/>
-            <feMergeNode in="SourceGraphic"/>
-          </feMerge>
+          <stop offset="60%" style="stop-color:#0a0a0a"/>
+          <stop offset="100%" style="stop-color:#000000"/>
+        </radialGradient>
+        
+        <!-- Smoke/mist effect filter -->
+        <filter id="smokeFilter" x="-50%" y="-50%" width="200%" height="200%">
+          <feTurbulence type="fractalNoise" baseFrequency="0.015" numOctaves="3" result="noise"/>
+          <feDisplacementMap in="SourceGraphic" in2="noise" scale="30" xChannelSelector="R" yChannelSelector="G"/>
+          <feGaussianBlur stdDeviation="8"/>
+        </filter>
+        
+        <!-- Glow for smoke wisps -->
+        <filter id="smokeGlow">
+          <feGaussianBlur stdDeviation="20" result="blur"/>
+          <feComposite in="SourceGraphic" in2="blur" operator="over"/>
         </filter>
       </defs>
       
-      <!-- Background -->
-      <rect width="1200" height="630" fill="url(#bgGrad)"/>
+      <!-- Pure black background -->
+      <rect width="1200" height="630" fill="#000000"/>
       
-      <!-- Architectural diagonal lines -->
-      <line x1="-100" y1="200" x2="1400" y2="350" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
-      <line x1="-100" y1="250" x2="1400" y2="400" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
-      <line x1="-100" y1="300" x2="1400" y2="450" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+      <!-- Subtle gradient overlay -->
+      <rect width="1200" height="630" fill="url(#smokeBg)" opacity="0.8"/>
       
-      <!-- Subtle radial glow -->
-      <circle cx="900" cy="100" r="400" fill="rgba(255,255,255,0.03)"/>
+      <!-- Smoke wisps - ethereal atmosphere -->
+      <ellipse cx="150" cy="500" rx="300" ry="150" fill="rgba(40,40,45,0.4)" filter="url(#smokeGlow)"/>
+      <ellipse cx="1050" cy="550" rx="250" ry="120" fill="rgba(35,35,40,0.3)" filter="url(#smokeGlow)"/>
+      <ellipse cx="600" cy="580" rx="400" ry="100" fill="rgba(30,30,35,0.25)" filter="url(#smokeGlow)"/>
       
-      <!-- Right shadow column -->
-      <rect x="950" y="0" width="150" height="630" fill="rgba(0,0,0,0.5)" transform="skewX(-10)"/>
+      <!-- Top left diagonal accent lines (subtle) -->
+      <line x1="0" y1="0" x2="200" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="50" y1="0" x2="250" y2="200" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
       
-      <!-- Main title text - oversized cinematic typography -->
-      <text x="80" y="280" font-size="96" font-weight="800" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-3">
-        ${displayTitle.length > 20 ? displayTitle.substring(0, 20) : displayTitle}
-      </text>
-      ${displayTitle.length > 20 ? `<text x="80" y="380" font-size="96" font-weight="800" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-3">${displayTitle.substring(20, 40)}</text>` : ''}
+      <!-- Main stacked title - elegant thin typography, left-aligned -->
+      ${titleLines.length === 1 ? `
+        <text x="100" y="280" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">
+          ${titleLines[0].length > 16 ? titleLines[0].substring(0, 16) : titleLines[0]}
+        </text>
+      ` : `
+        <text x="100" y="180" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">RESERVE</text>
+        <text x="100" y="290" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">YOUR</text>
+        <text x="100" y="400" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">SPACE</text>
+      `}
       
-      <!-- Accent bar -->
-      <rect x="80" y="${displayTitle.length > 20 ? '410' : '310'}" width="100" height="4" fill="rgba(255,255,255,0.5)"/>
+      <!-- Elegant horizontal accent line -->
+      <rect x="100" y="${titleLines.length === 1 ? '310' : '430'}" width="80" height="2" fill="rgba(255,255,255,0.5)"/>
       
-      <!-- Glass panel at bottom -->
-      <rect x="0" y="470" width="1200" height="160" fill="rgba(20,20,20,0.85)"/>
-      <line x1="0" y1="470" x2="1200" y2="470" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      <!-- Bottom info bar with glass effect -->
+      <rect x="0" y="480" width="1200" height="150" fill="rgba(18,18,18,0.95)"/>
+      <line x1="0" y1="480" x2="1200" y2="480" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
       
-      <!-- Business name with silver gradient -->
-      <text x="80" y="530" font-size="36" font-weight="500" fill="url(#silverText)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">
+      <!-- Business name - prominent -->
+      <text x="100" y="540" font-size="42" font-weight="400" fill="rgba(255,255,255,0.9)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="1">
         ${businessName}
       </text>
       
       <!-- Subtitle -->
-      <text x="80" y="575" font-size="16" fill="rgba(255,255,255,0.5)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="3" text-transform="uppercase">
-        ${serviceName ? 'BOOK YOUR APPOINTMENT' : subtitle.toUpperCase()}
+      <text x="100" y="580" font-size="18" font-weight="400" fill="rgba(255,255,255,0.45)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="4">
+        BOOK YOUR APPOINTMENT
       </text>
       
-      <!-- Domain branding -->
-      <text x="80" y="610" font-size="12" fill="rgba(255,255,255,0.3)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="2">
+      <!-- Domain -->
+      <text x="100" y="615" font-size="14" font-weight="400" fill="rgba(255,255,255,0.25)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="3">
         CONFIRMBOOKING.ONLINE
       </text>
       
-      <!-- Arrow icon -->
-      <g transform="translate(1080, 510)">
-        <circle cx="20" cy="20" r="20" fill="rgba(255,255,255,0.1)"/>
-        <path d="M15 15 L25 25 M25 25 L25 17 M25 25 L17 25" stroke="rgba(255,255,255,0.6)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <!-- Arrow button - right side -->
+      <g transform="translate(1050, 520)">
+        <circle cx="30" cy="30" r="30" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
+        <path d="M22 22 L38 38 M38 38 L38 28 M38 38 L28 38" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </g>
     </svg>`;
   }
