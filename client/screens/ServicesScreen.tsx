@@ -254,7 +254,11 @@ export default function ServicesScreen() {
     setAiGenerating(true);
     
     try {
-      const response = await fetch(new URL("/api/ai/generate-services", getApiUrl()).toString(), {
+      const apiUrl = getApiUrl();
+      const fullUrl = new URL("/api/ai/generate-services", apiUrl).toString();
+      console.log("[AI] Calling:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -265,16 +269,22 @@ export default function ServicesScreen() {
       });
       
       if (!response.ok) {
-        throw new Error("Failed to generate services");
+        const errorText = await response.text();
+        console.error("[AI] Server error:", response.status, errorText);
+        throw new Error(`Server error: ${response.status}`);
       }
       
       const data = await response.json();
+      console.log("[AI] Generated services:", data.services?.length);
       setAiServices(data.services || []);
       setAiStep("review");
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
-    } catch (error) {
-      console.error("AI generation error:", error);
-      Alert.alert("Error", "Failed to generate services. Please try again.");
+    } catch (error: any) {
+      console.error("[AI] Generation error:", error?.message || error);
+      Alert.alert(
+        "Connection Error", 
+        "Could not reach the server. Please check your internet connection and try again."
+      );
     } finally {
       setAiGenerating(false);
     }
