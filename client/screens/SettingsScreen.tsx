@@ -252,7 +252,22 @@ export default function SettingsScreen() {
     if (!business || !editingField) return;
     setEditLoading(true);
     try {
-      const updated = await api.updateBusiness({ [editingField]: editValue });
+      let updates: Partial<typeof business> = { [editingField]: editValue };
+      
+      if (editingField === "name" && editValue) {
+        const newSlug = editValue
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        if (newSlug) {
+          updates.slug = newSlug;
+        }
+      }
+      
+      const updated = await api.updateBusiness(updates);
       setBusiness(updated);
       setEditModalVisible(false);
     } catch (error) {

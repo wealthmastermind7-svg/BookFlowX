@@ -39,6 +39,19 @@ async function setSecureToken(token: string): Promise<void> {
   }
 }
 
+export function generateSlugFromName(name: string): string {
+  const baseSlug = name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .replace(/\s+/g, '-')
+    .replace(/-+/g, '-')
+    .replace(/^-|-$/g, '');
+  
+  const randomSuffix = Math.random().toString(36).substring(2, 6);
+  return baseSlug ? `${baseSlug}-${randomSuffix}` : `business-${randomSuffix}`;
+}
+
 async function makeRequest<T>(
   method: string,
   path: string,
@@ -229,13 +242,16 @@ class ApiClient {
         }
       }
       
-      // Create new business with fixed slug (not timestamped) to avoid duplicates
+      // Generate a unique slug for new business
+      const businessName = "My Business";
+      const uniqueSlug = generateSlugFromName(businessName);
+      
       const newBusiness = await makeRequest<Business>("POST", "/api/businesses", {
-        name: "My Business",
-        slug: "demo-business",
-        description: "Demo business for testing",
-        phone: "+1 (555) 123-4567",
-        email: "demo@bookflow.app",
+        name: businessName,
+        slug: uniqueSlug,
+        description: "Welcome to your new booking platform",
+        phone: "",
+        email: "",
       }, false);
       await this.setBusinessId(newBusiness.id, newBusiness.ownerToken ?? undefined);
       return newBusiness;
