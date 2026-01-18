@@ -63,27 +63,39 @@ interface OnboardingScreenProps {
 const PAGES = [
   {
     id: "1",
-    headline: "Booking Made",
-    highlightText: "Effortless",
-    description: "Beautiful appointment scheduling for every business type. No accounts. No waiting.",
+    headline: "Smart Booking",
+    highlightText: "Built In",
+    description: "Beautiful scheduling with intelligent features that adapt to your business. Setup in seconds, not hours.",
     buttonText: "Get Started",
     showSkip: false,
+    features: [
+      { icon: "zap", text: "AI-assisted service setup" },
+      { icon: "bell", text: "Smart reminders that adapt" },
+    ],
   },
   {
     id: "2",
-    headline: "Built for How",
-    highlightText: "You Work",
-    description: "From trades to clinics, salons to studios. One powerful dashboard for every appointment.",
+    headline: "Reduce No-Shows",
+    highlightText: "Automatically",
+    description: "Smart reminders learn customer patterns and adjust timing to help reduce missed appointments.",
     buttonText: "Continue",
     showSkip: true,
+    features: [
+      { icon: "clock", text: "Timing adapts per customer" },
+      { icon: "trending-up", text: "Fewer missed bookings" },
+    ],
   },
   {
     id: "3",
-    headline: "Every Appointment.",
-    highlightText: "Captured.",
-    description: "Instant confirmations, zero back-and-forth. Let your business run itself.",
+    headline: "Grow Smarter",
+    highlightText: "Not Harder",
+    description: "Customer insights, smart upsell suggestions, and availability optimization—all working quietly for you.",
     buttonText: "Get Started",
     showSkip: true,
+    features: [
+      { icon: "users", text: "Know your top customers" },
+      { icon: "gift", text: "Contextual add-on suggestions" },
+    ],
   },
 ];
 
@@ -647,6 +659,17 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
               <Text style={[styles.description, { color: colors.textSecondary }]}>
                 {item.description}
               </Text>
+              
+              {item.features && (
+                <View style={styles.featureList}>
+                  {item.features.map((feature, idx) => (
+                    <View key={idx} style={[styles.featureBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" }]}>
+                      <Feather name={feature.icon as any} size={14} color={isDark ? "#10B981" : "#059669"} />
+                      <Text style={[styles.featureText, { color: colors.text }]}>{feature.text}</Text>
+                    </View>
+                  ))}
+                </View>
+              )}
             </View>
 
             <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
@@ -821,6 +844,26 @@ const styles = StyleSheet.create({
     textAlign: "center",
     lineHeight: 24,
     paddingHorizontal: Spacing.lg,
+  },
+  featureList: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "center",
+    gap: Spacing.sm,
+    marginTop: Spacing.xl,
+    paddingHorizontal: Spacing.md,
+  },
+  featureBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
+    borderRadius: BorderRadius.full,
+  },
+  featureText: {
+    fontSize: 13,
+    fontWeight: "500",
   },
   buttonContainer: {
     gap: Spacing.lg,

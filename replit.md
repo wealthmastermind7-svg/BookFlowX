@@ -73,6 +73,13 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
 
 ## Recent Changes (January 2026)
+- **AI Service Setup Assistant**: Natural language service creation ("45 min haircut for $35" → structured service)
+- **AI Customer Insights Dashboard**: Automatic customer segmentation (VIP, Regular, At-Risk, New) with analytics
+- **AI Upsell Suggestions**: Contextual add-on recommendations during checkout (suggestions only, never forced)
+- **Updated Onboarding**: New Apple-safe onboarding pages highlighting intelligent features
+  - Page 1: "Smart Booking Built In" - AI-assisted setup, smart reminders
+  - Page 2: "Reduce No-Shows Automatically" - Adaptive timing, fewer missed bookings
+  - Page 3: "Grow Smarter Not Harder" - Customer insights, upsell suggestions
 - **Marketing Page Removal**: Removed the `/marketing` page and related template files as requested.
 - **Contractor Reminder Defaults**: Updated industry templates for contractors and field services.
   - Default reminders: Instant confirmation, 24h before, 2h before.
@@ -87,3 +94,7 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **Email Progress Tracking**: Dashboard now shows green progress ticks for booking email status
 - **Contractor Support**: Added comprehensive support for contractor and trade businesses
 - **Manual Payment Confirmation**: Tap-to-confirm bookings on Dashboard and Calendar
+
+## AI Feature Messaging (Apple-Safe)
+- Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
+- Avoid: "Fully autonomous", "Runs your business for you", "AI decides", "Predicts behavior"
