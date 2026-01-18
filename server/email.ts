@@ -169,7 +169,9 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
           <!-- Branding -->
           <tr>
             <td style="padding: 24px 32px 32px; background-color: #000000; border-top: 1px solid rgba(255,255,255,0.05);">
-              <p style="margin: 0; font-size: 10px; text-align: center; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.2);">Powered by BookFlow</p>
+              <p style="margin: 0; font-size: 10px; text-align: center; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.2);">
+                <a href="https://confirmbooking.online/" style="color: rgba(255,255,255,0.4); text-decoration: none;">Powered by BookFlow</a>
+              </p>
             </td>
           </tr>
           
