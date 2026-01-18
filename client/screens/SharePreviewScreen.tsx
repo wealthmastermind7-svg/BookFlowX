@@ -1,15 +1,18 @@
 import React, { useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Share } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, Share, ImageBackground, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useRoute, RouteProp } from "@react-navigation/native";
 import { Feather } from "@expo/vector-icons";
+import { BlurView } from "expo-blur";
+import { LinearGradient } from "expo-linear-gradient";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
   withSpring,
   WithSpringConfig,
+  FadeIn,
 } from "react-native-reanimated";
 
 import { useTheme } from "@/hooks/useTheme";
@@ -17,6 +20,8 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { usePremium } from "@/contexts/PremiumContext";
+
+const backgroundImage = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type SharePreviewRouteParams = {
   SharePreview: {
@@ -62,20 +67,81 @@ function AnimatedPressable({
   );
 }
 
+function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
+  if (Platform.OS === "ios") {
+    return (
+      <BlurView intensity={40} tint="dark" style={[styles.glassPanel, style]}>
+        {children}
+      </BlurView>
+    );
+  }
+  return (
+    <View style={[styles.glassPanel, styles.glassPanelAndroid, style]}>
+      {children}
+    </View>
+  );
+}
+
+function CinematicLinkPreview({ businessName, domain }: { businessName: string; domain: string }) {
+  return (
+    <View style={styles.cinematicCard}>
+      <LinearGradient
+        colors={['#1a1a1a', '#000000', '#0a0a0a']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.cinematicGradient}
+      />
+      
+      <View style={styles.diagonalLines}>
+        <View style={[styles.diagonalLine, { top: '30%', opacity: 0.08 }]} />
+        <View style={[styles.diagonalLine, { top: '40%', opacity: 0.04 }]} />
+        <View style={[styles.diagonalLine, { top: '50%', opacity: 0.02 }]} />
+      </View>
+      
+      <View style={styles.shadowColumn} />
+      
+      <View style={styles.cinematicContent}>
+        <ThemedText style={styles.cinematicTitle}>
+          RESERVE
+        </ThemedText>
+        <ThemedText style={styles.cinematicTitle}>
+          YOUR
+        </ThemedText>
+        <ThemedText style={styles.cinematicTitle}>
+          SPACE
+        </ThemedText>
+        <View style={styles.accentBar} />
+      </View>
+      
+      <View style={styles.glassFooter}>
+        <View style={styles.glassFooterTop} />
+        <View style={styles.footerContent}>
+          <View style={styles.footerLeft}>
+            <ThemedText style={styles.businessNameText}>{businessName}</ThemedText>
+            <ThemedText style={styles.subtitleText}>BOOK YOUR APPOINTMENT</ThemedText>
+          </View>
+          <View style={styles.arrowCircle}>
+            <Feather name="arrow-up-right" size={14} color="rgba(255,255,255,0.6)" />
+          </View>
+        </View>
+        <ThemedText style={styles.domainText}>{domain.toUpperCase()}</ThemedText>
+      </View>
+    </View>
+  );
+}
+
 export default function SharePreviewScreen() {
   const insets = useSafeAreaInsets();
   const route = useRoute<RouteProp<SharePreviewRouteParams, "SharePreview">>();
-  const { theme, isDark } = useTheme();
-  const { checkShareAccess, isPremium } = usePremium();
+  const { theme } = useTheme();
+  const { checkShareAccess } = usePremium();
   
   const { businessName, bookingUrl, slug } = route.params;
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
     const hasAccess = checkShareAccess();
-    if (!hasAccess) {
-      return;
-    }
+    if (!hasAccess) return;
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     await Clipboard.setStringAsync(bookingUrl);
@@ -84,9 +150,7 @@ export default function SharePreviewScreen() {
   };
 
   const handleShare = async () => {
-    if (!checkShareAccess()) {
-      return;
-    }
+    if (!checkShareAccess()) return;
     
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
@@ -103,340 +167,350 @@ export default function SharePreviewScreen() {
   const domain = bookingUrl.replace(/^https?:\/\//, "").split("/")[0];
 
   return (
-    <ThemedView style={styles.container}>
+    <ImageBackground source={backgroundImage} style={styles.container} resizeMode="cover">
+      <View style={styles.overlay} />
       <ScrollView
         contentContainerStyle={{
-          paddingTop: Spacing["2xl"],
+          paddingTop: insets.top + Spacing["2xl"],
           paddingBottom: insets.bottom + Spacing["4xl"],
           paddingHorizontal: Spacing.lg,
         }}
         showsVerticalScrollIndicator={false}
       >
-        <View style={styles.heroSection}>
-          <View style={[styles.heroIcon, { backgroundColor: theme.link }]}>
-            <Feather name="share" size={24} color={theme.buttonText} />
-          </View>
-          <ThemedText type="h3" style={styles.heroTitle}>
-            Look Professional Everywhere
+        <Animated.View entering={FadeIn.duration(600)} style={styles.heroSection}>
+          <ThemedText style={styles.heroTitle}>
+            Share Preview
           </ThemedText>
-          <ThemedText type="small" style={[styles.heroSubtitle, { color: theme.textSecondary }]}>
-            Your booking links transform into beautiful, rich cards on iMessage, WhatsApp, and social media.
+          <ThemedText style={styles.heroSubtitle}>
+            This is how your booking link appears when shared on iMessage, WhatsApp, LinkedIn, and social media.
           </ThemedText>
-        </View>
+        </Animated.View>
 
-        <View style={styles.previewContainer}>
-          <ThemedText type="small" style={[styles.previewLabel, { color: theme.textSecondary }]}>
-            MESSAGE PREVIEW
+        <Animated.View entering={FadeIn.duration(600).delay(200)} style={styles.previewSection}>
+          <ThemedText style={styles.previewLabel}>
+            LINK PREVIEW
           </ThemedText>
           
-          <View style={[styles.previewCard, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={styles.messageRow}>
-              <View style={styles.messageBubble}>
-                <ThemedText style={styles.messageText}>
-                  Hey! Here is the link to book your session.
-                </ThemedText>
-              </View>
+          <View style={styles.messageContainer}>
+            <View style={styles.messageBubble}>
+              <ThemedText style={styles.messageText}>
+                Hey! Here's my booking link 👇
+              </ThemedText>
             </View>
-
-            <View style={styles.linkPreviewContainer}>
-              <View style={[styles.linkPreview, { backgroundColor: isDark ? "#2C2C2E" : "#F2F2F7" }]}>
-                <View style={[styles.linkPreviewImage, { backgroundColor: isDark ? "#3A3A3C" : "#E5E5EA" }]}>
-                  <View style={[styles.linkPreviewBadge, { backgroundColor: isDark ? "rgba(0,0,0,0.8)" : "rgba(255,255,255,0.95)" }]}>
-                    <ThemedText style={[styles.badgeText, { color: theme.text }]}>
-                      BOOKFLOW
-                    </ThemedText>
-                  </View>
-                  <Feather 
-                    name="calendar" 
-                    size={48} 
-                    color={isDark ? "#6B6B6B" : "#9E9E9E"} 
-                    style={styles.placeholderIcon}
-                  />
-                </View>
-                <View style={styles.linkPreviewContent}>
-                  <ThemedText type="body" style={[styles.linkTitle, { fontWeight: "600" }]}>
-                    {businessName} - Premium Package
-                  </ThemedText>
-                  <ThemedText type="small" style={[styles.linkDescription, { color: theme.textSecondary }]} numberOfLines={2}>
-                    Schedule your appointment instantly. No calls required.
-                  </ThemedText>
-                  <View style={[styles.linkDomain, { borderTopColor: isDark ? "#3A3A3C" : "#E5E5EA" }]}>
-                    <Feather name="calendar" size={12} color={theme.textSecondary} />
-                    <ThemedText type="caption" style={[styles.domainText, { color: theme.textSecondary }]}>
-                      {domain}
-                    </ThemedText>
-                  </View>
-                </View>
-              </View>
+            
+            <View style={styles.linkCardWrapper}>
+              <CinematicLinkPreview businessName={businessName} domain={domain} />
             </View>
+            
+            <ThemedText style={styles.timestamp}>
+              {new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </ThemedText>
           </View>
-        </View>
+        </Animated.View>
 
-        <View style={styles.previewContainer}>
-          <ThemedText type="small" style={[styles.previewLabel, { color: theme.textSecondary }]}>
-            SOCIAL STICKER PREVIEW
-          </ThemedText>
-          
-          <View style={[styles.previewCard, { backgroundColor: theme.backgroundDefault }]}>
-            <View style={[styles.stickerPreview, { backgroundColor: isDark ? "#2C2C2E" : "#F2F2F7" }]}>
-              <View style={[styles.stickerGradient, { backgroundColor: isDark ? "#252525" : "#ECECEC" }]} />
-              
-              <View style={styles.stickerContent}>
-                <AnimatedPressable 
-                  onPress={handleShare}
-                  style={[styles.stickerButton, { backgroundColor: theme.backgroundRoot }]}
-                >
-                  <View style={[styles.stickerIconContainer, { backgroundColor: theme.link }]}>
-                    <Feather name="calendar" size={16} color={theme.buttonText} />
-                  </View>
-                  <View style={styles.stickerTextContainer}>
-                    <ThemedText type="caption" style={[styles.stickerLabel, { color: theme.textSecondary }]}>
-                      BOOK NOW
-                    </ThemedText>
-                    <ThemedText type="body" style={[styles.stickerTitle, { fontWeight: "600" }]}>
-                      {businessName}
-                    </ThemedText>
-                  </View>
-                  <Feather name="chevron-right" size={16} color={theme.textSecondary} />
-                </AnimatedPressable>
+        <Animated.View entering={FadeIn.duration(600).delay(400)} style={styles.infoSection}>
+          <GlassPanel style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Feather name="link" size={18} color="rgba(255,255,255,0.6)" />
+              <View style={styles.infoContent}>
+                <ThemedText style={styles.infoLabel}>Your Booking URL</ThemedText>
+                <ThemedText style={styles.infoValue} numberOfLines={1}>{bookingUrl}</ThemedText>
               </View>
             </View>
-          </View>
-        </View>
+          </GlassPanel>
+        </Animated.View>
 
-        <View style={styles.brandRow}>
-          <ThemedText type="small" style={{ color: theme.textSecondary }}>
-            Brand: <ThemedText type="small" style={{ fontWeight: "500", color: theme.text }}>{businessName}</ThemedText>
-          </ThemedText>
-        </View>
-
-        <View style={styles.actionsContainer}>
-          <AnimatedPressable
-            onPress={handleCopyLink}
-            style={[styles.primaryButton, { backgroundColor: theme.link }]}
-          >
-            <ThemedText type="body" style={[styles.primaryButtonText, { color: theme.buttonText }]}>
+        <Animated.View entering={FadeIn.duration(600).delay(500)} style={styles.actionsContainer}>
+          <AnimatedPressable onPress={handleCopyLink} style={styles.primaryButton}>
+            <Feather name={copied ? "check" : "copy"} size={20} color="#000" />
+            <ThemedText style={styles.primaryButtonText}>
               {copied ? "Copied!" : "Copy Link"}
             </ThemedText>
-            <Feather 
-              name={copied ? "check" : "copy"} 
-              size={18} 
-              color={theme.buttonText} 
-              style={styles.buttonIcon}
-            />
           </AnimatedPressable>
 
-          <View style={styles.shareButtons}>
-            <AnimatedPressable
-              onPress={handleShare}
-              style={[styles.shareButton, { backgroundColor: theme.backgroundDefault, borderColor: theme.borderLight }]}
-            >
-              <Feather name="share-2" size={20} color={theme.text} />
-            </AnimatedPressable>
-            
-            <AnimatedPressable
-              onPress={handleShare}
-              style={[styles.shareButton, { backgroundColor: theme.backgroundDefault, borderColor: theme.borderLight }]}
-            >
-              <Feather name="message-circle" size={20} color={theme.text} />
-            </AnimatedPressable>
-            
-            <AnimatedPressable
-              onPress={handleShare}
-              style={[styles.shareButton, { backgroundColor: theme.backgroundDefault, borderColor: theme.borderLight }]}
-            >
-              <Feather name="more-horizontal" size={20} color={theme.text} />
-            </AnimatedPressable>
+          <AnimatedPressable onPress={handleShare} style={styles.secondaryButton}>
+            <Feather name="share-2" size={20} color="#fff" />
+            <ThemedText style={styles.secondaryButtonText}>Share Now</ThemedText>
+          </AnimatedPressable>
+        </Animated.View>
+
+        <Animated.View entering={FadeIn.duration(600).delay(600)} style={styles.platformsSection}>
+          <ThemedText style={styles.platformsTitle}>WORKS ON</ThemedText>
+          <View style={styles.platformsRow}>
+            <View style={styles.platformBadge}>
+              <Feather name="message-circle" size={16} color="rgba(255,255,255,0.8)" />
+              <ThemedText style={styles.platformText}>iMessage</ThemedText>
+            </View>
+            <View style={styles.platformBadge}>
+              <Feather name="phone" size={16} color="rgba(255,255,255,0.8)" />
+              <ThemedText style={styles.platformText}>WhatsApp</ThemedText>
+            </View>
+            <View style={styles.platformBadge}>
+              <Feather name="linkedin" size={16} color="rgba(255,255,255,0.8)" />
+              <ThemedText style={styles.platformText}>LinkedIn</ThemedText>
+            </View>
           </View>
-        </View>
+        </Animated.View>
       </ScrollView>
-    </ThemedView>
+    </ImageBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
+  },
+  overlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.7)",
   },
   heroSection: {
     alignItems: "center",
     marginBottom: Spacing["3xl"],
   },
-  heroIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: Spacing.lg,
-  },
   heroTitle: {
+    fontSize: 48,
+    fontWeight: "800",
+    color: "#fff",
+    letterSpacing: -2,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   heroSubtitle: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.5)",
     textAlign: "center",
-    maxWidth: 280,
-    lineHeight: 20,
+    maxWidth: 300,
+    lineHeight: 24,
   },
-  previewContainer: {
+  previewSection: {
     marginBottom: Spacing["2xl"],
   },
   previewLabel: {
+    fontSize: 11,
     fontWeight: "600",
-    letterSpacing: 1,
+    letterSpacing: 2,
+    color: "rgba(255,255,255,0.4)",
     marginBottom: Spacing.md,
-    textTransform: "uppercase",
   },
-  previewCard: {
-    borderRadius: BorderRadius["2xl"],
-    padding: Spacing.xl,
-    overflow: "hidden",
-  },
-  messageRow: {
+  messageContainer: {
     alignItems: "flex-end",
-    marginBottom: Spacing.lg,
   },
   messageBubble: {
     backgroundColor: "#007AFF",
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.xl,
-    borderTopRightRadius: 4,
-    maxWidth: "85%",
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 18,
+    borderBottomRightRadius: 4,
+    marginBottom: Spacing.md,
+    maxWidth: "80%",
   },
   messageText: {
-    color: "#FFFFFF",
-    fontSize: 14,
+    color: "#fff",
+    fontSize: 15,
   },
-  linkPreviewContainer: {
-    alignItems: "flex-end",
-  },
-  linkPreview: {
-    borderRadius: BorderRadius.lg,
-    overflow: "hidden",
-    maxWidth: "85%",
+  linkCardWrapper: {
     width: "100%",
-  },
-  linkPreviewImage: {
-    height: 120,
-    alignItems: "center",
-    justifyContent: "center",
-    position: "relative",
-  },
-  linkPreviewBadge: {
-    position: "absolute",
-    top: Spacing.sm,
-    right: Spacing.sm,
-    paddingHorizontal: Spacing.sm,
-    paddingVertical: 2,
-    borderRadius: 4,
-  },
-  badgeText: {
-    fontSize: 9,
-    fontWeight: "700",
-    letterSpacing: 0.5,
-  },
-  placeholderIcon: {
-    opacity: 0.5,
-  },
-  linkPreviewContent: {
-    padding: Spacing.md,
-  },
-  linkTitle: {
-    marginBottom: 4,
-  },
-  linkDescription: {
-    marginBottom: Spacing.sm,
-    lineHeight: 18,
-  },
-  linkDomain: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-    paddingTop: Spacing.sm,
-    borderTopWidth: 1,
-    marginTop: 4,
-  },
-  domainText: {
-    fontSize: 10,
-  },
-  stickerPreview: {
-    borderRadius: BorderRadius.lg,
+    maxWidth: 320,
+    borderRadius: 16,
     overflow: "hidden",
-    aspectRatio: 4 / 3,
-    position: "relative",
   },
-  stickerGradient: {
+  timestamp: {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.3)",
+    marginTop: 8,
+  },
+  cinematicCard: {
+    aspectRatio: 4 / 5,
+    borderRadius: 16,
+    overflow: "hidden",
+    position: "relative",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  cinematicGradient: {
     ...StyleSheet.absoluteFillObject,
   },
-  stickerContent: {
+  diagonalLines: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  diagonalLine: {
+    position: "absolute",
+    left: -100,
+    right: -100,
+    height: 1,
+    backgroundColor: "#fff",
+    transform: [{ rotate: "25deg" }],
+  },
+  shadowColumn: {
+    position: "absolute",
+    right: 30,
+    top: 0,
+    bottom: 0,
+    width: 80,
+    backgroundColor: "rgba(0,0,0,0.4)",
+    transform: [{ skewX: "-10deg" }],
+  },
+  cinematicContent: {
     flex: 1,
-    justifyContent: "flex-end",
-    padding: Spacing.xl,
+    justifyContent: "center",
+    paddingHorizontal: 24,
   },
-  stickerButton: {
+  cinematicTitle: {
+    fontSize: 42,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.95)",
+    letterSpacing: -2,
+    lineHeight: 46,
+  },
+  accentBar: {
+    width: 60,
+    height: 3,
+    backgroundColor: "rgba(255,255,255,0.5)",
+    marginTop: 12,
+  },
+  glassFooter: {
+    backgroundColor: "rgba(20,20,20,0.9)",
+    paddingHorizontal: 20,
+    paddingVertical: 16,
+    paddingBottom: 20,
+  },
+  glassFooterTop: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  footerContent: {
     flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.md,
+    justifyContent: "space-between",
+    alignItems: "flex-start",
   },
-  stickerIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: BorderRadius.xs,
+  footerLeft: {
+    flex: 1,
+  },
+  businessNameText: {
+    fontSize: 18,
+    fontWeight: "500",
+    color: "#fff",
+    letterSpacing: 0.5,
+  },
+  subtitleText: {
+    fontSize: 10,
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 2,
+    marginTop: 4,
+  },
+  arrowCircle: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: "rgba(255,255,255,0.1)",
     alignItems: "center",
     justifyContent: "center",
   },
-  stickerTextContainer: {
+  domainText: {
+    fontSize: 9,
+    color: "rgba(255,255,255,0.3)",
+    letterSpacing: 2,
+    marginTop: 12,
+  },
+  infoSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  infoCard: {
+    padding: 20,
+  },
+  infoRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 16,
+  },
+  infoContent: {
     flex: 1,
   },
-  stickerLabel: {
-    fontWeight: "700",
-    letterSpacing: 0.5,
-    textTransform: "uppercase",
-    fontSize: 10,
+  infoLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 4,
   },
-  stickerTitle: {
+  infoValue: {
     fontSize: 14,
-  },
-  brandRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Spacing.lg,
-    paddingHorizontal: 4,
+    color: "#fff",
   },
   actionsContainer: {
-    gap: Spacing.lg,
+    gap: Spacing.md,
+    marginBottom: Spacing["2xl"],
   },
   primaryButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
     height: 56,
-    borderRadius: BorderRadius.lg,
-    gap: Spacing.sm,
+    borderRadius: 16,
+    backgroundColor: "#fff",
+    gap: 10,
   },
   primaryButtonText: {
-    fontWeight: "600",
+    fontSize: 17,
+    fontWeight: "700",
+    color: "#000",
   },
-  buttonIcon: {
-    marginLeft: 4,
-  },
-  shareButtons: {
+  secondaryButton: {
     flexDirection: "row",
-    justifyContent: "center",
-    gap: Spacing.lg,
-  },
-  shareButton: {
-    width: 48,
-    height: 48,
-    borderRadius: BorderRadius.full,
     alignItems: "center",
     justifyContent: "center",
+    height: 56,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
     borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.15)",
+    gap: 10,
+  },
+  secondaryButtonText: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  platformsSection: {
+    alignItems: "center",
+  },
+  platformsTitle: {
+    fontSize: 10,
+    fontWeight: "600",
+    letterSpacing: 2,
+    color: "rgba(255,255,255,0.3)",
+    marginBottom: Spacing.md,
+  },
+  platformsRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  platformBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  platformText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
+  },
+  glassPanel: {
+    borderRadius: 16,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  glassPanelAndroid: {
+    backgroundColor: "rgba(30,30,30,0.9)",
   },
 });
