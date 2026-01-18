@@ -72,47 +72,57 @@ export const BorderRadius = {
 export const Typography = {
   display: {
     fontSize: 72,
-    fontWeight: "200" as const,
+    fontFamily: "CormorantGaramond-Medium",
+    letterSpacing: -2,
   },
   displayLarge: {
     fontSize: 96,
-    fontWeight: "200" as const,
+    fontFamily: "CormorantGaramond-Bold",
+    letterSpacing: -2,
   },
   h1: {
     fontSize: 48,
-    fontWeight: "700" as const,
+    fontFamily: "CormorantGaramond-Bold",
+    letterSpacing: -1,
   },
   h2: {
     fontSize: 40,
-    fontWeight: "700" as const,
+    fontFamily: "CormorantGaramond-Bold",
+    letterSpacing: -1,
   },
   h3: {
     fontSize: 32,
-    fontWeight: "600" as const,
+    fontFamily: "CormorantGaramond-SemiBold",
   },
   h4: {
     fontSize: 24,
-    fontWeight: "600" as const,
+    fontFamily: "Inter-SemiBold",
   },
   body: {
     fontSize: 18,
-    fontWeight: "400" as const,
+    fontFamily: "Inter-Regular",
   },
   bodyLarge: {
     fontSize: 24,
-    fontWeight: "400" as const,
+    fontFamily: "Inter-Light",
   },
   small: {
     fontSize: 14,
-    fontWeight: "400" as const,
+    fontFamily: "Inter-Regular",
   },
   caption: {
     fontSize: 12,
-    fontWeight: "400" as const,
+    fontFamily: "Inter-Light",
+    letterSpacing: 2,
+    textTransform: "uppercase" as const,
   },
   link: {
     fontSize: 18,
-    fontWeight: "400" as const,
+    fontFamily: "Inter-SemiBold",
+  },
+  mono: {
+    fontFamily: "JetBrainsMono-Regular",
+    fontSize: 14,
   },
 };
 
@@ -133,27 +143,12 @@ export const Shadows = {
   },
 };
 
-export const Fonts = Platform.select({
-  ios: {
-    sans: "system-ui",
-    serif: "ui-serif",
-    rounded: "ui-rounded",
-    mono: "ui-monospace",
-  },
-  default: {
-    sans: "normal",
-    serif: "serif",
-    rounded: "normal",
-    mono: "monospace",
-  },
-  web: {
-    sans: "system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif",
-    serif: "Georgia, 'Times New Roman', serif",
-    rounded:
-      "'SF Pro Rounded', 'Hiragino Maru Gothic ProN', Meiryo, 'MS PGothic', sans-serif",
-    mono: "SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace",
-  },
-});
+export const Fonts = {
+  heading: "CormorantGaramond-Bold",
+  subheading: "Inter-SemiBold",
+  body: "Inter-Regular",
+  mono: "JetBrainsMono-Regular",
+};
 
 export const AnimationConfig = {
   spring: {
