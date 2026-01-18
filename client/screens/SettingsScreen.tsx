@@ -270,8 +270,9 @@ export default function SettingsScreen() {
       const updated = await api.updateBusiness(updates);
       setBusiness(updated);
       setEditModalVisible(false);
-    } catch (error) {
-      Alert.alert("Error", "Save failed.");
+    } catch (error: any) {
+      console.error("Save business field failed:", error);
+      Alert.alert("Error", `Save failed: ${error.message || "Unknown error"}`);
     } finally {
       setEditLoading(false);
     }
