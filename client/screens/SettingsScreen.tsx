@@ -359,7 +359,7 @@ export default function SettingsScreen() {
             <SectionTitle>Automation</SectionTitle>
             <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
               <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
-              <ThemedText style={styles.automationDesc}>Intelligent reminders & cinematic confirmation sequences.</ThemedText>
+              <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences.</ThemedText>
               <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
             </GlassCard>
 
