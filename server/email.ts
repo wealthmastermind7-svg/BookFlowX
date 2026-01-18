@@ -23,6 +23,8 @@ interface BookingConfirmationData {
   currency?: string;
   isReminder?: boolean;
   hoursToGo?: number;
+  businessWebsite?: string;
+  businessPhone?: string;
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -161,7 +163,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
           <tr>
             <td style="padding: 0 32px 24px; background-color: #000000;">
               <p style="margin: 0; font-size: 13px; text-align: center; color: rgba(255,255,255,0.4); font-style: italic; line-height: 1.6;">
-                Need to reschedule? Contact ${data.businessName} directly.
+                Need to reschedule? Contact ${data.businessName} directly${data.businessPhone ? ` at <span style="color: rgba(255,255,255,0.6); font-style: normal;">${data.businessPhone}</span>` : ''}${data.businessWebsite ? `${data.businessPhone ? ' or' : ''} visit <a href="${data.businessWebsite.startsWith('http') ? data.businessWebsite : `https://${data.businessWebsite}`}" style="color: rgba(255,255,255,0.6); text-decoration: underline; font-style: normal;">${data.businessWebsite.replace(/^https?:\/\//, '')}</a>` : ''}.
               </p>
             </td>
           </tr>
