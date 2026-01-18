@@ -722,6 +722,37 @@ export default function DashboardScreen() {
                     </View>
                   )}
 
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Payment</Text>
+                    <View style={[
+                      styles.statusBadge,
+                      selectedBooking.paymentStatus === "paid" ? styles.statusConfirmed : styles.statusPending
+                    ]}>
+                      <Text style={styles.statusText}>
+                        {selectedBooking.paymentStatus?.toUpperCase() || "UNPAID"}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {selectedBooking.paymentStatus !== "paid" && (
+                    <Pressable
+                      style={styles.confirmPaidButton}
+                      onPress={async () => {
+                        try {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+                          await api.updateBooking(selectedBooking.id, { paymentStatus: "paid" });
+                          setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "paid" } : null);
+                          loadData();
+                        } catch (error) {
+                          console.error("Error confirming payment:", error);
+                        }
+                      }}
+                    >
+                      <Feather name="dollar-sign" size={16} color="#000" />
+                      <Text style={styles.confirmPaidButtonText}>Mark as Paid</Text>
+                    </Pressable>
+                  )}
+
                   {selectedBooking.status === "pending" && (
                     <Pressable
                       style={styles.confirmBookingButton}
@@ -1242,6 +1273,21 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   confirmBookingText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
+  },
+  confirmPaidButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#22C55E",
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 8,
+    gap: 8,
+  },
+  confirmPaidButtonText: {
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
