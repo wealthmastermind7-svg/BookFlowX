@@ -131,9 +131,11 @@ export default function CheckoutScreen() {
 
     try {
       const bookingId = `booking_${Date.now()}`;
-      const selectedAddonNames = Array.from(selectedAddons)
-        .map((idx) => upsellSuggestions[idx]?.name)
-        .filter(Boolean);
+      const selectedAddonsList = Array.from(selectedAddons)
+        .map((idx) => upsellSuggestions[idx])
+        .filter(Boolean)
+        .map((addon) => ({ name: addon.name, price: addon.price / 100 }));
+      const selectedAddonNames = selectedAddonsList.map((a) => a.name);
       const serviceName = selectedAddonNames.length > 0
         ? `${service?.name || "Service"} + ${selectedAddonNames.join(", ")}`
         : (service?.name || "Service");
@@ -148,6 +150,7 @@ export default function CheckoutScreen() {
         status: "confirmed",
         totalPrice: getTotalPrice(),
         createdAt: new Date().toISOString(),
+        addons: selectedAddonsList.length > 0 ? JSON.stringify(selectedAddonsList) : undefined,
       };
 
       await StorageService.addBooking(booking);
