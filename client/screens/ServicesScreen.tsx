@@ -336,6 +336,7 @@ export default function ServicesScreen() {
       <KeyboardAvoidingView 
         style={styles.modalOverlay} 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={0}
       >
         <Pressable style={styles.modalDismiss} onPress={() => setAiModalVisible(false)} />
         <View style={[styles.modalContent, { paddingBottom: insets.bottom + 20 }]}>
@@ -349,11 +350,7 @@ export default function ServicesScreen() {
           </View>
 
           {aiStep === "input" ? (
-            <KeyboardAwareScrollView 
-              style={styles.modalScroll}
-              contentContainerStyle={styles.modalScrollContent}
-              keyboardShouldPersistTaps="handled"
-            >
+            <View style={styles.inputContainer}>
               <Text style={styles.modalSubtitle}>
                 Describe your services in plain language
               </Text>
@@ -381,7 +378,7 @@ export default function ServicesScreen() {
                   </>
                 )}
               </Pressable>
-            </KeyboardAwareScrollView>
+            </View>
           ) : (
             <KeyboardAwareScrollView 
               style={styles.modalScroll}
@@ -622,6 +619,9 @@ const styles = StyleSheet.create({
   },
   modalScrollContent: {
     paddingBottom: 20,
+  },
+  inputContainer: {
+    marginTop: 8,
   },
   modalHeader: {
     flexDirection: "row",
