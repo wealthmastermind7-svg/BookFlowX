@@ -856,6 +856,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === AI SERVICE ASSISTANT ===
+  
+  // Generate services from natural language description
+  app.post("/api/ai/generate-services", async (req: Request, res: Response) => {
+    try {
+      const { description, businessType, currency } = req.body;
+      
+      if (!description || typeof description !== 'string') {
+        return res.status(400).json({ error: "Description is required" });
+      }
+      
+      const { generateServicesFromDescription } = await import("./ai");
+      const services = await generateServicesFromDescription(description, businessType, currency);
+      
+      res.json({ services });
+    } catch (error) {
+      console.error("[AI] Error generating services:", error);
+      res.status(500).json({ error: "Failed to generate services. Please try again." });
+    }
+  });
+
   // === QR CODE API ===
   
   // Generate QR code for booking link

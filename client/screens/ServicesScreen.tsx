@@ -7,6 +7,11 @@ import {
   Pressable,
   ImageBackground,
   Platform,
+  Modal,
+  TextInput,
+  ActivityIndicator,
+  Alert,
+  ScrollView,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -27,6 +32,15 @@ import { Spacing } from "@/constants/theme";
 import { api, Service, Business } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { formatPriceSimple } from "@/lib/currency";
+import { getApiUrl } from "@/lib/query-client";
+
+interface AIGeneratedService {
+  name: string;
+  description: string;
+  duration: number;
+  price: number;
+  bufferTime: number;
+}
 
 const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
@@ -171,6 +185,12 @@ export default function ServicesScreen() {
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
   const [business, setBusiness] = useState<Business | null>(null);
+  
+  const [aiModalVisible, setAiModalVisible] = useState(false);
+  const [aiDescription, setAiDescription] = useState("");
+  const [aiGenerating, setAiGenerating] = useState(false);
+  const [aiServices, setAiServices] = useState<AIGeneratedService[]>([]);
+  const [aiStep, setAiStep] = useState<"input" | "review">("input");
 
   useEffect(() => {
     initializeBusiness();
@@ -218,6 +238,73 @@ export default function ServicesScreen() {
     navigation.navigate("ServiceEditor", { serviceId });
   };
 
+  const handleAISetup = () => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setAiModalVisible(true);
+    setAiStep("input");
+    setAiDescription("");
+    setAiServices([]);
+  };
+
+  const handleAIGenerate = async () => {
+    if (!aiDescription.trim()) return;
+    
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    setAiGenerating(true);
+    
+    try {
+      const response = await fetch(new URL("/api/ai/generate-services", getApiUrl()).toString(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          description: aiDescription,
+          businessType: business?.name || "Service business",
+          currency: business?.currency || "USD",
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error("Failed to generate services");
+      }
+      
+      const data = await response.json();
+      setAiServices(data.services || []);
+      setAiStep("review");
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+    } catch (error) {
+      console.error("AI generation error:", error);
+      Alert.alert("Error", "Failed to generate services. Please try again.");
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
+  const handleAIConfirm = async () => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setAiGenerating(true);
+    
+    try {
+      for (const svc of aiServices) {
+        await api.createService({
+          name: svc.name,
+          description: svc.description,
+          duration: svc.duration,
+          price: Math.round(svc.price * 100),
+          bufferTime: svc.bufferTime,
+        });
+      }
+      
+      await loadServices();
+      setAiModalVisible(false);
+      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+    } catch (error) {
+      console.error("Error creating services:", error);
+      Alert.alert("Error", "Failed to create some services. Please try again.");
+    } finally {
+      setAiGenerating(false);
+    }
+  };
+
   const renderItem = ({ item }: { item: Service }) => (
     <ServiceCardCinematic
       name={item.name}
@@ -234,9 +321,99 @@ export default function ServicesScreen() {
       <Feather name="layers" size={48} color="rgba(255,255,255,0.2)" />
       <Text style={styles.emptyTitle}>No Services Yet</Text>
       <Text style={styles.emptyMessage}>
-        Create your first service by tapping the + button
+        Describe your services and let AI set them up for you
       </Text>
+      <Pressable style={styles.aiSetupButton} onPress={handleAISetup}>
+        <Feather name="zap" size={18} color="#000" />
+        <Text style={styles.aiSetupText}>AI Setup</Text>
+      </Pressable>
+      <Text style={styles.orText}>or tap + to add manually</Text>
     </View>
+  );
+
+  const renderAIModal = () => (
+    <Modal visible={aiModalVisible} transparent animationType="slide">
+      <View style={styles.modalOverlay}>
+        <View style={styles.modalContent}>
+          <View style={styles.modalHeader}>
+            <Text style={styles.modalTitle}>
+              {aiStep === "input" ? "AI Service Setup" : "Review Services"}
+            </Text>
+            <Pressable onPress={() => setAiModalVisible(false)}>
+              <Feather name="x" size={24} color="#fff" />
+            </Pressable>
+          </View>
+
+          {aiStep === "input" ? (
+            <>
+              <Text style={styles.modalSubtitle}>
+                Describe your services in plain language
+              </Text>
+              <TextInput
+                style={styles.aiInput}
+                placeholder="e.g., I offer 30-minute haircuts for $25, color treatments for 2 hours at $150, and quick beard trims for $15..."
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                multiline
+                numberOfLines={5}
+                value={aiDescription}
+                onChangeText={setAiDescription}
+                textAlignVertical="top"
+              />
+              <Pressable
+                style={[styles.aiGenerateButton, !aiDescription.trim() && styles.buttonDisabled]}
+                onPress={handleAIGenerate}
+                disabled={!aiDescription.trim() || aiGenerating}
+              >
+                {aiGenerating ? (
+                  <ActivityIndicator color="#000" />
+                ) : (
+                  <>
+                    <Feather name="zap" size={18} color="#000" />
+                    <Text style={styles.aiGenerateText}>Generate Services</Text>
+                  </>
+                )}
+              </Pressable>
+            </>
+          ) : (
+            <>
+              <Text style={styles.modalSubtitle}>
+                {aiServices.length} services generated
+              </Text>
+              <ScrollView style={styles.aiServicesList}>
+                {aiServices.map((svc, idx) => (
+                  <View key={idx} style={styles.aiServiceCard}>
+                    <Text style={styles.aiServiceName}>{svc.name}</Text>
+                    <Text style={styles.aiServiceDesc}>{svc.description}</Text>
+                    <View style={styles.aiServiceDetails}>
+                      <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
+                      <Text style={styles.aiServicePrice}>
+                        {formatPriceSimple(svc.price, business?.currency || "USD")}
+                      </Text>
+                    </View>
+                  </View>
+                ))}
+              </ScrollView>
+              <View style={styles.aiButtonRow}>
+                <Pressable style={styles.aiBackButton} onPress={() => setAiStep("input")}>
+                  <Text style={styles.aiBackText}>Edit</Text>
+                </Pressable>
+                <Pressable
+                  style={styles.aiConfirmButton}
+                  onPress={handleAIConfirm}
+                  disabled={aiGenerating}
+                >
+                  {aiGenerating ? (
+                    <ActivityIndicator color="#000" />
+                  ) : (
+                    <Text style={styles.aiConfirmText}>Add All Services</Text>
+                  )}
+                </Pressable>
+              </View>
+            </>
+          )}
+        </View>
+      </View>
+    </Modal>
   );
 
   return (
@@ -274,6 +451,8 @@ export default function ServicesScreen() {
           <Feather name="plus" size={24} color="#1a1a1a" />
         </Pressable>
       </Animated.View>
+      
+      {renderAIModal()}
     </ImageBackground>
   );
 }
@@ -392,5 +571,147 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: "rgba(255,255,255,0.6)",
     textAlign: "center",
+    marginBottom: 24,
+  },
+  aiSetupButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "#fff",
+    paddingHorizontal: 24,
+    paddingVertical: 14,
+    borderRadius: 30,
+    gap: 8,
+  },
+  aiSetupText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  orText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 16,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.9)",
+    justifyContent: "flex-end",
+  },
+  modalContent: {
+    backgroundColor: "#111",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    paddingBottom: 40,
+    maxHeight: "85%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  modalSubtitle: {
+    fontSize: 16,
+    color: "rgba(255,255,255,0.6)",
+    marginBottom: 20,
+  },
+  aiInput: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 16,
+    color: "#fff",
+    fontSize: 16,
+    minHeight: 120,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    marginBottom: 20,
+  },
+  aiGenerateButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 16,
+    borderRadius: 16,
+    gap: 8,
+  },
+  aiGenerateText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  buttonDisabled: {
+    opacity: 0.5,
+  },
+  aiServicesList: {
+    maxHeight: 300,
+    marginBottom: 20,
+  },
+  aiServiceCard: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  aiServiceName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  aiServiceDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    marginBottom: 12,
+  },
+  aiServiceDetails: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+  },
+  aiServiceDuration: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+  },
+  aiServicePrice: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#4ade80",
+  },
+  aiButtonRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  aiBackButton: {
+    flex: 1,
+    paddingVertical: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: "center",
+  },
+  aiBackText: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  aiConfirmButton: {
+    flex: 2,
+    backgroundColor: "#fff",
+    paddingVertical: 16,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  aiConfirmText: {
+    color: "#000",
+    fontSize: 16,
+    fontWeight: "700",
   },
 });
