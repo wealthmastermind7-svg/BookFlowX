@@ -1150,34 +1150,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // Helper function to generate Open Graph meta tags with cinematic design
+  // Helper function to generate Open Graph meta tags (Apple-style clean format)
   function generateOpenGraphMeta(business: any, service?: any, req?: Request, allServices?: any[]): string {
-    // Determine the base URL - use env domain if set, otherwise use request host
-    let baseUrl = '';
-    const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
+    // Always use HTTPS for production OG images (required for proper link previews)
+    const baseUrl = 'https://confirmbooking.online';
     
-    if (domain) {
-      const cleanDomain = domain.replace(/^https?:\/\//, '');
-      baseUrl = `https://${cleanDomain}`;
-    } else if (req) {
-      const host = req.get('host') || 'localhost:5000';
-      const protocol = req.protocol || 'https';
-      baseUrl = `${protocol}://${host}`;
-    } else {
-      baseUrl = 'https://localhost:5000';
-    }
-    
-    // Cinematic title formatting - elegant and premium
-    let title = business.name;
-    let description = `Reserve your space with ${business.name}. Instant online booking, no calls needed.`;
+    // Apple-style clean title - simple and elegant
+    let title = `Book with ${business.name}`;
+    let description = 'Book your appointment';
 
     if (service) {
       title = `${service.name} - ${business.name}`;
-      description = `Schedule your ${service.name} appointment instantly. Professional service, seamless booking.`;
+      description = 'Book your appointment';
     } else if (allServices && allServices.length > 0) {
       const serviceNames = allServices.slice(0, 4).map(s => s.name).join(', ');
       title = `${business.name} | Professional Services`;
-      description = `Services: ${serviceNames}${allServices.length > 4 ? ' and more' : ''}. Book your appointment now.`;
+      description = `Services: ${serviceNames}${allServices.length > 4 ? '...' : ''}`;
     }
     
     // Use dynamic cinematic OG image based on business/service
@@ -1189,22 +1177,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ? `${baseUrl}/book/${business.slug}/${service.slug || service.id}`
       : `${baseUrl}/book/${business.slug}`;
     
+    // Apple-style meta tags with secure_url for maximum compatibility
     return `
     <meta property="og:title" content="${title}" />
     <meta property="og:description" content="${description}" />
     <meta property="og:image" content="${ogImage}" />
+    <meta property="og:image:secure_url" content="${ogImage}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Book with ${business.name}" />
+    <meta property="og:image:type" content="image/png" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${ogUrl}" />
     <meta property="og:site_name" content="BookFlow" />
-    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${ogImage}" />
-    <meta name="twitter:image:alt" content="Book with ${business.name}" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="${business.name}" />
     <meta name="theme-color" content="#000000" />`;
