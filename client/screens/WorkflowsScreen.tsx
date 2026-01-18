@@ -60,6 +60,8 @@ export default function WorkflowsScreen() {
   const [initializing, setInitializing] = useState(false);
   const [blueprintModalVisible, setBlueprintModalVisible] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
+  const [previewModalVisible, setPreviewModalVisible] = useState(false);
+  const [previewWorkflow, setPreviewWorkflow] = useState<Workflow | null>(null);
   const [business, setBusiness] = useState<any>(null);
 
   useFocusEffect(
@@ -257,10 +259,17 @@ export default function WorkflowsScreen() {
 
       <View style={styles.cardFooter}>
         <View style={styles.metaRow}>
-          <View style={styles.metaItem}>
+          <Pressable 
+            style={styles.metaItem}
+            onPress={() => {
+              setPreviewWorkflow(workflow);
+              setPreviewModalVisible(true);
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            }}
+          >
             <Feather name="mail" size={12} color="rgba(255,255,255,0.4)" />
-            <ThemedText style={styles.metaText}>Email (Preview)</ThemedText>
-          </View>
+            <ThemedText style={[styles.metaText, { textDecorationLine: "underline" }]}>Email (Preview)</ThemedText>
+          </Pressable>
           <View style={styles.metaItem}>
             <Feather name="shield" size={12} color="rgba(255,255,255,0.4)" />
             <ThemedText style={styles.metaText}>Runs automatically</ThemedText>
@@ -287,6 +296,81 @@ export default function WorkflowsScreen() {
       </View>
     );
   }
+
+  const renderPreviewModal = () => {
+    if (!previewWorkflow) return null;
+    
+    const isReminder = previewWorkflow.triggerType !== 'booking_created';
+    const businessName = business?.name || "Black Edition";
+    const statusLabel = isReminder ? `${businessName} • Appointment` : "Booking Status";
+    const title = isReminder ? "Reminder" : "CONFIRMED";
+
+    return (
+      <Modal
+        visible={previewModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setPreviewModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalVisible(false)} />
+          <View style={[styles.previewContent, { backgroundColor: "#000" }]}>
+            <View style={styles.previewHeader}>
+              <ThemedText style={styles.previewStatus}>{statusLabel}</ThemedText>
+              <ThemedText style={styles.previewTitle}>{title}</ThemedText>
+            </View>
+
+            <ScrollView style={styles.previewBody} showsVerticalScrollIndicator={false}>
+              <ThemedText style={styles.previewGreeting}>Hi <ThemedText style={{ fontWeight: "700" }}>Adam Mupinda</ThemedText>,</ThemedText>
+              <ThemedText style={styles.previewIntro}>
+                {isReminder 
+                  ? `Your appointment with ${businessName} is coming up soon.`
+                  : `Your appointment with ${businessName} has been successfully secured.`}
+              </ThemedText>
+
+              <GlassCard style={styles.previewCard}>
+                <View style={styles.previewInfoRow}>
+                  <ThemedText style={styles.previewInfoLabel}>Confirmation</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>BA5971E2</ThemedText>
+                </View>
+                <View style={styles.previewInfoRow}>
+                  <ThemedText style={styles.previewInfoLabel}>Service</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>Premium Service</ThemedText>
+                </View>
+                <View style={styles.previewInfoRow}>
+                  <ThemedText style={styles.previewInfoLabel}>Date</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>Jan 19, 2026</ThemedText>
+                </View>
+                <View style={styles.previewInfoRow}>
+                  <ThemedText style={styles.previewInfoLabel}>Time</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>2:00 PM</ThemedText>
+                </View>
+                <View style={[styles.divider, { marginVertical: 12 }]} />
+                <View style={styles.previewInfoRow}>
+                  <ThemedText style={styles.previewInfoLabel}>Total</ThemedText>
+                  <ThemedText style={[styles.previewInfoValue, { fontSize: 24, fontWeight: "800" }]}>$40.00</ThemedText>
+                </View>
+              </GlassCard>
+
+              <View style={styles.previewButton}>
+                <ThemedText style={styles.previewButtonText}>View Appointment</ThemedText>
+              </View>
+
+              <ThemedText style={styles.previewFooterNote}>
+                If you need to make any changes, please{"\n"}contact the business directly.
+              </ThemedText>
+
+              <ThemedText style={styles.previewBranding}>Sent via BookFlow</ThemedText>
+            </ScrollView>
+
+            <Pressable style={styles.previewClose} onPress={() => setPreviewModalVisible(false)}>
+              <Feather name="x" size={24} color="#fff" />
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
+    );
+  };
 
   return (
     <View style={styles.container}>
@@ -324,6 +408,8 @@ export default function WorkflowsScreen() {
           </ScrollView>
         </View>
       </ImageBackground>
+
+      {renderPreviewModal()}
 
       <Modal visible={blueprintModalVisible} transparent animationType="slide">
         <View style={styles.modalOverlay}>
@@ -391,4 +477,21 @@ const styles = StyleSheet.create({
   modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff" },
   blueprintItem: { flexDirection: "row", alignItems: "center", gap: 16, padding: 20, borderRadius: 20, borderWidth: 1, borderColor: "rgba(255,255,255,0.05)", marginBottom: 12 },
   blueprintLabel: { fontSize: 16, fontWeight: "600", color: "#fff" },
+  modalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "transparent" },
+  previewContent: { width: "90%", maxHeight: "80%", borderRadius: 32, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  previewHeader: { padding: 32, paddingTop: 48 },
+  previewStatus: { fontSize: 10, textTransform: "uppercase", letterSpacing: 4, color: "rgba(255,255,255,0.5)", marginBottom: 8 },
+  previewTitle: { fontSize: 56, fontWeight: "800", letterSpacing: -2, color: "#fff" },
+  previewBody: { paddingHorizontal: 32, paddingBottom: 48 },
+  previewGreeting: { fontSize: 18, fontWeight: "300", color: "#fff", marginBottom: 8 },
+  previewIntro: { fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 20, marginBottom: 32 },
+  previewCard: { padding: 24, marginBottom: 32 },
+  previewInfoRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
+  previewInfoLabel: { fontSize: 10, textTransform: "uppercase", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
+  previewInfoValue: { fontSize: 14, fontWeight: "600", color: "#fff" },
+  previewButton: { width: "100%", backgroundColor: "#fff", height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginBottom: 32 },
+  previewButtonText: { color: "#000", fontWeight: "700", textTransform: "uppercase", letterSpacing: 2, fontSize: 13 },
+  previewFooterNote: { fontSize: 11, textAlign: "center", color: "rgba(255,255,255,0.4)", fontStyle: "italic", lineHeight: 18, marginBottom: 32 },
+  previewBranding: { fontSize: 9, textAlign: "center", textTransform: "uppercase", letterSpacing: 4, color: "rgba(255,255,255,0.2)" },
+  previewClose: { position: "absolute", top: 20, right: 20, width: 40, height: 40, alignItems: "center", justifyContent: "center" },
 });
