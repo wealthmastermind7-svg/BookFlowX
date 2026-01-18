@@ -2,7 +2,6 @@ import React from "react";
 import { View, Text, StyleSheet, Pressable } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { usePremium } from "@/contexts/PremiumContext";
 
@@ -11,7 +10,6 @@ interface PremiumBannerProps {
 }
 
 export function PremiumBanner({ onPress }: PremiumBannerProps) {
-  const { theme: colors } = useTheme();
   const { isPremium, showPaywall } = usePremium();
 
   if (isPremium) return null;
@@ -26,27 +24,23 @@ export function PremiumBanner({ onPress }: PremiumBannerProps) {
   };
 
   return (
-    <Pressable onPress={handlePress}>
-      <View
-        style={[
-          styles.container,
-          { backgroundColor: colors.backgroundSecondary },
-        ]}
-      >
-        <View style={styles.content}>
-          <View style={[styles.iconContainer, { backgroundColor: "#00CED1" }]}>
-            <Feather name="zap" size={16} color="#000000" />
-          </View>
-          <View style={styles.textContainer}>
-            <Text style={[styles.title, { color: colors.text }]}>
-              Grow faster with Premium
-            </Text>
-            <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
-              Unlimited booking links, QR codes, and website embeds
-            </Text>
+    <Pressable onPress={handlePress} style={({ pressed }) => [pressed && { opacity: 0.9 }]}>
+      <View style={styles.container}>
+        <View style={styles.iconContainer}>
+          <Feather name="zap" size={20} color="#fff" />
+        </View>
+        <View style={styles.textContainer}>
+          <Text style={styles.title}>Unlock Advanced Automation</Text>
+          <Text style={styles.subtitle}>
+            Smart reminders, instant setup, upsell suggestions
+          </Text>
+          <View style={styles.pricingRow}>
+            <Text style={styles.priceText}>$7.99/mo</Text>
+            <View style={styles.priceDot} />
+            <Text style={styles.priceText}>$69.99/yr</Text>
           </View>
         </View>
-        <Feather name="chevron-right" size={20} color={colors.textSecondary} />
+        <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
       </View>
     </Pressable>
   );
@@ -56,34 +50,52 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    padding: Spacing.lg,
+    padding: 24,
+    gap: 18,
     borderRadius: BorderRadius.lg,
     marginHorizontal: Spacing.xl,
     marginBottom: Spacing.xl,
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-    flex: 1,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
   },
   iconContainer: {
-    width: 32,
-    height: 32,
+    width: 52,
+    height: 52,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    marginRight: Spacing.md,
+    backgroundColor: "rgba(255,255,255,0.1)",
   },
   textContainer: {
     flex: 1,
   },
   title: {
-    fontSize: 15,
-    fontWeight: "600",
-    marginBottom: 2,
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
   },
   subtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  pricingRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  priceText: {
     fontSize: 13,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.7)",
+  },
+  priceDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
 });

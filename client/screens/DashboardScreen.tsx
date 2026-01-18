@@ -461,15 +461,20 @@ export default function DashboardScreen() {
             <Pressable onPress={() => showPaywall("soft_upsell")}>
               <GlassPanel style={styles.premiumBanner}>
                 <View style={styles.premiumIconContainer}>
-                  <Feather name="zap" size={16} color="white" />
+                  <Feather name="zap" size={20} color="#fff" />
                 </View>
                 <View style={styles.premiumContent}>
-                  <Animated.Text style={styles.premiumTitle}>Grow faster with Premium</Animated.Text>
+                  <Animated.Text style={styles.premiumTitle}>Unlock Advanced Automation</Animated.Text>
                   <Animated.Text style={styles.premiumSubtitle}>
-                    Unlimited booking links, QR codes, and website embeds
+                    Smart reminders, instant setup, upsell suggestions
                   </Animated.Text>
+                  <View style={styles.premiumPricing}>
+                    <Animated.Text style={styles.premiumPrice}>$7.99/mo</Animated.Text>
+                    <View style={styles.premiumPriceDot} />
+                    <Animated.Text style={styles.premiumPrice}>$69.99/yr</Animated.Text>
+                  </View>
                 </View>
-                <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+                <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
               </GlassPanel>
             </Pressable>
           )}
@@ -685,15 +690,17 @@ const styles = StyleSheet.create({
   premiumBanner: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 20,
-    gap: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    padding: 24,
+    gap: 18,
+    backgroundColor: "rgba(255,255,255,0.06)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.12)",
   },
   premiumIconContainer: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: "#06B6D4",
+    width: 52,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -701,15 +708,32 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   premiumTitle: {
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
   },
   premiumSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+    lineHeight: 20,
+    marginBottom: 8,
+  },
+  premiumPricing: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  premiumPrice: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.6)",
-    lineHeight: 18,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.7)",
+  },
+  premiumPriceDot: {
+    width: 3,
+    height: 3,
+    borderRadius: 2,
+    backgroundColor: "rgba(255,255,255,0.3)",
   },
   metersRow: {
     flexDirection: "row",
