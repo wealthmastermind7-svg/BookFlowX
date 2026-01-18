@@ -603,4 +603,32 @@ export async function getCustomerInsights(businessId: string): Promise<CustomerI
   }
 }
 
+export interface UpsellSuggestion {
+  name: string;
+  description: string;
+  price: number;
+  reason: string;
+}
+
+export async function getUpsellSuggestions(
+  serviceName: string,
+  serviceDescription: string,
+  servicePrice: number,
+  businessType?: string,
+  currency?: string
+): Promise<UpsellSuggestion[]> {
+  try {
+    const response = await fetch(new URL("/api/ai/upsell-suggestions", getApiUrl()).toString(), {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ serviceName, serviceDescription, servicePrice, businessType, currency }),
+    });
+    if (!response.ok) return [];
+    const data = await response.json();
+    return data.suggestions || [];
+  } catch {
+    return [];
+  }
+}
+
 export const api = new ApiClient();

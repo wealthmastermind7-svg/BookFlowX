@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, TextInput, Dimensions } from "react-native";
+import { View, StyleSheet, Pressable, TextInput, Dimensions, ActivityIndicator } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -15,6 +15,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Service, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
+import { getUpsellSuggestions, UpsellSuggestion } from "@/lib/api";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -31,6 +32,9 @@ export default function CheckoutScreen() {
   const [customerPhone, setCustomerPhone] = useState("");
   const [service, setService] = useState<Service | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [upsellSuggestions, setUpsellSuggestions] = useState<UpsellSuggestion[]>([]);
+  const [selectedAddons, setSelectedAddons] = useState<Set<number>>(new Set());
+  const [loadingUpsells, setLoadingUpsells] = useState(false);
 
   const serviceId = (route.params as any)?.serviceId || "";
   const timeSlotId = (route.params as any)?.timeSlotId || "";
@@ -42,7 +46,54 @@ export default function CheckoutScreen() {
   const loadService = async () => {
     const services = await StorageService.getServices();
     const found = services.find((s) => s.id === serviceId);
-    if (found) setService(found);
+    if (found) {
+      setService(found);
+      loadUpsellSuggestions(found);
+    }
+  };
+
+  const loadUpsellSuggestions = async (svc: Service) => {
+    setLoadingUpsells(true);
+    try {
+      const suggestions = await getUpsellSuggestions(
+        svc.name,
+        svc.description || "",
+        svc.price / 100
+      );
+      setUpsellSuggestions(suggestions);
+    } catch (error) {
+      console.log("[Upsell] Error loading suggestions:", error);
+    } finally {
+      setLoadingUpsells(false);
+    }
+  };
+
+  const toggleAddon = (index: number) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setSelectedAddons((prev) => {
+      const updated = new Set(prev);
+      if (updated.has(index)) {
+        updated.delete(index);
+      } else {
+        updated.add(index);
+      }
+      return updated;
+    });
+  };
+
+  const getAddonsTotal = () => {
+    let total = 0;
+    selectedAddons.forEach((index) => {
+      const addon = upsellSuggestions[index];
+      if (addon) {
+        total += addon.price * 100;
+      }
+    });
+    return total;
+  };
+
+  const getTotalPrice = () => {
+    return (service?.price || 0) + getAddonsTotal();
   };
 
   const parseTimeSlot = () => {
@@ -80,16 +131,22 @@ export default function CheckoutScreen() {
 
     try {
       const bookingId = `booking_${Date.now()}`;
+      const selectedAddonNames = Array.from(selectedAddons)
+        .map((idx) => upsellSuggestions[idx]?.name)
+        .filter(Boolean);
+      const serviceName = selectedAddonNames.length > 0
+        ? `${service?.name || "Service"} + ${selectedAddonNames.join(", ")}`
+        : (service?.name || "Service");
       const booking: Booking = {
         id: bookingId,
         customerId: `customer_${Date.now()}`,
         customerName: customerName.trim(),
         serviceId,
-        serviceName: service?.name || "Service",
+        serviceName,
         date: date.toISOString().split("T")[0],
         time,
         status: "confirmed",
-        totalPrice: service?.price || 0,
+        totalPrice: getTotalPrice(),
         createdAt: new Date().toISOString(),
       };
 
@@ -199,6 +256,57 @@ export default function CheckoutScreen() {
           </View>
         </Animated.View>
 
+        {(loadingUpsells || upsellSuggestions.length > 0) && (
+          <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
+            <View style={styles.upsellHeader}>
+              <Feather name="zap" size={16} color={isDark ? "#FFD700" : "#D4A017"} />
+              <ThemedText style={styles.upsellTitle}>Enhance Your Booking</ThemedText>
+            </View>
+            <ThemedText style={styles.upsellSubtitle}>Optional add-ons to get more value</ThemedText>
+            
+            {loadingUpsells ? (
+              <View style={styles.upsellLoading}>
+                <ActivityIndicator size="small" color={theme.text} />
+              </View>
+            ) : (
+              <View style={styles.upsellList}>
+                {upsellSuggestions.map((addon, index) => (
+                  <Pressable
+                    key={index}
+                    onPress={() => toggleAddon(index)}
+                    style={[
+                      styles.addonCard,
+                      {
+                        borderColor: selectedAddons.has(index)
+                          ? (isDark ? "#FFD700" : "#D4A017")
+                          : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"),
+                        backgroundColor: selectedAddons.has(index)
+                          ? (isDark ? "rgba(255,215,0,0.1)" : "rgba(212,160,23,0.08)")
+                          : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)"),
+                      },
+                    ]}
+                  >
+                    <View style={styles.addonCheckbox}>
+                      {selectedAddons.has(index) ? (
+                        <Feather name="check-circle" size={20} color={isDark ? "#FFD700" : "#D4A017"} />
+                      ) : (
+                        <Feather name="circle" size={20} color={theme.textTertiary} />
+                      )}
+                    </View>
+                    <View style={styles.addonContent}>
+                      <ThemedText style={styles.addonName}>{addon.name}</ThemedText>
+                      <ThemedText style={styles.addonDescription}>{addon.description}</ThemedText>
+                    </View>
+                    <ThemedText style={styles.addonPrice}>
+                      +{formatPrice(addon.price * 100)}
+                    </ThemedText>
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </Animated.View>
+        )}
+
         <Animated.View entering={FadeInUp.delay(200).springify()}>
           <BlurView
             intensity={isDark ? 30 : 50}
@@ -218,6 +326,15 @@ export default function CheckoutScreen() {
               <ThemedText style={styles.summaryValue}>{service?.name || "--"}</ThemedText>
             </View>
 
+            {selectedAddons.size > 0 && (
+              <View style={styles.summaryRow}>
+                <ThemedText style={styles.summaryLabel}>Add-ons ({selectedAddons.size})</ThemedText>
+                <ThemedText style={styles.summaryValue}>
+                  +{formatPrice(getAddonsTotal())}
+                </ThemedText>
+              </View>
+            )}
+
             <View style={styles.summaryRow}>
               <ThemedText style={styles.summaryLabel}>Date</ThemedText>
               <ThemedText style={styles.summaryValue}>{formatDate()}</ThemedText>
@@ -231,7 +348,7 @@ export default function CheckoutScreen() {
             <View style={[styles.summaryRow, styles.totalRow]}>
               <ThemedText style={styles.totalLabel}>Total amount</ThemedText>
               <ThemedText style={styles.totalValue}>
-                {service ? formatPrice(service.price) : "--"}
+                {service ? formatPrice(getTotalPrice()) : "--"}
               </ThemedText>
             </View>
           </BlurView>
@@ -426,5 +543,59 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: "500",
     opacity: 0.4,
+  },
+  upsellSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  upsellHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: Spacing.xs,
+  },
+  upsellTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+  },
+  upsellSubtitle: {
+    fontSize: 13,
+    opacity: 0.5,
+    marginBottom: Spacing.lg,
+  },
+  upsellLoading: {
+    paddingVertical: Spacing["2xl"],
+    alignItems: "center",
+  },
+  upsellList: {
+    gap: Spacing.md,
+  },
+  addonCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1.5,
+    gap: Spacing.md,
+  },
+  addonCheckbox: {
+    width: 24,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addonContent: {
+    flex: 1,
+  },
+  addonName: {
+    fontSize: 15,
+    fontWeight: "600",
+    marginBottom: 2,
+  },
+  addonDescription: {
+    fontSize: 12,
+    opacity: 0.5,
+  },
+  addonPrice: {
+    fontSize: 15,
+    fontWeight: "600",
   },
 });
