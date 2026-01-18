@@ -25,6 +25,7 @@ interface BookingConfirmationData {
   hoursToGo?: number;
   businessWebsite?: string;
   businessPhone?: string;
+  addons?: { name: string; price: number }[];
 }
 
 const CURRENCY_SYMBOLS: Record<string, string> = {
@@ -111,6 +112,20 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
                     </table>
                   </td>
                 </tr>
+
+                ${data.addons && data.addons.length > 0 ? data.addons.map(addon => `
+                <!-- Add-on -->
+                <tr>
+                  <td style="padding: 4px 24px;">
+                    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">
+                      <tr>
+                        <td style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.3);">+ ${addon.name}</td>
+                        <td style="text-align: right; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.7);">${getCurrencySymbol(data.currency || "USD")}${(addon.price / 100).toFixed(2)}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+                `).join('') : ''}
                 
                 <!-- Date -->
                 <tr>

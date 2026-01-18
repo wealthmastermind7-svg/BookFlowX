@@ -315,6 +315,15 @@ async function executeEmailAction(
   }
 
   try {
+    let addons: { name: string; price: number }[] | undefined;
+    if (context.booking.addons) {
+      try {
+        addons = JSON.parse(context.booking.addons);
+      } catch (e) {
+        console.error("[Workflow] Failed to parse booking addons:", e);
+      }
+    }
+
     await sendBookingConfirmation({
       businessName: context.business.name,
       customerName: context.customer.name,
@@ -328,6 +337,7 @@ async function executeEmailAction(
       isReminder: delayMinutes !== 0 && delayMinutes !== undefined,
       businessWebsite: context.business.website || undefined,
       businessPhone: context.business.phone || undefined,
+      addons,
     });
 
     // Mark email sent timestamp on booking based on reminder timing
