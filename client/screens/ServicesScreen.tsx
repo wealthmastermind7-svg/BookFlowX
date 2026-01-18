@@ -290,7 +290,6 @@ export default function ServicesScreen() {
           description: svc.description,
           duration: svc.duration,
           price: Math.round(svc.price * 100),
-          bufferTime: svc.bufferTime,
         });
       }
       
