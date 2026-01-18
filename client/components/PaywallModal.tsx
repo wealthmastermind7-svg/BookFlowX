@@ -244,7 +244,7 @@ export function PaywallModal({
                   </View>
                   <View style={styles.featureItem}>
                     <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Professional branded booking page</Text>
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Booking page with your business name</Text>
                   </View>
                 </View>
               </View>
