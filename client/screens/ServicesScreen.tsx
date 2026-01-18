@@ -11,7 +11,7 @@ import {
   TextInput,
   ActivityIndicator,
   Alert,
-  ScrollView,
+  KeyboardAvoidingView,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -20,6 +20,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
+import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
@@ -332,28 +333,36 @@ export default function ServicesScreen() {
 
   const renderAIModal = () => (
     <Modal visible={aiModalVisible} transparent animationType="slide">
-      <View style={styles.modalOverlay}>
-        <View style={styles.modalContent}>
+      <KeyboardAvoidingView 
+        style={styles.modalOverlay} 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+      >
+        <Pressable style={styles.modalDismiss} onPress={() => setAiModalVisible(false)} />
+        <View style={[styles.modalContent, { paddingBottom: insets.bottom + 20 }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
               {aiStep === "input" ? "AI Service Setup" : "Review Services"}
             </Text>
-            <Pressable onPress={() => setAiModalVisible(false)}>
+            <Pressable onPress={() => setAiModalVisible(false)} hitSlop={12}>
               <Feather name="x" size={24} color="#fff" />
             </Pressable>
           </View>
 
           {aiStep === "input" ? (
-            <>
+            <KeyboardAwareScrollView 
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
               <Text style={styles.modalSubtitle}>
                 Describe your services in plain language
               </Text>
               <TextInput
                 style={styles.aiInput}
-                placeholder="e.g., I offer 30-minute haircuts for $25, color treatments for 2 hours at $150, and quick beard trims for $15..."
+                placeholder="e.g., I offer 30-minute haircuts for $25, color treatments for 2 hours at $150..."
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 multiline
-                numberOfLines={5}
+                numberOfLines={4}
                 value={aiDescription}
                 onChangeText={setAiDescription}
                 textAlignVertical="top"
@@ -368,30 +377,32 @@ export default function ServicesScreen() {
                 ) : (
                   <>
                     <Feather name="zap" size={18} color="#000" />
-                    <Text style={styles.aiGenerateText}>Generate Services</Text>
+                    <Text style={styles.aiGenerateText}>Generate</Text>
                   </>
                 )}
               </Pressable>
-            </>
+            </KeyboardAwareScrollView>
           ) : (
-            <>
+            <KeyboardAwareScrollView 
+              style={styles.modalScroll}
+              contentContainerStyle={styles.modalScrollContent}
+              keyboardShouldPersistTaps="handled"
+            >
               <Text style={styles.modalSubtitle}>
                 {aiServices.length} services generated
               </Text>
-              <ScrollView style={styles.aiServicesList}>
-                {aiServices.map((svc, idx) => (
-                  <View key={idx} style={styles.aiServiceCard}>
-                    <Text style={styles.aiServiceName}>{svc.name}</Text>
-                    <Text style={styles.aiServiceDesc}>{svc.description}</Text>
-                    <View style={styles.aiServiceDetails}>
-                      <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
-                      <Text style={styles.aiServicePrice}>
-                        {formatPriceSimple(svc.price, business?.currency || "USD")}
-                      </Text>
-                    </View>
+              {aiServices.map((svc, idx) => (
+                <View key={idx} style={styles.aiServiceCard}>
+                  <Text style={styles.aiServiceName}>{svc.name}</Text>
+                  <Text style={styles.aiServiceDesc}>{svc.description}</Text>
+                  <View style={styles.aiServiceDetails}>
+                    <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
+                    <Text style={styles.aiServicePrice}>
+                      {formatPriceSimple(svc.price, business?.currency || "USD")}
+                    </Text>
                   </View>
-                ))}
-              </ScrollView>
+                </View>
+              ))}
               <View style={styles.aiButtonRow}>
                 <Pressable style={styles.aiBackButton} onPress={() => setAiStep("input")}>
                   <Text style={styles.aiBackText}>Edit</Text>
@@ -404,14 +415,14 @@ export default function ServicesScreen() {
                   {aiGenerating ? (
                     <ActivityIndicator color="#000" />
                   ) : (
-                    <Text style={styles.aiConfirmText}>Add All Services</Text>
+                    <Text style={styles.aiConfirmText}>Add All</Text>
                   )}
                 </Pressable>
               </View>
-            </>
+            </KeyboardAwareScrollView>
           )}
         </View>
-      </View>
+      </KeyboardAvoidingView>
     </Modal>
   );
 
@@ -593,16 +604,24 @@ const styles = StyleSheet.create({
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.9)",
+    backgroundColor: "rgba(0,0,0,0.85)",
     justifyContent: "flex-end",
+  },
+  modalDismiss: {
+    flex: 1,
   },
   modalContent: {
     backgroundColor: "#111",
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     padding: 24,
-    paddingBottom: 40,
-    maxHeight: "85%",
+    maxHeight: "70%",
+  },
+  modalScroll: {
+    flex: 1,
+  },
+  modalScrollContent: {
+    paddingBottom: 20,
   },
   modalHeader: {
     flexDirection: "row",
@@ -647,10 +666,6 @@ const styles = StyleSheet.create({
   },
   buttonDisabled: {
     opacity: 0.5,
-  },
-  aiServicesList: {
-    maxHeight: 300,
-    marginBottom: 20,
   },
   aiServiceCard: {
     backgroundColor: "rgba(255,255,255,0.05)",
