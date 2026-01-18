@@ -295,7 +295,7 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {offerings?.current?.annual?.product.priceString || "Yearly"}
+                      {offerings?.annual?.product.priceString || "Yearly"}
                     </Text>
                   </View>
                 </Pressable>
@@ -322,7 +322,7 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
-                      {offerings?.current?.monthly?.product.priceString || "Monthly"}
+                      {offerings?.monthly?.product.priceString || "Monthly"}
                     </Text>
                   </View>
                 </Pressable>
@@ -349,7 +349,7 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
-                      {offerings?.current?.lifetime?.product.priceString || "Lifetime"}
+                      {offerings?.lifetime?.product.priceString || "Lifetime"}
                     </Text>
                   </View>
                 </Pressable>
