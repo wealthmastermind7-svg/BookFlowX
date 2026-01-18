@@ -388,10 +388,7 @@ export default function WorkflowsScreen() {
             }}
           >
             <View style={styles.headerRow}>
-              <View style={{ flex: 1 }}>
-                <ThemedText style={styles.title}>Automation</ThemedText>
-                <ThemedText style={styles.title}>Workflows</ThemedText>
-              </View>
+              <ThemedText style={styles.title}>Automation Workflows</ThemedText>
               <Pressable style={styles.addBtn} onPress={() => setBlueprintModalVisible(true)}>
                 <Feather name="plus" size={20} color="#000" />
                 <ThemedText style={styles.addBtnText}>Choose template</ThemedText>
@@ -446,9 +443,9 @@ export default function WorkflowsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlay: { flex: 1 },
-  headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 40 },
-  title: { fontSize: 48, fontWeight: "800", color: "#fff", letterSpacing: -2, lineHeight: 48 },
-  addBtn: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
+  headerRow: { flexDirection: "column", gap: 16, marginBottom: 40 },
+  title: { fontSize: 40, fontWeight: "800", color: "#fff", letterSpacing: -2 },
+  addBtn: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: "#fff", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
   addBtnText: { color: "#000", fontWeight: "700", fontSize: 14 },
   glassCard: { backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 32, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", marginBottom: 16, overflow: "hidden" },
   workflowCard: { padding: 24 },
@@ -485,7 +482,7 @@ const styles = StyleSheet.create({
   headerImgPlaceholder: { height: 240, backgroundColor: "#111", justifyContent: "flex-end" },
   headerOverlay: { padding: 32, paddingBottom: 40 },
   previewStatus: { fontSize: 10, textTransform: "uppercase", letterSpacing: 4, color: "rgba(255,255,255,0.5)", marginBottom: 8 },
-  previewTitle: { fontSize: 56, fontWeight: "800", letterSpacing: -2, color: "#fff" },
+  previewTitle: { fontSize: 42, fontWeight: "800", letterSpacing: -2, color: "#fff" },
   previewBody: { paddingHorizontal: 32, paddingBottom: 48, paddingTop: 30 },
   previewGreeting: { fontSize: 18, fontWeight: "300", color: "#fff", marginBottom: 8 },
   previewIntro: { fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 20, marginBottom: 32 },
