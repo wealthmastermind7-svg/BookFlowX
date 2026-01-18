@@ -99,10 +99,15 @@ export default function ServiceEditorScreen() {
     
     try {
       const apiUrl = getApiUrl();
-      console.log("[Upsell] Fetching suggestions for:", service.name);
-      const response = await fetch(`${apiUrl}/api/ai/upsell-suggestions`, {
+      const fullUrl = `${apiUrl}api/ai/upsell-suggestions`;
+      console.log("[Upsell] Calling:", fullUrl);
+      
+      const response = await fetch(fullUrl, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: { 
+          "Content-Type": "application/json",
+          "Accept": "application/json"
+        },
         body: JSON.stringify({
           serviceName: service.name,
           serviceDescription: service.description || "",
@@ -113,16 +118,22 @@ export default function ServiceEditorScreen() {
       });
       
       console.log("[Upsell] Response status:", response.status);
-      const data = await response.json();
-      console.log("[Upsell] Response data:", JSON.stringify(data));
       
-      if (response.ok && data.suggestions) {
-        setUpsells(data.suggestions);
-      } else {
-        console.log("[Upsell] No suggestions in response");
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        console.log("[Upsell] Non-JSON response, content-type:", contentType);
+        setUpsells([]);
+        return;
       }
-    } catch (error) {
-      console.error("[Upsell] Error getting upsells:", error);
+      
+      const data = await response.json();
+      console.log("[Upsell] Suggestions count:", data.suggestions?.length || 0);
+      
+      if (response.ok && data.suggestions && data.suggestions.length > 0) {
+        setUpsells(data.suggestions);
+      }
+    } catch (error: any) {
+      console.error("[Upsell] Error:", error?.message || error);
     } finally {
       setUpsellLoading(false);
     }
