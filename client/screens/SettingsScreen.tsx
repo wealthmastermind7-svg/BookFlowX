@@ -632,7 +632,7 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlay: { flex: 1 },
   sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12 },
-  sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2 },
+  sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2.5 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
   glassCard: { borderRadius: 32, borderWidth: 1, overflow: "hidden" },
@@ -667,12 +667,12 @@ const styles = StyleSheet.create({
   gridRow: { flexDirection: "row", gap: 12 },
   gridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
   gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
-  gridLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2, marginBottom: 4 },
+  gridLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5, marginBottom: 4 },
   gridValue: { fontSize: 18, fontWeight: "700", color: "#fff" },
   multiRowCard: { paddingVertical: 8 },
   infoRow: { flexDirection: "row", alignItems: "center", padding: 24 },
   rowDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginHorizontal: 24 },
-  infoLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
+  infoLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5 },
   infoValue: { fontSize: 15, fontWeight: "600", color: "#fff", marginTop: 2 },
 
   parallaxIconBox: { 

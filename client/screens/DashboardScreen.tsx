@@ -776,6 +776,7 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(255,255,255,0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
+    letterSpacing: -1.5,
   },
   glassPanel: {
     borderRadius: 16,
@@ -806,6 +807,7 @@ const styles = StyleSheet.create({
     textShadowColor: "rgba(255,255,255,0.2)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
+    letterSpacing: -2,
   },
   premiumBanner: {
     flexDirection: "row",

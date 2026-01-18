@@ -123,7 +123,7 @@ export default function CalendarScreen() {
     navigation.navigate("BlockedSlots", { date: selectedDateStr });
   };
 
-  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long" }).toUpperCase();
+  const monthName = currentMonth.toLocaleDateString("en-US", { month: "long" });
   const yearName = currentMonth.getFullYear();
 
   const containerStyle = useAnimatedStyle(() => ({
@@ -298,18 +298,19 @@ const styles = StyleSheet.create({
     fontSize: 56,
     fontWeight: "300",
     color: "#fff",
-    letterSpacing: -2,
+    letterSpacing: -2.5,
     lineHeight: 64,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
     flexShrink: 1,
+    textTransform: "capitalize",
   },
   hugeYear: {
     fontSize: 56,
     fontWeight: "200",
     color: "rgba(255,255,255,0.6)",
-    letterSpacing: -1,
+    letterSpacing: -1.5,
     lineHeight: 64,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
@@ -413,6 +414,7 @@ const styles = StyleSheet.create({
     fontSize: 36,
     fontWeight: "700",
     color: "white",
+    letterSpacing: -1.5,
   },
   selectedDateSub: {
     fontSize: 14,
