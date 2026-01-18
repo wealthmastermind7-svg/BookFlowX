@@ -369,6 +369,15 @@ export default function SettingsScreen() {
     </Pressable>
   );
 
+  const SectionTitleBadge = ({ children, label }: any) => (
+    <View style={styles.sectionTitleRow}>
+      <View>
+        <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
+        {label && <ThemedText style={{ fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 1.5, marginTop: 4 }}>{label}</ThemedText>}
+      </View>
+    </View>
+  );
+
   const SectionTitle = ({ children, badge }: any) => (
     <View style={styles.sectionTitleRow}>
       <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
@@ -477,11 +486,11 @@ export default function SettingsScreen() {
 
             <View style={{ height: 32 }} />
 
-            <SectionTitle>Business</SectionTitle>
+            <SectionTitleBadge label="BUSINESS DETAILS">Public Profile</SectionTitleBadge>
             <View style={styles.gridRow}>
               <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
                 <View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View>
-                <ThemedText style={styles.gridLabel}>ENTITY</ThemedText>
+                <ThemedText style={styles.gridLabel}>BUSINESS NAME</ThemedText>
                 <ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText>
               </GlassCard>
               <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}>
@@ -491,9 +500,9 @@ export default function SettingsScreen() {
               </GlassCard>
             </View>
             <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}>
-              <InfoRow icon="globe" label="BUSINESS WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+              <InfoRow icon="globe" label="PUBLIC WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
               <View style={styles.rowDivider} />
-              <InfoRow icon="phone" label="CUSTOMER SUPPORT" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+              <InfoRow icon="phone" label="PUBLIC SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
             </GlassCard>
 
             <View style={{ height: 32 }} />
