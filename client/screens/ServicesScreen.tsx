@@ -28,7 +28,7 @@ import { api, Service, Business } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { formatPriceSimple } from "@/lib/currency";
 
-const silkBackground = require("../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
 

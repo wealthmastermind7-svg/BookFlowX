@@ -29,7 +29,7 @@ import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const shadowBackground = require("../../attached_assets/generated_images/abstract_black_and_white_shifting_shadows_background.png");
+const shadowBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type CalendarScreenNavigationProp = NativeStackNavigationProp<CalendarStackParamList, "CalendarMain">;
 

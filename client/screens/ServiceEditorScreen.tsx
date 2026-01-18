@@ -39,7 +39,7 @@ import QRCode from "react-native-qrcode-svg";
 
 import { usePremium } from "@/contexts/PremiumContext";
 
-const silkBackground = require("../../attached_assets/generated_images/black_silk_flowing_fabric_background_for_services.png");
+const silkBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type EditScreenNavigationProp = NativeStackNavigationProp<
   RootStackParamList,

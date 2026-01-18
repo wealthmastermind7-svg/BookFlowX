@@ -31,7 +31,7 @@ import { formatPrice } from "@/lib/currency";
 import { usePremium } from "@/contexts/PremiumContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
-const smokeBackground = require("../../attached_assets/generated_images/abstract_dark_smoke_fluid_motion.png");
+const smokeBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
