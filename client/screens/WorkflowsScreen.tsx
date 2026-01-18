@@ -300,7 +300,10 @@ export default function WorkflowsScreen() {
             }}
           >
             <View style={styles.headerRow}>
-              <ThemedText style={styles.title}>Automation Workflows</ThemedText>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.title}>Automation</ThemedText>
+                <ThemedText style={styles.title}>Workflows</ThemedText>
+              </View>
               <Pressable style={styles.addBtn} onPress={() => setBlueprintModalVisible(true)}>
                 <Feather name="plus" size={20} color="#000" />
                 <ThemedText style={styles.addBtnText}>Choose template</ThemedText>
@@ -353,8 +356,8 @@ export default function WorkflowsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlay: { flex: 1 },
-  headerRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 40 },
-  title: { fontSize: 48, fontWeight: "800", color: "#fff", letterSpacing: -2, flex: 1, marginRight: 16 },
+  headerRow: { flexDirection: "row", alignItems: "flex-start", justifyContent: "space-between", marginBottom: 40 },
+  title: { fontSize: 48, fontWeight: "800", color: "#fff", letterSpacing: -2, lineHeight: 48 },
   addBtn: { flexDirection: "row", alignItems: "center", backgroundColor: "#fff", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
   addBtnText: { color: "#000", fontWeight: "700", fontSize: 14 },
   glassCard: { backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 32, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", marginBottom: 16, overflow: "hidden" },
