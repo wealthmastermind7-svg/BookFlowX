@@ -7,6 +7,12 @@ export interface ServiceLink {
   category: "gallery" | "video" | "external" | "social";
 }
 
+export interface ServiceUpsell {
+  name: string;
+  description: string;
+  price: number;
+}
+
 export interface Service {
   id: string;
   name: string;
@@ -14,6 +20,7 @@ export interface Service {
   price: number;
   description?: string;
   links?: ServiceLink[];
+  upsells?: string; // JSON array of ServiceUpsell objects
 }
 
 export interface Customer {
@@ -43,6 +50,7 @@ export interface Booking {
   status: BookingStatus;
   totalPrice: number;
   createdAt: string;
+  addons?: string; // JSON array of {name, price} objects
 }
 
 const STORAGE_KEYS = {

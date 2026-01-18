@@ -108,6 +108,12 @@ export interface Business {
   updatedAt?: string | null;
 }
 
+export interface ServiceUpsell {
+  name: string;
+  description: string;
+  price: number;
+}
+
 export interface Service {
   id: string;
   businessId: string;
@@ -116,6 +122,7 @@ export interface Service {
   description?: string | null;
   duration: number;
   price: number;
+  upsells?: string | null; // JSON array of ServiceUpsell objects
   isActive?: boolean | null;
   createdAt?: string | null;
 }

@@ -76,7 +76,7 @@ export default function ServiceEditorScreen() {
     description: "",
   });
 
-  const [activeTab, setActiveTab] = useState<"details" | "links">("details");
+  const [activeTab, setActiveTab] = useState<"details" | "upsells" | "links">("details");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [businessReady, setBusinessReady] = useState(!!api.getBusinessId());
@@ -85,7 +85,9 @@ export default function ServiceEditorScreen() {
   const [qrModalVisible, setQrModalVisible] = useState(false);
   const [upsellModalVisible, setUpsellModalVisible] = useState(false);
   const [upsells, setUpsells] = useState<any[]>([]);
+  const [savedUpsells, setSavedUpsells] = useState<{name: string; description: string; price: number}[]>([]);
   const [upsellLoading, setUpsellLoading] = useState(false);
+  const [editingUpsellIndex, setEditingUpsellIndex] = useState<number | null>(null);
   const qrRef = useRef<any>(null);
 
   const serviceId = (route.params as any)?.serviceId;
@@ -140,22 +142,37 @@ export default function ServiceEditorScreen() {
   };
 
   const handleAddUpsell = async (upsell: any) => {
-    try {
-      setUpsellLoading(true);
-      await api.createService({
-        name: upsell.name,
-        description: upsell.description,
-        duration: 15, // Default for add-ons
-        price: Math.round(upsell.price * 100),
-      });
-      try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
-      setUpsells(prev => prev.filter(u => u.name !== upsell.name));
-    } catch (error) {
-      console.error("Error adding upsell:", error);
-      Alert.alert("Error", "Failed to add upsell service");
-    } finally {
-      setUpsellLoading(false);
-    }
+    try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
+    setSavedUpsells(prev => [...prev, {
+      name: upsell.name,
+      description: upsell.description || upsell.reason || "",
+      price: upsell.price,
+    }]);
+    setUpsells(prev => prev.filter(u => u.name !== upsell.name));
+  };
+
+  const handleRemoveUpsell = (index: number) => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    Alert.alert(
+      "Remove Add-on",
+      `Remove "${savedUpsells[index].name}" from your add-ons?`,
+      [
+        { text: "Cancel", style: "cancel" },
+        { 
+          text: "Remove", 
+          style: "destructive",
+          onPress: () => setSavedUpsells(prev => prev.filter((_, i) => i !== index))
+        }
+      ]
+    );
+  };
+
+  const handleUpdateUpsell = (index: number, field: 'name' | 'description' | 'price', value: string | number) => {
+    setSavedUpsells(prev => {
+      const updated = [...prev];
+      updated[index] = { ...updated[index], [field]: value };
+      return updated;
+    });
   };
 
   useEffect(() => {
@@ -200,6 +217,16 @@ export default function ServiceEditorScreen() {
       const found = await api.getService(serviceId);
       if (found) {
         setService(found);
+        if (found.upsells) {
+          try {
+            const parsed = JSON.parse(found.upsells);
+            if (Array.isArray(parsed)) {
+              setSavedUpsells(parsed);
+            }
+          } catch (e) {
+            console.error("Error parsing upsells:", e);
+          }
+        }
       }
     } catch (error) {
       console.error("Error loading service:", error);
@@ -319,12 +346,15 @@ export default function ServiceEditorScreen() {
       Keyboard.dismiss();
       await new Promise(resolve => setTimeout(resolve, 100));
       
+      const upsellsJson = savedUpsells.length > 0 ? JSON.stringify(savedUpsells) : null;
+      
       if (serviceId) {
         await api.updateService(serviceId, {
           name: service.name,
           duration: service.duration,
           price: service.price || 0,
           description: service.description,
+          upsells: upsellsJson,
         });
       } else {
         await api.createService({
@@ -332,6 +362,7 @@ export default function ServiceEditorScreen() {
           duration: service.duration,
           price: service.price || 0,
           description: service.description,
+          upsells: upsellsJson,
         });
       }
       try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
@@ -384,6 +415,14 @@ export default function ServiceEditorScreen() {
                 activeTab === "details" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
                 Details
+              </Text>
+            </Pressable>
+            <Pressable onPress={() => setActiveTab("upsells")}>
+              <Text style={[
+                styles.carouselItem,
+                activeTab === "upsells" ? styles.carouselItemActive : styles.carouselItemInactive
+              ]}>
+                Add-ons
               </Text>
             </Pressable>
             <Pressable onPress={() => setActiveTab("links")}>
@@ -462,6 +501,95 @@ export default function ServiceEditorScreen() {
                     style={[styles.inputSecondary, styles.textArea]}
                   />
                 </View>
+              </View>
+            )}
+
+            {activeTab === "upsells" && (
+              <View style={styles.formContainer}>
+                <GlassPanel style={styles.linkCard}>
+                  <View style={styles.labelRow}>
+                    <Text style={styles.linkCardTitle}>Custom Add-ons</Text>
+                    <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
+                      <Feather name="zap" size={12} color="#fff" />
+                      <Text style={styles.aiUpsellTriggerText}>AI Suggest</Text>
+                    </Pressable>
+                  </View>
+                  <Text style={styles.linkCardDesc}>
+                    Add-ons customers can select when booking this service
+                  </Text>
+                  
+                  {savedUpsells.length === 0 ? (
+                    <View style={styles.emptyUpsells}>
+                      <Feather name="package" size={32} color="rgba(255,255,255,0.3)" />
+                      <Text style={styles.emptyUpsellsText}>
+                        No add-ons yet. Tap "AI Suggest" to get smart recommendations.
+                      </Text>
+                    </View>
+                  ) : (
+                    <View style={styles.savedUpsellsList}>
+                      {savedUpsells.map((upsell, index) => (
+                        <View key={index} style={styles.savedUpsellCard}>
+                          {editingUpsellIndex === index ? (
+                            <View style={styles.editUpsellForm}>
+                              <TextInput
+                                value={upsell.name}
+                                onChangeText={(text) => handleUpdateUpsell(index, 'name', text)}
+                                placeholder="Add-on name"
+                                placeholderTextColor="rgba(255,255,255,0.4)"
+                                style={[styles.inputSecondary, { marginBottom: 8 }]}
+                              />
+                              <TextInput
+                                value={upsell.description}
+                                onChangeText={(text) => handleUpdateUpsell(index, 'description', text)}
+                                placeholder="Description"
+                                placeholderTextColor="rgba(255,255,255,0.4)"
+                                multiline
+                                style={[styles.inputSecondary, { marginBottom: 8, minHeight: 60 }]}
+                              />
+                              <View style={styles.priceEditRow}>
+                                <Text style={styles.inputLabel}>{currencySymbol}</Text>
+                                <TextInput
+                                  value={String(upsell.price)}
+                                  onChangeText={(text) => handleUpdateUpsell(index, 'price', parseFloat(text) || 0)}
+                                  keyboardType="decimal-pad"
+                                  style={[styles.inputSecondary, { flex: 1 }]}
+                                />
+                              </View>
+                              <Pressable 
+                                onPress={() => setEditingUpsellIndex(null)} 
+                                style={styles.doneEditButton}
+                              >
+                                <Text style={styles.doneEditButtonText}>Done</Text>
+                              </Pressable>
+                            </View>
+                          ) : (
+                            <>
+                              <View style={styles.savedUpsellInfo}>
+                                <Text style={styles.savedUpsellName}>{upsell.name}</Text>
+                                <Text style={styles.savedUpsellDesc} numberOfLines={2}>{upsell.description}</Text>
+                                <Text style={styles.savedUpsellPrice}>{currencySymbol}{upsell.price}</Text>
+                              </View>
+                              <View style={styles.savedUpsellActions}>
+                                <Pressable 
+                                  onPress={() => setEditingUpsellIndex(index)} 
+                                  style={styles.upsellActionButton}
+                                >
+                                  <Feather name="edit-2" size={16} color="#fff" />
+                                </Pressable>
+                                <Pressable 
+                                  onPress={() => handleRemoveUpsell(index)} 
+                                  style={styles.upsellActionButton}
+                                >
+                                  <Feather name="trash-2" size={16} color="#ff4444" />
+                                </Pressable>
+                              </View>
+                            </>
+                          )}
+                        </View>
+                      ))}
+                    </View>
+                  )}
+                </GlassPanel>
               </View>
             )}
 
@@ -1007,5 +1135,83 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.4)",
     textAlign: "center",
     padding: 20,
+  },
+  emptyUpsells: {
+    alignItems: "center",
+    paddingVertical: 32,
+    gap: 12,
+  },
+  emptyUpsellsText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 14,
+    textAlign: "center",
+    maxWidth: 240,
+    lineHeight: 20,
+  },
+  savedUpsellsList: {
+    gap: 12,
+    marginTop: 8,
+  },
+  savedUpsellCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  savedUpsellInfo: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  savedUpsellName: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  savedUpsellDesc: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 6,
+    lineHeight: 18,
+  },
+  savedUpsellPrice: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#4ade80",
+  },
+  savedUpsellActions: {
+    flexDirection: "row",
+    gap: 8,
+  },
+  upsellActionButton: {
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  editUpsellForm: {
+    flex: 1,
+  },
+  priceEditRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+    marginBottom: 12,
+  },
+  doneEditButton: {
+    backgroundColor: "#fff",
+    borderRadius: 12,
+    paddingVertical: 10,
+    alignItems: "center",
+  },
+  doneEditButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#000",
   },
 });

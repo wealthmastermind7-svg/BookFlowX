@@ -76,6 +76,11 @@ BookFlow utilizes a decoupled frontend and backend architecture.
 - **AI Service Setup Assistant**: Natural language service creation ("45 min haircut for $35" → structured service)
 - **AI Customer Insights Dashboard**: Automatic customer segmentation (VIP, Regular, At-Risk, New) with analytics
 - **AI Upsell Suggestions**: Contextual add-on recommendations during checkout (suggestions only, never forced)
+- **Custom Add-ons**: Business owners can save, edit, and manage their own custom add-ons per service
+  - ServiceEditorScreen has a new "Add-ons" tab for managing saved upsells
+  - AI suggestions can be saved as custom add-ons with editable name, description, and price
+  - CheckoutScreen prioritizes business-defined add-ons over AI suggestions
+  - Database schema: `services.upsells` stores JSON array of {name, description, price} objects
 - **Updated Onboarding**: New Apple-safe onboarding pages highlighting intelligent features
   - Page 1: "Smart Booking Built In" - AI-assisted setup, smart reminders
   - Page 2: "Reduce No-Shows Automatically" - Adaptive timing, fewer missed bookings
