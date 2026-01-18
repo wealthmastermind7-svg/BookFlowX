@@ -491,9 +491,9 @@ export default function SettingsScreen() {
               </GlassCard>
             </View>
             <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}>
-              <InfoRow icon="globe" label="WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
+              <InfoRow icon="globe" label="BUSINESS WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} />
               <View style={styles.rowDivider} />
-              <InfoRow icon="phone" label="SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
+              <InfoRow icon="phone" label="CUSTOMER SUPPORT" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} />
             </GlassCard>
 
             <View style={{ height: 32 }} />
