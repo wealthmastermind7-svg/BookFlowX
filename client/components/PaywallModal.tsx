@@ -216,24 +216,35 @@ export function PaywallModal({
 
               <View style={styles.titleContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>
-                  Unlock Full Access
+                  Unlock Advanced Automation
+                </Text>
+                <Text style={[styles.subtitle, { color: colors.textSecondary, marginBottom: Spacing.lg }]}>
+                  Intelligent features that work quietly in the background
                 </Text>
                 <View style={styles.featuresList}>
                   <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Unlimited booking links</Text>
+                    <Feather name="check" size={16} color="#10B981" />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Smart reminders that reduce no-shows</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color="#10B981" />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Instant service setup in seconds</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color="#10B981" />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Customer insights at a glance</Text>
+                  </View>
+                  <View style={styles.featureItem}>
+                    <Feather name="check" size={16} color="#10B981" />
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Smart upsell suggestions</Text>
                   </View>
                   <View style={styles.featureItem}>
                     <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>QR code booking</Text>
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Unlimited booking links & QR codes</Text>
                   </View>
                   <View style={styles.featureItem}>
                     <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Automated confirmations & reminders</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Professional booking page with your business name</Text>
+                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Professional branded booking page</Text>
                   </View>
                 </View>
               </View>
