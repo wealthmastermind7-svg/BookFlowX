@@ -778,11 +778,4 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
   },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#fff",
-    marginTop: 16,
-    marginBottom: 8,
-  },
 });

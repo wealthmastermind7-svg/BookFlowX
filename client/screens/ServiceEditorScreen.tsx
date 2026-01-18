@@ -31,7 +31,7 @@ import Animated, {
 
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, Service, Business } from "@/lib/api";
-import { getBookingDomain } from "@/lib/query-client";
+import { getBookingDomain, getApiUrl } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -98,7 +98,7 @@ export default function ServiceEditorScreen() {
     setUpsells([]);
     
     try {
-      const apiUrl = api.getApiUrl ? api.getApiUrl() : "";
+      const apiUrl = getApiUrl();
       const response = await fetch(`${apiUrl}/api/ai/upsell-suggestions`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -585,7 +585,7 @@ export default function ServiceEditorScreen() {
           animationType="slide"
           onRequestClose={() => setUpsellModalVisible(false)}
         >
-          <View style={styles.modalOverlay}>
+          <View style={[styles.modalOverlay, { justifyContent: "flex-end", padding: 0 }]}>
             <Pressable style={styles.modalDismiss} onPress={() => setUpsellModalVisible(false)} />
             <View style={[styles.upsellModalContent, { paddingBottom: insets.bottom + 20 }]}>
               <View style={styles.modalHeader}>
@@ -889,5 +889,106 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     color: "#000",
+  },
+  labelRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+    paddingRight: 4,
+  },
+  aiUpsellTrigger: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    gap: 4,
+  },
+  aiUpsellTriggerText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  modalDismiss: {
+    flex: 1,
+  },
+  upsellModalContent: {
+    backgroundColor: "#111",
+    borderTopLeftRadius: 32,
+    borderTopRightRadius: 32,
+    padding: 24,
+    maxHeight: "80%",
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  modalTitle: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  modalSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 24,
+  },
+  modalLoading: {
+    padding: 40,
+    alignItems: "center",
+    gap: 12,
+  },
+  loadingText: {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: 14,
+  },
+  upsellList: {
+    gap: 12,
+  },
+  upsellCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: 16,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  upsellCardInfo: {
+    flex: 1,
+    paddingRight: 12,
+  },
+  upsellName: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 4,
+  },
+  upsellReason: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 8,
+  },
+  upsellPrice: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#4ade80",
+  },
+  addUpsellButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    backgroundColor: "#fff",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  emptyText: {
+    color: "rgba(255,255,255,0.4)",
+    textAlign: "center",
+    padding: 20,
   },
 });
