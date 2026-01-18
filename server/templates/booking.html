@@ -2,191 +2,546 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Book Appointment</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    
     :root {
       --black: #000000;
-      --charcoal: #1a1a1a;
-      --graphite: #2d2d2d;
+      --charcoal: #0a0a0a;
+      --graphite: #141414;
+      --carbon: #1a1a1a;
       --smoke: #6b6b6b;
       --silver: #9e9e9e;
       --pearl: #f5f5f5;
       --white: #ffffff;
+      --glass-bg: rgba(255, 255, 255, 0.03);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-hover: rgba(255, 255, 255, 0.06);
     }
+    
+    @keyframes smokeFloat {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.15; }
+      50% { transform: translateY(-20px) scale(1.05); opacity: 0.25; }
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+    
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--white);
-      color: var(--black);
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+      background: var(--black);
+      color: var(--white);
       min-height: 100vh;
       overflow-x: hidden;
     }
+    
+    .smoke-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    
+    .smoke-wisp {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: smokeFloat 8s ease-in-out infinite;
+    }
+    
+    .smoke-wisp:nth-child(1) {
+      width: 400px;
+      height: 200px;
+      background: radial-gradient(ellipse, rgba(40,40,45,0.5) 0%, transparent 70%);
+      bottom: -50px;
+      left: -100px;
+      animation-delay: 0s;
+    }
+    
+    .smoke-wisp:nth-child(2) {
+      width: 350px;
+      height: 180px;
+      background: radial-gradient(ellipse, rgba(35,35,40,0.4) 0%, transparent 70%);
+      bottom: 0;
+      right: -80px;
+      animation-delay: -2s;
+    }
+    
+    .smoke-wisp:nth-child(3) {
+      width: 500px;
+      height: 150px;
+      background: radial-gradient(ellipse, rgba(30,30,35,0.3) 0%, transparent 70%);
+      bottom: 100px;
+      left: 50%;
+      transform: translateX(-50%);
+      animation-delay: -4s;
+    }
+    
     .container {
       max-width: 480px;
       margin: 0 auto;
-      padding: 24px;
+      padding: 32px 24px;
       min-height: 100vh;
       position: relative;
+      z-index: 1;
     }
-    .bg-text {
-      position: fixed;
-      font-size: 150px;
-      font-weight: 200;
-      color: var(--black);
-      opacity: 0.03;
-      z-index: -1;
-      white-space: nowrap;
-      pointer-events: none;
-      text-transform: uppercase;
-      top: 15%;
-      left: 50%;
-      transform: translateX(-50%);
-    }
+    
     .header {
-      text-align: left;
       margin-bottom: 48px;
-      padding-top: 40px;
+      padding-top: 24px;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
+    
     .header h1 {
-      font-size: 40px;
+      font-size: 56px;
       font-weight: 700;
-      letter-spacing: -1.5px;
-      margin-bottom: 4px;
+      letter-spacing: -2px;
+      margin-bottom: 8px;
+      line-height: 1;
     }
+    
     .header p {
-      color: var(--smoke);
+      color: var(--silver);
       font-size: 18px;
+      font-weight: 300;
+      letter-spacing: 0.5px;
     }
+    
+    .section-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--smoke);
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-bottom: 20px;
+      display: block;
+    }
+    
     .glass-card {
-      background: rgba(255, 255, 255, 0.7);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
+      background: var(--glass-bg);
+      backdrop-filter: blur(40px);
+      -webkit-backdrop-filter: blur(40px);
       border-radius: 24px;
-      padding: 24px;
-      border: 1px solid rgba(0, 0, 0, 0.05);
+      padding: 28px;
+      border: 1px solid var(--glass-border);
       margin-bottom: 16px;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
+    
     .glass-card:hover {
+      background: var(--glass-hover);
+      border-color: rgba(255, 255, 255, 0.12);
       transform: translateY(-2px);
-      background: rgba(255, 255, 255, 0.85);
-      border-color: rgba(0, 0, 0, 0.1);
     }
+    
     .glass-card.selected {
-      border-color: var(--black);
-      border-width: 2px;
+      border-color: rgba(255, 255, 255, 0.4);
+      background: rgba(255, 255, 255, 0.08);
     }
-    .service-name { font-size: 24px; font-weight: 700; margin-bottom: 8px; }
-    .service-meta { display: flex; align-items: baseline; gap: 12px; }
-    .service-duration { font-size: 18px; color: var(--smoke); font-weight: 300; }
-    .service-price { font-size: 28px; font-weight: 200; color: var(--black); }
-    .service-desc { font-size: 16px; color: var(--smoke); margin-top: 12px; line-height: 1.5; }
-
-    .time-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+    
+    .glass-card.static {
+      cursor: default;
+    }
+    
+    .glass-card.static:hover {
+      transform: none;
+    }
+    
+    .service-name {
+      font-size: 28px;
+      font-weight: 600;
+      margin-bottom: 12px;
+      letter-spacing: -0.5px;
+    }
+    
+    .service-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+    }
+    
+    .service-price {
+      font-size: 32px;
+      font-weight: 200;
+      letter-spacing: -1px;
+    }
+    
+    .service-duration {
+      font-size: 16px;
+      color: var(--smoke);
+      font-weight: 400;
+    }
+    
+    .service-desc {
+      font-size: 15px;
+      color: var(--silver);
+      margin-top: 16px;
+      line-height: 1.6;
+      font-weight: 300;
+    }
+    
+    .time-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+    }
+    
     .time-slot {
-      padding: 16px;
+      padding: 18px 12px;
       border-radius: 16px;
       text-align: center;
-      background: rgba(0, 0, 0, 0.03);
-      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
       font-weight: 500;
-      transition: all 0.2s ease;
+      font-size: 15px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       cursor: pointer;
     }
-    .time-slot.selected {
-      background: var(--black);
-      color: var(--white);
+    
+    .time-slot:hover:not(.unavailable) {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
     }
-    .time-slot.unavailable { opacity: 0.3; cursor: not-allowed; text-decoration: line-through; }
-
-    .input-group { margin-bottom: 24px; }
-    .input-group label { display: block; font-size: 14px; font-weight: 600; color: var(--smoke); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    
+    .time-slot.selected {
+      background: var(--white);
+      color: var(--black);
+      border-color: transparent;
+      font-weight: 600;
+    }
+    
+    .time-slot.unavailable {
+      opacity: 0.25;
+      cursor: not-allowed;
+      text-decoration: line-through;
+    }
+    
+    .input-group {
+      margin-bottom: 24px;
+    }
+    
+    .input-group label {
+      display: block;
+      font-size: 12px;
+      font-weight: 500;
+      color: var(--smoke);
+      margin-bottom: 10px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    
     .input-group input {
       width: 100%;
-      padding: 18px;
-      background: rgba(0, 0, 0, 0.04);
-      border: none;
+      padding: 18px 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
       border-radius: 16px;
-      font-size: 18px;
+      font-size: 17px;
+      color: var(--white);
       outline: none;
-      transition: background 0.2s ease;
+      transition: all 0.3s ease;
+      font-family: inherit;
     }
-    .input-group input:focus { background: rgba(0, 0, 0, 0.06); }
-
+    
+    .input-group input::placeholder {
+      color: var(--smoke);
+    }
+    
+    .input-group input:focus {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(255, 255, 255, 0.2);
+    }
+    
+    input[type="date"] {
+      color-scheme: dark;
+    }
+    
     .btn {
       width: 100%;
       padding: 20px;
-      background: var(--black);
-      color: var(--white);
+      background: var(--white);
+      color: var(--black);
       border: none;
       border-radius: 20px;
-      font-size: 18px;
+      font-size: 17px;
       font-weight: 600;
       cursor: pointer;
-      transition: all 0.3s ease;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       margin-top: 12px;
+      font-family: inherit;
     }
-    .btn:disabled { background: var(--silver); cursor: not-allowed; transform: none !important; }
-    .btn:active { transform: scale(0.98); }
-    .btn-secondary { background: transparent; border: 1px solid var(--pearl); color: var(--black); }
-
-    .screen { display: none; animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1); }
-    .screen.active { display: block; }
-    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-
-    .confirmation-hero { text-align: center; padding: 40px 0; }
+    
+    .btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 10px 40px rgba(255,255,255,0.1);
+    }
+    
+    .btn:active {
+      transform: scale(0.98);
+    }
+    
+    .btn:disabled {
+      background: var(--graphite);
+      color: var(--smoke);
+      cursor: not-allowed;
+      transform: none !important;
+      box-shadow: none !important;
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: var(--white);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.05);
+      border-color: rgba(255, 255, 255, 0.25);
+      box-shadow: none;
+    }
+    
+    .screen {
+      display: none;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    
+    .screen.active {
+      display: block;
+    }
+    
+    .confirmation-hero {
+      text-align: center;
+      padding: 60px 0 40px;
+    }
+    
     .checkmark-ring {
-      width: 80px;
-      height: 80px;
-      border-radius: 40px;
-      background: var(--black);
+      width: 100px;
+      height: 100px;
+      border-radius: 50px;
+      background: var(--white);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin: 0 auto 24px;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+      margin: 0 auto 32px;
+      box-shadow: 0 20px 60px rgba(255,255,255,0.15);
     }
-    .checkmark-ring svg { width: 40px; height: 40px; color: var(--white); }
-
-    .summary-item { display: flex; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(0,0,0,0.05); }
-    .summary-item:last-child { border: none; font-weight: 700; font-size: 20px; padding-top: 24px; }
-    .summary-label { color: var(--smoke); }
-
-    #date-input { margin-bottom: 24px; width: 100%; }
+    
+    .checkmark-ring svg {
+      width: 48px;
+      height: 48px;
+      color: var(--black);
+    }
+    
+    .confirmation-hero h2 {
+      font-size: 48px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      letter-spacing: -1.5px;
+    }
+    
+    .confirmation-hero p {
+      color: var(--silver);
+      font-size: 18px;
+      font-weight: 300;
+    }
+    
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 18px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      font-size: 16px;
+    }
+    
+    .summary-item:last-child {
+      border: none;
+      font-weight: 600;
+      font-size: 20px;
+      padding-top: 24px;
+    }
+    
+    .summary-label {
+      color: var(--smoke);
+    }
     
     .addon-item {
       display: flex;
       align-items: center;
-      padding: 14px;
-      background: rgba(0,0,0,0.02);
-      border-radius: 12px;
-      margin-bottom: 10px;
+      padding: 18px;
+      background: rgba(255,255,255,0.02);
+      border-radius: 16px;
+      margin-bottom: 12px;
       cursor: pointer;
-      transition: all 0.2s ease;
-      border: 2px solid transparent;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+      border: 1px solid transparent;
     }
-    .addon-item:hover { background: rgba(0,0,0,0.04); }
-    .addon-item.selected { border-color: var(--black); background: rgba(0,0,0,0.06); }
-    .addon-info { flex: 1; }
-    .addon-name { font-weight: 600; font-size: 16px; margin-bottom: 2px; }
-    .addon-reason { font-size: 13px; color: var(--smoke); }
-    .addon-price { font-weight: 700; font-size: 18px; margin-left: 12px; }
-    .addon-check { width: 24px; height: 24px; border: 2px solid var(--silver); border-radius: 12px; margin-right: 12px; display: flex; align-items: center; justify-content: center; }
-    .addon-item.selected .addon-check { background: var(--black); border-color: var(--black); }
-    .addon-item.selected .addon-check::after { content: ''; display: block; width: 8px; height: 8px; background: white; border-radius: 4px; }
-    .loading-overlay { position: fixed; inset: 0; background: var(--white); display: flex; align-items: center; justify-content: center; z-index: 100; }
+    
+    .addon-item:hover {
+      background: rgba(255,255,255,0.04);
+    }
+    
+    .addon-item.selected {
+      border-color: rgba(255,255,255,0.3);
+      background: rgba(255,255,255,0.06);
+    }
+    
+    .addon-info {
+      flex: 1;
+    }
+    
+    .addon-name {
+      font-weight: 600;
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    
+    .addon-reason {
+      font-size: 14px;
+      color: var(--smoke);
+      line-height: 1.4;
+    }
+    
+    .addon-price {
+      font-weight: 600;
+      font-size: 18px;
+      margin-left: 16px;
+      color: var(--silver);
+    }
+    
+    .addon-check {
+      width: 26px;
+      height: 26px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 13px;
+      margin-right: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+    
+    .addon-item.selected .addon-check {
+      background: var(--white);
+      border-color: var(--white);
+    }
+    
+    .addon-item.selected .addon-check::after {
+      content: '';
+      display: block;
+      width: 10px;
+      height: 10px;
+      background: var(--black);
+      border-radius: 5px;
+    }
+    
+    .loading-overlay {
+      position: fixed;
+      inset: 0;
+      background: var(--black);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+    
+    .loading-text {
+      font-weight: 200;
+      font-size: 28px;
+      letter-spacing: 8px;
+      animation: fadeIn 1s ease;
+    }
+    
+    .loading-bar {
+      width: 120px;
+      height: 2px;
+      background: rgba(255,255,255,0.1);
+      margin-top: 32px;
+      border-radius: 1px;
+      overflow: hidden;
+    }
+    
+    .loading-bar::after {
+      content: '';
+      display: block;
+      width: 40%;
+      height: 100%;
+      background: var(--white);
+      animation: loadingSlide 1.5s ease-in-out infinite;
+    }
+    
+    @keyframes loadingSlide {
+      0% { transform: translateX(-100%); }
+      50% { transform: translateX(250%); }
+      100% { transform: translateX(-100%); }
+    }
+    
+    .date-input-wrapper {
+      margin-bottom: 28px;
+    }
+    
+    .date-input-wrapper input {
+      width: 100%;
+      padding: 16px 20px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      font-size: 16px;
+      color: var(--white);
+      text-align: center;
+      font-weight: 500;
+    }
+    
+    @media (max-width: 380px) {
+      .header h1 {
+        font-size: 44px;
+      }
+      .service-name {
+        font-size: 24px;
+      }
+      .service-price {
+        font-size: 28px;
+      }
+      .time-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+      }
+      .time-slot {
+        padding: 14px 8px;
+        font-size: 14px;
+      }
+    }
   </style>
 </head>
 <body>
+  <div class="smoke-bg">
+    <div class="smoke-wisp"></div>
+    <div class="smoke-wisp"></div>
+    <div class="smoke-wisp"></div>
+  </div>
+
   <div id="loading" class="loading-overlay">
-    <div style="font-weight: 200; font-size: 24px; letter-spacing: 4px;">BOOKFLOW</div>
+    <div class="loading-text">BOOKFLOW</div>
+    <div class="loading-bar"></div>
   </div>
 
   <div class="container" id="app" style="display: none;">
-    <div id="bg-text" class="bg-text">SERVICE</div>
-    
     <div class="header">
       <h1 id="business-name">Business</h1>
       <p id="business-tagline">Premium Booking</p>
@@ -194,16 +549,20 @@
 
     <!-- Screen 1: Services -->
     <div id="screen-1" class="screen active">
+      <span class="section-label">Select Service</span>
       <div id="services-list"></div>
     </div>
 
     <!-- Screen 2: Time -->
     <div id="screen-2" class="screen">
-      <div class="glass-card">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: var(--smoke); margin-bottom: 12px;">SELECT DATE</label>
-        <input type="date" id="date-input" class="input-group input">
+      <span class="section-label">Choose Your Time</span>
+      <div class="glass-card static">
+        <div class="date-input-wrapper">
+          <label class="section-label" style="margin-bottom: 12px;">Select Date</label>
+          <input type="date" id="date-input">
+        </div>
         <div id="slots-container">
-          <label style="display: block; font-size: 14px; font-weight: 600; color: var(--smoke); margin-bottom: 12px;">AVAILABLE TIMES</label>
+          <label class="section-label" style="margin-bottom: 16px;">Available Times</label>
           <div class="time-grid" id="time-slots"></div>
         </div>
       </div>
@@ -213,7 +572,8 @@
 
     <!-- Screen 3: Details -->
     <div id="screen-3" class="screen">
-      <div class="glass-card">
+      <span class="section-label">Your Details</span>
+      <div class="glass-card static">
         <div class="input-group">
           <label>Full Name</label>
           <input type="text" id="customer-name" placeholder="John Smith">
@@ -222,23 +582,24 @@
           <label>Email Address</label>
           <input type="email" id="customer-email" placeholder="john@example.com">
         </div>
-        <div class="input-group">
+        <div class="input-group" style="margin-bottom: 0;">
           <label>Phone Number</label>
           <input type="tel" id="customer-phone" placeholder="(555) 123-4567">
         </div>
       </div>
       
       <!-- Add-on Suggestions -->
-      <div id="addons-container" class="glass-card" style="display: none;">
-        <label style="display: block; font-size: 14px; font-weight: 600; color: var(--smoke); margin-bottom: 16px;">RECOMMENDED ADD-ONS</label>
+      <div id="addons-container" class="glass-card static" style="display: none;">
+        <label class="section-label" style="margin-bottom: 20px;">Recommended Add-Ons</label>
         <div id="addons-list"></div>
       </div>
       
-      <div class="glass-card">
+      <span class="section-label" style="margin-top: 24px;">Booking Summary</span>
+      <div class="glass-card static">
         <div class="summary-item"><span class="summary-label">Service</span><span id="summary-service">-</span></div>
         <div id="summary-addons"></div>
         <div class="summary-item"><span class="summary-label">Date & Time</span><span id="summary-datetime">-</span></div>
-        <div class="summary-item" style="font-weight: 700;"><span class="summary-label">Total Amount</span><span id="summary-total">$0.00</span></div>
+        <div class="summary-item"><span class="summary-label">Total</span><span id="summary-total">$0.00</span></div>
       </div>
       
       <button class="btn" id="btn-confirm">Confirm Booking</button>
@@ -251,14 +612,14 @@
         <div class="checkmark-ring">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
         </div>
-        <h2 style="font-size: 32px; font-weight: 700; margin-bottom: 8px;">Confirmed</h2>
-        <p style="color: var(--smoke); font-size: 18px;">Check your email for details</p>
+        <h2>Confirmed</h2>
+        <p>Check your email for details</p>
       </div>
       
-      <div class="glass-card">
+      <div class="glass-card static">
         <div class="summary-item"><span class="summary-label">Booking ID</span><span id="confirm-id">-</span></div>
         <div class="summary-item"><span class="summary-label">Service</span><span id="confirm-service">-</span></div>
-        <div class="summary-item"><span class="summary-label">Time</span><span id="confirm-datetime">-</span></div>
+        <div class="summary-item"><span class="summary-label">Date & Time</span><span id="confirm-datetime">-</span></div>
       </div>
       
       <button class="btn" id="btn-new-booking">Book Another</button>
@@ -274,7 +635,6 @@
     let upsellSuggestions = [];
     let selectedAddons = [];
 
-    const bgText = document.getElementById('bg-text');
     const pathParts = window.location.pathname.split('/');
     const businessSlug = pathParts[pathParts.indexOf('book') + 1];
 
@@ -292,11 +652,14 @@
         document.getElementById('date-input').min = selectedDate;
         document.getElementById('date-input').value = selectedDate;
         
-        document.getElementById('loading').style.display = 'none';
-        document.getElementById('app').style.display = 'block';
+        setTimeout(() => {
+          document.getElementById('loading').style.display = 'none';
+          document.getElementById('app').style.display = 'block';
+        }, 800);
+        
         setupListeners();
       } catch (e) {
-        document.getElementById('loading').innerHTML = 'Business Not Found';
+        document.getElementById('loading').innerHTML = '<div class="loading-text">Not Found</div>';
       }
     }
 
@@ -316,16 +679,20 @@
 
     function selectService(id) {
       selectedService = services.find(s => s.id === id);
-      bgText.textContent = 'DATE';
       goToStep(2);
       loadSlots();
     }
 
     async function loadSlots() {
       const container = document.getElementById('time-slots');
-      container.innerHTML = 'Loading...';
+      container.innerHTML = '<div style="color: var(--smoke); padding: 20px; text-align: center;">Loading...</div>';
       const res = await fetch(`/api/businesses/${business.id}/slots/${selectedDate}?serviceId=${selectedService.id}`);
       const data = await res.json();
+      
+      if (data.slots.length === 0) {
+        container.innerHTML = '<div style="color: var(--smoke); padding: 20px; text-align: center;">No available times</div>';
+        return;
+      }
       
       container.innerHTML = data.slots.map(s => `
         <div class="time-slot ${s.available ? '' : 'unavailable'}" 
@@ -345,15 +712,12 @@
 
     function goToStep(step) {
       document.querySelectorAll('.screen').forEach((s, i) => s.classList.toggle('active', i + 1 === step));
-      if (step === 1) bgText.textContent = 'SERVICE';
-      if (step === 2) bgText.textContent = 'TIME';
       if (step === 3) {
-        bgText.textContent = 'RESERVE';
         selectedAddons = [];
         updateSummary();
         loadUpsellSuggestions();
       }
-      if (step === 4) bgText.textContent = 'DONE';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     }
     
     async function loadUpsellSuggestions() {
@@ -470,7 +834,7 @@
 
         document.getElementById('confirm-id').textContent = booking.id.substring(0,8).toUpperCase();
         document.getElementById('confirm-service').textContent = selectedService.name;
-        document.getElementById('confirm-datetime').textContent = `${selectedDate} ${selectedTime}`;
+        document.getElementById('confirm-datetime').textContent = `${selectedDate} at ${selectedTime}`;
         goToStep(4);
       } catch (e) {
         alert('Booking failed');
@@ -482,6 +846,8 @@
     function setupListeners() {
       document.getElementById('date-input').onchange = (e) => {
         selectedDate = e.target.value;
+        selectedTime = null;
+        document.getElementById('btn-to-checkout').disabled = true;
         loadSlots();
       };
       document.getElementById('btn-back-1').onclick = () => goToStep(1);
