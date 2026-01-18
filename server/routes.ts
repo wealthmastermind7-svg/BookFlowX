@@ -877,6 +877,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get customer insights (AI-powered analytics)
+  app.get("/api/businesses/:businessId/insights", async (req: Request, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      
+      // Get all customers, bookings, and services for this business
+      const [allCustomers, allBookings, allServices] = await Promise.all([
+        storage.getCustomers(businessId),
+        storage.getBookings(businessId),
+        storage.getServices(businessId),
+      ]);
+      
+      // Transform bookings to match expected format
+      const bookingsForAnalysis = allBookings.map(b => ({
+        customerId: b.customerId,
+        serviceId: b.serviceId,
+        date: b.date,
+        totalPrice: b.totalPrice,
+        status: b.status,
+      }));
+      
+      const { analyzeCustomerInsights } = await import("./ai");
+      const insights = analyzeCustomerInsights(allCustomers, bookingsForAnalysis, allServices);
+      
+      res.json(insights);
+    } catch (error) {
+      console.error("[Insights] Error:", error);
+      res.status(500).json({ error: "Failed to analyze customer insights" });
+    }
+  });
+
   // === QR CODE API ===
   
   // Generate QR code for booking link

@@ -569,4 +569,38 @@ export interface WidgetTheme {
   customCss?: string | null;
 }
 
+export interface CustomerInsight {
+  id: string;
+  name: string;
+  email: string;
+  segment: "vip" | "regular" | "at_risk" | "new";
+  totalBookings: number;
+  totalSpend: number;
+  lastBookingDate: string | null;
+  avgBookingValue: number;
+}
+
+export interface CustomerInsightsResult {
+  topCustomers: CustomerInsight[];
+  atRiskCustomers: CustomerInsight[];
+  newCustomers: CustomerInsight[];
+  mostFrequentServices: { name: string; count: number; revenue: number }[];
+  summary: {
+    totalCustomers: number;
+    vipCount: number;
+    atRiskCount: number;
+    avgCustomerValue: number;
+  };
+}
+
+export async function getCustomerInsights(businessId: string): Promise<CustomerInsightsResult | null> {
+  try {
+    const response = await fetch(new URL(`/api/businesses/${businessId}/insights`, getApiUrl()).toString());
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
+
 export const api = new ApiClient();

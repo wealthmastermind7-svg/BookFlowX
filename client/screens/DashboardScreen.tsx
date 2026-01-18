@@ -26,8 +26,9 @@ import Animated, {
 } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
-import { api, Booking, DashboardStats, Business } from "@/lib/api";
+import { api, Booking, DashboardStats, Business, getCustomerInsights, CustomerInsightsResult } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
+import { Text } from "react-native";
 import { usePremium } from "@/contexts/PremiumContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
@@ -340,6 +341,7 @@ export default function DashboardScreen() {
   const [loading, setLoading] = useState(true);
   const [showAllBookings, setShowAllBookings] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
+  const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
 
   const fadeIn = useSharedValue(0);
 
@@ -389,7 +391,11 @@ export default function DashboardScreen() {
       ]);
       setStats(statsData);
       setBookings(bookingsData);
-      if (businessData) setBusiness(businessData);
+      if (businessData) {
+        setBusiness(businessData);
+        const insightsData = await getCustomerInsights(businessData.id);
+        if (insightsData) setInsights(insightsData);
+      }
     } catch (error) {
       console.error("Error loading data:", error);
     } finally {
@@ -539,6 +545,82 @@ export default function DashboardScreen() {
               )}
             </ScrollView>
           </View>
+
+          {insights && (insights.topCustomers.length > 0 || insights.atRiskCustomers.length > 0 || insights.mostFrequentServices.length > 0) && (
+            <View style={styles.insightsSection}>
+              <Animated.Text style={styles.sectionTitle}>AI Insights</Animated.Text>
+              
+              {insights.topCustomers.length > 0 && (
+                <GlassPanel style={styles.insightCard}>
+                  <View style={styles.insightHeader}>
+                    <View style={[styles.insightIcon, { backgroundColor: "#10B981" }]}>
+                      <Feather name="star" size={14} color="#fff" />
+                    </View>
+                    <Text style={styles.insightTitle}>Top Customers</Text>
+                  </View>
+                  {insights.topCustomers.slice(0, 3).map((customer, idx) => (
+                    <View key={customer.id} style={styles.insightRow}>
+                      <Text style={styles.insightName}>{customer.name}</Text>
+                      <Text style={styles.insightValue}>
+                        {formatPrice(Math.round(customer.totalSpend * 100), business?.currency || "USD")}
+                      </Text>
+                    </View>
+                  ))}
+                </GlassPanel>
+              )}
+
+              {insights.atRiskCustomers.length > 0 && (
+                <GlassPanel style={styles.insightCard}>
+                  <View style={styles.insightHeader}>
+                    <View style={[styles.insightIcon, { backgroundColor: "#EF4444" }]}>
+                      <Feather name="alert-circle" size={14} color="#fff" />
+                    </View>
+                    <Text style={styles.insightTitle}>At-Risk Customers</Text>
+                  </View>
+                  {insights.atRiskCustomers.slice(0, 3).map((customer) => (
+                    <View key={customer.id} style={styles.insightRow}>
+                      <Text style={styles.insightName}>{customer.name}</Text>
+                      <Text style={styles.insightSubtext}>Last: {customer.lastBookingDate || "Never"}</Text>
+                    </View>
+                  ))}
+                </GlassPanel>
+              )}
+
+              {insights.mostFrequentServices.length > 0 && (
+                <GlassPanel style={styles.insightCard}>
+                  <View style={styles.insightHeader}>
+                    <View style={[styles.insightIcon, { backgroundColor: "#8B5CF6" }]}>
+                      <Feather name="trending-up" size={14} color="#fff" />
+                    </View>
+                    <Text style={styles.insightTitle}>Popular Services</Text>
+                  </View>
+                  {insights.mostFrequentServices.slice(0, 3).map((service, idx) => (
+                    <View key={idx} style={styles.insightRow}>
+                      <Text style={styles.insightName}>{service.name}</Text>
+                      <Text style={styles.insightValue}>{service.count} bookings</Text>
+                    </View>
+                  ))}
+                </GlassPanel>
+              )}
+
+              <GlassPanel style={styles.summaryCard}>
+                <View style={styles.summaryRow}>
+                  <View style={styles.summaryItem}>
+                    <Text style={styles.summaryNumber}>{insights.summary.totalCustomers}</Text>
+                    <Text style={styles.summaryLabel}>Customers</Text>
+                  </View>
+                  <View style={styles.summaryItem}>
+                    <Text style={[styles.summaryNumber, { color: "#10B981" }]}>{insights.summary.vipCount}</Text>
+                    <Text style={styles.summaryLabel}>VIP</Text>
+                  </View>
+                  <View style={styles.summaryItem}>
+                    <Text style={[styles.summaryNumber, { color: "#EF4444" }]}>{insights.summary.atRiskCount}</Text>
+                    <Text style={styles.summaryLabel}>At Risk</Text>
+                  </View>
+                </View>
+              </GlassPanel>
+            </View>
+          )}
         </ScrollView>
       </Animated.View>
     </ImageBackground>
@@ -798,5 +880,78 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "rgba(255,255,255,0.6)",
     textAlign: "center",
+  },
+  insightsSection: {
+    marginTop: 24,
+    gap: 12,
+  },
+  sectionTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  insightCard: {
+    padding: 16,
+  },
+  insightHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    marginBottom: 12,
+  },
+  insightIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  insightTitle: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  insightRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.08)",
+  },
+  insightName: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    flex: 1,
+  },
+  insightValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  insightSubtext: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.5)",
+  },
+  summaryCard: {
+    padding: 20,
+  },
+  summaryRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+  },
+  summaryItem: {
+    alignItems: "center",
+  },
+  summaryNumber: {
+    fontSize: 28,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  summaryLabel: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
+    marginTop: 4,
   },
 });
