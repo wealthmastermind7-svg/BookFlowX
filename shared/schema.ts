@@ -56,6 +56,7 @@ export const services = pgTable("services", {
   description: text("description"),
   duration: integer("duration").notNull(),
   price: integer("price").notNull(),
+  upsells: text("upsells"), // JSON array of {name, description, price}
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
 });

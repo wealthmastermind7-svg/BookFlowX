@@ -53,6 +53,19 @@ export default function CheckoutScreen() {
   };
 
   const loadUpsellSuggestions = async (svc: Service) => {
+    // If service has business-defined upsells, use those instead of AI suggestions
+    if (svc.upsells) {
+      try {
+        const customUpsells = JSON.parse(svc.upsells);
+        if (Array.isArray(customUpsells) && customUpsells.length > 0) {
+          setUpsellSuggestions(customUpsells);
+          return;
+        }
+      } catch (e) {
+        console.error("[Upsell] Error parsing custom upsells:", e);
+      }
+    }
+
     setLoadingUpsells(true);
     try {
       const suggestions = await getUpsellSuggestions(
