@@ -14,6 +14,7 @@ import { z } from "zod";
 import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
+import sharp from "sharp";
 import { sendBookingConfirmation } from "./email";
 import { sendBookingNotification, sendTestNotification } from "./notifications";
 import { 
@@ -1033,26 +1034,54 @@ export async function registerRoutes(app: Express): Promise<Server> {
     </svg>`;
   }
   
-  // Serve dynamic OG image for businesses
+  // Serve dynamic OG image for businesses (SVG format for better compatibility)
+  app.get("/og/:slug.svg", async (req: Request, res: Response) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      const businessName = business?.name || 'BookFlow';
+      const svg = generateCinematicOgImage(businessName);
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
+    } catch {
+      const svg = generateCinematicOgImage('BookFlow');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
+    }
+  });
+
+  // Serve actual PNG images converted from SVG for better social media compatibility
   app.get("/og/:slug.png", async (req: Request, res: Response) => {
     try {
       const business = await storage.getBusinessBySlug(req.params.slug);
       const businessName = business?.name || 'BookFlow';
       const svg = generateCinematicOgImage(businessName);
-      res.type("image/svg+xml").send(svg);
-    } catch {
+      
+      // Convert SVG to PNG using sharp for WhatsApp/social media compatibility
+      const pngBuffer = await sharp(Buffer.from(svg))
+        .png()
+        .toBuffer();
+      
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Content-Type', 'image/png');
+      res.send(pngBuffer);
+    } catch (error) {
+      console.error('Error generating OG image:', error);
+      // Fallback to SVG if PNG conversion fails
       const svg = generateCinematicOgImage('BookFlow');
-      res.type("image/svg+xml").send(svg);
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
     }
   });
   
   // Serve dynamic OG image for specific service
-  app.get("/og/:slug/:serviceSlug.png", async (req: Request, res: Response) => {
+  app.get("/og/:slug/:serviceSlug.svg", async (req: Request, res: Response) => {
     try {
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
         const svg = generateCinematicOgImage('BookFlow');
-        return res.type("image/svg+xml").send(svg);
+        res.setHeader('Content-Type', 'image/svg+xml');
+        return res.send(svg);
       }
       
       const services = await storage.getServices(business.id);
@@ -1060,17 +1089,65 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const serviceName = service?.name;
       
       const svg = generateCinematicOgImage(business.name, serviceName);
-      res.type("image/svg+xml").send(svg);
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
     } catch {
       const svg = generateCinematicOgImage('BookFlow');
-      res.type("image/svg+xml").send(svg);
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
+    }
+  });
+
+  // Serve PNG for service OG images with proper conversion
+  app.get("/og/:slug/:serviceSlug.png", async (req: Request, res: Response) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        const svg = generateCinematicOgImage('BookFlow');
+        const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+        res.setHeader('Content-Type', 'image/png');
+        return res.send(pngBuffer);
+      }
+      
+      const services = await storage.getServices(business.id);
+      const service = services.find(s => s.slug === req.params.serviceSlug || s.id === req.params.serviceSlug);
+      const serviceName = service?.name;
+      
+      const svg = generateCinematicOgImage(business.name, serviceName);
+      const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+      
+      res.setHeader('Cache-Control', 'public, max-age=3600');
+      res.setHeader('Content-Type', 'image/png');
+      res.send(pngBuffer);
+    } catch (error) {
+      console.error('Error generating service OG image:', error);
+      const svg = generateCinematicOgImage('BookFlow');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
     }
   });
   
   // Fallback OG image
-  app.get("/og-image.png", (req: Request, res: Response) => {
+  app.get("/og-image.svg", (req: Request, res: Response) => {
     const svg = generateCinematicOgImage('BookFlow', undefined, 'Professional Booking Platform');
-    res.type("image/svg+xml").send(svg);
+    res.setHeader('Cache-Control', 'public, max-age=86400');
+    res.setHeader('Content-Type', 'image/svg+xml');
+    res.send(svg);
+  });
+
+  app.get("/og-image.png", async (req: Request, res: Response) => {
+    try {
+      const svg = generateCinematicOgImage('BookFlow', undefined, 'Professional Booking Platform');
+      const pngBuffer = await sharp(Buffer.from(svg)).png().toBuffer();
+      res.setHeader('Cache-Control', 'public, max-age=86400');
+      res.setHeader('Content-Type', 'image/png');
+      res.send(pngBuffer);
+    } catch {
+      const svg = generateCinematicOgImage('BookFlow', undefined, 'Professional Booking Platform');
+      res.setHeader('Content-Type', 'image/svg+xml');
+      res.send(svg);
+    }
   });
   
   // Helper function to generate Open Graph meta tags with cinematic design
