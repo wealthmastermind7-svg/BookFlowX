@@ -254,3 +254,75 @@ Suggest 3-4 reminder timings with brief explanation. Respond as JSON:
     throw error;
   }
 }
+
+// Upsell Suggestions Types
+export interface UpsellSuggestion {
+  name: string;
+  description: string;
+  price: number;
+  reason: string;
+}
+
+export async function generateUpsellSuggestions(
+  serviceName: string,
+  serviceDescription: string,
+  servicePrice: number,
+  businessType?: string,
+  currency?: string
+): Promise<UpsellSuggestion[]> {
+  const systemPrompt = `You are an expert at suggesting relevant add-on services that enhance the customer experience.
+Generate 2-3 contextual upsell suggestions based on the main service being booked.
+
+Guidelines:
+- Suggestions should genuinely complement the main service
+- Price add-ons reasonably (typically 20-50% of main service price)
+- Focus on value-add, not just revenue
+- Be specific to the service type
+- Never suggest the same service
+- Keep descriptions concise (under 50 characters)
+- Make suggestions feel helpful, not pushy`;
+
+  const userPrompt = `Main service: "${serviceName}"
+Description: "${serviceDescription}"
+Price: ${servicePrice} ${currency || "USD"}
+Business type: ${businessType || "General service business"}
+
+Generate 2-3 add-on suggestions as JSON array:
+[{
+  "name": "Add-on Name",
+  "description": "Brief description",
+  "price": 25,
+  "reason": "Why this pairs well with the main service"
+}]`;
+
+  try {
+    const response = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      response_format: { type: "json_object" },
+      max_tokens: 512,
+      temperature: 0.7,
+    });
+
+    const content = response.choices[0]?.message?.content || "{}";
+    const parsed = JSON.parse(content);
+    
+    if (Array.isArray(parsed)) {
+      return parsed.slice(0, 3);
+    }
+    if (parsed.suggestions && Array.isArray(parsed.suggestions)) {
+      return parsed.suggestions.slice(0, 3);
+    }
+    if (parsed.addons && Array.isArray(parsed.addons)) {
+      return parsed.addons.slice(0, 3);
+    }
+    
+    return [];
+  } catch (error) {
+    console.error("[AI] Error generating upsell suggestions:", error);
+    return [];
+  }
+}

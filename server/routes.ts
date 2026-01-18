@@ -908,6 +908,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get AI-powered upsell suggestions for a service
+  app.post("/api/ai/upsell-suggestions", async (req: Request, res: Response) => {
+    try {
+      const { serviceName, serviceDescription, servicePrice, businessType, currency } = req.body;
+      
+      if (!serviceName) {
+        return res.status(400).json({ error: "Service name is required" });
+      }
+      
+      const { generateUpsellSuggestions } = await import("./ai");
+      const suggestions = await generateUpsellSuggestions(
+        serviceName,
+        serviceDescription || "",
+        servicePrice || 0,
+        businessType,
+        currency
+      );
+      
+      res.json({ suggestions });
+    } catch (error) {
+      console.error("[AI Upsell] Error:", error);
+      res.status(500).json({ error: "Failed to generate suggestions", suggestions: [] });
+    }
+  });
+
   // === QR CODE API ===
   
   // Generate QR code for booking link
