@@ -1014,28 +1014,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <rect x="100" y="${titleLines.length === 1 ? '310' : '430'}" width="80" height="2" fill="rgba(255,255,255,0.5)"/>
       
       <!-- Bottom info bar with glass effect -->
-      <rect x="0" y="480" width="1200" height="150" fill="rgba(18,18,18,0.95)"/>
-      <line x1="0" y1="480" x2="1200" y2="480" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <rect x="0" y="470" width="1200" height="160" fill="rgba(18,18,18,0.95)"/>
+      <line x1="0" y1="470" x2="1200" y2="470" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
       
-      <!-- Business name - prominent -->
-      <text x="100" y="540" font-size="42" font-weight="400" fill="rgba(255,255,255,0.9)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="1">
+      <!-- Business name - large and prominent -->
+      <text x="100" y="535" font-size="56" font-weight="500" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="1">
         ${businessName}
       </text>
       
-      <!-- Subtitle -->
-      <text x="100" y="580" font-size="18" font-weight="400" fill="rgba(255,255,255,0.45)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="4">
+      <!-- Subtitle - larger and more visible -->
+      <text x="100" y="585" font-size="26" font-weight="400" fill="rgba(255,255,255,0.6)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="5">
         BOOK YOUR APPOINTMENT
       </text>
       
-      <!-- Domain -->
-      <text x="100" y="615" font-size="14" font-weight="400" fill="rgba(255,255,255,0.25)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="3">
+      <!-- Domain - more visible -->
+      <text x="100" y="620" font-size="18" font-weight="400" fill="rgba(255,255,255,0.4)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="3">
         CONFIRMBOOKING.ONLINE
       </text>
       
-      <!-- Arrow button - right side -->
-      <g transform="translate(1050, 520)">
-        <circle cx="30" cy="30" r="30" fill="rgba(255,255,255,0.08)" stroke="rgba(255,255,255,0.15)" stroke-width="1"/>
-        <path d="M22 22 L38 38 M38 38 L38 28 M38 38 L28 38" stroke="rgba(255,255,255,0.6)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+      <!-- Arrow button - right side, larger -->
+      <g transform="translate(1040, 520)">
+        <circle cx="35" cy="35" r="35" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+        <path d="M25 25 L45 45 M45 45 L45 33 M45 45 L33 45" stroke="rgba(255,255,255,0.7)" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
       </g>
     </svg>`;
   }
