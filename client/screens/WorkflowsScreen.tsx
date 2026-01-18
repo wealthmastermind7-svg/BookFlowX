@@ -289,14 +289,6 @@ export default function WorkflowsScreen() {
     </GlassCard>
   );
 
-  if (loading) {
-    return (
-      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
-        <ActivityIndicator size="large" color="#fff" />
-      </View>
-    );
-  }
-
   const renderPreviewModal = () => {
     if (!previewWorkflow) return null;
     
@@ -304,6 +296,7 @@ export default function WorkflowsScreen() {
     const businessName = business?.name || "Black Edition";
     const statusLabel = isReminder ? `${businessName} • Appointment` : "Booking Status";
     const title = isReminder ? "Reminder" : "CONFIRMED";
+    const formattedDate = "Jan 19, 2026";
 
     return (
       <Modal
@@ -315,9 +308,11 @@ export default function WorkflowsScreen() {
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalVisible(false)} />
           <View style={[styles.previewContent, { backgroundColor: "#000" }]}>
-            <View style={styles.previewHeader}>
-              <ThemedText style={styles.previewStatus}>{statusLabel}</ThemedText>
-              <ThemedText style={styles.previewTitle}>{title}</ThemedText>
+            <View style={styles.headerImgPlaceholder}>
+              <View style={styles.headerOverlay}>
+                <ThemedText style={styles.previewStatus}>{statusLabel}</ThemedText>
+                <ThemedText style={styles.previewTitle}>{title}</ThemedText>
+              </View>
             </View>
 
             <ScrollView style={styles.previewBody} showsVerticalScrollIndicator={false}>
@@ -339,7 +334,7 @@ export default function WorkflowsScreen() {
                 </View>
                 <View style={styles.previewInfoRow}>
                   <ThemedText style={styles.previewInfoLabel}>Date</ThemedText>
-                  <ThemedText style={styles.previewInfoValue}>Jan 19, 2026</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>{formattedDate}</ThemedText>
                 </View>
                 <View style={styles.previewInfoRow}>
                   <ThemedText style={styles.previewInfoLabel}>Time</ThemedText>
@@ -348,7 +343,7 @@ export default function WorkflowsScreen() {
                 <View style={[styles.divider, { marginVertical: 12 }]} />
                 <View style={styles.previewInfoRow}>
                   <ThemedText style={styles.previewInfoLabel}>Total</ThemedText>
-                  <ThemedText style={[styles.previewInfoValue, { fontSize: 24, fontWeight: "800" }]}>$40.00</ThemedText>
+                  <ThemedText style={[styles.previewInfoValue, { fontSize: 20, fontWeight: "800" }]}>$40.00</ThemedText>
                 </View>
               </GlassCard>
 
@@ -371,6 +366,14 @@ export default function WorkflowsScreen() {
       </Modal>
     );
   };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>
@@ -479,10 +482,11 @@ const styles = StyleSheet.create({
   blueprintLabel: { fontSize: 16, fontWeight: "600", color: "#fff" },
   modalBackdrop: { ...StyleSheet.absoluteFillObject, backgroundColor: "transparent" },
   previewContent: { width: "90%", maxHeight: "80%", borderRadius: 32, overflow: "hidden", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  previewHeader: { padding: 32, paddingTop: 48 },
+  headerImgPlaceholder: { height: 240, backgroundColor: "#111", justifyContent: "flex-end" },
+  headerOverlay: { padding: 32, paddingBottom: 40 },
   previewStatus: { fontSize: 10, textTransform: "uppercase", letterSpacing: 4, color: "rgba(255,255,255,0.5)", marginBottom: 8 },
   previewTitle: { fontSize: 56, fontWeight: "800", letterSpacing: -2, color: "#fff" },
-  previewBody: { paddingHorizontal: 32, paddingBottom: 48 },
+  previewBody: { paddingHorizontal: 32, paddingBottom: 48, paddingTop: 30 },
   previewGreeting: { fontSize: 18, fontWeight: "300", color: "#fff", marginBottom: 8 },
   previewIntro: { fontSize: 14, color: "rgba(255,255,255,0.6)", lineHeight: 20, marginBottom: 32 },
   previewCard: { padding: 24, marginBottom: 32 },

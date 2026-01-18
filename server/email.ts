@@ -42,15 +42,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
 
   try {
     const formattedDate = new Date(data.date).toLocaleDateString('en-US', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
+      month: 'short', day: 'numeric', year: 'numeric'
     });
 
     const isReminder = data.isReminder || false;
     const title = isReminder ? "Reminder" : "CONFIRMED";
     const statusLabel = isReminder ? `${data.businessName} • Appointment` : "Booking Status";
     
-    // In a real email, we can't use complex Tailwind/JS like the user provided, 
-    // but we can mimic the design with solid HTML/CSS inline styles.
     const html = `
 <!DOCTYPE html>
 <html lang="en">
@@ -60,28 +58,33 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
 <style>
   body { margin: 0; padding: 0; background-color: #000000; font-family: 'Inter', Helvetica, Arial, sans-serif; color: #ffffff; }
   .container { max-width: 400px; margin: 0 auto; background-color: #000000; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); }
-  .header { position: relative; padding: 60px 30px 40px; text-align: left; }
+  .header-img { width: 100%; height: 240px; background-color: #111; position: relative; }
+  .header-img img { width: 100%; height: 100%; object-fit: cover; opacity: 0.6; }
+  .header-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 30px; background: linear-gradient(to top, #000, transparent); box-sizing: border-box; }
   .status-label { font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.5); margin-bottom: 8px; }
-  .title { font-size: 64px; font-weight: 800; letter-spacing: -2px; margin: 0; line-height: 0.9; color: #ffffff; text-shadow: 0 0 20px rgba(255,255,255,0.3); }
-  .content { padding: 0 30px 60px; }
-  .greeting { font-size: 20px; font-weight: 300; margin-bottom: 8px; }
+  .title { font-size: 56px; font-weight: 800; letter-spacing: -2px; margin: 0; line-height: 0.9; color: #ffffff; }
+  .content { padding: 30px; }
+  .greeting { font-size: 18px; font-weight: 300; margin-bottom: 8px; }
   .intro { font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 32px; }
   .glass-card { background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 24px; padding: 24px; margin-bottom: 32px; }
-  .info-row { display: table; width: 100%; margin-bottom: 20px; }
+  .info-row { display: table; width: 100%; margin-bottom: 16px; }
   .info-label { display: table-cell; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.4); vertical-align: middle; }
   .info-value { display: table-cell; text-align: right; font-size: 14px; font-weight: 600; color: #ffffff; vertical-align: middle; }
-  .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0 20px; }
-  .total-row .info-value { font-size: 24px; font-weight: 700; }
-  .button { display: block; width: 100%; background: #ffffff; color: #000000; text-align: center; padding: 18px 0; border-radius: 16px; font-weight: 700; font-size: 14px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; margin-bottom: 40px; }
+  .divider { height: 1px; background: rgba(255,255,255,0.1); margin: 8px 0 16px; }
+  .total-row .info-value { font-size: 20px; font-weight: 700; }
+  .button { display: block; width: 100%; background: #E5E7EB; color: #000000; text-align: center; padding: 18px 0; border-radius: 16px; font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 2px; text-decoration: none; margin-bottom: 40px; }
   .footer-note { font-size: 11px; text-align: center; color: rgba(255,255,255,0.4); font-style: italic; line-height: 1.8; margin-bottom: 40px; }
   .branding { font-size: 9px; text-align: center; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.2); }
 </style>
 </head>
 <body>
   <div class="container">
-    <div class="header">
-      <div class="status-label">${statusLabel}</div>
-      <h1 class="title">${title}</h1>
+    <div class="header-img">
+      <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=600" alt="Cinematic Abstract">
+      <div class="header-overlay">
+        <div class="status-label">${statusLabel}</div>
+        <h1 class="title">${title}</h1>
+      </div>
     </div>
     <div class="content">
       <div class="greeting">Hi <strong>${data.customerName}</strong>,</div>
