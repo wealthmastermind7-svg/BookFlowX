@@ -43,7 +43,18 @@
         }
       ],
       "expo-web-browser",
-      "expo-secure-store"
+      "expo-secure-store",
+      [
+        "react-native-app-clip",
+        {
+          "name": "BookFlow",
+          "bundleIdSuffix": "Clip",
+          "deploymentTarget": "16.0",
+          "requestEphemeralUserNotification": false,
+          "requestLocationConfirmation": false,
+          "appleSignin": false
+        }
+      ]
     ],
     "experiments": {
       "reactCompiler": true
