@@ -225,7 +225,7 @@ export default function CustomersScreen() {
 
   return (
     <ImageBackground 
-      source={require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg")} 
+      source={require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg")} 
       style={styles.background} 
       resizeMode="cover"
     >

@@ -26,7 +26,7 @@ import { api, TimeSlot, BlockedSlot } from "@/lib/api";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
-const shadowBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
+const shadowBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type BlockedSlotsNavigationProp = NativeStackNavigationProp<
   CalendarStackParamList,

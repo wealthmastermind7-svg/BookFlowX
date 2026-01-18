@@ -31,7 +31,7 @@ import { api, AvailabilitySchedule } from "@/lib/api";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const lightPlayBackground = require("../../attached_assets/stock_images/abstract_dark_fluid__e119120c.jpg");
+const lightPlayBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type AvailabilityNavigationProp = NativeStackNavigationProp<
   CalendarStackParamList,
