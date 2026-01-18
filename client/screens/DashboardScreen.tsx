@@ -7,6 +7,7 @@ import {
   ImageBackground,
   Dimensions,
   Platform,
+  Modal,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -342,6 +343,7 @@ export default function DashboardScreen() {
   const [showAllBookings, setShowAllBookings] = useState(false);
   const [business, setBusiness] = useState<Business | null>(null);
   const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   const fadeIn = useSharedValue(0);
 
@@ -526,20 +528,9 @@ export default function DashboardScreen() {
                     confirmationSentAt={booking.confirmationSentAt}
                     reminder24hSentAt={booking.reminder24hSentAt}
                     reminder2hSentAt={booking.reminder2hSentAt}
-                    onPress={async () => {
-                      if (booking.status === "pending") {
-                        try {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(
-                            () => {}
-                          );
-                        } catch {}
-                        try {
-                          await api.updateBooking(booking.id, { status: "confirmed" });
-                          loadData();
-                        } catch (error) {
-                          console.error("Error confirming booking:", error);
-                        }
-                      }
+                    onPress={() => {
+                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
+                      setSelectedBooking(booking);
                     }}
                   />
                 ))
@@ -628,6 +619,135 @@ export default function DashboardScreen() {
           )}
         </ScrollView>
       </Animated.View>
+
+      <Modal
+        visible={selectedBooking !== null}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setSelectedBooking(null)}
+      >
+        <Pressable 
+          style={styles.modalOverlay} 
+          onPress={() => setSelectedBooking(null)}
+        >
+          <Pressable 
+            style={styles.modalContent}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
+              <View style={styles.modalHeader}>
+                <Animated.Text style={styles.modalTitle}>Booking Details</Animated.Text>
+                <Pressable onPress={() => setSelectedBooking(null)} style={styles.modalCloseButton}>
+                  <Feather name="x" size={20} color="rgba(255,255,255,0.6)" />
+                </Pressable>
+              </View>
+
+              {selectedBooking && (
+                <View style={styles.modalBody}>
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Customer</Text>
+                    <Text style={styles.detailValue}>{selectedBooking.customerName || "—"}</Text>
+                  </View>
+
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Service</Text>
+                    <Text style={styles.detailValue}>{selectedBooking.serviceName || "—"}</Text>
+                  </View>
+
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Date</Text>
+                    <Text style={styles.detailValue}>
+                      {new Date(selectedBooking.date).toLocaleDateString("en-US", {
+                        weekday: "short",
+                        month: "short",
+                        day: "numeric",
+                        year: "numeric",
+                      })}
+                    </Text>
+                  </View>
+
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Time</Text>
+                    <Text style={styles.detailValue}>{selectedBooking.time}</Text>
+                  </View>
+
+                  <View style={styles.detailRow}>
+                    <Text style={styles.detailLabel}>Status</Text>
+                    <View style={[
+                      styles.statusBadge,
+                      selectedBooking.status === "confirmed" && styles.statusConfirmed,
+                      selectedBooking.status === "pending" && styles.statusPending,
+                      selectedBooking.status === "completed" && styles.statusCompleted,
+                      selectedBooking.status === "cancelled" && styles.statusCancelled,
+                    ]}>
+                      <Text style={styles.statusText}>
+                        {selectedBooking.status?.charAt(0).toUpperCase() + selectedBooking.status?.slice(1)}
+                      </Text>
+                    </View>
+                  </View>
+
+                  {selectedBooking.addons && (() => {
+                    try {
+                      const addonsArray = JSON.parse(selectedBooking.addons);
+                      if (Array.isArray(addonsArray) && addonsArray.length > 0) {
+                        return (
+                          <View style={styles.addonsSection}>
+                            <Text style={styles.addonsSectionTitle}>Add-ons</Text>
+                            {addonsArray.map((addon: { name: string; price: number }, idx: number) => (
+                              <View key={idx} style={styles.addonItem}>
+                                <Text style={styles.addonName}>{addon.name}</Text>
+                                <Text style={styles.addonPrice}>
+                                  {formatPrice(addon.price * 100, business?.currency || "USD")}
+                                </Text>
+                              </View>
+                            ))}
+                          </View>
+                        );
+                      }
+                      return null;
+                    } catch {
+                      return null;
+                    }
+                  })()}
+
+                  <View style={[styles.detailRow, styles.totalRow]}>
+                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalValue}>
+                      {formatPrice(selectedBooking.totalPrice, business?.currency || "USD")}
+                    </Text>
+                  </View>
+
+                  {selectedBooking.notes && (
+                    <View style={styles.notesSection}>
+                      <Text style={styles.notesLabel}>Notes</Text>
+                      <Text style={styles.notesText}>{selectedBooking.notes}</Text>
+                    </View>
+                  )}
+
+                  {selectedBooking.status === "pending" && (
+                    <Pressable
+                      style={styles.confirmBookingButton}
+                      onPress={async () => {
+                        try {
+                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+                          await api.updateBooking(selectedBooking.id, { status: "confirmed" });
+                          setSelectedBooking(null);
+                          loadData();
+                        } catch (error) {
+                          console.error("Error confirming booking:", error);
+                        }
+                      }}
+                    >
+                      <Feather name="check" size={16} color="#000" />
+                      <Text style={styles.confirmBookingText}>Confirm Booking</Text>
+                    </Pressable>
+                  )}
+                </View>
+              )}
+            </BlurView>
+          </Pressable>
+        </Pressable>
+      </Modal>
     </ImageBackground>
   );
 }
@@ -977,5 +1097,153 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: "rgba(255,255,255,0.6)",
     marginTop: 4,
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.7)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 20,
+  },
+  modalContent: {
+    width: "100%",
+    maxWidth: 400,
+    borderRadius: 24,
+    overflow: "hidden",
+  },
+  modalBlur: {
+    padding: 24,
+  },
+  modalHeader: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 24,
+  },
+  modalTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  modalCloseButton: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  modalBody: {
+    gap: 16,
+  },
+  detailRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+  },
+  detailLabel: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+  },
+  detailValue: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+    textAlign: "right",
+    flex: 1,
+    marginLeft: 16,
+  },
+  statusConfirmed: {
+    backgroundColor: "#22C55E",
+  },
+  statusPending: {
+    backgroundColor: "#F59E0B",
+  },
+  statusCompleted: {
+    backgroundColor: "#3B82F6",
+  },
+  statusCancelled: {
+    backgroundColor: "#EF4444",
+  },
+  statusText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#fff",
+    paddingHorizontal: 8,
+  },
+  addonsSection: {
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  addonsSectionTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.7)",
+    marginBottom: 12,
+  },
+  addonItem: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingVertical: 8,
+  },
+  addonName: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    flex: 1,
+  },
+  addonPrice: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  totalRow: {
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  totalLabel: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.7)",
+  },
+  totalValue: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  notesSection: {
+    marginTop: 8,
+    paddingTop: 16,
+    borderTopWidth: 1,
+    borderTopColor: "rgba(255,255,255,0.1)",
+  },
+  notesLabel: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 8,
+  },
+  notesText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.9)",
+    lineHeight: 20,
+  },
+  confirmBookingButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "#fff",
+    paddingVertical: 14,
+    borderRadius: 12,
+    marginTop: 16,
+    gap: 8,
+  },
+  confirmBookingText: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#000",
   },
 });

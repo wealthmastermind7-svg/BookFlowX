@@ -142,6 +142,7 @@ export interface Booking {
   status: string;
   totalPrice: number;
   notes?: string | null;
+  addons?: string | null;
   paymentStatus?: string | null;
   stripePaymentIntentId?: string | null;
   stripeCheckoutSessionId?: string | null;
