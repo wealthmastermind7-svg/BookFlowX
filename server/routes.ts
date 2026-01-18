@@ -916,34 +916,137 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === PUBLIC BOOKING PAGE ===
   
-  // Serve OG image (simple placeholder)
-  app.get("/og-image.png", (req: Request, res: Response) => {
-    // Return a simple SVG image as PNG fallback
-    const svg = `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
-      <rect width="1200" height="630" fill="#000000"/>
-      <text x="600" y="315" font-size="72" font-weight="bold" text-anchor="middle" dominant-baseline="middle" fill="#FFFFFF" font-family="Arial">
-        BookFlow
-      </text>
-      <text x="600" y="400" font-size="36" text-anchor="middle" fill="#9E9E9E" font-family="Arial">
-        Book Your Appointment
-      </text>
-    </svg>`;
+  // Generate cinematic OG image for link previews
+  function generateCinematicOgImage(businessName: string, serviceName?: string, tagline?: string): string {
+    const displayTitle = serviceName ? serviceName.toUpperCase() : 'RESERVE YOUR SPACE';
+    const subtitle = serviceName ? businessName : (tagline || 'Book instantly online');
     
+    // Create a premium cinematic SVG with architectural gradients and glass effects
+    return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#1a1a1a"/>
+          <stop offset="50%" style="stop-color:#000000"/>
+          <stop offset="100%" style="stop-color:#0a0a0a"/>
+        </linearGradient>
+        <linearGradient id="silverText" x1="0%" y1="0%" x2="0%" y2="100%">
+          <stop offset="0%" style="stop-color:#FFFFFF"/>
+          <stop offset="100%" style="stop-color:#A1A1A1"/>
+        </linearGradient>
+        <linearGradient id="accentLine" x1="0%" y1="0%" x2="100%" y2="0%">
+          <stop offset="0%" style="stop-color:rgba(255,255,255,0)"/>
+          <stop offset="50%" style="stop-color:rgba(255,255,255,0.4)"/>
+          <stop offset="100%" style="stop-color:rgba(255,255,255,0)"/>
+        </linearGradient>
+        <filter id="glow">
+          <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+          <feMerge>
+            <feMergeNode in="coloredBlur"/>
+            <feMergeNode in="SourceGraphic"/>
+          </feMerge>
+        </filter>
+      </defs>
+      
+      <!-- Background -->
+      <rect width="1200" height="630" fill="url(#bgGrad)"/>
+      
+      <!-- Architectural diagonal lines -->
+      <line x1="-100" y1="200" x2="1400" y2="350" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+      <line x1="-100" y1="250" x2="1400" y2="400" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="-100" y1="300" x2="1400" y2="450" stroke="rgba(255,255,255,0.02)" stroke-width="1"/>
+      
+      <!-- Subtle radial glow -->
+      <circle cx="900" cy="100" r="400" fill="rgba(255,255,255,0.03)"/>
+      
+      <!-- Right shadow column -->
+      <rect x="950" y="0" width="150" height="630" fill="rgba(0,0,0,0.5)" transform="skewX(-10)"/>
+      
+      <!-- Main title text - oversized cinematic typography -->
+      <text x="80" y="280" font-size="96" font-weight="800" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-3">
+        ${displayTitle.length > 20 ? displayTitle.substring(0, 20) : displayTitle}
+      </text>
+      ${displayTitle.length > 20 ? `<text x="80" y="380" font-size="96" font-weight="800" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="-3">${displayTitle.substring(20, 40)}</text>` : ''}
+      
+      <!-- Accent bar -->
+      <rect x="80" y="${displayTitle.length > 20 ? '410' : '310'}" width="100" height="4" fill="rgba(255,255,255,0.5)"/>
+      
+      <!-- Glass panel at bottom -->
+      <rect x="0" y="470" width="1200" height="160" fill="rgba(20,20,20,0.85)"/>
+      <line x1="0" y1="470" x2="1200" y2="470" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+      
+      <!-- Business name with silver gradient -->
+      <text x="80" y="530" font-size="36" font-weight="500" fill="url(#silverText)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="1">
+        ${businessName}
+      </text>
+      
+      <!-- Subtitle -->
+      <text x="80" y="575" font-size="16" fill="rgba(255,255,255,0.5)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="3" text-transform="uppercase">
+        ${serviceName ? 'BOOK YOUR APPOINTMENT' : subtitle.toUpperCase()}
+      </text>
+      
+      <!-- Domain branding -->
+      <text x="80" y="610" font-size="12" fill="rgba(255,255,255,0.3)" font-family="system-ui, -apple-system, sans-serif" letter-spacing="2">
+        CONFIRMBOOKING.ONLINE
+      </text>
+      
+      <!-- Arrow icon -->
+      <g transform="translate(1080, 510)">
+        <circle cx="20" cy="20" r="20" fill="rgba(255,255,255,0.1)"/>
+        <path d="M15 15 L25 25 M25 25 L25 17 M25 25 L17 25" stroke="rgba(255,255,255,0.6)" stroke-width="2" fill="none" stroke-linecap="round"/>
+      </g>
+    </svg>`;
+  }
+  
+  // Serve dynamic OG image for businesses
+  app.get("/og/:slug.png", async (req: Request, res: Response) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      const businessName = business?.name || 'BookFlow';
+      const svg = generateCinematicOgImage(businessName);
+      res.type("image/svg+xml").send(svg);
+    } catch {
+      const svg = generateCinematicOgImage('BookFlow');
+      res.type("image/svg+xml").send(svg);
+    }
+  });
+  
+  // Serve dynamic OG image for specific service
+  app.get("/og/:slug/:serviceSlug.png", async (req: Request, res: Response) => {
+    try {
+      const business = await storage.getBusinessBySlug(req.params.slug);
+      if (!business) {
+        const svg = generateCinematicOgImage('BookFlow');
+        return res.type("image/svg+xml").send(svg);
+      }
+      
+      const services = await storage.getServices(business.id);
+      const service = services.find(s => s.slug === req.params.serviceSlug || s.id === req.params.serviceSlug);
+      const serviceName = service?.name;
+      
+      const svg = generateCinematicOgImage(business.name, serviceName);
+      res.type("image/svg+xml").send(svg);
+    } catch {
+      const svg = generateCinematicOgImage('BookFlow');
+      res.type("image/svg+xml").send(svg);
+    }
+  });
+  
+  // Fallback OG image
+  app.get("/og-image.png", (req: Request, res: Response) => {
+    const svg = generateCinematicOgImage('BookFlow', undefined, 'Professional Booking Platform');
     res.type("image/svg+xml").send(svg);
   });
   
-  // Helper function to generate Open Graph meta tags
+  // Helper function to generate Open Graph meta tags with cinematic design
   function generateOpenGraphMeta(business: any, service?: any, req?: Request, allServices?: any[]): string {
     // Determine the base URL - use env domain if set, otherwise use request host
     let baseUrl = '';
     const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
     
     if (domain) {
-      // Clean up the domain and add https
       const cleanDomain = domain.replace(/^https?:\/\//, '');
       baseUrl = `https://${cleanDomain}`;
     } else if (req) {
-      // Fallback to request host
       const host = req.get('host') || 'localhost:5000';
       const protocol = req.protocol || 'https';
       baseUrl = `${protocol}://${host}`;
@@ -951,23 +1054,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
       baseUrl = 'https://localhost:5000';
     }
     
+    // Cinematic title formatting - elegant and premium
     let title = business.name;
-    let description = `Book an appointment with ${business.name}. Fast, easy, and secure booking.`;
+    let description = `Reserve your space with ${business.name}. Instant online booking, no calls needed.`;
 
     if (service) {
       title = `${service.name} - ${business.name}`;
-      description = `Schedule your ${service.name} appointment instantly. No calls required.`;
+      description = `Schedule your ${service.name} appointment instantly. Professional service, seamless booking.`;
     } else if (allServices && allServices.length > 0) {
-      // Highlight all services by listing them
       const serviceNames = allServices.slice(0, 4).map(s => s.name).join(', ');
       title = `${business.name} | Professional Services`;
-      description = `Services: ${serviceNames}${allServices.length > 4 ? ' and more' : ''}. Book your appointment instantly online.`;
+      description = `Services: ${serviceNames}${allServices.length > 4 ? ' and more' : ''}. Book your appointment now.`;
     }
     
-    // Use OG image from assets
-    const ogImage = `${baseUrl}/assets/og/booking-preview.png`;
+    // Use dynamic cinematic OG image based on business/service
+    const ogImage = service 
+      ? `${baseUrl}/og/${business.slug}/${service.slug || service.id}.png`
+      : `${baseUrl}/og/${business.slug}.png`;
     
-    // Calculate correct URL for canonical/OG
     const ogUrl = service 
       ? `${baseUrl}/book/${business.slug}/${service.slug || service.id}`
       : `${baseUrl}/book/${business.slug}`;
@@ -978,15 +1082,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
     <meta property="og:image" content="${ogImage}" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Book with ${business.name}" />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="${ogUrl}" />
     <meta property="og:site_name" content="BookFlow" />
+    <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${title}" />
     <meta name="twitter:description" content="${description}" />
     <meta name="twitter:image" content="${ogImage}" />
+    <meta name="twitter:image:alt" content="Book with ${business.name}" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-title" content="BookFlow" />`;
+    <meta name="apple-mobile-web-app-title" content="${business.name}" />
+    <meta name="theme-color" content="#000000" />`;
   }
   
   // Serve public booking page (client-side routing)
