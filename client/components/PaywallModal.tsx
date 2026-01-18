@@ -216,37 +216,11 @@ export function PaywallModal({
 
               <View style={styles.titleContainer}>
                 <Text style={[styles.title, { color: colors.text }]}>
-                  Unlock Advanced Automation
+                  Unlock Full Access
                 </Text>
-                <Text style={[styles.subtitle, { color: colors.textSecondary, marginBottom: Spacing.lg }]}>
-                  Intelligent features that work quietly in the background
+                <Text style={[styles.subtitle, { color: colors.textSecondary }]}>
+                  BookFlow gives you a booking link and QR code so customers can book you instantly, with automatic confirmations and reminders.
                 </Text>
-                <View style={styles.featuresList}>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color="#10B981" />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Smart reminders that reduce no-shows</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color="#10B981" />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Instant service setup in seconds</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color="#10B981" />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Customer insights at a glance</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color="#10B981" />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Smart upsell suggestions</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Unlimited booking links & QR codes</Text>
-                  </View>
-                  <View style={styles.featureItem}>
-                    <Feather name="check" size={16} color={colors.text} />
-                    <Text style={[styles.featureText, { color: colors.textSecondary }]}>Booking page with your business name</Text>
-                  </View>
-                </View>
               </View>
 
               <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
@@ -255,7 +229,7 @@ export function PaywallModal({
                     Enable 7-day free trial
                   </Text>
                   <Text style={[styles.trialSubtext, { color: colors.textSecondary }]}>
-                    Free trial applies to subscriptions only. Billing starts after trial ends. Cancel anytime in Apple ID settings.
+                    Not sure yet? Cancel anytime.
                   </Text>
                 </View>
                 <Switch
@@ -267,7 +241,7 @@ export function PaywallModal({
                 />
               </View>
 
-                <View style={styles.planSection}>
+              <View style={styles.planSection}>
                 <Pressable
                   style={[
                     styles.planCard,
@@ -282,7 +256,7 @@ export function PaywallModal({
                 >
                   <View style={styles.planDetails}>
                     <View style={styles.planHeader}>
-                      <Text style={[styles.planName, { color: colors.text, fontWeight: "700" }]}>
+                      <Text style={[styles.planName, { color: colors.text }]}>
                         Yearly Access
                       </Text>
                       <View style={[styles.bestValueBadge, { backgroundColor: colors.text }]}>
@@ -290,13 +264,14 @@ export function PaywallModal({
                       </View>
                     </View>
                     <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      {freeTrialEnabled ? "7-day free trial, then " : ""}yearly subscription
+                      {offerings?.annual?.product.priceString || yearlyPrice}/year
                     </Text>
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {offerings?.annual?.product.priceString || yearlyPrice}
+                      {yearlyMonthly}
                     </Text>
+                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
                 </Pressable>
 
@@ -324,6 +299,7 @@ export function PaywallModal({
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
                       {offerings?.monthly?.product.priceString || monthlyPrice}
                     </Text>
+                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
                 </Pressable>
 
@@ -344,7 +320,7 @@ export function PaywallModal({
                       Lifetime Access
                     </Text>
                     <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      One-time purchase
+                      One-time payment
                     </Text>
                   </View>
                   <View style={styles.planPriceRight}>
