@@ -393,7 +393,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Send email confirmation
-      if (customerEmail && customerName) {
+      if (customerEmail && customerName && !booking.confirmationSentAt) {
         console.log(`[Booking] Triggering email confirmation for ${customerEmail} (${customerName})`);
         sendBookingConfirmation({
           customerName: customerName,
@@ -410,8 +410,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
           if (success) {
             console.log(`[Booking] Email sent successfully to ${customerEmail}`);
             try {
-              await storage.updateBooking(booking.id, { confirmationSentAt: new Date() });
-              console.log(`[Booking] Updated confirmationSentAt for booking ${booking.id}`);
+              // Fetch fresh booking record before update to ensure we have the most recent state
+              const currentBooking = await storage.getBooking(booking.id);
+              if (currentBooking && !currentBooking.confirmationSentAt) {
+                await storage.updateBooking(booking.id, { confirmationSentAt: new Date() });
+                console.log(`[Booking] Updated confirmationSentAt for booking ${booking.id}`);
+              }
             } catch (updateErr) {
               console.error("[Booking] Error updating confirmationSentAt:", updateErr);
             }
@@ -420,7 +424,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         })
         .catch(err => console.error("[Booking] Critical error in email confirmation:", err));
       } else {
-        console.log(`[Booking] Skipping email - missing customer details. Email: ${customerEmail}, Name: ${customerName}, CustomerId: ${data.customerId}`);
+        console.log(`[Booking] Skipping email - details: Email: ${customerEmail}, Name: ${customerName}, Sent: ${!!booking.confirmationSentAt}`);
       }
       
       // Send push notification to business owner (if notifications are enabled)

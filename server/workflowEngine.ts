@@ -331,6 +331,11 @@ async function executeEmailAction(
     // Mark email sent timestamp on booking based on reminder timing
     const now = new Date();
     if (delayMinutes === 0 || delayMinutes === undefined) {
+      // Fetch fresh booking to check if confirmation was already sent by main route
+      const currentBooking = await storage.getBooking(context.booking.id);
+      if (currentBooking?.confirmationSentAt) {
+        return { success: true, message: "Email already sent by main route" };
+      }
       // Confirmation email (no delay or immediate send)
       await db.update(bookings).set({ confirmationSentAt: now }).where(eq(bookings.id, context.booking.id));
       console.log(`[Workflow] Marked confirmationSentAt for booking ${context.booking.id}`);
