@@ -325,6 +325,7 @@ async function executeEmailAction(
       price: context.booking.totalPrice,
       currency: context.business.currency || "USD",
       confirmationNumber: context.booking.id.split("-")[0].toUpperCase(),
+      isReminder: delayMinutes !== 0 && delayMinutes !== undefined,
     });
 
     // Mark email sent timestamp on booking based on reminder timing

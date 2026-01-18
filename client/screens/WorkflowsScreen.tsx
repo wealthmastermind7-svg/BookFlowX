@@ -222,6 +222,7 @@ export default function WorkflowsScreen() {
 
   const renderWorkflowItem = (workflow: Workflow) => (
     <GlassCard key={workflow.id} style={styles.workflowCard}>
+      <Feather name="zap" size={120} color="#fff" style={styles.parallaxIcon} />
       <View style={styles.cardHeader}>
         <View style={styles.triggerBadge}>
           <ThemedText style={styles.triggerBadgeText}>
@@ -371,6 +372,7 @@ const styles = StyleSheet.create({
   timingRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   timingText: { fontSize: 15, color: "rgba(255,255,255,0.8)", fontWeight: "600" },
   workflowDescription: { fontSize: 14, color: "rgba(255,255,255,0.4)", lineHeight: 20, marginBottom: 20 },
+  parallaxIcon: { position: "absolute", right: -20, bottom: -20, opacity: 0.05 },
   divider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginBottom: 20 },
   cardFooter: { gap: 16 },
   metaRow: { flexDirection: "row", gap: 16 },
