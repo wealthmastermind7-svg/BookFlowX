@@ -94,6 +94,7 @@ export const bookings = pgTable("bookings", {
   status: text("status").notNull().default("pending"),
   totalPrice: integer("total_price").notNull(),
   notes: text("notes"),
+  addons: text("addons"), // JSON array of {name, price} objects
   paymentStatus: text("payment_status").default("unpaid"),
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   stripeCheckoutSessionId: text("stripe_checkout_session_id"),
