@@ -734,24 +734,43 @@ export default function DashboardScreen() {
                     </View>
                   </View>
 
-                  {selectedBooking.paymentStatus !== "paid" && (
-                    <Pressable
-                      style={styles.confirmPaidButton}
-                      onPress={async () => {
-                        try {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-                          await api.updateBooking(selectedBooking.id, { paymentStatus: "paid" });
-                          setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "paid" } : null);
-                          loadData();
-                        } catch (error) {
-                          console.error("Error confirming payment:", error);
-                        }
-                      }}
-                    >
-                      <Feather name="dollar-sign" size={16} color="#000" />
-                      <Text style={styles.confirmPaidButtonText}>Mark as Paid</Text>
-                    </Pressable>
-                  )}
+                  <View style={styles.paymentActions}>
+                    {selectedBooking.paymentStatus !== "paid" ? (
+                      <Pressable
+                        style={styles.confirmPaidButton}
+                        onPress={async () => {
+                          try {
+                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+                            await api.updateBooking(selectedBooking.id, { paymentStatus: "paid" });
+                            setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "paid" } : null);
+                            loadData();
+                          } catch (error) {
+                            console.error("Error confirming payment:", error);
+                          }
+                        }}
+                      >
+                        <Feather name="dollar-sign" size={16} color="#000" />
+                        <Text style={styles.confirmPaidButtonText}>Mark as Paid</Text>
+                      </Pressable>
+                    ) : (
+                      <Pressable
+                        style={styles.revertPaidButton}
+                        onPress={async () => {
+                          try {
+                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                            await api.updateBooking(selectedBooking.id, { paymentStatus: "unpaid" });
+                            setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "unpaid" } : null);
+                            loadData();
+                          } catch (error) {
+                            console.error("Error reverting payment:", error);
+                          }
+                        }}
+                      >
+                        <Feather name="rotate-ccw" size={16} color="rgba(255,255,255,0.6)" />
+                        <Text style={styles.revertPaidButtonText}>Revert to Unpaid</Text>
+                      </Pressable>
+                    )}
+                  </View>
 
                   {selectedBooking.status === "pending" && (
                     <Pressable
@@ -1291,5 +1310,24 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
+  },
+  paymentActions: {
+    marginTop: 8,
+  },
+  revertPaidButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingVertical: 12,
+    borderRadius: 12,
+    gap: 8,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  revertPaidButtonText: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.6)",
   },
 });
