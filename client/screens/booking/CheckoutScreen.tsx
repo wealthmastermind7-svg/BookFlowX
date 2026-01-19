@@ -147,7 +147,10 @@ export default function CheckoutScreen() {
       const selectedAddonsList = Array.from(selectedAddons)
         .map((idx) => upsellSuggestions[idx])
         .filter(Boolean)
-        .map((addon) => ({ name: addon.name, price: addon.price / 100 }));
+        .map((addon) => ({ 
+          name: addon.name, 
+          price: (addon.price * 100).toString() 
+        }));
       const selectedAddonNames = selectedAddonsList.map((a) => a.name);
       const serviceName = selectedAddonNames.length > 0
         ? `${service?.name || "Service"} + ${selectedAddonNames.join(", ")}`

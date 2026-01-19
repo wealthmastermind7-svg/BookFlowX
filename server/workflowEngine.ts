@@ -318,10 +318,13 @@ async function executeEmailAction(
     let addons: { name: string; price: number }[] | undefined;
     if (context.booking.addons) {
       try {
+        console.log(`[Workflow] Found addons for booking ${context.booking.id}: ${context.booking.addons}`);
         addons = JSON.parse(context.booking.addons);
       } catch (e) {
         console.error("[Workflow] Failed to parse booking addons:", e);
       }
+    } else {
+      console.log(`[Workflow] No addons found for booking ${context.booking.id}`);
     }
 
     await sendBookingConfirmation({
