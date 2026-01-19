@@ -269,7 +269,9 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {yearlyMonthly}
+                      {selectedPlan === "yearly" && offerings?.annual?.product.pricePerMonthString 
+                        ? offerings.annual.product.pricePerMonthString 
+                        : yearlyMonthly}
                     </Text>
                     <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
@@ -299,7 +301,9 @@ export function PaywallModal({
                     <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
                       {offerings?.monthly?.product.priceString || monthlyPrice}
                     </Text>
-                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
+                    {!(offerings?.monthly?.product.priceString || monthlyPrice).includes('/mo') && (
+                      <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
+                    )}
                   </View>
                 </Pressable>
 
