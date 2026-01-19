@@ -503,18 +503,20 @@ const styles = StyleSheet.create({
   },
   featuresList: {
     width: "100%",
-    paddingHorizontal: Spacing.md,
-    gap: Spacing.xs,
+    paddingHorizontal: Spacing.xl,
+    gap: Spacing.md,
+    marginVertical: Spacing.xl,
   },
   featureItem: {
     flexDirection: "row",
     alignItems: "center",
-    gap: Spacing.sm,
+    gap: Spacing.md,
     paddingVertical: 2,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: 16,
     fontWeight: "500",
+    letterSpacing: -0.3,
   },
   subtitle: {
     fontSize: 14,
