@@ -295,25 +295,26 @@ export default function SelectTimeScreen() {
           </ThemedText>
         </View>
 
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.dateScroller}
-          style={styles.dateScrollerContainer}
-        >
-          {dates.map((date, index) => (
-            <Animated.View
-              key={date.toISOString()}
-              entering={FadeInDown.delay(index * 30).springify()}
-            >
-              <DateCard
-                date={date}
-                isSelected={date.toDateString() === selectedDate.toDateString()}
-                onPress={() => setSelectedDate(date)}
-              />
-            </Animated.View>
-          ))}
-        </ScrollView>
+        <View style={styles.dateScrollerContainer}>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={styles.dateScroller}
+          >
+            {dates.map((date, index) => (
+              <Animated.View
+                key={date.toISOString()}
+                entering={FadeInDown.delay(index * 30).springify()}
+              >
+                <DateCard
+                  date={date}
+                  isSelected={date.toDateString() === selectedDate.toDateString()}
+                  onPress={() => setSelectedDate(date)}
+                />
+              </Animated.View>
+            ))}
+          </ScrollView>
+        </View>
 
         <View style={styles.timesSection}>
           <ThemedText style={styles.timesLabel}>AVAILABLE TIMES</ThemedText>
@@ -417,6 +418,7 @@ const styles = StyleSheet.create({
     pointerEvents: "none",
     zIndex: 0,
     paddingHorizontal: Spacing.lg,
+    opacity: 0.5,
   },
   oversizedText: {
     fontSize: 80,
@@ -472,27 +474,27 @@ const styles = StyleSheet.create({
     gap: Spacing.md,
   },
   dateCard: {
-    width: 80,
-    aspectRatio: 0.75,
+    width: 72,
+    aspectRatio: 0.8,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
   },
   dateMonth: {
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: "600",
     letterSpacing: 1,
-    marginBottom: 2,
+    marginBottom: 1,
   },
   dateDay: {
-    fontSize: 34,
+    fontSize: 28,
     fontWeight: "800",
-    marginVertical: 2,
+    marginVertical: 1,
   },
   dateDayName: {
-    fontSize: 12,
+    fontSize: 10,
     fontWeight: "600",
-    marginTop: 2,
+    marginTop: 1,
   },
   timesSection: {
     paddingHorizontal: Spacing.lg,
