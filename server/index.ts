@@ -445,6 +445,10 @@ import { processReminders } from "./workflowEngine";
     res.send("google-site-verification: googlec99eb3b619abbef4.html");
   });
 
+  app.get("/favicon.png", (_req: Request, res: Response) => {
+    res.sendFile(path.resolve(process.cwd(), "server/static/favicon.png"));
+  });
+
   configureExpoAndLanding(app);
 
   await initStripe();
