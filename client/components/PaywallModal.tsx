@@ -229,6 +229,25 @@ export function PaywallModal({
                 </Text>
               </View>
 
+              <View style={styles.featuresList}>
+                <View style={styles.featureItem}>
+                  <Feather name="check" size={16} color={colors.text} />
+                  <Text style={[styles.featureText, { color: colors.text }]}>Smart reminders that reduce no-shows</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="check" size={16} color={colors.text} />
+                  <Text style={[styles.featureText, { color: colors.text }]}>Instant service setup in seconds</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="check" size={16} color={colors.text} />
+                  <Text style={[styles.featureText, { color: colors.text }]}>Intelligent upsell suggestions</Text>
+                </View>
+                <View style={styles.featureItem}>
+                  <Feather name="check" size={16} color={colors.text} />
+                  <Text style={[styles.featureText, { color: colors.text }]}>Unlimited booking links & QR codes</Text>
+                </View>
+              </View>
+
               <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
                 <View style={styles.trialTextContainer}>
                   <Text style={[styles.trialText, { color: colors.text }]}>
