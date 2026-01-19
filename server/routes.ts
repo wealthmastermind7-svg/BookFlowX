@@ -174,18 +174,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch("/api/businesses/:id", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const updates = insertBusinessSchema.partial().parse(req.body);
+      
+      // If name is updated, we might need to update slug but only if it doesn't cause a conflict
+      // For now, let's just allow name updates without forcing slug changes to avoid breaking links
+      
       const business = await storage.updateBusiness(req.params.id, updates);
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
       const bookingUrl = getBookingUrlForBusiness(business, req);
       res.json({ ...business, bookingUrl });
-    } catch (error) {
+    } catch (error: any) {
       if (error instanceof z.ZodError) {
         return res.status(400).json({ error: error.errors });
       }
       console.error("Error updating business:", error);
-      res.status(500).json({ error: "Failed to update business" });
+      res.status(500).json({ error: "Failed to update business", details: error.message });
     }
   });
 
