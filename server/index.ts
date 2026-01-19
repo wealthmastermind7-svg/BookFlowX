@@ -441,7 +441,8 @@ import { processReminders } from "./workflowEngine";
   });
 
   app.get("/googlec99eb3b619abbef4.html", (_req: Request, res: Response) => {
-    res.sendFile(path.resolve(process.cwd(), "server/static/googlec99eb3b619abbef4.html"));
+    res.setHeader("Content-Type", "text/html; charset=utf-8");
+    res.send("google-site-verification: googlec99eb3b619abbef4.html");
   });
 
   configureExpoAndLanding(app);
