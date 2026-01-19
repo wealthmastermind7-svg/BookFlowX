@@ -141,9 +141,9 @@ export function PaywallModal({
     setFreeTrialEnabled(value);
   }, []);
 
-  const yearlyPrice = "$69.99";
-  const yearlyMonthly = "$5.83";
-  const monthlyPrice = "$7.99";
+  const yearlyPrice = "$269.00";
+  const yearlyMonthly = "$22.42";
+  const monthlyPrice = "$29.99";
   const lifetimePrice = "$149.00";
 
   const getCtaText = () => {
