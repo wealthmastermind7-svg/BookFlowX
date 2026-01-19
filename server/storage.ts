@@ -171,10 +171,40 @@ export class DatabaseStorage implements IStorage {
     return created;
   }
 
+  private async generateUniqueBusinessSlug(name: string, excludeId?: string): Promise<string> {
+    const baseSlug = this.generateSlug(name);
+    let slug = baseSlug;
+    let counter = 1;
+
+    while (true) {
+      const existing = await db
+        .select()
+        .from(businesses)
+        .where(eq(businesses.slug, slug));
+      
+      if (existing.length === 0 || (excludeId && existing.length === 1 && existing[0].id === excludeId)) {
+        break;
+      }
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
+
+    return slug;
+  }
+
   async updateBusiness(id: string, updates: Partial<InsertBusiness>): Promise<Business | undefined> {
+    let finalUpdates = { ...updates };
+    
+    // If name is updated, check if we need to update the slug to match
+    // and ensure it's unique to avoid "businesses_slug_unique" constraint violations
+    if (updates.name && !updates.slug) {
+      const slug = await this.generateUniqueBusinessSlug(updates.name, id);
+      finalUpdates.slug = slug;
+    }
+
     const [updated] = await db
       .update(businesses)
-      .set({ ...updates, updatedAt: new Date() })
+      .set({ ...finalUpdates, updatedAt: new Date() })
       .where(eq(businesses.id, id))
       .returning();
     return updated || undefined;
