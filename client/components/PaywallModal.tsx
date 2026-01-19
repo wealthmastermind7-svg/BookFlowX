@@ -141,6 +141,12 @@ export function PaywallModal({
     setFreeTrialEnabled(value);
   }, []);
 
+  useEffect(() => {
+    if (offerings) {
+      console.log("[RevenueCat] Current offerings:", JSON.stringify(offerings, null, 2));
+    }
+  }, [offerings]);
+
   const yearlyPrice = "$269.00";
   const yearlyMonthly = "$22.42";
   const monthlyPrice = "$29.99";
@@ -269,9 +275,7 @@ export function PaywallModal({
                   </View>
                   <View style={styles.planPriceRight}>
                     <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {selectedPlan === "yearly" && offerings?.annual?.product.pricePerMonthString 
-                        ? offerings.annual.product.pricePerMonthString 
-                        : yearlyMonthly}
+                      {offerings?.annual?.product.pricePerMonthString || yearlyMonthly}
                     </Text>
                     <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
