@@ -37,6 +37,7 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import Svg, { Circle } from "react-native-svg";
 
+type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -109,7 +110,7 @@ export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkShareAccess, checkQrAccess, isPremium, showPaywall, offerings } = usePremium();
+  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -123,6 +124,10 @@ export default function SettingsScreen() {
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
+  const [embedModalVisible, setEmbedModalVisible] = useState(false);
+  const [embedCode, setEmbedCode] = useState<EmbedCode | null>(null);
+  const [embedLoading, setEmbedLoading] = useState(false);
+  const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
 
@@ -290,6 +295,19 @@ export default function SettingsScreen() {
     await Share.share({ url: fileUri });
   };
 
+  const handleShowEmbedModal = async () => {
+    if (!checkEmbedAccess()) return;
+    setEmbedModalVisible(true);
+    setEmbedLoading(true);
+    try {
+      const data = await api.getEmbedCode();
+      setEmbedCode(data);
+    } catch (error) {
+      setEmbedCode(null);
+    } finally {
+      setEmbedLoading(false);
+    }
+  };
 
   const handleCopyBookingLink = async () => {
     if (!business) return;
@@ -489,17 +507,60 @@ export default function SettingsScreen() {
 
             <View style={{ height: 32 }} />
 
-            <SectionTitleBadge label="DANGER ZONE">Security</SectionTitleBadge>
+            <SectionTitle>Automation</SectionTitle>
+            <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
+              <View style={styles.automationHeader}>
+                <ParallaxIcon name="cpu" delay={0} />
+                <ParallaxIcon name="zap" delay={300} />
+                <ParallaxIcon name="bell" delay={600} />
+              </View>
+              <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
+              <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences that work quietly in the background.</ThemedText>
+              <View style={styles.automationActionRow}>
+                <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
+                <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
+              </View>
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
+
+            <SectionTitle>Booking</SectionTitle>
+            <GlassCard style={styles.bookingCard}>
+              <View style={styles.bookingHeader}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.bookingTitle}>Booking Link</ThemedText>
+                  <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{getBookingDomain()}/book/{business?.slug || "..."}</ThemedText>
+                </View>
+                <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={16} color="#fff" /></Pressable>
+              </View>
+              <ThemedText style={styles.qrPlacementHint}>Place this at your counter, van, invoices, or website</ThemedText>
+              <View style={styles.bookingActions}>
+                <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
+                <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="grid" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Share QR</ThemedText></Pressable>
+              </View>
+            </GlassCard>
+            <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
+              <View style={styles.embedIconBox}><Feather name="code" size={18} color="#fff" /></View>
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <ThemedText style={styles.embedTitle}>Embed Widget</ThemedText>
+                <ThemedText style={styles.embedDesc}>Add to your website</ThemedText>
+              </View>
+              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
+
+            <SectionTitle>Data</SectionTitle>
             <View style={styles.gridRow}>
               <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}>
-                <View style={styles.securityIconCircle}><Feather name="database" size={16} color="#fff" /></View>
-                <ThemedText style={styles.securityLabel}>DEMO DATA</ThemedText>
+                <Feather name="download-cloud" size={22} color="#fff" />
+                <ThemedText style={styles.securityTitle}>Demo Data</ThemedText>
                 <ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText>
               </GlassCard>
               <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}>
-                <View style={[styles.securityIconCircle, { backgroundColor: "rgba(239, 68, 68, 0.2)" }]}><Feather name="trash-2" size={16} color="#EF4444" /></View>
-                <ThemedText style={styles.securityLabel}>DESTRUCTIVE</ThemedText>
-                <ThemedText style={styles.securityAction}>CLEAR ALL</ThemedText>
+                <Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} />
+                <ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Wipe Cloud</ThemedText>
+                <ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText>
               </GlassCard>
             </View>
 
@@ -652,12 +713,15 @@ const styles = StyleSheet.create({
   shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
   shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
+  embedCard: { flexDirection: "row", alignItems: "center", padding: 24, marginTop: 16 },
+  embedIconBox: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
+  embedTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
+  embedDesc: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
 
-  securityGridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
-  securityLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5, marginBottom: 4 },
-  securityAction: { fontSize: 11, fontWeight: "800", letterSpacing: 3, color: "rgba(255,255,255,0.4)" },
-  securityIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
-  
+  securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
+  securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
+  securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
+
   footer: { marginTop: 56, alignItems: "center" },
   footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.15)" },
   footerVersion: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.1)", marginTop: 4 },
