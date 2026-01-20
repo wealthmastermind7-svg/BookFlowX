@@ -76,7 +76,8 @@ export default function CalendarScreen() {
   };
 
   const swipeGesture = Gesture.Pan()
-    .activeOffsetX([-20, 20])
+    .activeOffsetX([-30, 30])
+    .failOffsetY([-15, 15])
     .onEnd((event) => {
       if (event.velocityX > 500 || event.translationX > 80) {
         calendarTranslateX.value = withSpring(50, { damping: 15 });
