@@ -29,7 +29,7 @@ interface FloatingMascotProps {
 const SCREEN_TIPS: Record<string, MascotTip> = {
   Dashboard: {
     title: "Welcome to BookFlow",
-    message: "This is your command center. View today's bookings, revenue trends, and upcoming appointments at a glance.",
+    message: "This is your command center. View today's bookings and revenue at a glance. Tip: Tap on any booking card to quickly confirm payment details!",
     icon: "home",
   },
   Calendar: {
@@ -130,7 +130,13 @@ export function FloatingMascot({ screenName, customTip }: FloatingMascotProps) {
   }, [showTip]);
 
   const handlePress = () => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    try { 
+      // Multi-stage haptic for a "living" feel
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      setTimeout(() => {
+        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      }, 50);
+    } catch {}
     setShowTip(true);
   };
 
@@ -219,25 +225,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   mascotButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 22,
+    width: 50,
+    height: 50,
+    borderRadius: 25,
     backgroundColor: "#fff",
     alignItems: "center",
     justifyContent: "center",
     shadowColor: "#fff",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.2,
-    shadowRadius: 8,
-    elevation: 6,
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 8,
   },
   mascotPressed: {
-    transform: [{ scale: 0.95 }],
-    opacity: 0.9,
+    transform: [{ scale: 0.9 }],
+    opacity: 0.8,
   },
   mascotFace: {
-    width: 32,
-    height: 32,
+    width: 36,
+    height: 36,
     alignItems: "center",
     justifyContent: "center",
   },
