@@ -49,7 +49,7 @@ const SCREEN_TIPS: Record<string, MascotTip> = {
   },
   Settings: {
     title: "Customize Everything",
-    message: "Set up your booking link, share your QR code, configure reminders, and manage your business details.",
+    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Wipe Cloud' to start fresh.",
     icon: "settings",
   },
   Checkout: {
