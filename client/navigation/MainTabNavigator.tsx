@@ -2,13 +2,15 @@ import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
-import { Platform, StyleSheet } from "react-native";
+import { Platform, StyleSheet, View } from "react-native";
+import { useNavigationState } from "@react-navigation/native";
 import DashboardStackNavigator from "@/navigation/DashboardStackNavigator";
 import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
 import ServicesStackNavigator from "@/navigation/ServicesStackNavigator";
 import CustomersStackNavigator from "@/navigation/CustomersStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
+import { FloatingMascot } from "@/components/FloatingMascot";
 
 export type MainTabParamList = {
   DashboardTab: undefined;
@@ -20,10 +22,25 @@ export type MainTabParamList = {
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
+const TAB_TO_SCREEN_NAME: Record<string, string> = {
+  DashboardTab: "Dashboard",
+  CalendarTab: "Calendar",
+  ServicesTab: "Services",
+  CustomersTab: "Customers",
+  SettingsTab: "Settings",
+};
+
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
+  
+  const currentTabName = useNavigationState((state) => {
+    if (!state || !state.routes || state.index === undefined) return "Dashboard";
+    const currentRoute = state.routes[state.index];
+    return TAB_TO_SCREEN_NAME[currentRoute?.name] || "Dashboard";
+  });
 
   return (
+    <View style={{ flex: 1 }}>
     <Tab.Navigator
       initialRouteName="DashboardTab"
       screenOptions={{
@@ -100,5 +117,7 @@ export default function MainTabNavigator() {
         }}
       />
     </Tab.Navigator>
+    <FloatingMascot screenName={currentTabName} />
+    </View>
   );
 }
