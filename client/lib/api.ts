@@ -48,6 +48,7 @@ export function generateSlugFromName(name: string): string {
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '');
   
+  // Use a short random suffix to ensure uniqueness even for duplicate names
   const randomSuffix = Math.random().toString(36).substring(2, 6);
   return baseSlug ? `${baseSlug}-${randomSuffix}` : `business-${randomSuffix}`;
 }
