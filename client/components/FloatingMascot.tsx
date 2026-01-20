@@ -29,7 +29,7 @@ interface FloatingMascotProps {
 const SCREEN_TIPS: Record<string, MascotTip> = {
   Dashboard: {
     title: "Welcome to BookFlow",
-    message: "This is your command center. View today's bookings and revenue at a glance. Tip: Tap on any booking card to quickly confirm payment details!",
+    message: "This is your command center. View today's bookings and revenue at a glance. Tap on any booking card to quickly confirm payment details!",
     icon: "home",
   },
   Calendar: {
