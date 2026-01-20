@@ -234,7 +234,8 @@ export class DatabaseStorage implements IStorage {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
       .replace(/-+/g, '-')
-      .trim();
+      .trim()
+      .slice(0, 100); // Limit slug length to avoid DB or URL issues
   }
 
   private async generateUniqueServiceSlug(businessId: string, name: string, excludeId?: string): Promise<string> {

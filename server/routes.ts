@@ -173,11 +173,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update business (PROTECTED)
   app.patch("/api/businesses/:id", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const updates = insertBusinessSchema.partial().parse(req.body);
+      // Allow partial updates with broad validation
+      const updates = req.body;
       
-      // If name is updated, we might need to update slug but only if it doesn't cause a conflict
-      // For now, let's just allow name updates without forcing slug changes to avoid breaking links
-      
+      // Basic check for name length if provided, but don't strictly block long names
+      if (updates.name && typeof updates.name === 'string' && updates.name.length > 500) {
+        return res.status(400).json({ error: "Business name is too long (max 500 characters)" });
+      }
+
       const business = await storage.updateBusiness(req.params.id, updates);
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
@@ -185,9 +188,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const bookingUrl = getBookingUrlForBusiness(business, req);
       res.json({ ...business, bookingUrl });
     } catch (error: any) {
-      if (error instanceof z.ZodError) {
-        return res.status(400).json({ error: error.errors });
-      }
       console.error("Error updating business:", error);
       res.status(500).json({ error: "Failed to update business", details: error.message });
     }
