@@ -109,6 +109,15 @@ function CustomerCardCinematic({
     return n.slice(0, 2).toUpperCase();
   };
 
+  const getSegment = (bookings: number) => {
+    if (bookings >= 10) return { label: "VIP", color: "#FBBF24" };
+    if (bookings >= 3) return { label: "REGULAR", color: "#60A5FA" };
+    if (bookings === 0) return { label: "NEW", color: "#34D399" };
+    return { label: "AT-RISK", color: "#F87171" };
+  };
+
+  const segment = getSegment(totalBookings);
+
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
@@ -122,7 +131,12 @@ function CustomerCardCinematic({
               <Text style={styles.initialsText}>{getInitials(name)}</Text>
             </View>
             <View style={styles.cardInfo}>
-              <Text style={styles.customerName}>{name}</Text>
+              <View style={styles.nameSegmentRow}>
+                <Text style={styles.customerName}>{name}</Text>
+                <View style={[styles.segmentBadge, { backgroundColor: segment.color + '20', borderColor: segment.color }]}>
+                  <Text style={[styles.segmentText, { color: segment.color }]}>{segment.label}</Text>
+                </View>
+              </View>
               <Text style={styles.customerEmail} numberOfLines={1}>{email}</Text>
             </View>
             <BookingRing count={totalBookings} />
@@ -323,7 +337,23 @@ const styles = StyleSheet.create({
     fontSize: 17,
     fontWeight: "600",
     color: "#fff",
+  },
+  nameSegmentRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
     marginBottom: 2,
+  },
+  segmentBadge: {
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  segmentText: {
+    fontSize: 9,
+    fontWeight: "800",
+    letterSpacing: 0.5,
   },
   customerEmail: {
     fontSize: 14,
