@@ -326,27 +326,26 @@ export default function SettingsScreen() {
     if (!business || !editingField) return;
     setEditLoading(true);
     try {
+      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+      
       let updates: Partial<typeof business> = { [editingField]: editValue };
       
-      if (editingField === "name" && editValue) {
-        const newSlug = editValue
-          .toLowerCase()
-          .trim()
-          .replace(/[^a-z0-9\s-]/g, '')
-          .replace(/\s+/g, '-')
-          .replace(/-+/g, '-')
-          .replace(/^-|-$/g, '');
-        if (newSlug) {
-          updates.slug = newSlug;
-        }
-      }
+      // Note: Slug generation is handled on the server if name is updated
+      // We don't manually generate it here to avoid duplication of logic
+      // and ensure the server's unique constraint handling is used.
       
       const updated = await api.updateBusiness(updates);
       setBusiness(updated);
       setEditModalVisible(false);
     } catch (error: any) {
       console.error("Save business field failed:", error);
-      Alert.alert("Error", `Save failed: ${error.message || "Unknown error"}`);
+      
+      let errorMessage = error.message || "Please check your connection and try again.";
+      if (errorMessage.includes("duplicate key value violates unique constraint")) {
+        errorMessage = "That name is too common. Try adding a unique word or changing it slightly.";
+      }
+      
+      Alert.alert("Update Failed", errorMessage);
     } finally {
       setEditLoading(false);
     }
