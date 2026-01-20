@@ -44,6 +44,12 @@ interface AIGeneratedService {
   bufferTime: number;
 }
 
+interface AIGeneratedAddon {
+  name: string;
+  description: string;
+  price: number;
+}
+
 const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
@@ -192,6 +198,7 @@ export default function ServicesScreen() {
   const [aiDescription, setAiDescription] = useState("");
   const [aiGenerating, setAiGenerating] = useState(false);
   const [aiServices, setAiServices] = useState<AIGeneratedService[]>([]);
+  const [aiAddons, setAiAddons] = useState<AIGeneratedAddon[]>([]);
   const [aiStep, setAiStep] = useState<"input" | "review">("input");
 
   useEffect(() => {
@@ -246,6 +253,7 @@ export default function ServicesScreen() {
     setAiStep("input");
     setAiDescription("");
     setAiServices([]);
+    setAiAddons([]);
   };
 
   const handleAIGenerate = async () => {
@@ -287,10 +295,12 @@ export default function ServicesScreen() {
       }
       
       const data = await response.json();
-      console.log("[AI] Generated services:", data.services?.length, JSON.stringify(data.services));
+      console.log("[AI] Generated services:", data.services?.length, "addons:", data.addons?.length);
       const servicesArray = data.services || [];
+      const addonsArray = data.addons || [];
       setAiServices(servicesArray);
-      console.log("[AI] Set aiServices to:", servicesArray.length, "items");
+      setAiAddons(addonsArray);
+      console.log("[AI] Set aiServices to:", servicesArray.length, "items, addons:", addonsArray.length);
       setAiStep("review");
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     } catch (error: any) {
@@ -309,17 +319,32 @@ export default function ServicesScreen() {
     setAiGenerating(true);
     
     try {
+      // Convert addons to the format expected by services (JSON string)
+      const upsellsForServices = aiAddons.length > 0 
+        ? JSON.stringify(aiAddons.map(addon => ({
+            name: addon.name,
+            description: addon.description,
+            price: Math.round(addon.price * 100),
+          })))
+        : null;
+      
       for (const svc of aiServices) {
         await api.createService({
           name: svc.name,
           description: svc.description,
           duration: svc.duration,
           price: Math.round(svc.price * 100),
+          upsells: upsellsForServices, // Attach addons as upsells to each service
         });
       }
       
       await loadServices();
       setAiModalVisible(false);
+      const totalItems = aiServices.length + aiAddons.length;
+      Alert.alert(
+        "Services Created", 
+        `Added ${aiServices.length} service${aiServices.length !== 1 ? 's' : ''}${aiAddons.length > 0 ? ` with ${aiAddons.length} add-on${aiAddons.length !== 1 ? 's' : ''} attached` : ''}.`
+      );
       try { Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success); } catch {}
     } catch (error) {
       console.error("Error creating services:", error);
@@ -406,7 +431,7 @@ export default function ServicesScreen() {
           ) : (
             <View style={styles.reviewContainer}>
               <Text style={styles.modalSubtitle}>
-                {aiServices.length} service{aiServices.length !== 1 ? 's' : ''} generated
+                {aiServices.length} service{aiServices.length !== 1 ? 's' : ''}{aiAddons.length > 0 ? ` + ${aiAddons.length} add-on${aiAddons.length !== 1 ? 's' : ''}` : ''} generated
               </Text>
               <ScrollView 
                 style={styles.reviewScrollView}
@@ -414,22 +439,44 @@ export default function ServicesScreen() {
                 contentContainerStyle={styles.reviewScrollContent}
               >
                 {aiServices.length > 0 ? (
-                  aiServices.map((svc, idx) => (
-                    <View key={idx} style={styles.aiServiceCard}>
-                      <Text style={styles.aiServiceName}>{svc.name}</Text>
-                      <Text style={styles.aiServiceDesc}>{svc.description}</Text>
-                      <View style={styles.aiServiceDetails}>
-                        <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
-                        <Text style={styles.aiServicePrice}>
-                          {formatPriceSimple(svc.price, business?.currency || "USD")}
-                        </Text>
+                  <>
+                    <Text style={styles.sectionLabel}>Services</Text>
+                    {aiServices.map((svc, idx) => (
+                      <View key={`svc-${idx}`} style={styles.aiServiceCard}>
+                        <Text style={styles.aiServiceName}>{svc.name}</Text>
+                        <Text style={styles.aiServiceDesc}>{svc.description}</Text>
+                        <View style={styles.aiServiceDetails}>
+                          <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
+                          <Text style={styles.aiServicePrice}>
+                            {formatPriceSimple(svc.price, business?.currency || "USD")}
+                          </Text>
+                        </View>
                       </View>
-                    </View>
-                  ))
+                    ))}
+                  </>
                 ) : (
                   <Text style={styles.noServicesText}>
                     No services could be generated. Please try a different description.
                   </Text>
+                )}
+                
+                {aiAddons.length > 0 && (
+                  <>
+                    <Text style={[styles.sectionLabel, { marginTop: 16 }]}>Add-ons (Extras)</Text>
+                    <Text style={styles.addonNote}>These will be attached to all services above</Text>
+                    {aiAddons.map((addon, idx) => (
+                      <View key={`addon-${idx}`} style={styles.aiAddonCard}>
+                        <View style={styles.addonHeader}>
+                          <Feather name="plus-circle" size={14} color="#4ade80" style={{ marginRight: 8 }} />
+                          <Text style={styles.aiAddonName}>{addon.name}</Text>
+                        </View>
+                        <Text style={styles.aiAddonDesc}>{addon.description}</Text>
+                        <Text style={styles.aiAddonPrice}>
+                          +{formatPriceSimple(addon.price, business?.currency || "USD")}
+                        </Text>
+                      </View>
+                    ))}
+                  </>
                 )}
               </ScrollView>
               <View style={styles.aiButtonRow}>
@@ -717,7 +764,8 @@ const styles = StyleSheet.create({
     padding: 16,
     color: "#fff",
     fontSize: 16,
-    minHeight: 120,
+    minHeight: 180,
+    maxHeight: 300,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
     marginBottom: 20,
@@ -799,5 +847,49 @@ const styles = StyleSheet.create({
     color: "#000",
     fontSize: 16,
     fontWeight: "700",
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.4)",
+    textTransform: "uppercase",
+    letterSpacing: 1,
+    marginBottom: 12,
+  },
+  addonNote: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    marginBottom: 12,
+    fontStyle: "italic",
+  },
+  aiAddonCard: {
+    backgroundColor: "rgba(74, 222, 128, 0.08)",
+    borderRadius: 12,
+    padding: 12,
+    marginBottom: 8,
+    borderWidth: 1,
+    borderColor: "rgba(74, 222, 128, 0.2)",
+  },
+  addonHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 4,
+  },
+  aiAddonName: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  aiAddonDesc: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.5)",
+    marginBottom: 6,
+    marginLeft: 22,
+  },
+  aiAddonPrice: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#4ade80",
+    marginLeft: 22,
   },
 });

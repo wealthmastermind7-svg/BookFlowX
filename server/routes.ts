@@ -832,9 +832,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const { generateServicesFromDescription } = await import("./ai");
-      const services = await generateServicesFromDescription(description, businessType, currency);
+      const result = await generateServicesFromDescription(description, businessType, currency);
       
-      res.json({ services });
+      // Return both services and addons
+      res.json({ 
+        services: result.services, 
+        addons: result.addons 
+      });
     } catch (error) {
       console.error("[AI] Error generating services:", error);
       res.status(500).json({ error: "Failed to generate services. Please try again." });

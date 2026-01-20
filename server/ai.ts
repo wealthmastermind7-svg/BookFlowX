@@ -13,37 +13,59 @@ export interface GeneratedService {
   bufferTime: number;
 }
 
+export interface GeneratedAddon {
+  name: string;
+  description: string;
+  price: number;
+}
+
+export interface GeneratedServicesResult {
+  services: GeneratedService[];
+  addons: GeneratedAddon[];
+}
+
 export async function generateServicesFromDescription(
   description: string,
   businessType?: string,
   currency?: string
-): Promise<GeneratedService[]> {
+): Promise<GeneratedServicesResult> {
   const systemPrompt = `You are an expert business consultant helping small businesses set up their booking services.
 Given a natural language description of services, generate structured service definitions.
 
+IMPORTANT: Intelligently separate MAIN SERVICES from ADD-ONS (extras):
+- MAIN SERVICES: Core offerings that customers book as appointments (e.g., "Exterior Groom - Sedan $115", "Haircut $25")
+- ADD-ONS (EXTRAS): Optional enhancements customers can add to a main service (e.g., "Leather conditioning $80", "Pet hair removal $55")
+
 Guidelines:
 - Extract individual services from the description
+- If a service has vehicle-type pricing (Sedan/SUV/Van), create separate service entries for each
 - Suggest appropriate durations in minutes (15, 30, 45, 60, 90, 120, etc.)
-- Suggest reasonable prices based on the service type and market rates
 - Add buffer time between appointments (5-15 minutes for quick services, 15-30 for longer ones)
 - Write professional, concise descriptions
+- For add-ons, do NOT include duration (they are added to existing appointments)
+- If something is labeled as "Extras", "A la carte", "Add-ons", or similar, put it in the addons array
 - If unclear, make reasonable assumptions based on industry standards
 
-Respond with a JSON array of services.`;
+Respond with a JSON object containing BOTH services and addons arrays.`;
 
   const userPrompt = `Business type: ${businessType || "General service business"}
 Currency: ${currency || "USD"}
 
 Description: "${description}"
 
-Generate services as a JSON object with a "services" key containing an array.
+Generate a JSON object with BOTH "services" (main bookable services) and "addons" (optional extras):
 {
   "services": [{
-    "name": "Service Name",
+    "name": "Service Name - Vehicle Type",
     "description": "Brief professional description",
     "duration": 60,
-    "price": 50,
+    "price": 115,
     "bufferTime": 15
+  }],
+  "addons": [{
+    "name": "Add-on Name",
+    "description": "Brief description of the add-on",
+    "price": 55
   }]
 }`;
 
@@ -55,37 +77,41 @@ Generate services as a JSON object with a "services" key containing an array.
         { role: "user", content: userPrompt },
       ],
       response_format: { type: "json_object" },
-      max_tokens: 1024,
+      max_tokens: 4096,
       temperature: 0.7,
     });
 
-    const content = response.choices[0]?.message?.content || "{\"services\":[]}";
+    const content = response.choices[0]?.message?.content || "{\"services\":[],\"addons\":[]}";
+    console.log("[AI] Raw response length:", content.length);
+    
     let parsed;
     try {
       parsed = JSON.parse(content);
     } catch (parseErr) {
       console.error("[AI] JSON parse error:", parseErr, "Content:", content);
-      return [];
+      return { services: [], addons: [] };
     }
     
-    // Look for services array in the parsed object
+    const services: GeneratedService[] = [];
+    const addons: GeneratedAddon[] = [];
+    
+    // Extract services array
     if (parsed.services && Array.isArray(parsed.services)) {
-      return parsed.services;
+      services.push(...parsed.services);
     }
     
-    // Fallback: look for any array in the object
-    for (const key in parsed) {
-      if (Array.isArray(parsed[key])) {
-        return parsed[key];
-      }
+    // Extract addons array (check multiple possible keys)
+    if (parsed.addons && Array.isArray(parsed.addons)) {
+      addons.push(...parsed.addons);
+    } else if (parsed.add_ons && Array.isArray(parsed.add_ons)) {
+      addons.push(...parsed.add_ons);
+    } else if (parsed.extras && Array.isArray(parsed.extras)) {
+      addons.push(...parsed.extras);
     }
     
-    // Final fallback: if the whole thing is an array (unlikely with json_object mode but safe)
-    if (Array.isArray(parsed)) {
-      return parsed;
-    }
+    console.log("[AI] Parsed:", services.length, "services,", addons.length, "addons");
     
-    return [];
+    return { services, addons };
   } catch (error) {
     console.error("[AI] Error generating services:", error);
     throw error;
