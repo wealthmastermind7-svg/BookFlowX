@@ -507,60 +507,17 @@ export default function SettingsScreen() {
 
             <View style={{ height: 32 }} />
 
-            <SectionTitle>Automation</SectionTitle>
-            <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
-              <View style={styles.automationHeader}>
-                <ParallaxIcon name="cpu" delay={0} />
-                <ParallaxIcon name="zap" delay={300} />
-                <ParallaxIcon name="bell" delay={600} />
-              </View>
-              <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
-              <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences that work quietly in the background.</ThemedText>
-              <View style={styles.automationActionRow}>
-                <ThemedText style={styles.automationAction}>CONFIGURE</ThemedText>
-                <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
-              </View>
-            </GlassCard>
-
-            <View style={{ height: 32 }} />
-
-            <SectionTitle>Booking</SectionTitle>
-            <GlassCard style={styles.bookingCard}>
-              <View style={styles.bookingHeader}>
-                <View style={{ flex: 1 }}>
-                  <ThemedText style={styles.bookingTitle}>Booking Link</ThemedText>
-                  <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{getBookingDomain()}/book/{business?.slug || "..."}</ThemedText>
-                </View>
-                <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={16} color="#fff" /></Pressable>
-              </View>
-              <ThemedText style={styles.qrPlacementHint}>Place this at your counter, van, invoices, or website</ThemedText>
-              <View style={styles.bookingActions}>
-                <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
-                <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="grid" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Share QR</ThemedText></Pressable>
-              </View>
-            </GlassCard>
-            <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
-              <View style={styles.embedIconBox}><Feather name="code" size={18} color="#fff" /></View>
-              <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.embedTitle}>Embed Widget</ThemedText>
-                <ThemedText style={styles.embedDesc}>Add to your website</ThemedText>
-              </View>
-              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
-            </GlassCard>
-
-            <View style={{ height: 32 }} />
-
-            <SectionTitle>Data</SectionTitle>
+            <SectionTitleBadge label="DANGER ZONE">Security</SectionTitleBadge>
             <View style={styles.gridRow}>
               <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}>
-                <Feather name="download-cloud" size={22} color="#fff" />
-                <ThemedText style={styles.securityTitle}>Demo Data</ThemedText>
+                <View style={styles.securityIconCircle}><Feather name="database" size={16} color="#fff" /></View>
+                <ThemedText style={styles.securityLabel}>DEMO DATA</ThemedText>
                 <ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText>
               </GlassCard>
               <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}>
-                <Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} />
-                <ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Wipe Cloud</ThemedText>
-                <ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText>
+                <View style={[styles.securityIconCircle, { backgroundColor: "rgba(239, 68, 68, 0.2)" }]}><Feather name="trash-2" size={16} color="#EF4444" /></View>
+                <ThemedText style={styles.securityLabel}>DESTRUCTIVE</ThemedText>
+                <ThemedText style={styles.securityAction}>CLEAR ALL</ThemedText>
               </GlassCard>
             </View>
 
