@@ -174,8 +174,12 @@ export class DatabaseStorage implements IStorage {
   private async generateUniqueBusinessSlug(name: string, excludeId?: string): Promise<string> {
     const baseSlug = this.generateSlug(name);
     let slug = baseSlug;
+    
+    // Add a short random suffix immediately to minimize collisions
+    const randomSuffix = Math.random().toString(36).substring(2, 6);
+    slug = `${baseSlug}-${randomSuffix}`;
+    
     let counter = 1;
-
     while (true) {
       const existing = await db
         .select()
@@ -185,7 +189,7 @@ export class DatabaseStorage implements IStorage {
       if (existing.length === 0 || (excludeId && existing.length === 1 && existing[0].id === excludeId)) {
         break;
       }
-      slug = `${baseSlug}-${counter}`;
+      slug = `${baseSlug}-${randomSuffix}-${counter}`;
       counter++;
     }
 
