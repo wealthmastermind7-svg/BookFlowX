@@ -12,6 +12,7 @@ import {
   ActivityIndicator,
   Alert,
   KeyboardAvoidingView,
+  ScrollView,
 } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -407,24 +408,30 @@ export default function ServicesScreen() {
               <Text style={styles.modalSubtitle}>
                 {aiServices.length} service{aiServices.length !== 1 ? 's' : ''} generated
               </Text>
-              {aiServices.length > 0 ? (
-                aiServices.map((svc, idx) => (
-                  <View key={idx} style={styles.aiServiceCard}>
-                    <Text style={styles.aiServiceName}>{svc.name}</Text>
-                    <Text style={styles.aiServiceDesc}>{svc.description}</Text>
-                    <View style={styles.aiServiceDetails}>
-                      <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
-                      <Text style={styles.aiServicePrice}>
-                        {formatPriceSimple(svc.price, business?.currency || "USD")}
-                      </Text>
+              <ScrollView 
+                style={styles.reviewScrollView}
+                showsVerticalScrollIndicator={true}
+                contentContainerStyle={styles.reviewScrollContent}
+              >
+                {aiServices.length > 0 ? (
+                  aiServices.map((svc, idx) => (
+                    <View key={idx} style={styles.aiServiceCard}>
+                      <Text style={styles.aiServiceName}>{svc.name}</Text>
+                      <Text style={styles.aiServiceDesc}>{svc.description}</Text>
+                      <View style={styles.aiServiceDetails}>
+                        <Text style={styles.aiServiceDuration}>{svc.duration} min</Text>
+                        <Text style={styles.aiServicePrice}>
+                          {formatPriceSimple(svc.price, business?.currency || "USD")}
+                        </Text>
+                      </View>
                     </View>
-                  </View>
-                ))
-              ) : (
-                <Text style={styles.noServicesText}>
-                  No services could be generated. Please try a different description.
-                </Text>
-              )}
+                  ))
+                ) : (
+                  <Text style={styles.noServicesText}>
+                    No services could be generated. Please try a different description.
+                  </Text>
+                )}
+              </ScrollView>
               <View style={styles.aiButtonRow}>
                 <Pressable style={styles.aiBackButton} onPress={() => setAiStep("input")}>
                   <Text style={styles.aiBackText}>Edit</Text>
@@ -669,7 +676,15 @@ const styles = StyleSheet.create({
     maxHeight: "70%",
   },
   reviewContainer: {
+    flex: 1,
     paddingBottom: 8,
+  },
+  reviewScrollView: {
+    maxHeight: 300,
+    marginBottom: 16,
+  },
+  reviewScrollContent: {
+    paddingBottom: 4,
   },
   noServicesText: {
     color: "rgba(255,255,255,0.5)",
