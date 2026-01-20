@@ -37,7 +37,6 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import Svg, { Circle } from "react-native-svg";
 
-type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -110,7 +109,7 @@ export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings } = usePremium();
+  const { checkShareAccess, checkQrAccess, isPremium, showPaywall, offerings } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -124,10 +123,6 @@ export default function SettingsScreen() {
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
-  const [embedModalVisible, setEmbedModalVisible] = useState(false);
-  const [embedCode, setEmbedCode] = useState<EmbedCode | null>(null);
-  const [embedLoading, setEmbedLoading] = useState(false);
-  const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
 
@@ -295,19 +290,6 @@ export default function SettingsScreen() {
     await Share.share({ url: fileUri });
   };
 
-  const handleShowEmbedModal = async () => {
-    if (!checkEmbedAccess()) return;
-    setEmbedModalVisible(true);
-    setEmbedLoading(true);
-    try {
-      const data = await api.getEmbedCode();
-      setEmbedCode(data);
-    } catch (error) {
-      setEmbedCode(null);
-    } finally {
-      setEmbedLoading(false);
-    }
-  };
 
   const handleCopyBookingLink = async () => {
     if (!business) return;
@@ -670,10 +652,6 @@ const styles = StyleSheet.create({
   shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
   shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
-  embedCard: { flexDirection: "row", alignItems: "center", padding: 24, marginTop: 16 },
-  embedIconBox: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
-  embedTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
-  embedDesc: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
 
   securityGridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
   securityLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5, marginBottom: 4 },
