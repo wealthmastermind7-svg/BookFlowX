@@ -34,7 +34,7 @@ const SCREEN_TIPS: Record<string, MascotTip> = {
   },
   Calendar: {
     title: "Your Schedule",
-    message: "Tap any date to see bookings. Long-press a time slot to block it off. Swipe between months easily.",
+    message: "Tap any date to see bookings. Use the arrows or swipe left/right to navigate between months. Tap 'Block Times' to mark unavailable slots.",
     icon: "calendar",
   },
   Services: {

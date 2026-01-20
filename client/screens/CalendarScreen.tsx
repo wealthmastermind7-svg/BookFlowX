@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   View,
   FlatList,
@@ -16,12 +16,13 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
+import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
-  Easing,
-  interpolate,
+  withSpring,
+  runOnJS,
 } from "react-native-reanimated";
 
 import { api, Booking } from "@/lib/api";
@@ -61,6 +62,41 @@ export default function CalendarScreen() {
   const [loading, setLoading] = useState(true);
 
   const fadeIn = useSharedValue(0);
+  const calendarTranslateX = useSharedValue(0);
+  const calendarOpacity = useSharedValue(1);
+
+  const goToPreviousMonth = () => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() - 1, 1));
+  };
+
+  const goToNextMonth = () => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    setCurrentMonth(prev => new Date(prev.getFullYear(), prev.getMonth() + 1, 1));
+  };
+
+  const swipeGesture = Gesture.Pan()
+    .activeOffsetX([-20, 20])
+    .onEnd((event) => {
+      if (event.velocityX > 500 || event.translationX > 80) {
+        calendarTranslateX.value = withSpring(50, { damping: 15 });
+        calendarOpacity.value = withTiming(0.5, { duration: 100 });
+        runOnJS(goToPreviousMonth)();
+        calendarTranslateX.value = withSpring(0, { damping: 15 });
+        calendarOpacity.value = withTiming(1, { duration: 200 });
+      } else if (event.velocityX < -500 || event.translationX < -80) {
+        calendarTranslateX.value = withSpring(-50, { damping: 15 });
+        calendarOpacity.value = withTiming(0.5, { duration: 100 });
+        runOnJS(goToNextMonth)();
+        calendarTranslateX.value = withSpring(0, { damping: 15 });
+        calendarOpacity.value = withTiming(1, { duration: 200 });
+      }
+    });
+
+  const calendarAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: calendarTranslateX.value }],
+    opacity: calendarOpacity.value,
+  }));
 
   useEffect(() => {
     fadeIn.value = withTiming(1, { duration: 800 });
@@ -183,11 +219,21 @@ export default function CalendarScreen() {
         >
           <View style={styles.header}>
             <View style={styles.headerTitleRow}>
-              <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.6}>{monthName}</Animated.Text>
-              <Animated.Text style={styles.hugeYear} numberOfLines={1}>{yearName}</Animated.Text>
+              <View style={styles.monthNavRow}>
+                <Pressable onPress={goToPreviousMonth} style={styles.navArrow}>
+                  <Feather name="chevron-left" size={28} color="rgba(255,255,255,0.6)" />
+                </Pressable>
+                <View style={styles.monthTextContainer}>
+                  <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{monthName}</Animated.Text>
+                  <Animated.Text style={styles.hugeYear} numberOfLines={1}>{yearName}</Animated.Text>
+                </View>
+                <Pressable onPress={goToNextMonth} style={styles.navArrow}>
+                  <Feather name="chevron-right" size={28} color="rgba(255,255,255,0.6)" />
+                </Pressable>
+              </View>
             </View>
             <View style={styles.headerControls}>
-              <Animated.Text style={styles.setupText}>Set up your business hours</Animated.Text>
+              <Animated.Text style={styles.setupText}>Swipe to change months</Animated.Text>
               <Pressable onPress={handleOpenAvailability} style={styles.glassButtonSmall}>
                 <Feather name="clock" size={14} color="white" />
                 <Animated.Text style={styles.buttonTextSmall}>Set Hours</Animated.Text>
@@ -195,16 +241,18 @@ export default function CalendarScreen() {
             </View>
           </View>
 
-          <View style={styles.calendarGrid}>
-            <View style={styles.weekDaysHeader}>
-              {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
-                <Animated.Text key={d} style={styles.weekDayText}>{d}</Animated.Text>
-              ))}
-            </View>
-            <View style={styles.datesGrid}>
-              {calendarData.map((day, i) => renderDay(day, i))}
-            </View>
-          </View>
+          <GestureDetector gesture={swipeGesture}>
+            <Animated.View style={[styles.calendarGrid, calendarAnimatedStyle]}>
+              <View style={styles.weekDaysHeader}>
+                {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
+                  <Animated.Text key={d} style={styles.weekDayText}>{d}</Animated.Text>
+                ))}
+              </View>
+              <View style={styles.datesGrid}>
+                {calendarData.map((day, i) => renderDay(day, i))}
+              </View>
+            </Animated.View>
+          </GestureDetector>
 
           <View style={styles.bookingsHeader}>
             <View>
@@ -289,32 +337,46 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   headerTitleRow: {
+    marginBottom: 8,
+  },
+  monthNavRow: {
     flexDirection: "row",
-    alignItems: "baseline",
-    gap: 8,
-    flexWrap: "wrap",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  navArrow: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: "rgba(255,255,255,0.1)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  monthTextContainer: {
+    flex: 1,
+    alignItems: "center",
   },
   giantMonth: {
-    fontSize: 56,
+    fontSize: 42,
     fontWeight: "300",
     color: "#fff",
-    letterSpacing: -2.5,
-    lineHeight: 64,
+    letterSpacing: -2,
+    lineHeight: 48,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 4,
-    flexShrink: 1,
     textTransform: "capitalize",
+    textAlign: "center",
   },
   hugeYear: {
-    fontSize: 56,
-    fontWeight: "200",
-    color: "rgba(255,255,255,0.6)",
-    letterSpacing: -1.5,
-    lineHeight: 64,
+    fontSize: 20,
+    fontWeight: "400",
+    color: "rgba(255,255,255,0.5)",
+    letterSpacing: 2,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    textShadowOffset: { width: 0, height: 1 },
+    textShadowRadius: 2,
+    marginTop: 4,
   },
   headerControls: {
     flexDirection: "row",
