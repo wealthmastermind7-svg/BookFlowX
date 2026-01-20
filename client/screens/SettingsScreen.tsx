@@ -539,14 +539,6 @@ export default function SettingsScreen() {
                 <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="grid" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Share QR</ThemedText></Pressable>
               </View>
             </GlassCard>
-            <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
-              <View style={styles.embedIconBox}><Feather name="code" size={18} color="#fff" /></View>
-              <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.embedTitle}>Embed Widget</ThemedText>
-                <ThemedText style={styles.embedDesc}>Add to your website</ThemedText>
-              </View>
-              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
-            </GlassCard>
 
             <View style={{ height: 32 }} />
 
