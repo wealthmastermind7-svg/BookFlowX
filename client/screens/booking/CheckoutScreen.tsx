@@ -185,11 +185,22 @@ export default function CheckoutScreen() {
     navigation.goBack();
   };
 
+  const getIndustryPhrasePrefix = (serviceName: string): string => {
+    const combined = serviceName.toLowerCase();
+    if (combined.includes('dentist') || combined.includes('dental') || combined.includes('teeth')) return "RESTORE";
+    if (combined.includes('consultant') || combined.includes('coach') || combined.includes('advisor')) return "BOOK";
+    if (combined.includes('salon') || combined.includes('hair') || combined.includes('barber') || combined.includes('beauty')) return "ELEVATE";
+    if (combined.includes('spa') || combined.includes('massage') || combined.includes('relax')) return "FIND";
+    if (combined.includes('car wash') || combined.includes('auto') || combined.includes('detail')) return "SHINE";
+    if (combined.includes('contractor') || combined.includes('repair') || combined.includes('fix')) return "BOOK";
+    return "RESERVE";
+  };
+
   return (
     <ThemedView style={styles.container}>
       <View style={[styles.oversizedTextContainer, { top: insets.top + 20 }]}>
         <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.03 : 0.04 }]}>
-          RESERVE
+          {getIndustryPhrasePrefix(service?.name || "")}
         </ThemedText>
       </View>
 

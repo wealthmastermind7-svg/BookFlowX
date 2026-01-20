@@ -83,6 +83,19 @@ function GlassPanel({ children, style }: { children: React.ReactNode; style?: an
 }
 
 function CinematicLinkPreview({ businessName, domain }: { businessName: string; domain: string }) {
+  const getIndustryPhrase = (name: string): string[] => {
+    const lowName = name.toLowerCase();
+    if (lowName.includes('dentist') || lowName.includes('dental') || lowName.includes('teeth')) return ['RESTORE', 'YOUR', 'SMILE'];
+    if (lowName.includes('consultant') || lowName.includes('coach') || lowName.includes('advisor')) return ['BOOK', 'YOUR', 'SESSION'];
+    if (lowName.includes('salon') || lowName.includes('hair') || lowName.includes('barber') || lowName.includes('beauty')) return ['ELEVATE', 'YOUR', 'STYLE'];
+    if (lowName.includes('spa') || lowName.includes('massage') || lowName.includes('relax')) return ['FIND', 'YOUR', 'CALM'];
+    if (lowName.includes('car wash') || lowName.includes('auto') || lowName.includes('detail')) return ['SHINE', 'YOUR', 'RIDE'];
+    if (lowName.includes('contractor') || lowName.includes('repair') || lowName.includes('fix')) return ['BOOK', 'YOUR', 'SERVICE'];
+    return ['RESERVE', 'YOUR', 'SPACE'];
+  };
+
+  const phrases = getIndustryPhrase(businessName);
+
   return (
     <View style={styles.cinematicCard}>
       <LinearGradient
@@ -102,13 +115,13 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
       
       <View style={styles.cinematicContent}>
         <ThemedText style={styles.cinematicTitle}>
-          RESERVE
+          {phrases[0]}
         </ThemedText>
         <ThemedText style={styles.cinematicTitle}>
-          YOUR
+          {phrases[1]}
         </ThemedText>
         <ThemedText style={styles.cinematicTitle}>
-          SPACE
+          {phrases[2]}
         </ThemedText>
         <View style={styles.accentBar} />
       </View>
