@@ -1,9 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { Feather } from "@expo/vector-icons";
 import { BlurView } from "expo-blur";
 import { Platform, StyleSheet, View } from "react-native";
-import { useNavigationState } from "@react-navigation/native";
 import DashboardStackNavigator from "@/navigation/DashboardStackNavigator";
 import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
 import ServicesStackNavigator from "@/navigation/ServicesStackNavigator";
@@ -32,16 +31,21 @@ const TAB_TO_SCREEN_NAME: Record<string, string> = {
 
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
-  
-  const currentTabName = useNavigationState((state) => {
-    if (!state || !state.routes || state.index === undefined) return "Dashboard";
-    const currentRoute = state.routes[state.index];
-    return TAB_TO_SCREEN_NAME[currentRoute?.name] || "Dashboard";
-  });
+  const [currentTabName, setCurrentTabName] = useState("Dashboard");
 
   return (
     <View style={{ flex: 1 }}>
     <Tab.Navigator
+      screenListeners={{
+        state: (e) => {
+          const state = e.data.state;
+          if (state && state.routes && state.index !== undefined) {
+            const routeName = state.routes[state.index]?.name;
+            const screenName = TAB_TO_SCREEN_NAME[routeName] || "Dashboard";
+            setCurrentTabName(screenName);
+          }
+        },
+      }}
       initialRouteName="DashboardTab"
       screenOptions={{
         tabBarActiveTintColor: theme.tabIconSelected,
