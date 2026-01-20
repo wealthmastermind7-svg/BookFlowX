@@ -961,12 +961,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === PUBLIC BOOKING PAGE ===
   
+  // Helper to get industry-specific phrase
+  function getHeroPhrase(businessName: string, serviceName?: string): string {
+    const name = businessName.toLowerCase();
+    const service = (serviceName || "").toLowerCase();
+    const combined = `${name} ${service}`;
+    
+    if (combined.includes('dentist') || combined.includes('dental') || combined.includes('teeth') || combined.includes('orthodontist')) {
+      return "RESTORE YOUR SMILE";
+    }
+    if (combined.includes('consultant') || combined.includes('consulting') || combined.includes('coach') || combined.includes('advisor') || combined.includes('expert')) {
+      return "BOOK YOUR SESSION";
+    }
+    if (combined.includes('salon') || combined.includes('hair') || combined.includes('barber') || combined.includes('cut') || combined.includes('style') || combined.includes('beauty')) {
+      return "ELEVATE YOUR STYLE";
+    }
+    if (combined.includes('spa') || combined.includes('massage') || combined.includes('therapy') || combined.includes('relax')) {
+      return "FIND YOUR CALM";
+    }
+    if (combined.includes('car wash') || combined.includes('auto') || combined.includes('detail') || combined.includes('shine')) {
+      return "SHINE YOUR RIDE";
+    }
+    if (combined.includes('contractor') || combined.includes('plumb') || combined.includes('electr') || combined.includes('repair') || combined.includes('fix')) {
+      return "BOOK YOUR SERVICE";
+    }
+    
+    return "RESERVE YOUR SPACE";
+  }
+
   // Generate premium cinematic OG image for link previews (inspired by luxury brand aesthetics)
   function generateCinematicOgImage(businessName: string, serviceName?: string, tagline?: string): string {
+    const heroPhrase = getHeroPhrase(businessName, serviceName);
+    const phrases = heroPhrase.split(' ');
+    
     // Premium stacked title layout
     const titleLines = serviceName 
       ? [serviceName.toUpperCase()]
-      : ['RESERVE', 'YOUR', 'SPACE'];
+      : phrases;
     
     // Create premium SVG with smoke effects and elegant typography
     return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
@@ -1013,9 +1044,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
           ${titleLines[0].length > 16 ? titleLines[0].substring(0, 16) : titleLines[0]}
         </text>
       ` : `
-        <text x="100" y="180" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">RESERVE</text>
-        <text x="100" y="290" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">YOUR</text>
-        <text x="100" y="400" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">SPACE</text>
+        <text x="100" y="180" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[0] || ''}</text>
+        <text x="100" y="290" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[1] || ''}</text>
+        <text x="100" y="400" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[2] || ''}</text>
       `}
       
       <!-- Elegant horizontal accent line -->
