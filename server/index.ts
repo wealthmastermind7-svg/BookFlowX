@@ -416,7 +416,210 @@ import { processReminders } from "./workflowEngine";
     if (templatePath) {
       res.sendFile(templatePath);
     } else {
-      res.status(404).send("Alternatives page not found");
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(`<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookFlow vs Alternatives | BookFlow</title>
+    <style>
+        :root {
+            --primary: #000000;
+            --secondary: #1a1a1a;
+            --accent: #ffffff;
+            --text: #ffffff;
+            --text-dim: #a0a0a0;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text);
+            background: var(--primary);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            color: var(--text-dim);
+            text-decoration: none;
+            font-weight: 500;
+            margin-bottom: 40px;
+            transition: color 0.2s;
+        }
+        .back-link:hover { color: var(--accent); }
+        h1 {
+            font-size: 3.5rem;
+            font-weight: 800;
+            letter-spacing: -0.04em;
+            margin: 0 0 20px 0;
+            text-transform: uppercase;
+        }
+        .subtitle {
+            font-size: 1.25rem;
+            color: var(--text-dim);
+            max-width: 600px;
+            margin-bottom: 60px;
+        }
+        .comparison-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 80px;
+        }
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 40px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+        .card:hover {
+            transform: translateY(-8px);
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(255, 255, 255, 0.2);
+        }
+        .card h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+            letter-spacing: -0.02em;
+        }
+        .card p {
+            color: var(--text-dim);
+            margin: 0 0 24px 0;
+            font-size: 1rem;
+        }
+        .card .action {
+            font-weight: 600;
+            font-size: 0.9rem;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .features-section {
+            margin-top: 100px;
+            padding-top: 100px;
+            border-top: 1px solid var(--border);
+        }
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+        }
+        .feature h3 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            margin: 0 0 12px 0;
+        }
+        .feature p {
+            color: var(--text-dim);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+        .mascot-container {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            text-align: center;
+        }
+        .mascot {
+            width: 80px;
+            height: 80px;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        .mascot:hover { transform: scale(1.1); }
+        footer {
+            margin-top: 100px;
+            padding-top: 40px;
+            border-top: 1px solid var(--border);
+            color: var(--text-dim);
+            font-size: 0.9rem;
+        }
+        @media (max-width: 600px) {
+            h1 { font-size: 2.5rem; }
+            .container { padding: 40px 20px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← BACK TO APP</a>
+        <h1>BookFlow vs Alternatives</h1>
+        <p class="subtitle">See how BookFlow compares to other popular scheduling and booking systems. We focus on premium design and AI automation for modern service businesses.</p>
+
+        <div class="comparison-grid">
+            <a href="/vs/calendly" class="card">
+                <h2>Calendly</h2>
+                <p>Enterprise-focused scheduling automation.</p>
+                <div class="action">VIEW COMPARISON →</div>
+            </a>
+            <a href="/vs/acuity" class="card">
+                <h2>Acuity Scheduling</h2>
+                <p>Advanced appointments for service providers.</p>
+                <div class="action">VIEW COMPARISON →</div>
+            </a>
+            <a href="/vs/simplybook" class="card">
+                <h2>SimplyBook.me</h2>
+                <p>Comprehensive service booking system.</p>
+                <div class="action">VIEW COMPARISON →</div>
+            </a>
+            <a href="/vs/square" class="card">
+                <h2>Square Appointments</h2>
+                <p>POS integrated scheduling for local shops.</p>
+                <div class="action">VIEW COMPARISON →</div>
+            </a>
+        </div>
+
+        <div class="features-section">
+            <h2>Why Choose BookFlow</h2>
+            <div class="feature-grid">
+                <div class="feature">
+                    <h3>Cinematic Design</h3>
+                    <p>Liquid glass UI with premium typography that makes your brand look high-end.</p>
+                </div>
+                <div class="feature">
+                    <h3>AI Setup Assistant</h3>
+                    <p>Go from zero to bookable in 30 seconds with natural language service creation.</p>
+                </div>
+                <div class="feature">
+                    <h3>Smart Reminders</h3>
+                    <p>Adaptive notification timing that reduces no-shows without being annoying.</p>
+                </div>
+                <div class="feature">
+                    <h3>App Clip Ready</h3>
+                    <p>Instant booking without app installation via iOS App Clips and QR codes.</p>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            &copy; 2026 BookFlow. All rights reserved. Premium Booking Infrastructure.
+        </footer>
+    </div>
+
+    <div class="mascot-container">
+        <img src="https://luxeweb.cerolauto.store/assets/3d_luxury_geometric_mascot_character-QA8UOSGB.png" class="mascot" alt="Mascot">
+    </div>
+</body>
+</html>`);
     }
   });
 
