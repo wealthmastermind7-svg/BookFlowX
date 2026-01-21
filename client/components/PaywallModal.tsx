@@ -251,10 +251,10 @@ export function PaywallModal({
               <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
                 <View style={styles.trialTextContainer}>
                   <Text style={[styles.trialText, { color: colors.text }]}>
-                    Enable 7-day free trial
+                    7-day free trial
                   </Text>
                   <Text style={[styles.trialSubtext, { color: colors.textSecondary }]}>
-                    Not sure yet? Cancel anytime.
+                    Then {selectedPlan === "yearly" ? "$69.99/year" : "$7.99/month"}, billed automatically. Cancel anytime before trial ends.
                   </Text>
                 </View>
                 <Switch
@@ -288,15 +288,12 @@ export function PaywallModal({
                         <Text style={[styles.bestValueText, { color: colors.backgroundRoot }]}>BEST VALUE</Text>
                       </View>
                     </View>
-                    <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
+                    <Text style={[styles.planPriceMain, { color: colors.text }]}>
                       {offerings?.annual?.product.priceString || yearlyPrice}/year
                     </Text>
-                  </View>
-                  <View style={styles.planPriceRight}>
-                    <Text style={[styles.planMonthly, { color: colors.text }]}>
-                      {offerings?.annual?.product.pricePerMonthString || yearlyMonthly}
+                    <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
+                      ({offerings?.annual?.product.pricePerMonthString || yearlyMonthly} per month equivalent)
                     </Text>
-                    <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
                   </View>
                 </Pressable>
 
@@ -314,19 +311,14 @@ export function PaywallModal({
                 >
                   <View style={styles.planDetails}>
                     <Text style={[styles.planName, { color: colors.text }]}>
-                      Monthly
+                      Monthly Access
                     </Text>
-                    <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
+                    <Text style={[styles.planPriceMain, { color: colors.text }]}>
+                      {offerings?.monthly?.product.priceString || monthlyPrice}/month
+                    </Text>
+                    <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
                       Billed every month
                     </Text>
-                  </View>
-                  <View style={styles.planPriceRight}>
-                    <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
-                      {offerings?.monthly?.product.priceString || monthlyPrice}
-                    </Text>
-                    {!(offerings?.monthly?.product.priceString || monthlyPrice).includes('/mo') && (
-                      <Text style={[styles.planUnit, { color: colors.textSecondary }]}>/mo</Text>
-                    )}
                   </View>
                 </Pressable>
 
@@ -346,13 +338,11 @@ export function PaywallModal({
                     <Text style={[styles.planName, { color: colors.text }]}>
                       Lifetime Access
                     </Text>
-                    <Text style={[styles.planDuration, { color: colors.textSecondary }]}>
-                      One-time payment
-                    </Text>
-                  </View>
-                  <View style={styles.planPriceRight}>
-                    <Text style={[styles.planMonthlySmall, { color: colors.text }]}>
+                    <Text style={[styles.planPriceMain, { color: colors.text }]}>
                       {offerings?.lifetime?.product.priceString || lifetimePrice}
+                    </Text>
+                    <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
+                      One-time payment. Not a subscription.
                     </Text>
                   </View>
                 </Pressable>
@@ -378,6 +368,12 @@ export function PaywallModal({
                   </View>
                 )}
               </Pressable>
+
+              <View style={styles.disclaimerContainer}>
+                <Text style={[styles.disclaimerText, { color: colors.textTertiary }]}>
+                  Payment will be charged to your Apple ID at confirmation of purchase. Subscriptions automatically renew unless cancelled at least 24 hours before the end of the current period. You can manage or cancel your subscription in App Store settings.
+                </Text>
+              </View>
 
               <View style={styles.legalLinks}>
                 <Pressable 
@@ -588,25 +584,24 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     letterSpacing: 0.5,
   },
-  planDuration: {
-    fontSize: 12,
-  },
-  planPriceRight: {
-    flexDirection: "row",
-    alignItems: "baseline",
-  },
-  planMonthly: {
+  planPriceMain: {
     fontSize: 22,
     fontWeight: "700",
+    marginTop: 4,
   },
-  planMonthlySmall: {
-    fontSize: 18,
-    fontWeight: "600",
-  },
-  planUnit: {
+  planMonthlySub: {
     fontSize: 12,
-    fontWeight: "400",
-    marginLeft: 2,
+    marginTop: 2,
+  },
+  disclaimerContainer: {
+    marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.sm,
+  },
+  disclaimerText: {
+    fontSize: 10,
+    textAlign: "center",
+    lineHeight: 14,
+    opacity: 0.7,
   },
   ctaButton: {
     height: 60,
