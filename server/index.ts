@@ -422,201 +422,278 @@ import { processReminders } from "./workflowEngine";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BookFlow vs Alternatives | BookFlow</title>
+    <title>BookFlow vs Alternatives | Premium Booking Infrastructure</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #000000;
-            --secondary: #1a1a1a;
+            --pure-black: #000000;
+            --charcoal: #111111;
+            --graphite: #222222;
+            --smoke: #444444;
+            --silver: #888888;
+            --pearl: #f5f5f7;
             --accent: #ffffff;
-            --text: #ffffff;
-            --text-dim: #a0a0a0;
-            --glass: rgba(255, 255, 255, 0.05);
-            --border: rgba(255, 255, 255, 0.1);
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.06);
         }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            color: var(--text);
-            background: var(--primary);
-            margin: 0;
-            padding: 0;
+            background-color: var(--pure-black);
+            color: var(--pearl);
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
         }
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 80px 20px;
+
+        /* Abstract Video Background */
+        .video-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.4;
+            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
         }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 24px;
+        }
+
         .back-link {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--silver);
+            text-decoration: none;
             display: inline-flex;
             align-items: center;
-            color: var(--text-dim);
-            text-decoration: none;
-            font-weight: 500;
-            margin-bottom: 40px;
-            transition: color 0.2s;
+            margin-bottom: 60px;
+            transition: color 0.3s;
         }
         .back-link:hover { color: var(--accent); }
+
+        /* Oversized Typography */
         h1 {
-            font-size: 3.5rem;
-            font-weight: 800;
-            letter-spacing: -0.04em;
-            margin: 0 0 20px 0;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 10vw, 6rem);
+            font-weight: 400;
+            line-height: 0.9;
+            letter-spacing: -3px;
+            margin-bottom: 40px;
             text-transform: uppercase;
         }
-        .subtitle {
-            font-size: 1.25rem;
-            color: var(--text-dim);
-            max-width: 600px;
-            margin-bottom: 60px;
+
+        .hero-desc {
+            font-size: 22px;
+            color: var(--silver);
+            max-width: 650px;
+            line-height: 1.4;
+            margin-bottom: 100px;
+            font-weight: 300;
         }
+
+        /* Glassmorphic Grid */
         .comparison-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 20px;
-            margin-bottom: 80px;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 150px;
         }
+
         .card {
             background: var(--glass);
-            border: 1px solid var(--border);
-            border-radius: 24px;
-            padding: 40px;
+            border: 1px solid var(--glass-border);
+            border-radius: 32px;
+            padding: 48px;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
+            cursor: pointer;
             text-decoration: none;
             color: inherit;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
         }
+
         .card:hover {
-            transform: translateY(-8px);
-            background: rgba(255, 255, 255, 0.08);
-            border-color: rgba(255, 255, 255, 0.2);
+            background: var(--glass-hover);
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-10px) scale(1.02);
         }
+
         .card h2 {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-            letter-spacing: -0.02em;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 500;
+            margin-bottom: 16px;
+            letter-spacing: -1px;
         }
+
         .card p {
-            color: var(--text-dim);
-            margin: 0 0 24px 0;
-            font-size: 1rem;
+            font-size: 16px;
+            color: var(--silver);
+            line-height: 1.6;
+            margin-bottom: 32px;
         }
-        .card .action {
+
+        .card .vs-link {
+            font-size: 12px;
             font-weight: 600;
-            font-size: 0.9rem;
-            letter-spacing: 0.05em;
+            letter-spacing: 2px;
             text-transform: uppercase;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
         }
-        .features-section {
-            margin-top: 100px;
-            padding-top: 100px;
-            border-top: 1px solid var(--border);
-        }
-        .feature-grid {
+
+        /* Circular Meters */
+        .meter-section {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 40px;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 80px;
+            margin-bottom: 150px;
         }
-        .feature h3 {
-            font-size: 1.25rem;
-            font-weight: 700;
-            margin: 0 0 12px 0;
-        }
-        .feature p {
-            color: var(--text-dim);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-        .mascot-container {
-            position: fixed;
-            bottom: 40px;
-            right: 40px;
+
+        .meter-container {
             text-align: center;
         }
-        .mascot {
-            width: 80px;
-            height: 80px;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.2));
-            cursor: pointer;
-            transition: transform 0.3s;
+
+        .circular-meter {
+            width: 150px;
+            height: 150px;
+            border-radius: 75px;
+            border: 2px solid var(--graphite);
+            margin: 0 auto 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        .mascot:hover { transform: scale(1.1); }
+
+        .circular-meter::after {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            border-radius: 75px;
+            border: 2px solid var(--accent);
+            clip-path: polygon(50% 50%, 50% 0%, 100% 0%, 100% 100%, 0% 100%, 0% 0%, 50% 0%);
+        }
+
+        .meter-val {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 40px;
+        }
+
+        .meter-label {
+            font-size: 12px;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            color: var(--silver);
+        }
+
+        /* Section Headers */
+        .section-tag {
+            font-size: 12px;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            color: var(--silver);
+            margin-bottom: 24px;
+            display: block;
+        }
+
+        h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 48px;
+            margin-bottom: 40px;
+            letter-spacing: -1px;
+        }
+
         footer {
-            margin-top: 100px;
-            padding-top: 40px;
-            border-top: 1px solid var(--border);
-            color: var(--text-dim);
-            font-size: 0.9rem;
+            border-top: 1px solid var(--graphite);
+            padding-top: 60px;
+            color: var(--smoke);
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
         }
-        @media (max-width: 600px) {
-            h1 { font-size: 2.5rem; }
-            .container { padding: 40px 20px; }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 72px; }
+            .comparison-grid { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
+    <div class="video-bg"></div>
+    
     <div class="container">
-        <a href="/" class="back-link">← BACK TO APP</a>
-        <h1>BookFlow vs Alternatives</h1>
-        <p class="subtitle">See how BookFlow compares to other popular scheduling and booking systems. We focus on premium design and AI automation for modern service businesses.</p>
+        <a href="/" class="back-link">← Return to BookFlow</a>
+        
+        <span class="section-tag">Market Comparison</span>
+        <h1>BookFlow vs<br>Alternatives</h1>
+        
+        <p class="hero-desc">Experience the future of appointment management. While others build tools, we build luxury infrastructure for service leaders.</p>
 
         <div class="comparison-grid">
             <a href="/vs/calendly" class="card">
                 <h2>Calendly</h2>
-                <p>Enterprise-focused scheduling automation.</p>
-                <div class="action">VIEW COMPARISON →</div>
+                <p>Functional but corporate. Calendly focuses on enterprise meeting links, while BookFlow focuses on the premium service experience.</p>
+                <div class="vs-link">Detailed Audit →</div>
             </a>
+            
             <a href="/vs/acuity" class="card">
-                <h2>Acuity Scheduling</h2>
-                <p>Advanced appointments for service providers.</p>
-                <div class="action">VIEW COMPARISON →</div>
+                <h2>Acuity</h2>
+                <p>Powerful but cluttered. Acuity offers deep customization at the cost of a complex, dated interface. BookFlow offers cinematic simplicity.</p>
+                <div class="vs-link">Detailed Audit →</div>
             </a>
+            
             <a href="/vs/simplybook" class="card">
-                <h2>SimplyBook.me</h2>
-                <p>Comprehensive service booking system.</p>
-                <div class="action">VIEW COMPARISON →</div>
-            </a>
-            <a href="/vs/square" class="card">
-                <h2>Square Appointments</h2>
-                <p>POS integrated scheduling for local shops.</p>
-                <div class="action">VIEW COMPARISON →</div>
+                <h2>SimplyBook</h2>
+                <p>Legacy booking systems lack the modern AI automation and liquid interface that keeps your clients coming back.</p>
+                <div class="vs-link">Detailed Audit →</div>
             </a>
         </div>
 
-        <div class="features-section">
-            <h2>Why Choose BookFlow</h2>
-            <div class="feature-grid">
-                <div class="feature">
-                    <h3>Cinematic Design</h3>
-                    <p>Liquid glass UI with premium typography that makes your brand look high-end.</p>
+        <span class="section-tag">Performance Metrics</span>
+        <h3>Performance by Design</h3>
+        
+        <div class="meter-section">
+            <div class="meter-container">
+                <div class="circular-meter">
+                    <span class="meter-val">98%</span>
                 </div>
-                <div class="feature">
-                    <h3>AI Setup Assistant</h3>
-                    <p>Go from zero to bookable in 30 seconds with natural language service creation.</p>
+                <span class="meter-label">Booking Completion</span>
+            </div>
+            
+            <div class="meter-container">
+                <div class="circular-meter">
+                    <span class="meter-val">45%</span>
                 </div>
-                <div class="feature">
-                    <h3>Smart Reminders</h3>
-                    <p>Adaptive notification timing that reduces no-shows without being annoying.</p>
+                <span class="meter-label">Churn Reduction</span>
+            </div>
+            
+            <div class="meter-container">
+                <div class="circular-meter">
+                    <span class="meter-val">2s</span>
                 </div>
-                <div class="feature">
-                    <h3>App Clip Ready</h3>
-                    <p>Instant booking without app installation via iOS App Clips and QR codes.</p>
-                </div>
+                <span class="meter-label">Checkout Speed</span>
             </div>
         </div>
 
         <footer>
-            &copy; 2026 BookFlow. All rights reserved. Premium Booking Infrastructure.
+            <span>© 2026 BOOKFLOW INFRASTRUCTURE</span>
+            <span>CINEMATIC LUXURY SETTINGS ENABLED</span>
         </footer>
-    </div>
-
-    <div class="mascot-container">
-        <img src="https://luxeweb.cerolauto.store/assets/3d_luxury_geometric_mascot_character-QA8UOSGB.png" class="mascot" alt="Mascot">
     </div>
 </body>
 </html>`);
