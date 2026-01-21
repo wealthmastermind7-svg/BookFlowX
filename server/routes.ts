@@ -123,33 +123,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadEmbedHtml();
   await loadEmbedJs();
 
-  // === SUPPORT PAGES ===
-  app.get(["/support", "/help"], (_req: Request, res: Response) => {
-    res.send(`
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <title>BookFlowX Support</title>
-        <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 40px auto; padding: 20px; color: #333; }
-          h1 { border-bottom: 1px solid #eee; padding-bottom: 10px; }
-          .contact { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-top: 20px; }
-          .email { font-weight: bold; color: #007AFF; }
-        </style>
-      </head>
-      <body>
-        <h1>BookFlowX Support</h1>
-        <p>If you need help with the BookFlowX app, please contact us at:</p>
-        <div class="contact">
-          Email: <span class="email">admin@cerolauto.com</span>
-        </div>
-        <p>We typically respond within 24–48 hours.</p>
-        <p>For urgent issues, please include your Apple ID email when contacting support.</p>
-      </body>
-      </html>
-    `);
-  });
-
   // === BUSINESSES API ===
   
   // Get business by ID (for admin dashboard)
