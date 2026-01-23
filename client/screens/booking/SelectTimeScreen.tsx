@@ -115,36 +115,36 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
         style={[
-          styles.dateCard,
+          styles.datePickerItem,
           isSelected
-            ? { backgroundColor: theme.text }
+            ? { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
             : {
-                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.5)",
-                borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                backgroundColor: "rgba(255,255,255,0.05)",
+                borderColor: "rgba(255,255,255,0.15)",
                 borderWidth: 1,
               },
         ]}
       >
         <ThemedText
           style={[
-            styles.dateMonth,
-            { color: isSelected ? theme.buttonText : theme.textSecondary },
+            styles.datePickerMonth,
+            { color: "#FFF" },
           ]}
         >
           {monthName}
         </ThemedText>
         <ThemedText
           style={[
-            styles.dateDay,
-            { color: isSelected ? theme.buttonText : theme.text },
+            styles.datePickerDay,
+            { color: "#FFF" },
           ]}
         >
           {dayNum}
         </ThemedText>
         <ThemedText
           style={[
-            styles.dateDayName,
-            { color: isSelected ? theme.buttonText : theme.textSecondary },
+            styles.datePickerDayName,
+            { color: "#FFF" },
           ]}
         >
           {dayName}
@@ -325,10 +325,10 @@ export default function SelectTimeScreen() {
     return `${month} ${day} • ${selectedTime || "--:--"}`;
   };
 
-  const businessName = service?.businessName || "BOOKFLOW";
+  const businessName = (service as any)?.businessName || "BOOKFLOW";
 
   return (
-    <ThemedView style={styles.container}>
+    <View style={styles.container}>
       <View style={[styles.oversizedTextContainer, { top: insets.top + 40 }]}>
         <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.05 : 0.08 }]}>
           {businessName.toUpperCase()}
@@ -369,7 +369,7 @@ export default function SelectTimeScreen() {
 
         <View style={styles.timesSection}>
           <View style={styles.timesGrid}>
-            {TIME_SLOTS.map((time, index) => (
+            {TIME_SLOTS.map((time) => (
               <TimeSlotButton
                 key={time}
                 time={time}
@@ -409,7 +409,7 @@ export default function SelectTimeScreen() {
           <ThemedText style={styles.backButtonText}>BACK</ThemedText>
         </Pressable>
       </View>
-    </ThemedView>
+    </View>
   );
 }
 
@@ -528,9 +528,9 @@ const styles = StyleSheet.create({
     marginVertical: 2,
   },
   datePickerDayName: {
-    fontSize: 10,
+    fontSize: 9,
     fontFamily: "Inter-SemiBold",
-    opacity: 0.6,
+    marginTop: 0,
   },
   timesSection: {
     paddingHorizontal: Spacing.lg,
