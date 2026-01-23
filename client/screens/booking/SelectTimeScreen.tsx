@@ -363,10 +363,6 @@ export default function SelectTimeScreen() {
         </View>
 
         <View style={styles.datePickerSection}>
-          <Pressable style={styles.dateSelectorButton}>
-            <ThemedText style={styles.dateSelectorLabel}>SELECT DATE</ThemedText>
-            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
-          </Pressable>
           <DateScrollPicker
             dates={dates}
             selectedDate={selectedDate}
