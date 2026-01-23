@@ -214,6 +214,63 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
   );
 }
 
+function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[], selectedDate: Date, onDateChange: (date: Date) => void }) {
+  const { theme, isDark } = useTheme();
+  
+  const handleScroll = (event: any) => {
+    const x = event.nativeEvent.contentOffset.x;
+    const index = Math.round(x / 80);
+    if (index >= 0 && index < dates.length) {
+      const newDate = dates[index];
+      if (newDate.toDateString() !== selectedDate.toDateString()) {
+        Haptics.selectionAsync();
+        onDateChange(newDate);
+      }
+    }
+  };
+
+  return (
+    <View style={styles.datePickerContainer}>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        snapToInterval={80}
+        decelerationRate="fast"
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        contentContainerStyle={styles.datePickerContent}
+      >
+        {dates.map((date, index) => {
+          const isSelected = date.toDateString() === selectedDate.toDateString();
+          return (
+            <Pressable
+              key={date.toISOString()}
+              onPress={() => {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                onDateChange(date);
+              }}
+              style={[
+                styles.datePickerItem,
+                isSelected && { backgroundColor: theme.text }
+              ]}
+            >
+              <ThemedText style={[styles.datePickerMonth, isSelected && { color: theme.buttonText }]}>
+                {date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
+              </ThemedText>
+              <ThemedText style={[styles.datePickerDay, isSelected && { color: theme.buttonText }]}>
+                {date.getDate()}
+              </ThemedText>
+              <ThemedText style={[styles.datePickerDayName, isSelected && { color: theme.buttonText }]}>
+                {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
+              </ThemedText>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
 export default function SelectTimeScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
@@ -296,13 +353,11 @@ export default function SelectTimeScreen() {
         </View>
 
         <View style={styles.dateScrollerContainer}>
-          <View style={styles.dateScroller}>
-            <DateCard
-              date={selectedDate}
-              isSelected={true}
-              onPress={() => {}}
-            />
-          </View>
+          <DateScrollPicker
+            dates={dates}
+            selectedDate={selectedDate}
+            onDateChange={setSelectedDate}
+          />
         </View>
 
         <View style={styles.timesSection}>
@@ -455,20 +510,42 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     opacity: 0.6,
   },
+  datePickerContainer: {
+    height: 100,
+    marginTop: Spacing.md,
+  },
+  datePickerContent: {
+    paddingHorizontal: SCREEN_WIDTH / 2 - 40,
+    alignItems: 'center',
+    gap: Spacing.sm,
+  },
+  datePickerItem: {
+    width: 80,
+    height: 80,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  datePickerMonth: {
+    fontSize: 10,
+    fontWeight: '600',
+    opacity: 0.6,
+  },
+  datePickerDay: {
+    fontSize: 24,
+    fontWeight: '800',
+    marginVertical: 2,
+  },
+  datePickerDayName: {
+    fontSize: 10,
+    fontWeight: '600',
+    opacity: 0.6,
+  },
   dateScrollerContainer: {
     marginBottom: Spacing.xl,
-    paddingHorizontal: Spacing.lg,
-  },
-  dateScroller: {
-    gap: Spacing.md,
-  },
-  dateCard: {
-    flex: 1,
-    aspectRatio: 1.2,
-    borderRadius: BorderRadius.lg,
-    alignItems: "center",
-    justifyContent: "center",
-    minWidth: 80,
   },
   dateMonth: {
     fontSize: 9,
