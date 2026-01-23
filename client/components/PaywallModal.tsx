@@ -154,7 +154,7 @@ export function PaywallModal({
 
   const getCtaText = () => {
     if (selectedPlan === "lifetime") {
-      return "Get Started";
+      return "Unlock Lifetime Access";
     }
     return "Start 7-Day Free Trial";
   };
@@ -268,7 +268,7 @@ export function PaywallModal({
                       </View>
                     </View>
                     <Text style={[styles.planPriceMain, { color: colors.text }]}>
-                      7 Days Free, then {offerings?.annual?.product.priceString || yearlyPrice}/year
+                      Includes 7-day free trial, then {offerings?.annual?.product.priceString || yearlyPrice}/year
                     </Text>
                     <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
                       ({offerings?.annual?.product.pricePerMonthString || yearlyMonthly} per month equivalent)
@@ -293,7 +293,7 @@ export function PaywallModal({
                       Monthly Access
                     </Text>
                     <Text style={[styles.planPriceMain, { color: colors.text }]}>
-                      7 Days Free, then {offerings?.monthly?.product.priceString || monthlyPrice}/month
+                      Includes 7-day free trial, then {offerings?.monthly?.product.priceString || monthlyPrice}/month
                     </Text>
                     <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
                       Billed every month
@@ -321,7 +321,7 @@ export function PaywallModal({
                       {offerings?.lifetime?.product.priceString || lifetimePrice}
                     </Text>
                     <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
-                      One-time payment. Not a subscription.
+                      One-time payment • No trial included
                     </Text>
                   </View>
                 </Pressable>
