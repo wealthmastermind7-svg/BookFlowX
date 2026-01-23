@@ -468,12 +468,11 @@ const styles = StyleSheet.create({
   },
   dateScrollerContainer: {
     marginBottom: Spacing.xl,
-    marginHorizontal: -Spacing.lg,
   },
   dateScroller: {
     paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
     gap: Spacing.md,
-    alignItems: 'center',
   },
   dateCard: {
     width: 64,
