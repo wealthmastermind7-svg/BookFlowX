@@ -156,10 +156,7 @@ export function PaywallModal({
     if (selectedPlan === "lifetime") {
       return "Get Started";
     }
-    if (freeTrialEnabled) {
-      return "Start Free Trial";
-    }
-    return "Get Started";
+    return "Start 7-Day Free Trial";
   };
 
   return (
@@ -248,24 +245,6 @@ export function PaywallModal({
                 </View>
               </View>
 
-              <View style={[styles.trialToggle, { backgroundColor: colors.backgroundSecondary, borderColor: colors.border }]}>
-                <View style={styles.trialTextContainer}>
-                  <Text style={[styles.trialText, { color: colors.text }]}>
-                    7-day free trial
-                  </Text>
-                  <Text style={[styles.trialSubtext, { color: colors.textSecondary }]}>
-                    Then {selectedPlan === "yearly" ? "$69.99/year" : "$7.99/month"}, billed automatically. Cancel anytime before trial ends.
-                  </Text>
-                </View>
-                <Switch
-                  value={freeTrialEnabled}
-                  onValueChange={handleTrialToggle}
-                  trackColor={{ false: colors.backgroundTertiary, true: colors.text }}
-                  thumbColor="#FFFFFF"
-                  ios_backgroundColor={colors.backgroundTertiary}
-                />
-              </View>
-
               <View style={styles.planSection}>
                 <Pressable
                   style={[
@@ -289,7 +268,7 @@ export function PaywallModal({
                       </View>
                     </View>
                     <Text style={[styles.planPriceMain, { color: colors.text }]}>
-                      {offerings?.annual?.product.priceString || yearlyPrice}/year
+                      7 Days Free, then {offerings?.annual?.product.priceString || yearlyPrice}/year
                     </Text>
                     <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
                       ({offerings?.annual?.product.pricePerMonthString || yearlyMonthly} per month equivalent)
@@ -314,7 +293,7 @@ export function PaywallModal({
                       Monthly Access
                     </Text>
                     <Text style={[styles.planPriceMain, { color: colors.text }]}>
-                      {offerings?.monthly?.product.priceString || monthlyPrice}/month
+                      7 Days Free, then {offerings?.monthly?.product.priceString || monthlyPrice}/month
                     </Text>
                     <Text style={[styles.planMonthlySub, { color: colors.textSecondary }]}>
                       Billed every month
