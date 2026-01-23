@@ -296,24 +296,13 @@ export default function SelectTimeScreen() {
         </View>
 
         <View style={styles.dateScrollerContainer}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.dateScroller}
-          >
-            {dates.map((date, index) => (
-              <Animated.View
-                key={date.toISOString()}
-                entering={FadeInDown.delay(index * 30).springify()}
-              >
-                <DateCard
-                  date={date}
-                  isSelected={date.toDateString() === selectedDate.toDateString()}
-                  onPress={() => setSelectedDate(date)}
-                />
-              </Animated.View>
-            ))}
-          </ScrollView>
+          <View style={styles.dateScroller}>
+            <DateCard
+              date={selectedDate}
+              isSelected={true}
+              onPress={() => {}}
+            />
+          </View>
         </View>
 
         <View style={styles.timesSection}>
@@ -468,18 +457,18 @@ const styles = StyleSheet.create({
   },
   dateScrollerContainer: {
     marginBottom: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
   },
   dateScroller: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.sm,
     gap: Spacing.md,
   },
   dateCard: {
-    width: 64,
-    aspectRatio: 0.8,
+    flex: 1,
+    aspectRatio: 1.2,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
+    minWidth: 80,
   },
   dateMonth: {
     fontSize: 9,
