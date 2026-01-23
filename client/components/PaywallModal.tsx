@@ -153,10 +153,7 @@ export function PaywallModal({
   const lifetimePrice = "$149.00";
 
   const getCtaText = () => {
-    if (selectedPlan === "lifetime") {
-      return "Unlock Lifetime Access";
-    }
-    return "Start 7-Day Free Trial";
+    return "Continue";
   };
 
   return (
