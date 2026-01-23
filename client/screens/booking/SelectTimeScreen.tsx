@@ -472,6 +472,7 @@ const styles = StyleSheet.create({
   dateScroller: {
     paddingHorizontal: Spacing.lg,
     gap: Spacing.md,
+    alignItems: 'center',
   },
   dateCard: {
     width: 64,
