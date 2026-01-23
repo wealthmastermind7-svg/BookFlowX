@@ -1,295 +1,292 @@
 <!DOCTYPE html>
-<html class="scroll-smooth dark" lang="en">
+<html lang="en">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-    <title>BookFlow vs Alternatives - Compare Booking Platforms</title>
-    <meta name="description" content="Compare BookFlow with Calendly, Square, Acuity and more. See why BookFlow is the most elegant booking engine for premium service providers.">
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,container-queries"></script>
-    <link href="https://fonts.googleapis.com" rel="preconnect"/>
-    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-    <script>
-        tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        primary: "#05070A",
-                        secondary: "#0A1128",
-                        accent: "#C5A059",
-                        charcoal: "#1A1C1E",
-                    },
-                    fontFamily: {
-                        display: ["Cormorant Garamond", "serif"],
-                        sans: ["Inter", "sans-serif"],
-                    },
-                },
-            },
-        };
-    </script>
-    <style type="text/tailwindcss">
-        @layer components {
-            .glass-card {
-                @apply bg-white/5 backdrop-blur-xl border border-white/10 shadow-2xl;
-            }
-            .text-gold {
-                @apply bg-gradient-to-tr from-[#C5A059] via-[#EAD196] to-[#C5A059] bg-clip-text text-transparent;
-            }
-            .btn-premium-gold {
-                @apply bg-gradient-to-r from-[#C5A059] via-[#EAD196] to-[#C5A059] text-primary hover:shadow-[0_0_30px_rgba(197,160,89,0.4)] transition-all duration-500;
-            }
-            .hero-mesh {
-                background: radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, rgba(5, 7, 10, 1) 100%);
-            }
-            .material-symbols-outlined {
-                font-variation-settings: 'FILL' 0, 'wght' 300, 'GRAD' 0, 'opsz' 24;
-            }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookFlow vs Alternatives | Premium Booking Infrastructure</title>
+    <meta name="description" content="Compare BookFlow with Calendly, Acuity, and SimplyBook. Discover why BookFlow is the premium choice for service leaders seeking AI-powered luxury booking experiences.">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pure-black: #000000;
+            --charcoal: #111111;
+            --graphite: #222222;
+            --smoke: #444444;
+            --silver: #888888;
+            --pearl: #f5f5f7;
+            --accent: #ffffff;
+            --glass: rgba(255, 255, 255, 0.03);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-hover: rgba(255, 255, 255, 0.12);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            background-color: var(--pure-black);
+            color: var(--pearl);
+            font-family: 'Inter', -apple-system, sans-serif;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 100px 24px;
+        }
+
+        .back-link {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            color: var(--silver);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            margin-bottom: 60px;
+            transition: color 0.3s;
+        }
+        .back-link:hover { color: var(--accent); }
+
+        h1 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: clamp(3rem, 8vw, 6rem);
+            font-weight: 400;
+            line-height: 0.95;
+            letter-spacing: -2px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+        }
+
+        .hero-desc {
+            font-size: 20px;
+            color: var(--silver);
+            max-width: 700px;
+            line-height: 1.5;
+            margin-bottom: 100px;
+            font-weight: 300;
+        }
+
+        /* Comparison Table */
+        .table-section {
+            margin-bottom: 150px;
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 18px;
+        }
+
+        th {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 28px;
+            text-align: left;
+            padding: 24px;
+            border-bottom: 1px solid var(--graphite);
+            font-weight: 400;
+            color: var(--accent);
+        }
+
+        td {
+            padding: 24px;
+            border-bottom: 1px solid var(--glass-border);
+            color: var(--silver);
+        }
+
+        .feature-col { color: var(--accent); font-weight: 600; width: 30%; }
+        .bookflow-col { color: var(--accent); background: var(--glass); font-weight: 600; }
+
+        /* Advantage Cards */
+        .advantage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 32px;
+            margin-bottom: 150px;
+        }
+
+        .card {
+            background: var(--glass);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 40px;
+            transition: all 0.4s ease;
+        }
+
+        .card:hover {
+            background: var(--glass-hover);
+            transform: translateY(-5px);
+        }
+
+        .card h3 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: var(--accent);
+        }
+
+        .card p {
+            color: var(--silver);
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .check-icon {
+            width: 20px;
+            height: 20px;
+            border: 1.5px solid var(--accent);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+        }
+
+        /* CTA Section */
+        .cta-section {
+            background: var(--accent);
+            color: var(--pure-black);
+            padding: 80px;
+            border-radius: 40px;
+            text-align: center;
+            margin-bottom: 100px;
+        }
+
+        .cta-section h2 {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 56px;
+            margin-bottom: 24px;
+            text-transform: uppercase;
+        }
+
+        .cta-button {
+            display: inline-block;
+            background: var(--pure-black);
+            color: var(--accent);
+            padding: 20px 48px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 600;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            transition: transform 0.3s ease;
+        }
+
+        .cta-button:hover {
+            transform: scale(1.05);
+        }
+
+        footer {
+            border-top: 1px solid var(--graphite);
+            padding-top: 60px;
+            color: var(--smoke);
+            font-size: 12px;
+            letter-spacing: 1px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        @media (max-width: 768px) {
+            h1 { font-size: 48px; }
+            .cta-section { padding: 40px 20px; }
+            .cta-section h2 { font-size: 36px; }
         }
     </style>
 </head>
-<body class="bg-primary text-slate-100 font-sans selection:bg-accent selection:text-primary overflow-x-hidden">
-    <nav class="fixed top-0 w-full z-[100] border-b border-white/5 bg-primary/80 backdrop-blur-lg">
-        <div class="max-w-[1440px] mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <a href="/marketing" class="flex items-center gap-3">
-                    <div class="w-10 h-10 border border-accent/30 rounded flex items-center justify-center">
-                        <span class="material-symbols-outlined text-accent text-2xl">calendar_month</span>
-                    </div>
-                    <span class="font-display text-2xl font-semibold tracking-tight">BookFlow</span>
-                </a>
-            </div>
-            <div class="hidden lg:flex items-center gap-12">
-                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="/marketing#features">Features</a>
-                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="/marketing#industries">Industries</a>
-                <a class="text-xs font-semibold tracking-widest uppercase hover:text-accent transition-colors" href="/marketing#pricing">Pricing</a>
-            </div>
-            <div class="flex items-center gap-6">
-                <a href="/marketing" class="px-6 py-3 bg-accent text-primary text-xs font-bold uppercase tracking-widest hover:bg-white transition-all rounded">
-                    Back to Home
-                </a>
-            </div>
-        </div>
-    </nav>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Return to BookFlow</a>
+        
+        <h1>BookFlow vs<br>The Market</h1>
+        
+        <p class="hero-desc">Most booking tools are built for general utility. BookFlow is built for luxury service leaders who demand cinematic aesthetics and AI-driven precision. No gold. No clutter. Just pure performance.</p>
 
-    <main class="relative pt-32 pb-20 px-6">
-        <div class="max-w-[1200px] mx-auto">
-            <header class="text-center mb-20">
-                <div class="inline-flex items-center gap-3 px-5 py-2 rounded-full border border-accent/20 bg-accent/5 text-accent text-[10px] font-bold tracking-[0.3em] uppercase mb-8">
-                    Comparison Guide
-                </div>
-                <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-light leading-[0.9] tracking-tighter mb-8">
-                    BookFlow vs <br/>
-                    <span class="italic font-normal text-gold">Alternatives.</span>
-                </h1>
-                <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto leading-relaxed font-light">
-                    See how BookFlow compares to other booking platforms. From calendar management to QR codes, compare the features that matter most for your business.
-                </p>
-            </header>
+        <section class="table-section">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Feature</th>
+                        <th class="bookflow-col">BookFlow</th>
+                        <th>Competitors</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="feature-col">Interface Design</td>
+                        <td class="bookflow-col">Liquid Glass UI (iOS 26+)</td>
+                        <td>Legacy Grid Layouts</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-col">AI Integration</td>
+                        <td class="bookflow-col">Autonomous Service Assistant</td>
+                        <td>Manual Data Entry</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-col">User Experience</td>
+                        <td class="bookflow-col">Cinematic Haptics & Transitions</td>
+                        <td>Static Page Refreshes</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-col">Brand Perception</td>
+                        <td class="bookflow-col">Luxury Editorial Aesthetic</td>
+                        <td>Generic SaaS Utility</td>
+                    </tr>
+                    <tr>
+                        <td class="feature-col">Automation</td>
+                        <td class="bookflow-col">Smart Reminders & No-Show Shield</td>
+                        <td>Basic Email Notifications</td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
 
-            <div class="grid md:grid-cols-2 gap-8 mb-24">
-                <div class="glass-card rounded-3xl p-8 border-white/5 hover:border-accent/30 transition-all">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-accent">event_available</span>
-                        </div>
-                        <h3 class="text-2xl font-display font-semibold text-white">Calendly</h3>
-                    </div>
-                    <p class="text-slate-400 mb-6 leading-relaxed">Simple scheduling but limited for full booking management. Best for individuals, but lacks the business infrastructure needed for premium service providers.</p>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-2 text-sm text-slate-300">
-                            <span class="material-symbols-outlined text-green-400 text-sm">check_circle</span>
-                            Good for 1-on-1 meetings
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Limited multi-tenant business support
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            No built-in business branding for emails
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card rounded-3xl p-8 border-white/5 hover:border-accent/30 transition-all">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-accent">construction</span>
-                        </div>
-                        <h3 class="text-2xl font-display font-semibold text-white">Housecall Pro</h3>
-                    </div>
-                    <p class="text-slate-400 mb-6 leading-relaxed">Field service focused, complex setup for simple businesses. Excellent for HVAC or plumbing, but over-engineered and expensive for salons or studios.</p>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-2 text-sm text-slate-300">
-                            <span class="material-symbols-outlined text-green-400 text-sm">check_circle</span>
-                            Great for field dispatch
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Steep learning curve
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            High monthly starting price
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card rounded-3xl p-8 border-white/5 hover:border-accent/30 transition-all">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-accent">payments</span>
-                        </div>
-                        <h3 class="text-2xl font-display font-semibold text-white">Square Appointments</h3>
-                    </div>
-                    <p class="text-slate-400 mb-6 leading-relaxed">Payment focused, limited calendar and service features. Good for retail integrated with POS, but the booking flow feels secondary to the payment system.</p>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-2 text-sm text-slate-300">
-                            <span class="material-symbols-outlined text-green-400 text-sm">check_circle</span>
-                            Strong POS integration
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Limited customization for booking flow
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Restricted to Square ecosystem
-                        </div>
-                    </div>
-                </div>
-
-                <div class="glass-card rounded-3xl p-8 border-white/5 hover:border-accent/30 transition-all">
-                    <div class="flex items-center gap-4 mb-6">
-                        <div class="w-12 h-12 rounded-xl bg-accent/10 flex items-center justify-center">
-                            <span class="material-symbols-outlined text-accent">settings_input_component</span>
-                        </div>
-                        <h3 class="text-2xl font-display font-semibold text-white">Acuity Scheduling</h3>
-                    </div>
-                    <p class="text-slate-400 mb-6 leading-relaxed">Powerful but expensive and over-engineered for small businesses. Offers deep customization but requires significant setup time and technical knowledge.</p>
-                    <div class="space-y-3 mb-8">
-                        <div class="flex items-center gap-2 text-sm text-slate-300">
-                            <span class="material-symbols-outlined text-green-400 text-sm">check_circle</span>
-                            Highly customizable
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Complex interface for owners
-                        </div>
-                        <div class="flex items-center gap-2 text-sm text-slate-500">
-                            <span class="material-symbols-outlined text-red-400/50 text-sm">cancel</span>
-                            Expensive at higher tiers
-                        </div>
-                    </div>
-                </div>
+        <section class="advantage-grid">
+            <div class="card">
+                <h3>The AI Advantage</h3>
+                <p>BookFlow doesn't just store appointments; it anticipates them. Our AI identifies patterns to reduce no-shows by up to 40%.</p>
+                <div class="check-item"><div class="check-icon">✓</div> Intelligent Slot Recovery</div>
+                <div class="check-item"><div class="check-icon">✓</div> Automated Customer Insights</div>
+                <div class="check-item"><div class="check-icon">✓</div> Smart Upsell Suggestions</div>
             </div>
 
-            <section class="py-24 border-t border-white/5">
-                <h2 class="font-display text-4xl md:text-6xl font-light text-center mb-16">
-                    Why Choose <span class="italic text-gold">BookFlow</span>
-                </h2>
-
-                <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-12">
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">no_accounts</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">No Accounts Required</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">Customers book instantly without creating logins or passwords. Fast, simple, and zero friction for maximum conversion.</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">sync</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">Real-Time Calendar Sync</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">Zero double bookings. Your calendar updates instantly across all booking channels—links, QR codes, and embeds.</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">qr_code_2</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">QR Codes & Widgets</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">Generate scannable QR codes and embed booking widgets on your website. Multiple ways for customers to reach you.</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">analytics</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">Complete Analytics</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">View revenue, bookings, customer history, and trends all in one clean dashboard. Better insights for your business.</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">speed</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">Instant Service Setup</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">Add services, set pricing and duration, manage availability—all from a simple, intuitive interface built for speed.</p>
-                    </div>
-
-                    <div class="space-y-4">
-                        <div class="w-12 h-12 rounded-full bg-accent/10 flex items-center justify-center mb-6">
-                            <span class="material-symbols-outlined text-accent">verified_user</span>
-                        </div>
-                        <h4 class="text-xl font-semibold text-white">Built for Professionals</h4>
-                        <p class="text-slate-500 text-sm leading-relaxed">Perfect for salons, fitness studios, coaches, consultants, and any appointment-based business demanding a premium feel.</p>
-                    </div>
-                </div>
-            </section>
-
-            <div class="glass-card rounded-[3rem] p-12 lg:p-20 text-center relative overflow-hidden mt-20">
-                <div class="absolute inset-0 pointer-events-none">
-                    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-accent/10 rounded-full blur-[120px]"></div>
-                </div>
-                <div class="relative z-10">
-                    <h2 class="font-display text-4xl md:text-6xl font-light mb-8">Ready to switch to <span class="italic text-gold">excellence?</span></h2>
-                    <div class="flex flex-col sm:flex-row items-center justify-center gap-6">
-                        <a href="/marketing" class="btn-premium-gold px-10 py-5 rounded-full text-sm font-bold uppercase tracking-widest">
-                            Get Started Now
-                        </a>
-                        <a href="mailto:support@confirmbooking.online" class="text-slate-400 hover:text-white transition-colors text-sm font-bold uppercase tracking-widest border-b border-transparent hover:border-white pb-1">
-                            Contact Support
-                        </a>
-                    </div>
-                </div>
+            <div class="card">
+                <h3>Cinematic Design</h3>
+                <p>First impressions matter. We've replaced standard buttons with liquid interactions and premium typography that reflects your brand's value.</p>
+                <div class="check-item"><div class="check-icon">✓</div> Oversized Editorial Type</div>
+                <div class="check-item"><div class="check-icon">✓</div> Glassmorphic Components</div>
+                <div class="check-item"><div class="check-icon">✓</div> Pure B&W Aesthetic</div>
             </div>
-        </div>
-    </main>
 
-    <footer class="bg-charcoal border-t border-white/5 py-16 px-6">
-        <div class="max-w-[1440px] mx-auto">
-            <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-12">
-                <div class="flex flex-col gap-6">
-                    <div class="flex items-center gap-3">
-                        <div class="w-10 h-10 bg-accent rounded-xl flex items-center justify-center">
-                            <span class="material-symbols-outlined text-primary font-bold">calendar_month</span>
-                        </div>
-                        <span class="font-display font-semibold text-2xl tracking-tight text-white">BookFlow</span>
-                    </div>
-                    <p class="text-slate-500 text-sm max-w-xs leading-relaxed">
-                        The world's most elegant booking engine for premium service providers.
-                    </p>
-                </div>
-
-                <nav class="flex flex-wrap gap-x-12 gap-y-4">
-                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/marketing">Home</a>
-                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/marketing#features">Features</a>
-                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/privacy-policy">Privacy</a>
-                    <a class="text-slate-400 hover:text-accent transition-colors text-sm font-bold uppercase tracking-widest" href="/terms">Terms</a>
-                </nav>
-
-                <div class="flex flex-col items-start lg:items-end gap-4">
-                    <p class="text-slate-600 text-[10px] uppercase tracking-[0.2em] font-bold">
-                        &copy; 2026 BookFlow. All rights reserved.
-                    </p>
-                </div>
+            <div class="card">
+                <h3>Built for Scale</h3>
+                <p>Whether you're a single consultant or a multi-location salon, BookFlow's infrastructure adapts to your volume seamlessly.</p>
+                <div class="check-item"><div class="check-icon">✓</div> Global Multi-Currency</div>
+                <div class="check-item"><div class="check-icon">✓</div> QR Code Ecosystem</div>
+                <div class="check-item"><div class="check-icon">✓</div> Enterprise-Grade Security</div>
             </div>
-        </div>
-    </footer>
+        </section>
+
+        <section class="cta-section">
+            <h2>Ready to Elevate?</h2>
+            <p style="margin-bottom: 40px; font-size: 20px;">Join the elite businesses moving to a more sophisticated booking experience.</p>
+            <a href="/" class="cta-button">Experience BookFlow</a>
+        </section>
+
+        <footer>
+            <div>&copy; 2026 BOOKFLOW. ALL RIGHTS RESERVED.</div>
+            <div style="text-align: right;">PREMIUM INFRASTRUCTURE FOR SERVICE LEADERS</div>
+        </footer>
+    </div>
 </body>
 </html>
