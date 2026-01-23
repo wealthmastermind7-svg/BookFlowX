@@ -33,11 +33,13 @@ const SPRING_CONFIG = {
   overshootClamping: true,
 };
 
-const TIME_SLOTS = [
-  "11:00 AM", "11:30 AM", "12:00 PM",
-  "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM",
-];
+  const TIME_SLOTS = [
+    "09:00 AM", "09:30 AM", "10:00 AM",
+    "10:30 AM", "11:00 AM", "11:30 AM",
+    "12:00 PM", "12:30 PM", "01:00 PM",
+    "01:30 PM", "02:00 PM", "02:30 PM",
+    "03:00 PM", "03:30 PM", "04:00 PM",
+  ];
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
   const { theme, isDark } = useTheme();
@@ -325,7 +327,12 @@ export default function SelectTimeScreen() {
     return `${month} ${day} • ${selectedTime || "--:--"}`;
   };
 
-  const businessName = (service as any)?.businessName || "BOOKFLOW";
+  const businessName = (service as any)?.businessName || (route.params as any)?.businessName || "BOOKFLOW";
+
+  useEffect(() => {
+    console.log("[SelectTimeScreen] Current businessName:", businessName);
+    console.log("[SelectTimeScreen] Route params:", route.params);
+  }, [businessName, route.params]);
 
   return (
     <View style={styles.container}>
@@ -503,7 +510,8 @@ const styles = StyleSheet.create({
     height: 90,
   },
   datePickerContent: {
-    paddingHorizontal: SCREEN_WIDTH / 2 - 45,
+    paddingHorizontal: Spacing.lg,
+    paddingRight: Spacing.lg + 8, // Added extra padding to prevent border overlap
     alignItems: 'center',
     gap: Spacing.md,
   },
@@ -541,7 +549,7 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   timeSlotWrapper: {
-    width: (SCREEN_WIDTH - Spacing.lg * 2 - 36) / 4,
+    width: (SCREEN_WIDTH - Spacing.lg * 2 - 24) / 3,
   },
   timeSlot: {
     aspectRatio: 1,
