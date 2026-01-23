@@ -181,6 +181,8 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
     onPress();
   };
 
+  const [timeVal, ampm] = time.split(' ');
+
   return (
     <Animated.View style={[animatedStyle, styles.timeSlotWrapper]}>
       <Pressable
@@ -190,10 +192,10 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
         style={[
           styles.timeSlot,
           isSelected
-            ? { backgroundColor: theme.text }
+            ? { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
             : {
-                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.4)",
-                borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+                backgroundColor: "rgba(255,255,255,0.05)",
+                borderColor: "rgba(255,255,255,0.15)",
                 borderWidth: 1,
               },
         ]}
@@ -202,13 +204,14 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
           style={[
             styles.timeSlotText,
             {
-              color: isSelected ? theme.buttonText : theme.text,
-              fontWeight: isSelected ? "700" : "500",
+              color: "#FFF",
+              fontWeight: isSelected ? "700" : "300",
             },
           ]}
         >
-          {time}
+          {timeVal}
         </ThemedText>
+        <ThemedText style={styles.timeSlotAmPm}>{ampm}</ThemedText>
       </Pressable>
     </Animated.View>
   );
@@ -219,7 +222,7 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
   
   const handleScroll = (event: any) => {
     const x = event.nativeEvent.contentOffset.x;
-    const index = Math.round(x / 80);
+    const index = Math.round(x / 96); // 80 width + 16 gap
     if (index >= 0 && index < dates.length) {
       const newDate = dates[index];
       if (newDate.toDateString() !== selectedDate.toDateString()) {
@@ -234,7 +237,7 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
-        snapToInterval={80}
+        snapToInterval={96}
         decelerationRate="fast"
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -251,16 +254,16 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
               }}
               style={[
                 styles.datePickerItem,
-                isSelected && { backgroundColor: theme.text }
+                isSelected && { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
               ]}
             >
-              <ThemedText style={[styles.datePickerMonth, isSelected && { color: theme.buttonText }]}>
+              <ThemedText style={[styles.datePickerMonth, { color: "#FFF" }]}>
                 {date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
               </ThemedText>
-              <ThemedText style={[styles.datePickerDay, isSelected && { color: theme.buttonText }]}>
+              <ThemedText style={[styles.datePickerDay, { color: "#FFF" }]}>
                 {date.getDate()}
               </ThemedText>
-              <ThemedText style={[styles.datePickerDayName, isSelected && { color: theme.buttonText }]}>
+              <ThemedText style={[styles.datePickerDayName, { color: "#FFF" }]}>
                 {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </ThemedText>
             </Pressable>
@@ -322,37 +325,41 @@ export default function SelectTimeScreen() {
     return `${month} ${day} • ${selectedTime || "--:--"}`;
   };
 
+  const businessName = service?.businessName || "BOOKFLOW";
+
   return (
     <ThemedView style={styles.container}>
-      <View style={[styles.oversizedTextContainer, { top: insets.top + 80 }]}>
-        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.03 : 0.04 }]}>
-          WHEN
+      <View style={[styles.oversizedTextContainer, { top: insets.top + 40 }]}>
+        <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.05 : 0.08 }]}>
+          {businessName.toUpperCase()}
         </ThemedText>
       </View>
 
       <ScrollView
         contentContainerStyle={{
           paddingTop: insets.top + Spacing.lg,
-          paddingBottom: insets.bottom + 200,
+          paddingBottom: insets.bottom + 250,
         }}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.header}>
           <Pressable onPress={handleBack} style={styles.backButton}>
-            <Feather name="chevron-left" size={24} color={theme.text} />
+            <Feather name="arrow-left" size={24} color="#FFF" />
           </Pressable>
           <ProgressRing step={2} total={3} />
           <View style={{ width: 40 }} />
         </View>
 
-        <View style={styles.titleSection}>
-          <ThemedText style={styles.headerTitle}>WHEN</ThemedText>
-          <ThemedText style={styles.subtitle}>
-            Select your preferred date & time
-          </ThemedText>
+        <View style={styles.heroSection}>
+          <ThemedText style={styles.heroTitle}>{businessName.toUpperCase()}</ThemedText>
+          <ThemedText style={styles.heroSubtitle}>PREMIUM BOOKING</ThemedText>
         </View>
 
-        <View style={styles.dateScrollerContainer}>
+        <View style={styles.datePickerSection}>
+          <Pressable style={styles.dateSelectorButton}>
+            <ThemedText style={styles.dateSelectorLabel}>SELECT DATE</ThemedText>
+            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
+          </Pressable>
           <DateScrollPicker
             dates={dates}
             selectedDate={selectedDate}
@@ -361,60 +368,24 @@ export default function SelectTimeScreen() {
         </View>
 
         <View style={styles.timesSection}>
-          <ThemedText style={styles.timesLabel}>AVAILABLE TIMES</ThemedText>
           <View style={styles.timesGrid}>
             {TIME_SLOTS.map((time, index) => (
-              <Animated.View
+              <TimeSlotButton
                 key={time}
-                entering={FadeInUp.delay(100 + index * 30).springify()}
-              >
-                <TimeSlotButton
-                  time={time}
-                  isSelected={selectedTime === time}
-                  onPress={() => setSelectedTime(time)}
-                />
-              </Animated.View>
+                time={time}
+                isSelected={selectedTime === time}
+                onPress={() => setSelectedTime(time)}
+              />
             ))}
           </View>
         </View>
-
-        {selectedTime && (
-          <Animated.View 
-            entering={FadeInUp.springify()}
-            style={styles.summaryContainer}
-          >
-            <BlurView
-              intensity={isDark ? 40 : 60}
-              tint={isDark ? "dark" : "light"}
-              style={[
-                styles.summaryCard,
-                {
-                  borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
-                  backgroundColor: isDark ? "rgba(20,20,20,0.6)" : "rgba(255,255,255,0.7)",
-                },
-              ]}
-            >
-              <View>
-                <ThemedText style={styles.summaryLabel}>SELECTED SLOT</ThemedText>
-                <ThemedText style={styles.summaryValue}>{formatSelectedSlot()}</ThemedText>
-              </View>
-              <View style={styles.summaryRight}>
-                <ThemedText style={styles.summaryLabel}>EST. PRICE</ThemedText>
-                <ThemedText style={styles.summaryPrice}>
-                  {service ? formatPrice(service.price) : "--"}
-                </ThemedText>
-              </View>
-            </BlurView>
-          </Animated.View>
-        )}
       </ScrollView>
 
       <View
         style={[
-          styles.bottomGradient,
+          styles.footer,
           {
-            paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+            paddingBottom: insets.bottom + Spacing.xl,
           },
         ]}
       >
@@ -422,29 +393,21 @@ export default function SelectTimeScreen() {
           onPress={handleContinue}
           disabled={!selectedTime}
           style={[
-            styles.continueButton,
+            styles.mainButton,
             {
-              backgroundColor: theme.text,
-              opacity: selectedTime ? 1 : 0.4,
+              backgroundColor: "rgba(0, 0, 0, 0.6)",
+              borderColor: "rgba(255, 255, 255, 0.4)",
+              opacity: selectedTime ? 1 : 0.5,
             },
           ]}
         >
-          <ThemedText style={[styles.continueButtonText, { color: theme.buttonText }]}>
-            Continue
-          </ThemedText>
+          <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
+          <ThemedText style={styles.mainButtonText}>CONTINUE</ThemedText>
         </Pressable>
 
-        <Pressable onPress={handleBack} style={styles.secondaryButton}>
-          <ThemedText style={styles.secondaryButtonText}>
-            BACK TO SERVICES
-          </ThemedText>
+        <Pressable onPress={handleBack} style={styles.backButtonLarge}>
+          <ThemedText style={styles.backButtonText}>BACK</ThemedText>
         </Pressable>
-
-        <View style={styles.progressIndicator}>
-          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-          <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.text }]} />
-          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-        </View>
       </View>
     </ThemedView>
   );
@@ -453,6 +416,7 @@ export default function SelectTimeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: "#000",
   },
   oversizedTextContainer: {
     position: "absolute",
@@ -462,25 +426,25 @@ const styles = StyleSheet.create({
     pointerEvents: "none",
     zIndex: 0,
     paddingHorizontal: Spacing.lg,
-    opacity: 0.5,
   },
   oversizedText: {
-    fontSize: 80,
-    fontWeight: "900",
+    fontFamily: "CormorantGaramond-Bold",
+    fontSize: 120,
     letterSpacing: -5,
-    lineHeight: 80,
+    lineHeight: 120,
+    textAlign: "center",
   },
   header: {
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing["2xl"],
+    marginBottom: Spacing.xl,
   },
   backButton: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 44,
+    height: 44,
+    borderRadius: 22,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -495,174 +459,144 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "700",
   },
-  titleSection: {
+  heroSection: {
+    alignItems: "center",
+    marginBottom: 40,
+  },
+  heroTitle: {
+    fontFamily: "CormorantGaramond-Regular",
+    fontSize: 72,
+    letterSpacing: -2,
+    textAlign: "center",
+    color: "#FFF",
+  },
+  heroSubtitle: {
+    fontFamily: "Inter-SemiBold",
+    fontSize: 12,
+    letterSpacing: 4,
+    color: "rgba(255,255,255,0.6)",
+    marginTop: -10,
+  },
+  datePickerSection: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: Spacing.xl,
+    marginBottom: 40,
   },
-  headerTitle: {
-    fontSize: 48,
-    fontWeight: "900",
-    letterSpacing: -3,
-    marginBottom: Spacing.xs,
+  dateSelectorButton: {
+    height: 56,
+    borderRadius: BorderRadius.md,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.2)",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingHorizontal: Spacing.lg,
+    marginBottom: Spacing.lg,
   },
-  subtitle: {
-    fontSize: 16,
-    fontWeight: "500",
-    opacity: 0.6,
+  dateSelectorLabel: {
+    fontFamily: "Inter-Light",
+    fontSize: 14,
+    letterSpacing: 2,
+    color: "rgba(255,255,255,0.8)",
   },
   datePickerContainer: {
-    height: 100,
-    marginTop: Spacing.md,
+    height: 90,
   },
   datePickerContent: {
-    paddingHorizontal: SCREEN_WIDTH / 2 - 40,
+    paddingHorizontal: SCREEN_WIDTH / 2 - 45,
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
   },
   datePickerItem: {
     width: 80,
     height: 80,
-    borderRadius: BorderRadius.lg,
+    borderRadius: BorderRadius.md,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'rgba(255,255,255,0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.15)',
   },
   datePickerMonth: {
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: "Inter-SemiBold",
     opacity: 0.6,
   },
   datePickerDay: {
     fontSize: 24,
-    fontWeight: '800',
+    fontFamily: "Inter-Bold",
     marginVertical: 2,
   },
   datePickerDayName: {
     fontSize: 10,
-    fontWeight: '600',
+    fontFamily: "Inter-SemiBold",
     opacity: 0.6,
-  },
-  dateScrollerContainer: {
-    marginBottom: Spacing.xl,
-  },
-  dateMonth: {
-    fontSize: 9,
-    fontWeight: "600",
-    letterSpacing: 1,
-    marginBottom: 0,
-  },
-  dateDay: {
-    fontSize: 24,
-    fontWeight: "800",
-    marginVertical: 0,
-  },
-  dateDayName: {
-    fontSize: 9,
-    fontWeight: "600",
-    marginTop: 0,
   },
   timesSection: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
-    marginBottom: Spacing["2xl"],
-  },
-  timesLabel: {
-    fontSize: 11,
-    fontWeight: "700",
-    letterSpacing: 2,
-    opacity: 0.5,
-    marginBottom: Spacing.lg,
   },
   timesGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
-    gap: Spacing.sm,
+    gap: 12,
   },
   timeSlotWrapper: {
-    width: (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3,
+    width: (SCREEN_WIDTH - Spacing.lg * 2 - 36) / 4,
   },
   timeSlot: {
-    paddingVertical: Spacing.xl,
-    borderRadius: BorderRadius.lg,
+    aspectRatio: 1,
+    borderRadius: BorderRadius.md,
     alignItems: "center",
     justifyContent: "center",
   },
   timeSlotText: {
-    fontSize: 15,
+    fontSize: 22,
+    fontFamily: "Inter-Light",
   },
-  summaryContainer: {
-    paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.lg,
-  },
-  summaryCard: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    borderWidth: 1,
-  },
-  summaryLabel: {
+  timeSlotAmPm: {
     fontSize: 10,
-    fontWeight: "700",
-    letterSpacing: 1.5,
-    opacity: 0.5,
-    marginBottom: 4,
+    fontFamily: "Inter-SemiBold",
+    color: "rgba(255,255,255,0.6)",
+    marginTop: 2,
   },
-  summaryValue: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  summaryRight: {
-    alignItems: "flex-end",
-  },
-  summaryPrice: {
-    fontSize: 16,
-    fontWeight: "700",
-  },
-  bottomGradient: {
+  footer: {
     position: "absolute",
     bottom: 0,
     left: 0,
     right: 0,
-    paddingTop: Spacing["2xl"],
     paddingHorizontal: Spacing.lg,
-    alignItems: "center",
+    paddingTop: 40,
+    backgroundColor: "transparent",
   },
-  continueButton: {
+  mainButton: {
     width: "100%",
-    paddingVertical: 18,
-    borderRadius: BorderRadius.lg,
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
-    marginBottom: Spacing.md,
+    justifyContent: "center",
+    borderWidth: 1,
+    overflow: "hidden",
+    marginBottom: 12,
   },
-  continueButtonText: {
-    fontSize: 17,
-    fontWeight: "700",
+  mainButtonText: {
+    fontFamily: "Inter-SemiBold",
+    fontSize: 14,
+    letterSpacing: 2,
+    color: "#FFF",
   },
-  secondaryButton: {
-    paddingVertical: Spacing.sm,
-    marginBottom: Spacing.lg,
-  },
-  secondaryButtonText: {
-    fontSize: 12,
-    fontWeight: "700",
-    letterSpacing: 1.5,
-    opacity: 0.4,
-  },
-  progressIndicator: {
-    flexDirection: "row",
+  backButtonLarge: {
+    width: "100%",
+    height: 64,
+    borderRadius: 32,
     alignItems: "center",
-    gap: 4,
+    justifyContent: "center",
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.4)",
   },
-  progressDot: {
-    height: 4,
-    width: 8,
-    borderRadius: 2,
-  },
-  progressDotActive: {
-    width: 32,
+  backButtonText: {
+    fontFamily: "Inter-SemiBold",
+    fontSize: 14,
+    letterSpacing: 2,
+    color: "#FFF",
   },
 });
