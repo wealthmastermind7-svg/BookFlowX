@@ -33,20 +33,6 @@ const SPRING_CONFIG = {
   overshootClamping: true,
 };
 
-const TIME_SLOTS = [
-  "06:00 AM", "06:30 AM", "07:00 AM", "07:30 AM", "08:00 AM", "08:30 AM",
-  "09:00 AM", "09:30 AM", "10:00 AM",
-  "10:30 AM", "11:00 AM", "11:30 AM",
-  "12:00 PM", "12:30 PM", "01:00 PM",
-  "01:30 PM", "02:00 PM", "02:30 PM",
-  "03:00 PM", "03:30 PM", "04:00 PM",
-  "04:30 PM", "05:00 PM", "05:30 PM",
-  "06:00 PM", "06:30 PM", "07:00 PM",
-  "07:30 PM", "08:00 PM", "08:30 PM",
-  "09:00 PM", "09:30 PM", "10:00 PM",
-  "10:30 PM", "11:00 PM",
-];
-
 function ProgressRing({ step, total }: { step: number; total: number }) {
   const { theme, isDark } = useTheme();
   const radius = 20;
@@ -289,9 +275,11 @@ export default function SelectTimeScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [service, setService] = useState<Service | null>(null);
+  const [availability, setAvailability] = useState<any[]>([]);
 
   useEffect(() => {
     loadService();
+    loadAvailability();
   }, [serviceId]);
 
   const loadService = async () => {
@@ -299,6 +287,44 @@ export default function SelectTimeScreen() {
     const found = services.find((s) => s.id === serviceId);
     if (found) setService(found);
   };
+
+  const loadAvailability = async () => {
+    try {
+      const data = await api.getAvailability();
+      setAvailability(data);
+    } catch (error) {
+      console.error("Error loading availability:", error);
+    }
+  };
+
+  const timeSlots = useMemo(() => {
+    const dayOfWeek = selectedDate.getDay();
+    const daySched = availability.find(a => a.dayOfWeek === dayOfWeek);
+    
+    if (!daySched || !daySched.isActive) return [];
+
+    const slots = [];
+    let current = daySched.startTime; // "HH:mm"
+    const end = daySched.endTime;
+
+    while (current < end) {
+      const [h, m] = current.split(':').map(Number);
+      const ampm = h >= 12 ? 'PM' : 'AM';
+      const displayH = h % 12 || 12;
+      const displayM = m === 0 ? '00' : m;
+      slots.push(`${displayH}:${displayM} ${ampm}`);
+
+      // Add 30 mins
+      let nextM = m + 30;
+      let nextH = h;
+      if (nextM >= 60) {
+        nextH++;
+        nextM = 0;
+      }
+      current = `${String(nextH).padStart(2, '0')}:${String(nextM).padStart(2, '0')}`;
+    }
+    return slots;
+  }, [selectedDate, availability]);
 
   const dates = useMemo(() => {
     const result: Date[] = [];
@@ -382,7 +408,7 @@ export default function SelectTimeScreen() {
         <View style={styles.timesSection}>
           <ThemedText style={styles.timesLabel}>AVAILABLE TIMES</ThemedText>
           <View style={styles.timesGrid}>
-            {TIME_SLOTS.map((time, index) => (
+            {timeSlots.length > 0 ? timeSlots.map((time, index) => (
               <Animated.View
                 key={time}
                 entering={FadeInUp.delay(100 + index * 30).springify()}
@@ -393,7 +419,11 @@ export default function SelectTimeScreen() {
                   onPress={() => setSelectedTime(time)}
                 />
               </Animated.View>
-            ))}
+            )) : (
+              <ThemedText style={{ opacity: 0.5, marginTop: Spacing.md }}>
+                No availability for this date.
+              </ThemedText>
+            )}
           </View>
         </View>
 
