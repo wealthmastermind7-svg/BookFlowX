@@ -43,10 +43,7 @@ const DAY_NAMES = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRID
 const TIME_OPTIONS = [
   "00:00", "01:00", "02:00", "03:00", "04:00", "05:00", "06:00", "07:00", "08:00", "09:00", "10:00", "11:00", 
   "12:00", "13:00", "14:00", "15:00", "16:00", "17:00", "18:00", "19:00", "20:00", "21:00", "22:00", "23:00"
-].filter(time => {
-  const hour = parseInt(time.split(':')[0]);
-  return hour >= 6 && hour <= 23;
-});
+];
 
 interface DaySchedule {
   dayOfWeek: number;
@@ -100,8 +97,8 @@ export default function AvailabilityEditorScreen() {
       const availability = await api.getAvailability();
       const defaultSchedules: DaySchedule[] = DAY_NAMES.map((_, index) => ({
         dayOfWeek: index,
-        startTime: "06:00",
-        endTime: "22:00",
+        startTime: "09:00",
+        endTime: "17:00",
         isActive: index >= 1 && index <= 5,
       }));
 
@@ -122,8 +119,8 @@ export default function AvailabilityEditorScreen() {
       console.error("Error loading availability:", error);
       const defaultSchedules: DaySchedule[] = DAY_NAMES.map((_, index) => ({
         dayOfWeek: index,
-        startTime: "06:00",
-        endTime: "22:00",
+        startTime: "09:00",
+        endTime: "17:00",
         isActive: index >= 1 && index <= 5,
       }));
       setSchedules(defaultSchedules);
