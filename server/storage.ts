@@ -808,14 +808,24 @@ export class DatabaseStorage implements IStorage {
 
       // Create demo customers with unique identifiers
       const timestamp = Date.now();
-      const demoCustomers = template.customers.map((c, index) => ({
-        businessId,
-        name: c.name,
-        email: c.email.includes('@resend.dev') 
-          ? c.email.replace('@resend.dev', `+${businessId.slice(0, 4)}-${index}@resend.dev`)
-          : `${c.email.split("@")[0]}-${timestamp}@example.com`,
-        phone: c.phone,
-      }));
+      const demoCustomers = template.customers.map((c, index) => {
+        let email = c.email;
+        if (email.includes('@resend.dev')) {
+          // Keep it as a resend test email but make it unique per business
+          const prefix = email.split('@')[0];
+          email = `${prefix}+${businessId.slice(0, 4)}-${index}@resend.dev`;
+        } else {
+          // Fallback for any missed templates, though we should use resend.dev
+          email = `${email.split("@")[0]}-${timestamp}@example.com`;
+        }
+        
+        return {
+          businessId,
+          name: c.name,
+          email,
+          phone: c.phone,
+        };
+      });
 
       const createdCustomers: Customer[] = [];
       for (const customer of demoCustomers) {
