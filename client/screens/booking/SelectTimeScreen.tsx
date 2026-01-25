@@ -41,6 +41,10 @@ const TIME_SLOTS = [
   "03:00 PM", "03:30 PM", "04:00 PM",
   "04:30 PM", "05:00 PM", "05:30 PM",
   "06:00 PM", "06:30 PM", "07:00 PM",
+  "07:30 PM", "08:00 PM", "08:30 PM",
+  "09:00 PM", "09:30 PM", "10:00 PM",
+  "10:30 PM", "11:00 PM", "11:30 PM",
+  "12:00 AM",
 ];
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
