@@ -289,10 +289,10 @@ export default function CheckoutScreen() {
         {(loadingUpsells || upsellSuggestions.length > 0) && (
           <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
             <View style={styles.upsellHeader}>
-              <Feather name="zap" size={16} color={isDark ? "#FFD700" : "#D4A017"} />
-              <ThemedText style={styles.upsellTitle}>Enhance Your Booking</ThemedText>
+              <Feather name="zap" size={16} color="#10B981" />
+              <ThemedText style={styles.upsellTitle}>Smart Suggestions</ThemedText>
             </View>
-            <ThemedText style={styles.upsellSubtitle}>Optional add-ons to get more value</ThemedText>
+            <ThemedText style={styles.upsellSubtitle}>Contextual add-ons to enhance your experience</ThemedText>
             
             {loadingUpsells ? (
               <View style={styles.upsellLoading}>
@@ -308,17 +308,17 @@ export default function CheckoutScreen() {
                       styles.addonCard,
                       {
                         borderColor: selectedAddons.has(index)
-                          ? (isDark ? "#FFD700" : "#D4A017")
+                          ? "#10B981"
                           : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"),
                         backgroundColor: selectedAddons.has(index)
-                          ? (isDark ? "rgba(255,215,0,0.1)" : "rgba(212,160,23,0.08)")
+                          ? "rgba(16, 185, 129, 0.08)"
                           : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)"),
                       },
                     ]}
                   >
                     <View style={styles.addonCheckbox}>
                       {selectedAddons.has(index) ? (
-                        <Feather name="check-circle" size={20} color={isDark ? "#FFD700" : "#D4A017"} />
+                        <Feather name="check-circle" size={20} color="#10B981" />
                       ) : (
                         <Feather name="circle" size={20} color={theme.textTertiary} />
                       )}
