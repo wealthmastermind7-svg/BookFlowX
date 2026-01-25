@@ -54,6 +54,12 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       return true; // Treat as success to prevent retries
     }
 
+    // Validation: Allow Resend test email addresses
+    const isTestEmail = data.customerEmail.toLowerCase().includes('@resend.dev');
+    if (isTestEmail) {
+      console.log(`[Resend] Test email detected: ${data.customerEmail}`);
+    }
+
     const isReminder = data.isReminder || false;
     const title = isReminder ? "REMINDER" : "CONFIRMED";
     const subtitle = isReminder 
