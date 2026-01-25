@@ -470,7 +470,7 @@ export default function DashboardScreen() {
       }
     });
     const peakHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
-    const peakHourLabel = peakHour ? `${peakHour[0]}:00` : "2-4 PM";
+    const peakHourLabel = peakHour ? `${peakHour[0]}:00` : null;
 
     // Most popular service for add-ons
     const serviceAddonCounts: Record<string, number> = {};
@@ -682,18 +682,22 @@ export default function DashboardScreen() {
                     </Animated.Text>
                   </View>
                 )}
-                <View style={styles.smartRevenueInsightRow}>
-                  <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#8B5CF6" }]} />
-                  <Animated.Text style={styles.smartRevenueInsightText}>
-                    Peak booking time: {smartRevenueStats.peakHourLabel}
-                  </Animated.Text>
-                </View>
-                <View style={styles.smartRevenueInsightRow}>
-                  <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#F59E0B" }]} />
-                  <Animated.Text style={styles.smartRevenueInsightText}>
-                    Automatic reminders reduce manual work
-                  </Animated.Text>
-                </View>
+                {smartRevenueStats.peakHourLabel && (
+                  <View style={styles.smartRevenueInsightRow}>
+                    <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#8B5CF6" }]} />
+                    <Animated.Text style={styles.smartRevenueInsightText}>
+                      Peak booking time: {smartRevenueStats.peakHourLabel}
+                    </Animated.Text>
+                  </View>
+                )}
+                {smartRevenueStats.bookingsWithReminders > 0 && (
+                  <View style={styles.smartRevenueInsightRow}>
+                    <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#F59E0B" }]} />
+                    <Animated.Text style={styles.smartRevenueInsightText}>
+                      {smartRevenueStats.bookingsWithReminders} bookings received smart reminders
+                    </Animated.Text>
+                  </View>
+                )}
               </View>
             </GlassPanel>
           </View>
