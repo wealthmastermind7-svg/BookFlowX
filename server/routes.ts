@@ -1325,10 +1325,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `${ogMeta}\n  </head>`
       );
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.type("text/html").send(htmlWithMeta);
     } catch (error) {
       console.error("Error serving booking page:", error);
       if (bookingHtmlContent) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.type("text/html").send(bookingHtmlContent);
       } else {
         res.status(500).json({ error: "Booking page not available" });
@@ -1408,10 +1412,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `${ogMeta}\n  </head>`
       );
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.type("text/html").send(htmlWithMeta);
     } catch (error) {
       console.error("Error serving booking page:", error);
       if (bookingHtmlContent) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.type("text/html").send(bookingHtmlContent);
       } else {
         res.status(500).json({ error: "Booking page not available" });
@@ -1441,10 +1449,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `${ogMeta}\n  </head>`
       );
       
+      res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
+      res.set('Pragma', 'no-cache');
+      res.set('Expires', '0');
       res.type("text/html").send(htmlWithMeta);
     } catch (error) {
       console.error("Error serving booking page:", error);
       if (bookingHtmlContent) {
+        res.set('Cache-Control', 'no-cache, no-store, must-revalidate');
         res.type("text/html").send(bookingHtmlContent);
       } else {
         res.status(500).json({ error: "Booking page not available" });
