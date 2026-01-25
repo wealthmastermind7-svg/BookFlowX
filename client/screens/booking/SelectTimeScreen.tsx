@@ -369,7 +369,7 @@ export default function SelectTimeScreen() {
               }
             ]}>
               <ThemedText style={styles.dateCardBigText}>
-                {selectedDate.toLocaleDateString("en-US", { day: 'numeric', month: 'short' })}, {selectedDate.getFullYear()}
+                {selectedDate.toLocaleDateString("en-US", { day: 'numeric', month: 'short', year: 'numeric' })}
               </ThemedText>
             </View>
           </View>
@@ -526,7 +526,6 @@ const styles = StyleSheet.create({
     opacity: 0.6,
   },
   dateAlignmentContainer: {
-    paddingHorizontal: Spacing.lg,
     alignItems: 'center',
     marginBottom: Spacing.xl,
   },
@@ -534,6 +533,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 400,
     alignItems: 'center',
+    paddingHorizontal: Spacing.lg,
   },
   dateLabelContainer: {
     width: '100%',
