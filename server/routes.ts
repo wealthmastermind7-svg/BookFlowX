@@ -525,8 +525,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const dateObj = new Date(date);
       const dayOfWeek = dateObj.getDay();
       
-      // Find availability for this day
-      const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek && a.isActive);
+      // Find availability for this day, or use defaults if none set
+      let dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek && a.isActive);
+      
+      // If no availability records exist at all, use sensible defaults (weekdays 6 AM - 10 PM)
+      if (availability.length === 0) {
+        const isWeekday = dayOfWeek >= 1 && dayOfWeek <= 5;
+        if (isWeekday) {
+          dayAvailability = { dayOfWeek, startTime: "06:00", endTime: "22:00", isActive: true } as any;
+        }
+      }
       
       if (!dayAvailability) {
         return res.json({ slots: [], message: "Business is closed on this day" });
