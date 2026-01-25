@@ -583,6 +583,16 @@ const styles = StyleSheet.create({
   timeSlotWrapper: {
     width: (SCREEN_WIDTH - Spacing.lg * 2 - Spacing.sm * 2) / 3,
   },
+  dateCard: {
+    width: 80,
+    height: 80,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
   timeSlot: {
     paddingVertical: Spacing.xl,
     borderRadius: BorderRadius.lg,
