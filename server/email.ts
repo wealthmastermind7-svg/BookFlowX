@@ -48,6 +48,12 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
 
+    // Validation: Prevent sending to example.com domains
+    if (data.customerEmail.toLowerCase().endsWith('@example.com')) {
+      console.log(`[Resend] Skipping example.com address: ${data.customerEmail}`);
+      return true; // Treat as success to prevent retries
+    }
+
     const isReminder = data.isReminder || false;
     const title = isReminder ? "REMINDER" : "CONFIRMED";
     const subtitle = isReminder 
@@ -204,16 +210,39 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
 </html>
     `;
 
-    await resend.emails.send({
+    const resendParams = {
       from: `${data.businessName} <bookings@confirmbooking.online>`,
       to: data.customerEmail,
       subject: isReminder 
         ? `Reminder: ${data.serviceName} - ${formattedDate}` 
         : `Booking Confirmed - ${data.businessName}`,
       html
-    });
+    };
 
-    return true;
+    // Retry logic for rate limits (429)
+    let attempts = 0;
+    const maxAttempts = 3;
+    const baseDelay = 1000;
+
+    while (attempts < maxAttempts) {
+      try {
+        await resend.emails.send(resendParams);
+        return true;
+      } catch (sendError: any) {
+        attempts++;
+        const isRateLimit = sendError?.statusCode === 429 || sendError?.message?.includes('rate limit');
+        
+        if (isRateLimit && attempts < maxAttempts) {
+          const delay = baseDelay * Math.pow(2, attempts - 1);
+          console.warn(`[Resend] Rate limit hit. Retrying in ${delay}ms (Attempt ${attempts}/${maxAttempts})`);
+          await new Promise(resolve => setTimeout(resolve, delay));
+          continue;
+        }
+        throw sendError;
+      }
+    }
+
+    return false;
   } catch (error) {
     console.error('[Resend] Exception:', error);
     return false;
