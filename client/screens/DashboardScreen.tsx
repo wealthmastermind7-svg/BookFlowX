@@ -412,6 +412,85 @@ export default function DashboardScreen() {
   const unpaidPercentage = Math.round((unpaidCount / totalBookings) * 100);
   const totalRevenue = stats?.totalRevenue || 0;
 
+  // Smart Revenue calculations from real booking data
+  const smartRevenueStats = React.useMemo(() => {
+    // Calculate add-on conversion rate
+    const bookingsWithAddons = bookings.filter((b) => {
+      if (!b.addons) return false;
+      try {
+        const addons = JSON.parse(b.addons);
+        return Array.isArray(addons) && addons.length > 0;
+      } catch { return false; }
+    });
+    const addonConversionRate = bookings.length > 0 
+      ? Math.round((bookingsWithAddons.length / bookings.length) * 100)
+      : 0;
+
+    // Calculate total add-on revenue
+    let addonRevenue = 0;
+    bookingsWithAddons.forEach((b) => {
+      try {
+        const addons = JSON.parse(b.addons || "[]");
+        addons.forEach((addon: { price?: number }) => {
+          addonRevenue += (addon.price || 0);
+        });
+      } catch {}
+    });
+
+    // Calculate no-show/cancellation rate
+    const cancelledBookings = bookings.filter((b) => b.status === "cancelled");
+    const completedOrConfirmed = bookings.filter((b) => 
+      b.status === "completed" || b.status === "confirmed"
+    );
+    const noShowRate = bookings.length > 0
+      ? Math.round((cancelledBookings.length / bookings.length) * 100)
+      : 0;
+
+    // Upsell opportunities (pending bookings without add-ons)
+    const upsellOpportunities = bookings.filter((b) => {
+      if (b.status === "cancelled" || b.status === "completed") return false;
+      if (!b.addons) return true;
+      try {
+        const addons = JSON.parse(b.addons);
+        return !Array.isArray(addons) || addons.length === 0;
+      } catch { return true; }
+    }).length;
+
+    // Calculate bookings with reminders sent
+    const bookingsWithReminders = bookings.filter((b) => 
+      b.confirmationSentAt || b.reminder24hSentAt || b.reminder2hSentAt
+    ).length;
+
+    // Find peak booking hours
+    const hourCounts: Record<number, number> = {};
+    bookings.forEach((b) => {
+      if (b.time) {
+        const hour = parseInt(b.time.split(":")[0], 10);
+        hourCounts[hour] = (hourCounts[hour] || 0) + 1;
+      }
+    });
+    const peakHour = Object.entries(hourCounts).sort((a, b) => b[1] - a[1])[0];
+    const peakHourLabel = peakHour ? `${peakHour[0]}:00` : "2-4 PM";
+
+    // Most popular service for add-ons
+    const serviceAddonCounts: Record<string, number> = {};
+    bookingsWithAddons.forEach((b) => {
+      const serviceName = b.serviceName || "Service";
+      serviceAddonCounts[serviceName] = (serviceAddonCounts[serviceName] || 0) + 1;
+    });
+    const topAddonService = Object.entries(serviceAddonCounts).sort((a, b) => b[1] - a[1])[0];
+
+    return {
+      addonConversionRate,
+      addonRevenue,
+      noShowRate,
+      upsellOpportunities,
+      bookingsWithReminders,
+      peakHourLabel,
+      topAddonService: topAddonService ? topAddonService[0] : null,
+    };
+  }, [bookings]);
+
   const upcomingBookings = bookings
     .filter((b) => b.status !== "cancelled")
     .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
@@ -555,49 +634,64 @@ export default function DashboardScreen() {
               
               <View style={styles.smartRevenueHighlight}>
                 <Animated.Text style={styles.smartRevenueAmount}>
-                  +{formatPrice(Math.round((totalRevenue * 0.18) * 100), business?.currency || "USD")}
+                  +{formatPrice(Math.round(smartRevenueStats.addonRevenue * 100), business?.currency || "USD")}
                 </Animated.Text>
                 <Animated.Text style={styles.smartRevenueAmountLabel}>
-                  potential this month from intelligent suggestions
+                  {smartRevenueStats.addonRevenue > 0 
+                    ? "earned from add-ons this period"
+                    : "potential from intelligent suggestions"}
                 </Animated.Text>
               </View>
 
               <View style={styles.smartRevenueStats}>
                 <View style={styles.smartRevenueStat}>
-                  <Animated.Text style={styles.smartRevenueStatValue}>38%</Animated.Text>
+                  <Animated.Text style={styles.smartRevenueStatValue}>
+                    {smartRevenueStats.addonConversionRate}%
+                  </Animated.Text>
                   <Animated.Text style={styles.smartRevenueStatLabel}>Add-on conversion</Animated.Text>
                 </View>
                 <View style={styles.smartRevenueStatDivider} />
                 <View style={styles.smartRevenueStat}>
                   <Animated.Text style={styles.smartRevenueStatValue}>
-                    {Math.max(3, Math.floor(bookings.length * 0.4))}
+                    {smartRevenueStats.upsellOpportunities}
                   </Animated.Text>
                   <Animated.Text style={styles.smartRevenueStatLabel}>Upsell opportunities</Animated.Text>
                 </View>
                 <View style={styles.smartRevenueStatDivider} />
                 <View style={styles.smartRevenueStat}>
-                  <Animated.Text style={styles.smartRevenueStatValue}>-40%</Animated.Text>
-                  <Animated.Text style={styles.smartRevenueStatLabel}>No-show reduction</Animated.Text>
+                  <Animated.Text style={styles.smartRevenueStatValue}>
+                    {smartRevenueStats.noShowRate > 0 ? `${smartRevenueStats.noShowRate}%` : "0%"}
+                  </Animated.Text>
+                  <Animated.Text style={styles.smartRevenueStatLabel}>Cancellation rate</Animated.Text>
                 </View>
               </View>
 
               <View style={styles.smartRevenueInsights}>
-                <View style={styles.smartRevenueInsightRow}>
-                  <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#10B981" }]} />
-                  <Animated.Text style={styles.smartRevenueInsightText}>
-                    Express add-ons convert best after full services
-                  </Animated.Text>
-                </View>
+                {smartRevenueStats.topAddonService ? (
+                  <View style={styles.smartRevenueInsightRow}>
+                    <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#10B981" }]} />
+                    <Animated.Text style={styles.smartRevenueInsightText}>
+                      {smartRevenueStats.topAddonService} has highest add-on rate
+                    </Animated.Text>
+                  </View>
+                ) : (
+                  <View style={styles.smartRevenueInsightRow}>
+                    <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#10B981" }]} />
+                    <Animated.Text style={styles.smartRevenueInsightText}>
+                      Add upsells to services to boost revenue
+                    </Animated.Text>
+                  </View>
+                )}
                 <View style={styles.smartRevenueInsightRow}>
                   <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#8B5CF6" }]} />
                   <Animated.Text style={styles.smartRevenueInsightText}>
-                    Peak booking window: 2-4 PM on weekdays
+                    Peak booking time: {smartRevenueStats.peakHourLabel}
                   </Animated.Text>
                 </View>
                 <View style={styles.smartRevenueInsightRow}>
                   <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#F59E0B" }]} />
                   <Animated.Text style={styles.smartRevenueInsightText}>
-                    Smart reminders sent to {Math.max(5, bookings.length)} customers
+                    {smartRevenueStats.bookingsWithReminders} bookings received smart reminders
                   </Animated.Text>
                 </View>
               </View>
