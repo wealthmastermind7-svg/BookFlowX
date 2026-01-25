@@ -100,8 +100,8 @@ export default function AvailabilityEditorScreen() {
       const availability = await api.getAvailability();
       const defaultSchedules: DaySchedule[] = DAY_NAMES.map((_, index) => ({
         dayOfWeek: index,
-        startTime: "09:00",
-        endTime: "17:00",
+        startTime: "06:00",
+        endTime: "22:00",
         isActive: index >= 1 && index <= 5,
       }));
 
@@ -122,8 +122,8 @@ export default function AvailabilityEditorScreen() {
       console.error("Error loading availability:", error);
       const defaultSchedules: DaySchedule[] = DAY_NAMES.map((_, index) => ({
         dayOfWeek: index,
-        startTime: "09:00",
-        endTime: "17:00",
+        startTime: "06:00",
+        endTime: "22:00",
         isActive: index >= 1 && index <= 5,
       }));
       setSchedules(defaultSchedules);
