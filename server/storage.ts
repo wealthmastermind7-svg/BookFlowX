@@ -585,10 +585,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Deep Conditioning", duration: 45, price: 2500, description: "Scalp treatment and conditioning" },
         ],
         customers: [
-          { name: "Emma Wilson", email: "emma-salon@example.com", phone: "555-0101" },
-          { name: "Olivia Chen", email: "olivia-salon@example.com", phone: "555-0102" },
-          { name: "Sophia Martinez", email: "sophia-salon@example.com", phone: "555-0103" },
-          { name: "Ava Johnson", email: "ava-salon@example.com", phone: "555-0104" },
+          { name: "Emma Wilson", email: "delivered+emma@resend.dev", phone: "555-0101" },
+          { name: "Olivia Chen", email: "delivered+olivia@resend.dev", phone: "555-0102" },
+          { name: "Sophia Martinez", email: "delivered+sophia@resend.dev", phone: "555-0103" },
+          { name: "Ava Johnson", email: "delivered+ava@resend.dev", phone: "555-0104" },
         ],
       },
       medical: {
@@ -600,10 +600,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Follow-up Visit", duration: 20, price: 5000, description: "Post-treatment follow-up" },
         ],
         customers: [
-          { name: "Michael Chen", email: "michael-med@example.com", phone: "555-0201" },
-          { name: "Jennifer Lee", email: "jennifer-med@example.com", phone: "555-0202" },
-          { name: "Robert Williams", email: "robert-med@example.com", phone: "555-0203" },
-          { name: "Diana Brown", email: "diana-med@example.com", phone: "555-0204" },
+          { name: "Michael Chen", email: "delivered+michael@resend.dev", phone: "555-0201" },
+          { name: "Jennifer Lee", email: "delivered+jennifer@resend.dev", phone: "555-0202" },
+          { name: "Robert Williams", email: "delivered+robert@resend.dev", phone: "555-0203" },
+          { name: "Diana Brown", email: "delivered+diana@resend.dev", phone: "555-0204" },
         ],
       },
       autodetailing: {
@@ -615,10 +615,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Pet Hair Removal", duration: 30, price: 4000, description: "Specialized pet hair removal" },
         ],
         customers: [
-          { name: "James Rodriguez", email: "james-auto@example.com", phone: "555-0301" },
-          { name: "Patricia Taylor", email: "patricia-auto@example.com", phone: "555-0302" },
-          { name: "Christopher Garcia", email: "chris-auto@example.com", phone: "555-0303" },
-          { name: "Nancy Davis", email: "nancy-auto@example.com", phone: "555-0304" },
+          { name: "James Rodriguez", email: "delivered+james@resend.dev", phone: "555-0301" },
+          { name: "Patricia Taylor", email: "delivered+patricia@resend.dev", phone: "555-0302" },
+          { name: "Christopher Garcia", email: "delivered+chris@resend.dev", phone: "555-0303" },
+          { name: "Nancy Davis", email: "delivered+nancy@resend.dev", phone: "555-0304" },
         ],
       },
       fitness: {
@@ -630,10 +630,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Group Fitness Class", duration: 45, price: 2500, description: "Led fitness class" },
         ],
         customers: [
-          { name: "Andrew Jackson", email: "andrew-fit@example.com", phone: "555-0401" },
-          { name: "Susan Miller", email: "susan-fit@example.com", phone: "555-0402" },
-          { name: "Thomas Moore", email: "thomas-fit@example.com", phone: "555-0403" },
-          { name: "Betty Anderson", email: "betty-fit@example.com", phone: "555-0404" },
+          { name: "Andrew Jackson", email: "delivered+andrew.f@resend.dev", phone: "555-0401" },
+          { name: "Susan Miller", email: "delivered+susan.f@resend.dev", phone: "555-0402" },
+          { name: "Thomas Moore", email: "delivered+thomas.f@resend.dev", phone: "555-0403" },
+          { name: "Betty Anderson", email: "delivered+betty.f@resend.dev", phone: "555-0404" },
         ],
       },
       coaching: {
@@ -645,10 +645,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Monthly Membership", duration: 2880, price: 35000, description: "Unlimited access to all sessions" },
         ],
         customers: [
-          { name: "David Thompson", email: "david-coach@example.com", phone: "555-0501" },
-          { name: "Karen White", email: "karen-coach@example.com", phone: "555-0502" },
-          { name: "Steven Harris", email: "steven-coach@example.com", phone: "555-0503" },
-          { name: "Mary Clark", email: "mary-coach@example.com", phone: "555-0504" },
+          { name: "David Thompson", email: "delivered+david.c@resend.dev", phone: "555-0501" },
+          { name: "Karen White", email: "delivered+karen.c@resend.dev", phone: "555-0502" },
+          { name: "Steven Harris", email: "delivered+steven.c@resend.dev", phone: "555-0503" },
+          { name: "Mary Clark", email: "delivered+mary.c@resend.dev", phone: "555-0504" },
         ],
       },
       photography: {
@@ -660,10 +660,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Retouching Package", duration: 30, price: 5000, description: "Professional photo retouching" },
         ],
         customers: [
-          { name: "Lisa Anderson", email: "lisa-photo@example.com", phone: "555-0601" },
-          { name: "Kevin Martin", email: "kevin-photo@example.com", phone: "555-0602" },
-          { name: "Rachel Green", email: "rachel-photo@example.com", phone: "555-0603" },
-          { name: "Jason Hall", email: "jason-photo@example.com", phone: "555-0604" },
+          { name: "Lisa Anderson", email: "delivered+lisa@resend.dev", phone: "555-0601" },
+          { name: "Kevin Martin", email: "delivered+kevin@resend.dev", phone: "555-0602" },
+          { name: "Rachel Green", email: "delivered+rachel@resend.dev", phone: "555-0603" },
+          { name: "Jason Hall", email: "delivered+jason@resend.dev", phone: "555-0604" },
         ],
       },
       consulting: {
@@ -675,10 +675,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Quarterly Review", duration: 90, price: 18000, description: "Progress review and planning" },
         ],
         customers: [
-          { name: "Daniel Scott", email: "daniel-cons@example.com", phone: "555-0701" },
-          { name: "Rebecca King", email: "rebecca-cons@example.com", phone: "555-0702" },
-          { name: "Matthew Wright", email: "matthew-cons@example.com", phone: "555-0703" },
-          { name: "Megan Lopez", email: "megan-cons@example.com", phone: "555-0704" },
+          { name: "Daniel Scott", email: "delivered+daniel@resend.dev", phone: "555-0701" },
+          { name: "Rebecca King", email: "delivered+rebecca@resend.dev", phone: "555-0702" },
+          { name: "Matthew Wright", email: "delivered+matthew@resend.dev", phone: "555-0703" },
+          { name: "Megan Lopez", email: "delivered+megan@resend.dev", phone: "555-0704" },
         ],
       },
       veterinary: {
@@ -690,10 +690,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Dental Cleaning", duration: 45, price: 12000, description: "Professional pet dental care" },
         ],
         customers: [
-          { name: "Sarah Collins", email: "sarah-vet@example.com", phone: "555-0801" },
-          { name: "Mark Hill", email: "mark-vet@example.com", phone: "555-0802" },
-          { name: "Lauren Young", email: "lauren-vet@example.com", phone: "555-0803" },
-          { name: "Eric Stewart", email: "eric-vet@example.com", phone: "555-0804" },
+          { name: "Sarah Collins", email: "delivered+sarah.v@resend.dev", phone: "555-0801" },
+          { name: "Mark Hill", email: "delivered+mark.v@resend.dev", phone: "555-0802" },
+          { name: "Lauren Young", email: "delivered+lauren.v@resend.dev", phone: "555-0803" },
+          { name: "Eric Stewart", email: "delivered+eric.v@resend.dev", phone: "555-0804" },
         ],
       },
       contractor: {
@@ -705,10 +705,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Installation Service", duration: 180, price: 35000, description: "New installation or replacement" },
         ],
         customers: [
-          { name: "John Mitchell", email: "john-contractor@example.com", phone: "555-0901" },
-          { name: "Lisa Walker", email: "lisa-contractor@example.com", phone: "555-0902" },
-          { name: "David Robinson", email: "david-contractor@example.com", phone: "555-0903" },
-          { name: "Amy Turner", email: "amy-contractor@example.com", phone: "555-0904" },
+          { name: "John Mitchell", email: "delivered+john.m@resend.dev", phone: "555-0901" },
+          { name: "Lisa Walker", email: "delivered+lisa.w@resend.dev", phone: "555-0902" },
+          { name: "David Robinson", email: "delivered+david.r@resend.dev", phone: "555-0903" },
+          { name: "Amy Turner", email: "delivered+amy.t@resend.dev", phone: "555-0904" },
         ],
       },
       plumber: {
@@ -720,10 +720,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Emergency Plumbing", duration: 60, price: 19500, description: "24/7 emergency call-out" },
         ],
         customers: [
-          { name: "Robert Barnes", email: "robert-plumb@example.com", phone: "555-1001" },
-          { name: "Sandra Cox", email: "sandra-plumb@example.com", phone: "555-1002" },
-          { name: "William Price", email: "william-plumb@example.com", phone: "555-1003" },
-          { name: "Emily Bell", email: "emily-plumb@example.com", phone: "555-1004" },
+          { name: "Robert Barnes", email: "delivered+robert.b@resend.dev", phone: "555-1001" },
+          { name: "Sandra Cox", email: "delivered+sandra.c@resend.dev", phone: "555-1002" },
+          { name: "William Price", email: "delivered+william.p@resend.dev", phone: "555-1003" },
+          { name: "Emily Bell", email: "delivered+emily.b@resend.dev", phone: "555-1004" },
         ],
       },
       electrician: {
@@ -735,10 +735,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Emergency Electrical", duration: 90, price: 22000, description: "Urgent electrical repair" },
         ],
         customers: [
-          { name: "Charles Reed", email: "charles-elec@example.com", phone: "555-1101" },
-          { name: "Nancy Morgan", email: "nancy-elec@example.com", phone: "555-1102" },
-          { name: "George Perry", email: "george-elec@example.com", phone: "555-1103" },
-          { name: "Helen Butler", email: "helen-elec@example.com", phone: "555-1104" },
+          { name: "Charles Reed", email: "delivered+charles.e@resend.dev", phone: "555-1101" },
+          { name: "Nancy Morgan", email: "delivered+nancy.e@resend.dev", phone: "555-1102" },
+          { name: "George Perry", email: "delivered+george.e@resend.dev", phone: "555-1103" },
+          { name: "Helen Butler", email: "delivered+helen.e@resend.dev", phone: "555-1104" },
         ],
       },
       hvac: {
@@ -750,10 +750,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Emergency HVAC", duration: 120, price: 28000, description: "24/7 emergency service" },
         ],
         customers: [
-          { name: "Frank Howard", email: "frank-hvac@example.com", phone: "555-1201" },
-          { name: "Dorothy Ward", email: "dorothy-hvac@example.com", phone: "555-1202" },
-          { name: "Ray Torres", email: "ray-hvac@example.com", phone: "555-1203" },
-          { name: "Carol Peterson", email: "carol-hvac@example.com", phone: "555-1204" },
+          { name: "Frank Howard", email: "delivered+frank@resend.dev", phone: "555-1201" },
+          { name: "Dorothy Ward", email: "delivered+dorothy@resend.dev", phone: "555-1202" },
+          { name: "Ray Torres", email: "delivered+ray@resend.dev", phone: "555-1203" },
+          { name: "Carol Peterson", email: "delivered+carol@resend.dev", phone: "555-1204" },
         ],
       },
       cleaning: {
@@ -765,10 +765,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Office Cleaning", duration: 180, price: 22000, description: "Commercial space cleaning" },
         ],
         customers: [
-          { name: "Angela Foster", email: "angela-clean@example.com", phone: "555-1301" },
-          { name: "Richard Sanders", email: "richard-clean@example.com", phone: "555-1302" },
-          { name: "Martha Ross", email: "martha-clean@example.com", phone: "555-1303" },
-          { name: "Peter Gray", email: "peter-clean@example.com", phone: "555-1304" },
+          { name: "Angela Foster", email: "delivered+angela@resend.dev", phone: "555-1301" },
+          { name: "Richard Sanders", email: "delivered+richard@resend.dev", phone: "555-1302" },
+          { name: "Martha Ross", email: "delivered+martha@resend.dev", phone: "555-1303" },
+          { name: "Peter Gray", email: "delivered+peter@resend.dev", phone: "555-1304" },
         ],
       },
       landscaping: {
@@ -780,10 +780,10 @@ export class DatabaseStorage implements IStorage {
           { name: "Irrigation Install", duration: 240, price: 45000, description: "Sprinkler system installation" },
         ],
         customers: [
-          { name: "Victor Hughes", email: "victor-land@example.com", phone: "555-1401" },
-          { name: "Janet Kelly", email: "janet-land@example.com", phone: "555-1402" },
-          { name: "Larry Brooks", email: "larry-land@example.com", phone: "555-1403" },
-          { name: "Diane Bennett", email: "diane-land@example.com", phone: "555-1404" },
+          { name: "Victor Hughes", email: "delivered+victor@resend.dev", phone: "555-1401" },
+          { name: "Janet Kelly", email: "delivered+janet@resend.dev", phone: "555-1402" },
+          { name: "Larry Brooks", email: "delivered+larry@resend.dev", phone: "555-1403" },
+          { name: "Diane Bennett", email: "delivered+diane@resend.dev", phone: "555-1404" },
         ],
       },
     };
@@ -808,10 +808,12 @@ export class DatabaseStorage implements IStorage {
 
       // Create demo customers with unique identifiers
       const timestamp = Date.now();
-      const demoCustomers = template.customers.map(c => ({
+      const demoCustomers = template.customers.map((c, index) => ({
         businessId,
         name: c.name,
-        email: `${c.email.split("@")[0]}-${timestamp}@example.com`,
+        email: c.email.includes('@resend.dev') 
+          ? c.email.replace('@resend.dev', `+${businessId.slice(0, 4)}-${index}@resend.dev`)
+          : `${c.email.split("@")[0]}-${timestamp}@example.com`,
         phone: c.phone,
       }));
 
