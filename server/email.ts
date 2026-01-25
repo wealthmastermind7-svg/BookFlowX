@@ -49,6 +49,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     });
 
     const isReminder = data.isReminder || false;
+    
+    // Safety check: Prevent sending emails to example.com addresses (demo data)
+    if (data.customerEmail.toLowerCase().endsWith('@example.com')) {
+      console.log(`[Resend] Skipping email to example.com address: ${data.customerEmail}`);
+      return true; // Return true so the workflow marks it as sent and doesn't retry
+    }
+
     const title = isReminder ? "REMINDER" : "CONFIRMED";
     const subtitle = isReminder 
       ? `Your appointment is ${data.hoursToGo ? `in ${data.hoursToGo} hours` : 'coming up soon'}`
