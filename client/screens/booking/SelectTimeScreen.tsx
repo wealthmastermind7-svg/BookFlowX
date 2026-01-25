@@ -34,9 +34,13 @@ const SPRING_CONFIG = {
 };
 
 const TIME_SLOTS = [
-  "11:00 AM", "11:30 AM", "12:00 PM",
-  "12:30 PM", "01:00 PM", "01:30 PM",
-  "02:00 PM", "02:30 PM", "03:00 PM",
+  "09:00 AM", "09:30 AM", "10:00 AM",
+  "10:30 AM", "11:00 AM", "11:30 AM",
+  "12:00 PM", "12:30 PM", "01:00 PM",
+  "01:30 PM", "02:00 PM", "02:30 PM",
+  "03:00 PM", "03:30 PM", "04:00 PM",
+  "04:30 PM", "05:00 PM", "05:30 PM",
+  "06:00 PM", "06:30 PM", "07:00 PM",
 ];
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
@@ -352,12 +356,23 @@ export default function SelectTimeScreen() {
           </ThemedText>
         </View>
 
-        <View style={styles.dateScrollerContainer}>
-          <DateScrollPicker
-            dates={dates}
-            selectedDate={selectedDate}
-            onDateChange={setSelectedDate}
-          />
+        <View style={styles.dateAlignmentContainer}>
+          <View style={styles.dateCardCenter}>
+            <View style={styles.dateLabelContainer}>
+              <ThemedText style={styles.dateLabel}>SELECT DATE</ThemedText>
+            </View>
+            <View style={[
+              styles.dateCardBig,
+              {
+                backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.5)",
+                borderColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)",
+              }
+            ]}>
+              <ThemedText style={styles.dateCardBigText}>
+                {selectedDate.toLocaleDateString("en-US", { day: 'numeric', month: 'short' })}, {selectedDate.getFullYear()}
+              </ThemedText>
+            </View>
+          </View>
         </View>
 
         <View style={styles.timesSection}>
@@ -510,6 +525,40 @@ const styles = StyleSheet.create({
     fontWeight: "500",
     opacity: 0.6,
   },
+  dateAlignmentContainer: {
+    paddingHorizontal: Spacing.lg,
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
+  },
+  dateCardCenter: {
+    width: '100%',
+    maxWidth: 400,
+    alignItems: 'center',
+  },
+  dateLabelContainer: {
+    width: '100%',
+    marginBottom: Spacing.md,
+  },
+  dateLabel: {
+    fontSize: 11,
+    fontWeight: "700",
+    letterSpacing: 2,
+    opacity: 0.5,
+  },
+  dateCardBig: {
+    width: '100%',
+    paddingVertical: Spacing.xl,
+    paddingHorizontal: Spacing.lg,
+    borderRadius: BorderRadius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  dateCardBigText: {
+    fontSize: 20,
+    fontWeight: '600',
+    letterSpacing: -0.5,
+  },
   datePickerContainer: {
     height: 100,
     marginTop: Spacing.md,
@@ -565,7 +614,7 @@ const styles = StyleSheet.create({
   },
   timesSection: {
     paddingHorizontal: Spacing.lg,
-    marginTop: Spacing.xl,
+    marginTop: Spacing.sm,
     marginBottom: Spacing["2xl"],
   },
   timesLabel: {
@@ -594,7 +643,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.1)',
   },
   timeSlot: {
-    paddingVertical: Spacing.xl,
+    paddingVertical: Spacing.lg,
     borderRadius: BorderRadius.lg,
     alignItems: "center",
     justifyContent: "center",
