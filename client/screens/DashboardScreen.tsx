@@ -660,9 +660,9 @@ export default function DashboardScreen() {
                 <View style={styles.smartRevenueStatDivider} />
                 <View style={styles.smartRevenueStat}>
                   <Animated.Text style={styles.smartRevenueStatValue}>
-                    {smartRevenueStats.noShowRate > 0 ? `${smartRevenueStats.noShowRate}%` : "0%"}
+                    {smartRevenueStats.bookingsWithReminders}
                   </Animated.Text>
-                  <Animated.Text style={styles.smartRevenueStatLabel}>Cancellation rate</Animated.Text>
+                  <Animated.Text style={styles.smartRevenueStatLabel}>Smart reminders</Animated.Text>
                 </View>
               </View>
 
@@ -691,7 +691,7 @@ export default function DashboardScreen() {
                 <View style={styles.smartRevenueInsightRow}>
                   <View style={[styles.smartRevenueInsightDot, { backgroundColor: "#F59E0B" }]} />
                   <Animated.Text style={styles.smartRevenueInsightText}>
-                    {smartRevenueStats.bookingsWithReminders} bookings received smart reminders
+                    Automatic reminders reduce manual work
                   </Animated.Text>
                 </View>
               </View>
