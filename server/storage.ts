@@ -809,11 +809,9 @@ export class DatabaseStorage implements IStorage {
       // Create demo customers with unique identifiers
       const timestamp = Date.now();
       const demoCustomers = template.customers.map((c, index) => {
-        // Force all demo customers to use @resend.dev test emails
-        // This ensures the user's domain reputation is protected and labeling is used correctly
-        // We use a clean string construction to avoid any accidental .com injection
-        // Using a unique timestamp to ensure the database recognizes these as fresh records
-        const email = `delivered+${businessId.slice(0, 4)}-${index}-${timestamp}@resend.dev`;
+        // Use a non-routable dummy domain for demo data to prevent any accidental sending
+        // and protect domain reputation. These will be skipped by the email service.
+        const email = `demo-${index}-${timestamp}@internal.bookflow.app`;
         
         return {
           businessId,

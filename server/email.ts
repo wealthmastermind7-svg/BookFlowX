@@ -48,16 +48,16 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
 
-    // Validation: Prevent sending to example.com domains
-    if (data.customerEmail.toLowerCase().endsWith('@example.com')) {
-      console.log(`[Resend] Skipping example.com address: ${data.customerEmail}`);
-      return true; // Treat as success to prevent retries
-    }
+    // PROTECT DOMAIN REPUTATION: 
+    // Do not send emails to resend.dev test addresses, example.com, or internal dummy domains
+    // to avoid bounce rates that could lead to account suspension.
+    const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
+    const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
+    const isResendDev = data.customerEmail.toLowerCase().endsWith('@resend.dev');
 
-    // Validation: Allow Resend test email addresses
-    const isTestEmail = data.customerEmail.toLowerCase().includes('@resend.dev');
-    if (isTestEmail) {
-      console.log(`[Resend] Test email detected: ${data.customerEmail}`);
+    if (isInternalDemo || isExampleDomain || isResendDev) {
+      console.log(`[Resend] BLOCKING delivery to test/demo address to protect reputation: ${data.customerEmail}`);
+      return true; // Treat as success to prevent retries but skip actual sending
     }
 
     const isReminder = data.isReminder || false;
