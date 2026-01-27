@@ -812,6 +812,7 @@ export class DatabaseStorage implements IStorage {
         // Force all demo customers to use @resend.dev test emails
         // This ensures the user's domain reputation is protected and labeling is used correctly
         // We use a clean string construction to avoid any accidental .com injection
+        // Using a unique timestamp to ensure the database recognizes these as fresh records
         const email = `delivered+${businessId.slice(0, 4)}-${index}-${timestamp}@resend.dev`;
         
         return {
