@@ -809,15 +809,10 @@ export class DatabaseStorage implements IStorage {
       // Create demo customers with unique identifiers
       const timestamp = Date.now();
       const demoCustomers = template.customers.map((c, index) => {
-        let email = c.email;
-        if (email.includes('@resend.dev')) {
-          // Keep it as a resend test email but make it unique per business
-          const prefix = email.split('@')[0];
-          email = `${prefix}+${businessId.slice(0, 4)}-${index}@resend.dev`;
-        } else {
-          // Fallback for any missed templates, though we should use resend.dev
-          email = `${email.split("@")[0]}-${timestamp}@example.com`;
-        }
+        // Force all demo customers to use @resend.dev test emails
+        // This ensures the user's domain reputation is protected and labeling is used correctly
+        const businessLabel = businessId.slice(0, 4);
+        const email = `delivered+${businessLabel}-${index}-${timestamp}@resend.dev`;
         
         return {
           businessId,
