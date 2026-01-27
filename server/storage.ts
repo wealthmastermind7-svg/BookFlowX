@@ -811,8 +811,8 @@ export class DatabaseStorage implements IStorage {
       const demoCustomers = template.customers.map((c, index) => {
         // Force all demo customers to use @resend.dev test emails
         // This ensures the user's domain reputation is protected and labeling is used correctly
-        const businessLabel = businessId.slice(0, 4);
-        const email = `delivered+${businessLabel}-${index}-${timestamp}@resend.dev`;
+        // We use a clean string construction to avoid any accidental .com injection
+        const email = `delivered+${businessId.slice(0, 4)}-${index}-${timestamp}@resend.dev`;
         
         return {
           businessId,
