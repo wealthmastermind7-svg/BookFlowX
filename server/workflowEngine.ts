@@ -341,6 +341,9 @@ async function executeEmailAction(
       businessWebsite: context.business.website || undefined,
       businessPhone: context.business.phone || undefined,
       addons,
+    }).catch(err => {
+      console.error(`[Workflow] sendBookingConfirmation error for booking ${context.booking?.id}:`, err);
+      throw err;
     });
 
     // Mark email sent timestamp on booking based on reminder timing
