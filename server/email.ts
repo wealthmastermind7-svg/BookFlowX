@@ -52,18 +52,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     // We block internal dummy domains or example.com.
     const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
     const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
-    const isResendDev = data.customerEmail.toLowerCase().includes('@resend.dev');
 
     if (isInternalDemo || isExampleDomain) {
       console.log(`[Postmark] BLOCKING delivery to internal/example address: ${data.customerEmail}`);
       return true; // Skip actual sending
     }
 
-    if (isResendDev) {
-      console.log(`[Postmark] ALLOWING safe test address: ${data.customerEmail}`);
-    } else {
-      console.log(`[Postmark] Attempting to send live email to: ${data.customerEmail}`);
-    }
+    console.log(`[Postmark] Attempting to send live email to: ${data.customerEmail}`);
 
     const isReminder = data.isReminder || false;
     const title = isReminder ? "REMINDER" : "CONFIRMED";

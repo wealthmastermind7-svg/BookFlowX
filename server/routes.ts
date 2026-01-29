@@ -400,6 +400,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Trigger workflow automations for booking_created
+      console.log(`[Booking] Triggering workflows for booking ${booking.id} (${customerName})`);
       triggerWorkflows("booking_created", req.params.businessId, {
         booking,
         service: service || undefined,
