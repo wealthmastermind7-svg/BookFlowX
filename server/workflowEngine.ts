@@ -366,6 +366,7 @@ async function executeEmailAction(
 
     return { success: true, message: "Email sent successfully" };
   } catch (error) {
+    console.error(`[Workflow] executeEmailAction Error for booking ${context.booking?.id}:`, error);
     return { success: false, message: `Email failed: ${error}` };
   }
 }

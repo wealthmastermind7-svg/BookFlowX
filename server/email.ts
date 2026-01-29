@@ -61,6 +61,8 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
 
     if (isResendDev) {
       console.log(`[Postmark] ALLOWING safe test address: ${data.customerEmail}`);
+    } else {
+      console.log(`[Postmark] Attempting to send live email to: ${data.customerEmail}`);
     }
 
     const isReminder = data.isReminder || false;
@@ -224,7 +226,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       : `Booking Confirmed - ${data.businessName}`;
 
     await client.sendEmail({
-      From: "bookings@confirmbooking.online",
+      From: "BookFlow <bookings@confirmbooking.online>",
       To: data.customerEmail,
       Subject: subject,
       HtmlBody: html,
