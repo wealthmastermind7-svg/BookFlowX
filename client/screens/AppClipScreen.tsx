@@ -84,7 +84,7 @@ export default function AppClipScreen({
     if (onInstallFullApp) {
       onInstallFullApp();
     } else {
-      Linking.openURL("https://apps.apple.com/app/bookflow");
+      Linking.openURL("https://apps.apple.com/app/bookflowx/id6756943439");
     }
   };
 
