@@ -1,14 +1,14 @@
-import { Resend } from 'resend';
+import * as postmark from 'postmark';
 
-function getResendClient(): Resend | null {
-  const apiKey = process.env.RESEND_API_KEY;
-  console.log('[Resend] Checking API Key configuration...');
-  if (!apiKey) {
-    console.error('[Resend] API Key is MISSING from environment variables.');
+function getPostmarkClient(): postmark.ServerClient | null {
+  const serverToken = process.env.POSTMARK_SERVER_TOKEN;
+  console.log('[Postmark] Checking Server Token configuration...');
+  if (!serverToken) {
+    console.error('[Postmark] Server Token is MISSING from environment variables.');
     return null;
   }
-  console.log('[Resend] API Key found, initializing client.');
-  return new Resend(apiKey);
+  console.log('[Postmark] Server Token found, initializing client.');
+  return new postmark.ServerClient(serverToken);
 }
 
 interface BookingConfirmationData {
@@ -37,9 +37,9 @@ function getCurrencySymbol(currency: string): string {
 }
 
 export async function sendBookingConfirmation(data: BookingConfirmationData): Promise<boolean> {
-  const resend = getResendClient();
-  if (!resend) {
-    console.log('[Resend] Client not initialized, skipping email');
+  const client = getPostmarkClient();
+  if (!client) {
+    console.log('[Postmark] Client not initialized, skipping email');
     return false;
   }
 
@@ -49,19 +49,18 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     });
 
     // PROTECT DOMAIN REPUTATION: 
-    // We strictly allow ONLY Resend's safe test domains (@resend.dev) 
-    // and block internal dummy domains or example.com.
+    // We block internal dummy domains or example.com.
     const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
     const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
     const isResendDev = data.customerEmail.toLowerCase().includes('@resend.dev');
 
     if (isInternalDemo || isExampleDomain) {
-      console.log(`[Resend] BLOCKING delivery to internal/example address: ${data.customerEmail}`);
+      console.log(`[Postmark] BLOCKING delivery to internal/example address: ${data.customerEmail}`);
       return true; // Skip actual sending
     }
 
     if (isResendDev) {
-      console.log(`[Resend] ALLOWING safe test address: ${data.customerEmail}`);
+      console.log(`[Postmark] ALLOWING safe test address: ${data.customerEmail}`);
     }
 
     const isReminder = data.isReminder || false;
@@ -220,41 +219,22 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
 </html>
     `;
 
-    const resendParams = {
-      from: `${data.businessName} <bookings@confirmbooking.online>`,
-      to: data.customerEmail,
-      subject: isReminder 
-        ? `Reminder: ${data.serviceName} - ${formattedDate}` 
-        : `Booking Confirmed - ${data.businessName}`,
-      html
-    };
+    const subject = isReminder 
+      ? `Reminder: ${data.serviceName} - ${formattedDate}` 
+      : `Booking Confirmed - ${data.businessName}`;
 
-    // Retry logic for rate limits (429)
-    let attempts = 0;
-    const maxAttempts = 3;
-    const baseDelay = 1000;
+    await client.sendEmail({
+      From: "bookings@confirmbooking.online",
+      To: data.customerEmail,
+      Subject: subject,
+      HtmlBody: html,
+      MessageStream: "outbound"
+    });
 
-    while (attempts < maxAttempts) {
-      try {
-        await resend.emails.send(resendParams);
-        return true;
-      } catch (sendError: any) {
-        attempts++;
-        const isRateLimit = sendError?.statusCode === 429 || sendError?.message?.includes('rate limit');
-        
-        if (isRateLimit && attempts < maxAttempts) {
-          const delay = baseDelay * Math.pow(2, attempts - 1);
-          console.warn(`[Resend] Rate limit hit. Retrying in ${delay}ms (Attempt ${attempts}/${maxAttempts})`);
-          await new Promise(resolve => setTimeout(resolve, delay));
-          continue;
-        }
-        throw sendError;
-      }
-    }
-
-    return false;
+    console.log(`[Postmark] Email sent successfully to ${data.customerEmail}`);
+    return true;
   } catch (error) {
-    console.error('[Resend] Exception:', error);
+    console.error('[Postmark] Exception:', error);
     return false;
   }
 }
