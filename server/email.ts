@@ -53,7 +53,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     // and block internal dummy domains or example.com.
     const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
     const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
-    const isResendDev = data.customerEmail.toLowerCase().endsWith('@resend.dev');
+    const isResendDev = data.customerEmail.toLowerCase().includes('@resend.dev');
 
     if (isInternalDemo || isExampleDomain) {
       console.log(`[Resend] BLOCKING delivery to internal/example address: ${data.customerEmail}`);
