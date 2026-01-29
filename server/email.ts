@@ -49,12 +49,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     });
 
     // PROTECT DOMAIN REPUTATION: 
-    // We block internal dummy domains or example.com.
+    // We block internal dummy domains, example.com, and resend.dev test emails.
     const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
     const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
+    const isResendDev = data.customerEmail.toLowerCase().includes('@resend.dev');
 
-    if (isInternalDemo || isExampleDomain) {
-      console.log(`[Postmark] BLOCKING delivery to internal/example address: ${data.customerEmail}`);
+    if (isInternalDemo || isExampleDomain || isResendDev) {
+      console.log(`[Postmark] BLOCKING delivery to test/example address: ${data.customerEmail}`);
       return true; // Skip actual sending
     }
 
