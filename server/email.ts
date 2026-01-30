@@ -222,7 +222,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       : `Booking Confirmed - ${data.businessName}`;
 
     await client.sendEmail({
-      From: "BookFlow <bookings@confirmbooking.online>",
+      From: `${data.businessName} <bookings@confirmbooking.online>`,
       To: data.customerEmail,
       Subject: subject,
       HtmlBody: html,
