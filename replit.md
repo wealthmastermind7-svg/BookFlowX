@@ -77,6 +77,16 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Integration: `POSTMARK_SERVER_TOKEN` configured as a Replit Secret.
   - Tracking: Enhanced server-side logging for confirmation and reminder emails.
 - **App Store Links Updated**: Official BookFlowX app links implemented across all public pages.
+- **Context4All AI System**: Implemented smart suggestions powered by OpenAI via Replit AI Integrations.
+  - **Smart Upsell Suggestions**: Context-aware upsell recommendations based on service, time of day, customer type, and industry.
+  - **Dynamic Messaging**: Industry-specific tone and messaging (professional, friendly, luxury, casual).
+  - **Revenue Insights**: Explanations for revenue optimization based on booking patterns.
+  - **API Endpoints**:
+    - `POST /api/smart-suggestions/upsell` - Get AI-powered upsell suggestions
+    - `POST /api/smart-suggestions/messaging` - Get dynamic messaging for industry
+    - `POST /api/smart-suggestions/revenue-insight` - Get revenue insight explanations
+  - **Client Hook**: `useSmartSuggestions` hook in `client/hooks/useSmartSuggestions.ts`
+  - **Industries Supported**: auto_detailing, salon, fitness, medical, consulting, trades, wellness (7 verticals)
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
