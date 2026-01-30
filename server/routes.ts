@@ -995,11 +995,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const heroPhrase = getHeroPhrase(businessName, serviceName);
     const phrases = heroPhrase.split(' ');
     
-    // Premium stacked title layout
-    const titleLines = serviceName 
-      ? [serviceName.toUpperCase()]
-      : phrases;
+    // Premium stacked title layout with dynamic wrapping
+    const titleLines: string[] = [];
+    if (serviceName) {
+      const upperService = serviceName.toUpperCase();
+      if (upperService.length > 16) {
+        // Split long service names into multiple lines
+        const words = upperService.split(' ');
+        let currentLine = "";
+        words.forEach(word => {
+          if ((currentLine + word).length > 16) {
+            if (currentLine) titleLines.push(currentLine.trim());
+            currentLine = word + " ";
+          } else {
+            currentLine += word + " ";
+          }
+        });
+        if (currentLine) titleLines.push(currentLine.trim());
+      } else {
+        titleLines.push(upperService);
+      }
+    } else {
+      titleLines.push(...phrases);
+    }
+
+    // Limit to 3 lines for visual balance
+    const finalLines = titleLines.slice(0, 3);
+    const fontSize = finalLines.length > 2 ? 80 : 120;
+    const startY = 300 - (finalLines.length * fontSize * 0.4);
     
+    const textElements = finalLines.map((line, i) => {
+      const y = startY + (i * fontSize * 1.1);
+      return `<text x="100" y="${y}" font-size="${fontSize}" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${line}</text>`;
+    }).join('\n');
+
     // Create premium SVG with smoke effects and elegant typography
     return `<svg width="1200" height="630" xmlns="http://www.w3.org/2000/svg">
       <defs>
@@ -1039,19 +1068,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <line x1="0" y1="0" x2="200" y2="200" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
       <line x1="50" y1="0" x2="250" y2="200" stroke="rgba(255,255,255,0.03)" stroke-width="1"/>
       
-      <!-- Main stacked title - elegant thin typography, left-aligned -->
-      ${titleLines.length === 1 ? `
-        <text x="100" y="280" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">
-          ${titleLines[0].length > 16 ? titleLines[0].substring(0, 16) : titleLines[0]}
-        </text>
-      ` : `
-        <text x="100" y="180" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[0] || ''}</text>
-        <text x="100" y="290" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[1] || ''}</text>
-        <text x="100" y="400" font-size="120" font-weight="200" fill="rgba(255,255,255,0.95)" font-family="system-ui, -apple-system, 'Helvetica Neue', sans-serif" letter-spacing="8">${titleLines[2] || ''}</text>
-      `}
+      <!-- Main stacked title - elegant typography, left-aligned -->
+      ${textElements}
       
       <!-- Elegant horizontal accent line -->
-      <rect x="100" y="${titleLines.length === 1 ? '310' : '430'}" width="80" height="2" fill="rgba(255,255,255,0.5)"/>
+      <rect x="100" y="${startY + (finalLines.length * fontSize * 1.1) + 20}" width="80" height="2" fill="rgba(255,255,255,0.5)"/>
       
       <!-- Bottom info bar with glass effect -->
       <rect x="0" y="470" width="1200" height="160" fill="rgba(18,18,18,0.95)"/>
