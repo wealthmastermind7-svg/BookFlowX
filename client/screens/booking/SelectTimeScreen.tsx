@@ -497,8 +497,11 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: Spacing.lg,
+    paddingHorizontal: Spacing.xl, // Increased from Spacing.lg
     marginBottom: Spacing.lg,
+    marginHorizontal: Spacing.lg, // Moves it in from the edges
+    width: SCREEN_WIDTH * 0.7, // Controlled width instead of full width
+    alignSelf: 'center', // Centers it horizontally
   },
   dateSelectorLabel: {
     fontFamily: "Inter-Light",
