@@ -73,32 +73,10 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - Test endpoint: `POST /api/test-email` with `{ "email": "..." }`
 
 ## Recent Changes (January 2026)
-- **AI Service Setup Assistant**: Natural language service creation ("45 min haircut for $35" → structured service)
-- **AI Customer Insights Dashboard**: Automatic customer segmentation (VIP, Regular, At-Risk, New) with analytics
-- **AI Upsell Suggestions**: Contextual add-on recommendations during checkout (suggestions only, never forced)
-- **Custom Add-ons**: Business owners can save, edit, and manage their own custom add-ons per service
-  - ServiceEditorScreen has a new "Add-ons" tab for managing saved upsells
-  - AI suggestions can be saved as custom add-ons with editable name, description, and price
-  - CheckoutScreen prioritizes business-defined add-ons over AI suggestions
-  - Database schema: `services.upsells` stores JSON array of {name, description, price} objects
-- **Updated Onboarding**: New Apple-safe onboarding pages highlighting intelligent features
-  - Page 1: "Smart Booking Built In" - AI-assisted setup, smart reminders
-  - Page 2: "Reduce No-Shows Automatically" - Adaptive timing, fewer missed bookings
-  - Page 3: "Grow Smarter Not Harder" - Customer insights, upsell suggestions
-- **Marketing Page Removal**: Removed the `/marketing` page and related template files as requested.
-- **Contractor Reminder Defaults**: Updated industry templates for contractors and field services.
-  - Default reminders: Instant confirmation, 24h before, 2h before.
-  - Specifically avoided 1-hour reminders to accommodate driving time.
-- **QR Code UX**: Added helper text in Settings for QR code placement ("Place this at your counter, van, invoices, or website").
-- Fixed legal pages (privacy-policy, terms) with inline fallback HTML for production reliability
-- Updated Resend sender email from `onboarding@resend.dev` to `bookings@confirmbooking.online`
-- Added comprehensive logging for email debugging (`[Resend]` and `[Booking]` prefixes)
-- Added test endpoint for debugging Resend integration
-- **Multi-Currency Support**: Added support for 75+ world currencies in `client/lib/currency.ts`
-- **Blocked Time Slots**: Added ability to block specific time slots on specific dates
-- **Email Progress Tracking**: Dashboard now shows green progress ticks for booking email status
-- **Contractor Support**: Added comprehensive support for contractor and trade businesses
-- **Manual Payment Confirmation**: Tap-to-confirm bookings on Dashboard and Calendar
+- **Email Service Migration**: Fully migrated from Resend to Postmark for improved delivery reliability.
+  - Integration: `POSTMARK_SERVER_TOKEN` configured as a Replit Secret.
+  - Tracking: Enhanced server-side logging for confirmation and reminder emails.
+- **App Store Links Updated**: Official BookFlowX app links implemented across all public pages.
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
