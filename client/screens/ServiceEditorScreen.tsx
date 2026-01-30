@@ -699,7 +699,10 @@ export default function ServiceEditorScreen() {
                 </Pressable>
               </View>
 
-              <View style={styles.qrContainer}>
+              <Pressable 
+                onPress={() => bookingLink && Linking.openURL(bookingLink)}
+                style={styles.qrContainer}
+              >
                 {bookingLink && (
                   <View style={{ padding: 16, backgroundColor: 'white', borderRadius: 16 }}>
                     <QRCode
@@ -711,11 +714,10 @@ export default function ServiceEditorScreen() {
                     />
                   </View>
                 )}
-              </View>
-
-              <Text style={styles.qrDescription}>
-                Scan to book {service.name}
-              </Text>
+                <Text style={styles.qrDescription}>
+                  Scan to book {service.name} or tap to open link
+                </Text>
+              </Pressable>
 
               <Pressable onPress={handleDownloadQRCode} style={styles.downloadButton}>
                 <Text style={styles.downloadButtonText}>Download QR Code</Text>
