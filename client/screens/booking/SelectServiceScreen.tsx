@@ -212,7 +212,7 @@ export default function SelectServiceScreen() {
 
   const handleSelectService = (service: Service) => {
     setSelectedService(service);
-    navigation.navigate("SelectTime", { serviceId: service.id });
+    navigation.navigate("Checkout", { serviceId: service.id, timeSlotId: "" });
   };
 
   return (
@@ -236,7 +236,7 @@ export default function SelectServiceScreen() {
             <ThemedText style={styles.businessLabel}>BookFlowX</ThemedText>
             <ThemedText style={styles.headerTitle}>Services</ThemedText>
           </View>
-          <ProgressRing step={1} total={3} />
+          <ProgressRing step={1} total={2} />
         </View>
 
         <ThemedText style={styles.subtitle}>
@@ -275,7 +275,6 @@ export default function SelectServiceScreen() {
       >
         <View style={styles.progressIndicator}>
           <View style={[styles.progressDot, styles.progressDotActive, { backgroundColor: theme.text }]} />
-          <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
           <View style={[styles.progressDot, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
         </View>
       </View>
