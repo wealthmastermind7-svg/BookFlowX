@@ -392,15 +392,18 @@ export default function QuickSaleScreen() {
           </Animated.View>
           
           {qrCode ? (
-            <View style={[styles.qrContainer, { backgroundColor: theme.backgroundSecondary, borderColor: theme.borderLight }]}>
+            <Pressable 
+              onPress={() => paymentUrl && Linking.openURL(paymentUrl)}
+              style={[styles.qrContainer, { backgroundColor: theme.backgroundSecondary, borderColor: theme.borderLight }]}
+            >
               <Image
                 source={{ uri: qrCode }}
                 style={styles.qrCode}
               />
               <ThemedText style={[styles.qrInstructions, { color: theme.textSecondary }]}>
-                Ask customer to scan with their phone
+                Ask customer to scan with their phone or tap to open link
               </ThemedText>
-            </View>
+            </Pressable>
           ) : null}
           
           <View style={styles.linkActions}>
