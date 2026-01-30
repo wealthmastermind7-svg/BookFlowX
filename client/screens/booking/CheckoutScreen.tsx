@@ -216,7 +216,8 @@ export default function CheckoutScreen() {
             <Feather name="chevron-left" size={24} color={theme.text} />
           </Pressable>
           <View style={styles.progressBar}>
-            <View style={[styles.progressSegment, styles.progressSegmentActive, { backgroundColor: theme.text }]} />
+            <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
+            <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
             <View style={[styles.progressSegment, styles.progressSegmentActive, { backgroundColor: theme.text }]} />
           </View>
         </Animated.View>

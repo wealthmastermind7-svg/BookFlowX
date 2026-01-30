@@ -353,7 +353,7 @@ export default function SelectTimeScreen() {
           <Pressable onPress={handleBack} style={styles.backButton}>
             <Feather name="arrow-left" size={24} color="#FFF" />
           </Pressable>
-          <ProgressRing step={2} total={2} />
+          <ProgressRing step={2} total={3} />
           <View style={{ width: 40 }} />
         </View>
 
