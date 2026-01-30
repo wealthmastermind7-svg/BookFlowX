@@ -27,6 +27,13 @@ import {
 import { triggerWorkflows, initializeIndustryBlueprints, INDUSTRY_BLUEPRINTS } from "./workflowEngine";
 import { insertWorkflowSchema, insertBusinessThemeSchema } from "@shared/schema";
 import crypto from "crypto";
+import { 
+  buildBookingContext, 
+  getSmartUpsellSuggestion, 
+  getDynamicMessage,
+  getRevenueInsightExplanation,
+  type BookingContext 
+} from "./context4all";
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -1553,6 +1560,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error generating embed code:", error);
       res.status(500).json({ error: "Failed to generate embed code" });
+    }
+  });
+
+  // === CONTEXT4ALL SMART SUGGESTIONS API ===
+
+  // Get smart upsell suggestion for a booking context
+  app.post("/api/smart-suggestions/upsell", async (req: Request, res: Response) => {
+    try {
+      const { businessId, serviceId, customerType, bookingChannel, mobileService } = req.body;
+
+      if (!businessId || !serviceId) {
+        return res.status(400).json({ error: "businessId and serviceId are required" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      const service = await storage.getService(serviceId);
+
+      if (!business || !service) {
+        return res.status(404).json({ error: "Business or service not found" });
+      }
+
+      const allServices = await storage.getServices(businessId);
+      const availableAddons = allServices
+        .filter(s => s.id !== serviceId && s.price < service.price)
+        .map(s => ({ name: s.name, price: s.price, duration: s.duration }));
+
+      const context = buildBookingContext(
+        { name: business.name, industry: (business as any).industry },
+        { name: service.name, price: service.price, duration: service.duration },
+        {
+          customerType: customerType || "new",
+          bookingChannel: bookingChannel || "link",
+          mobileService: mobileService || false,
+          availableAddons,
+        }
+      );
+
+      const suggestion = await getSmartUpsellSuggestion(context);
+
+      res.json({
+        suggestion,
+        context: {
+          industry: context.industry,
+          timeOfDay: context.timeOfDay,
+          dayOfWeek: context.dayOfWeek,
+        },
+      });
+    } catch (error) {
+      console.error("[Context4All] Error getting upsell suggestion:", error);
+      res.status(500).json({ error: "Failed to get smart suggestion" });
+    }
+  });
+
+  // Get dynamic messaging for a business/service context
+  app.post("/api/smart-suggestions/messaging", async (req: Request, res: Response) => {
+    try {
+      const { businessId, serviceId, customerType } = req.body;
+
+      if (!businessId || !serviceId) {
+        return res.status(400).json({ error: "businessId and serviceId are required" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      const service = await storage.getService(serviceId);
+
+      if (!business || !service) {
+        return res.status(404).json({ error: "Business or service not found" });
+      }
+
+      const context = buildBookingContext(
+        { name: business.name, industry: (business as any).industry },
+        { name: service.name, price: service.price, duration: service.duration },
+        { customerType: customerType || "new" }
+      );
+
+      const messaging = await getDynamicMessage(context);
+
+      res.json({
+        messaging,
+        industry: context.industry,
+      });
+    } catch (error) {
+      console.error("[Context4All] Error getting dynamic messaging:", error);
+      res.status(500).json({ error: "Failed to get dynamic messaging" });
+    }
+  });
+
+  // Get revenue insight explanation
+  app.post("/api/smart-suggestions/revenue-insight", async (req: Request, res: Response) => {
+    try {
+      const { businessId, serviceId, percentageIncrease } = req.body;
+
+      if (!businessId || !serviceId) {
+        return res.status(400).json({ error: "businessId and serviceId are required" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      const service = await storage.getService(serviceId);
+
+      if (!business || !service) {
+        return res.status(404).json({ error: "Business or service not found" });
+      }
+
+      const context = buildBookingContext(
+        { name: business.name, industry: (business as any).industry },
+        { name: service.name, price: service.price, duration: service.duration }
+      );
+
+      const explanation = getRevenueInsightExplanation(percentageIncrease || 15, context);
+
+      res.json({
+        explanation,
+        percentageIncrease: percentageIncrease || 15,
+        industry: context.industry,
+      });
+    } catch (error) {
+      console.error("[Context4All] Error getting revenue insight:", error);
+      res.status(500).json({ error: "Failed to get revenue insight" });
     }
   });
 
