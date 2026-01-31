@@ -62,76 +62,106 @@ IMPORTANT:
 }
 
 export async function createVoiceAgentWelcome(config: VoiceAgentConfig): Promise<Buffer> {
-  const industryContext = INDUSTRY_CONTEXT[config.industry] || INDUSTRY_CONTEXT.consulting;
-  const randomVerb = industryContext.verbs[Math.floor(Math.random() * industryContext.verbs.length)];
-  
   const welcomeMessage = `Hi there! Thanks for calling ${config.businessName}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`;
   
-  const response = await openai.chat.completions.create({
-    model: "gpt-audio-mini",
-    modalities: ["text", "audio"],
-    audio: { voice: config.voice || "nova", format: "mp3" },
-    messages: [
-      { role: "system", content: "You are a text-to-speech assistant. Repeat the following message exactly as written with a warm, friendly tone." },
-      { role: "user", content: welcomeMessage },
-    ],
-  });
+  try {
+    const ttsResponse = await openai.audio.speech.create({
+      model: "gpt-4o-mini-tts",
+      voice: config.voice || "nova",
+      input: welcomeMessage,
+      response_format: "mp3",
+    });
 
-  const audioData = (response.choices[0]?.message as any)?.audio?.data ?? "";
-  return Buffer.from(audioData, "base64");
+    const arrayBuffer = await ttsResponse.arrayBuffer();
+    return Buffer.from(arrayBuffer);
+  } catch (error) {
+    console.error("[VoiceAgent] Welcome TTS error:", error);
+    throw error;
+  }
 }
 
 export async function* voiceAgentRespond(
   audioBuffer: Buffer,
   config: VoiceAgentConfig,
   conversationHistory: VoiceAgentMessage[] = [],
-  inputFormat: "wav" | "mp3" = "wav"
+  inputFormat: "wav" | "mp3" | "webm" = "wav"
 ): AsyncGenerator<{ type: "user_transcript" | "audio" | "transcript" | "done" | "error"; data?: string }> {
+  const startTime = Date.now();
+  
   try {
+    // Step 1: Speech-to-Text with gpt-4o-mini-transcribe
+    console.log(`[VoiceAgent] STT starting, audio size: ${audioBuffer.length} bytes`);
+    
     const file = await toFile(audioBuffer, `audio.${inputFormat}`);
     const transcription = await openai.audio.transcriptions.create({
       file,
       model: "gpt-4o-mini-transcribe",
     });
-    const userText = transcription.text;
+    
+    const userText = transcription.text?.trim();
+    const sttDuration = Date.now() - startTime;
+    console.log(`[VoiceAgent] STT completed in ${sttDuration}ms: "${userText}"`);
+
+    if (!userText || userText.length < 2) {
+      yield { type: "error", data: "I didn't catch that. Could you please speak a bit louder or closer to your device?" };
+      return;
+    }
 
     yield { type: "user_transcript", data: userText };
 
+    // Step 2: Reasoning with gpt-4o-mini
+    const reasoningStart = Date.now();
     const systemPrompt = buildVoiceAgentSystemPrompt(config);
-    const messages = [
-      { role: "system" as const, content: systemPrompt },
-      ...conversationHistory.map(m => ({ role: m.role as "user" | "assistant", content: m.content })),
-      { role: "user" as const, content: userText },
+    const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
+      { role: "system", content: systemPrompt },
+      ...conversationHistory.map(m => ({ role: m.role, content: m.content })),
+      { role: "user", content: userText },
     ];
 
-    const stream = await openai.chat.completions.create({
-      model: "gpt-audio-mini",
-      modalities: ["text", "audio"],
-      audio: { voice: config.voice || "nova", format: "pcm16" },
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
       messages,
-      stream: true,
+      max_tokens: 150,
+      temperature: 0.7,
     });
 
-    let assistantTranscript = "";
+    const assistantText = completion.choices[0]?.message?.content?.trim() || "";
+    const reasoningDuration = Date.now() - reasoningStart;
+    console.log(`[VoiceAgent] Reasoning completed in ${reasoningDuration}ms: "${assistantText}"`);
 
-    for await (const chunk of stream) {
-      const delta = chunk.choices?.[0]?.delta as any;
-      if (!delta) continue;
-
-      if (delta?.audio?.transcript) {
-        assistantTranscript += delta.audio.transcript;
-        yield { type: "transcript", data: delta.audio.transcript };
-      }
-
-      if (delta?.audio?.data) {
-        yield { type: "audio", data: delta.audio.data };
-      }
+    if (!assistantText) {
+      yield { type: "error", data: "I'm having trouble processing your request. Please try again." };
+      return;
     }
 
-    yield { type: "done", data: assistantTranscript };
-  } catch (error) {
+    yield { type: "transcript", data: assistantText };
+
+    // Step 3: Text-to-Speech with gpt-4o-mini-tts (streaming)
+    const ttsStart = Date.now();
+    const ttsResponse = await openai.audio.speech.create({
+      model: "gpt-4o-mini-tts",
+      voice: config.voice || "nova",
+      input: assistantText,
+      response_format: "mp3",
+    });
+
+    const audioArrayBuffer = await ttsResponse.arrayBuffer();
+    const audioBase64 = Buffer.from(audioArrayBuffer).toString("base64");
+    const ttsDuration = Date.now() - ttsStart;
+    console.log(`[VoiceAgent] TTS completed in ${ttsDuration}ms, audio size: ${audioArrayBuffer.byteLength} bytes`);
+
+    yield { type: "audio", data: audioBase64 };
+
+    const totalDuration = Date.now() - startTime;
+    console.log(`[VoiceAgent] Total response time: ${totalDuration}ms (STT: ${sttDuration}ms, Reasoning: ${reasoningDuration}ms, TTS: ${ttsDuration}ms)`);
+
+    yield { type: "done", data: assistantText };
+  } catch (error: any) {
     console.error("[VoiceAgent] Error:", error);
-    yield { type: "error", data: "I'm sorry, I had trouble understanding. Could you please repeat that?" };
+    const errorMessage = error?.message?.includes("audio") 
+      ? "I had trouble with the audio. Please try speaking again."
+      : "I'm sorry, something went wrong. Please try again.";
+    yield { type: "error", data: errorMessage };
   }
 }
 
@@ -141,6 +171,17 @@ export async function getVoiceAgentConfig(businessSlug: string): Promise<VoiceAg
 
   const services = await storage.getServices(business.id);
   const industry = (business as any).industry || detectIndustry(business.name, services[0]?.name || "");
+
+  // Select voice based on industry
+  const voiceMap: Record<string, "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer"> = {
+    salon: "nova",
+    wellness: "nova",
+    medical: "echo",
+    consulting: "echo",
+    fitness: "onyx",
+    trades: "alloy",
+    auto_detailing: "alloy",
+  };
 
   return {
     businessId: business.id,
@@ -152,7 +193,7 @@ export async function getVoiceAgentConfig(businessSlug: string): Promise<VoiceAg
       price: s.price,
       duration: s.duration,
     })),
-    voice: "nova",
+    voice: voiceMap[industry] || "nova",
   };
 }
 

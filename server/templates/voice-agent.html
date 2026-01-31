@@ -125,6 +125,8 @@
       box-shadow: 
         0 4px 24px rgba(0, 0, 0, 0.4),
         inset 0 1px 0 rgba(255, 255, 255, 0.1);
+      -webkit-tap-highlight-color: transparent;
+      touch-action: manipulation;
     }
 
     .voice-button:hover {
@@ -143,10 +145,6 @@
       animation: glow 1.5s ease-in-out infinite alternate;
     }
 
-    .voice-button.recording .pulse-ring {
-      border-color: rgba(220, 38, 38, 0.3);
-    }
-
     @keyframes glow {
       from {
         box-shadow: 
@@ -162,6 +160,12 @@
 
     .voice-button.processing {
       background: linear-gradient(135deg, var(--smoke), var(--graphite));
+      animation: processingPulse 1s ease-in-out infinite;
+    }
+
+    @keyframes processingPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
     }
 
     .mic-icon {
@@ -182,6 +186,7 @@
       text-transform: uppercase;
       letter-spacing: 2px;
       min-height: 20px;
+      cursor: pointer;
     }
 
     .transcript-area {
@@ -288,7 +293,7 @@
     <h1 class="title">VOICE<br>BOOKING</h1>
     
     <p class="subtitle">
-      Tap the microphone and speak naturally to book an appointment or ask questions.
+      Tap and hold to speak, then release to send your message.
     </p>
 
     <div class="voice-button-container">
@@ -304,7 +309,7 @@
       </button>
     </div>
 
-    <div class="status-text" id="statusText">TAP TO START</div>
+    <div class="status-text" id="statusText">HOLD TO SPEAK</div>
 
     <div class="error-message" id="errorMessage"></div>
 
@@ -327,28 +332,11 @@
     const transcriptArea = document.getElementById('transcriptArea');
     const errorMessage = document.getElementById('errorMessage');
 
-    // Make "TAP TO START" text clickable too
-    statusText.style.cursor = 'pointer';
-    statusText.addEventListener('click', () => voiceButton.click());
-
     let mediaRecorder = null;
     let audioChunks = [];
     let conversationHistory = [];
     let isProcessing = false;
-    let audioContext = null;
-    let audioQueue = [];
-    let isPlaying = false;
-
-    async function initAudio() {
-      if (!audioContext) {
-        audioContext = new (window.AudioContext || window.webkitAudioContext)({
-          sampleRate: 24000
-        });
-      }
-      if (audioContext.state === 'suspended') {
-        await audioContext.resume();
-      }
-    }
+    let currentAudio = null;
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -359,6 +347,7 @@
     }
 
     function addTranscript(role, text) {
+      if (!text) return;
       transcriptArea.style.display = 'block';
       const line = document.createElement('div');
       line.className = `transcript-line ${role}`;
@@ -368,19 +357,35 @@
     }
 
     async function startRecording() {
+      if (isProcessing) return;
+      
+      // Stop any playing audio
+      if (currentAudio) {
+        currentAudio.pause();
+        currentAudio = null;
+      }
+      
       try {
-        await initAudio();
+        const stream = await navigator.mediaDevices.getUserMedia({ 
+          audio: {
+            echoCancellation: true,
+            noiseSuppression: true,
+            autoGainControl: true,
+            sampleRate: 16000,
+          }
+        });
         
-        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        
-        // Supported types check
+        // Choose best available format
         const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
           ? 'audio/webm;codecs=opus' 
           : MediaRecorder.isTypeSupported('audio/webm') 
             ? 'audio/webm' 
-            : 'audio/mp4';
+            : MediaRecorder.isTypeSupported('audio/mp4')
+              ? 'audio/mp4'
+              : '';
 
-        mediaRecorder = new MediaRecorder(stream, { mimeType });
+        const options = mimeType ? { mimeType } : {};
+        mediaRecorder = new MediaRecorder(stream, options);
         audioChunks = [];
 
         mediaRecorder.ondataavailable = (event) => {
@@ -391,84 +396,26 @@
 
         mediaRecorder.onstop = async () => {
           stream.getTracks().forEach(track => track.stop());
-          const audioBlob = new Blob(audioChunks, { type: 'audio/webm' });
           
-          isProcessing = true;
-          statusText.textContent = 'PROCESSING...';
-          
-          try {
-            const reader = new FileReader();
-            reader.readAsDataURL(audioBlob);
-            reader.onloadend = async () => {
-              const base64Audio = reader.result.split(',')[1];
-              const response = await fetch(`/api/voice/${businessSlug}/message`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  audio: base64Audio,
-                  inputFormat: 'webm',
-                  conversationHistory
-                })
-              });
-
-              if (!response.ok) throw new Error('Failed to process voice message');
-
-              const eventReader = response.body.getReader();
-              const decoder = new TextDecoder();
-              let assistantText = '';
-              let buffer = '';
-
-              statusText.textContent = 'RESPONDING...';
-
-              while (true) {
-                const { done, value } = await eventReader.read();
-                if (done) break;
-
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n\n');
-                buffer = lines.pop();
-
-                for (const line of lines) {
-                  if (!line.startsWith('data: ')) continue;
-                  try {
-                    const event = JSON.parse(line.slice(6));
-                    if (event.type === 'user_transcript' && event.data) {
-                      addTranscript('user', event.data);
-                      conversationHistory.push({ role: 'user', content: event.data });
-                    }
-                    if (event.type === 'transcript') {
-                      assistantText += event.data;
-                    }
-                    if (event.type === 'audio' && event.data) {
-                      playAudioChunk(event.data);
-                    }
-                    if (event.type === 'done') {
-                      const finalAssistantText = event.data || assistantText;
-                      if (finalAssistantText) {
-                        addTranscript('assistant', finalAssistantText);
-                        conversationHistory.push({ role: 'assistant', content: finalAssistantText });
-                      }
-                    }
-                    if (event.type === 'error') {
-                      showError(event.data);
-                    }
-                  } catch (e) { console.warn('Parse error:', e, line); }
-                }
-              }
-              isProcessing = false;
-              voiceButton.classList.remove('processing');
-              statusText.textContent = 'TAP TO SPEAK';
-            };
-          } catch (error) {
-            console.error('Send error:', error);
-            showError('Failed to process your message.');
-            isProcessing = false;
-            voiceButton.classList.remove('processing');
-            statusText.textContent = 'TAP TO SPEAK';
+          if (audioChunks.length === 0) {
+            showError('No audio recorded. Please try again.');
+            statusText.textContent = 'HOLD TO SPEAK';
+            return;
           }
+          
+          const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
+          console.log(`[VoiceAgent] Recorded ${audioBlob.size} bytes of audio`);
+          
+          if (audioBlob.size < 1000) {
+            showError('Recording too short. Please hold longer and speak clearly.');
+            statusText.textContent = 'HOLD TO SPEAK';
+            return;
+          }
+          
+          await sendAudio(audioBlob);
         };
 
-        mediaRecorder.start();
+        mediaRecorder.start(100); // Collect data every 100ms
         voiceButton.classList.add('recording');
         statusText.textContent = 'LISTENING...';
       } catch (error) {
@@ -486,120 +433,172 @@
       }
     }
 
-    async function* voiceAgentRespond(audioBuffer, config, conversationHistory, inputFormat) {
+    async function sendAudio(audioBlob) {
+      isProcessing = true;
+      
       try {
-        const audioBase64 = audioBuffer.toString('base64');
+        const reader = new FileReader();
+        
+        const base64Audio = await new Promise((resolve, reject) => {
+          reader.onloadend = () => resolve(reader.result.split(',')[1]);
+          reader.onerror = reject;
+          reader.readAsDataURL(audioBlob);
+        });
+
         const response = await fetch(`/api/voice/${businessSlug}/message`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
-            audio: audioBase64,
-            inputFormat,
+            audio: base64Audio,
+            inputFormat: 'webm',
             conversationHistory
           })
         });
 
-        if (!response.ok) throw new Error('Network response was not ok');
+        if (!response.ok) {
+          throw new Error(`Server error: ${response.status}`);
+        }
 
-        const reader = response.body.getReader();
+        const eventReader = response.body.getReader();
         const decoder = new TextDecoder();
         let buffer = '';
 
+        statusText.textContent = 'RESPONDING...';
+
         while (true) {
-          const { done, value } = await reader.read();
+          const { done, value } = await eventReader.read();
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
           const lines = buffer.split('\n\n');
-          buffer = lines.pop();
+          buffer = lines.pop() || '';
 
           for (const line of lines) {
-            if (line.startsWith('data: ')) {
+            if (!line.startsWith('data: ')) continue;
+            
+            try {
               const event = JSON.parse(line.slice(6));
-              yield event;
+              
+              if (event.type === 'user_transcript' && event.data) {
+                addTranscript('user', event.data);
+                conversationHistory.push({ role: 'user', content: event.data });
+              }
+              
+              if (event.type === 'audio' && event.data) {
+                // Play MP3 audio directly
+                await playAudioMP3(event.data);
+              }
+              
+              if (event.type === 'done' && event.data) {
+                addTranscript('assistant', event.data);
+                conversationHistory.push({ role: 'assistant', content: event.data });
+              }
+              
+              if (event.type === 'error' && event.data) {
+                showError(event.data);
+              }
+            } catch (e) {
+              console.warn('Parse error:', e);
             }
           }
         }
       } catch (error) {
-        console.error('Error in voiceAgentRespond:', error);
-        yield { type: 'error', data: error.message };
+        console.error('Send error:', error);
+        showError('Failed to process your message. Please try again.');
+      } finally {
+        isProcessing = false;
+        voiceButton.classList.remove('processing');
+        statusText.textContent = 'HOLD TO SPEAK';
       }
     }
 
-    function playAudioChunk(base64Data) {
-      const audioData = atob(base64Data);
-      const audioBytes = new Uint8Array(audioData.length);
-      for (let i = 0; i < audioData.length; i++) {
-        audioBytes[i] = audioData.charCodeAt(i);
-      }
-
-      const int16Array = new Int16Array(audioBytes.buffer);
-      const float32Array = new Float32Array(int16Array.length);
-      for (let i = 0; i < int16Array.length; i++) {
-        float32Array[i] = int16Array[i] / 32768.0;
-      }
-
-      audioQueue.push(float32Array);
-      
-      if (!isPlaying) {
-        playNextChunk();
-      }
+    async function playAudioMP3(base64Data) {
+      return new Promise((resolve, reject) => {
+        try {
+          const audioSrc = `data:audio/mp3;base64,${base64Data}`;
+          currentAudio = new Audio(audioSrc);
+          
+          currentAudio.onended = () => {
+            currentAudio = null;
+            resolve();
+          };
+          
+          currentAudio.onerror = (e) => {
+            console.error('Audio playback error:', e);
+            currentAudio = null;
+            reject(e);
+          };
+          
+          currentAudio.play().catch(err => {
+            console.error('Audio play failed:', err);
+            reject(err);
+          });
+        } catch (e) {
+          reject(e);
+        }
+      });
     }
 
-    async function playNextChunk() {
-      if (audioQueue.length === 0) {
-        isPlaying = false;
-        return;
-      }
+    // Push-to-talk: Hold to record, release to send
+    let isHolding = false;
 
-      isPlaying = true;
-      const float32Array = audioQueue.shift();
-
-      const buffer = audioContext.createBuffer(1, float32Array.length, 24000);
-      buffer.getChannelData(0).set(float32Array);
-
-      const source = audioContext.createBufferSource();
-      source.buffer = buffer;
-      source.connect(audioContext.destination);
-      source.onended = () => playNextChunk();
-      source.start();
-    }
-
-    voiceButton.addEventListener('click', async (e) => {
+    voiceButton.addEventListener('mousedown', (e) => {
       e.preventDefault();
-      if (isProcessing) return;
-      await initAudio();
-
-      if (mediaRecorder && mediaRecorder.state === 'recording') {
-        stopRecording();
-      } else {
-        await startRecording();
+      if (!isProcessing) {
+        isHolding = true;
+        startRecording();
       }
     });
 
-    // Handle touch separately but with same logic for better mobile responsiveness
-    let touchStartTime = 0;
-    let isTouching = false;
-
-    voiceButton.addEventListener('touchstart', async (e) => {
+    voiceButton.addEventListener('mouseup', (e) => {
       e.preventDefault();
-      if (isProcessing || isTouching) return;
-      isTouching = true;
-      touchStartTime = Date.now();
-      await initAudio();
-      await startRecording();
+      if (isHolding) {
+        isHolding = false;
+        stopRecording();
+      }
+    });
+
+    voiceButton.addEventListener('mouseleave', (e) => {
+      if (isHolding) {
+        isHolding = false;
+        stopRecording();
+      }
+    });
+
+    // Touch events for mobile
+    voiceButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      if (!isProcessing) {
+        isHolding = true;
+        startRecording();
+      }
     }, { passive: false });
 
     voiceButton.addEventListener('touchend', (e) => {
       e.preventDefault();
-      isTouching = false;
-      const duration = Date.now() - touchStartTime;
-      // For "Hold to Speak" behavior
-      if (duration > 500) {
+      if (isHolding) {
+        isHolding = false;
         stopRecording();
       }
-      // If it's a short tap, the click event will handle the toggle
     }, { passive: false });
+
+    voiceButton.addEventListener('touchcancel', (e) => {
+      if (isHolding) {
+        isHolding = false;
+        stopRecording();
+      }
+    }, { passive: false });
+
+    // Make status text clickable for tap-to-toggle mode
+    statusText.addEventListener('click', () => {
+      if (isProcessing) return;
+      
+      if (mediaRecorder && mediaRecorder.state === 'recording') {
+        stopRecording();
+      } else {
+        startRecording();
+      }
+    });
   </script>
 </body>
 </html>
