@@ -97,9 +97,10 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - `GET /voice/{slug}` - Serve voice booking page
     - `GET /api/voice/{slug}/config` - Get business config for voice agent
     - `GET /api/voice/{slug}/welcome` - Get welcome audio message
-    - `POST /api/voice/{slug}/message` - Process voice message with streaming response
+    - `POST /api/voice/${slug}/message` - Process voice message with streaming response
   - **Implementation Files**: `server/voiceAgent.ts`, `server/templates/voice-agent.html`
   - **Booking Page Integration**: "Try Voice Booking" link added to booking page header
+  - **App Store Link**: https://apps.apple.com/app/bookflowx/id6756943439
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
