@@ -1791,7 +1791,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert WebM to WAV if needed
       if (inputFormat === "webm") {
         try {
-          audioBuffer = await convertWebmToWav(audioBuffer);
+          const converted = await convertWebmToWav(audioBuffer);
+          audioBuffer = Buffer.from(converted);
         } catch (convErr) {
           console.warn("[VoiceAgent] WebM conversion failed, trying direct:", convErr);
         }
@@ -1805,6 +1806,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Stream the voice agent response
       for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, "wav")) {
         res.write(`data: ${JSON.stringify(event)}\n\n`);
+        if ((res as any).flush) (res as any).flush();
       }
 
       res.end();
