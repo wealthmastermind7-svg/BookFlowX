@@ -134,7 +134,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
       );
       soundRef.current = sound;
 
-      sound.setOnPlaybackStatusUpdate((status) => {
+      sound.setOnPlaybackStatusUpdate((status: any) => {
         if (status.isLoaded && status.didJustFinish) {
           sound.unloadAsync();
         }
@@ -218,11 +218,11 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
 
         <View style={styles.footer}>
           <Button
-            title="Text Booking"
             onPress={handleTextBooking}
-            variant="secondary"
             style={styles.footerButton}
-          />
+          >
+            Text Booking
+          </Button>
         </View>
       </ScrollView>
     </ThemedView>

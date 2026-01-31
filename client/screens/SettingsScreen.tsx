@@ -539,6 +539,20 @@ export default function SettingsScreen() {
               </View>
             </GlassCard>
 
+            <GlassCard style={[styles.automationCard, { marginTop: 12 }]} onPress={() => business?.slug && navigation.navigate("VoiceBooking", { businessSlug: business.slug, businessName: business.name })}>
+              <View style={styles.automationHeader}>
+                <ParallaxIcon name="mic" delay={0} />
+                <ParallaxIcon name="message-circle" delay={300} />
+                <ParallaxIcon name="volume-2" delay={600} />
+              </View>
+              <ThemedText style={styles.automationTitle}>Voice Booking</ThemedText>
+              <ThemedText style={styles.automationDesc}>Let customers book appointments using natural voice conversation with AI.</ThemedText>
+              <View style={styles.automationActionRow}>
+                <ThemedText style={styles.automationAction}>TRY IT NOW</ThemedText>
+                <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
+              </View>
+            </GlassCard>
+
             <View style={{ height: 32 }} />
 
             <SectionTitle>Data</SectionTitle>

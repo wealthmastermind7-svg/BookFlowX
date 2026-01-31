@@ -33,6 +33,7 @@
     "drizzle-orm": "^0.39.3",
     "drizzle-zod": "^0.7.1",
     "expo": "~54.0.30",
+    "expo-av": "^16.0.8",
     "expo-blur": "~15.0.8",
     "expo-build-properties": "^1.0.10",
     "expo-clipboard": "^8.0.8",

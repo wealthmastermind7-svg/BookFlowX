@@ -4,6 +4,7 @@ import MainTabNavigator from "@/navigation/MainTabNavigator";
 import BookingFlowNavigator from "@/navigation/BookingFlowNavigator";
 import ServiceEditorScreen from "@/screens/ServiceEditorScreen";
 import QuickSaleScreen from "@/screens/QuickSaleScreen";
+import VoiceBookingScreen from "@/screens/VoiceBookingScreen";
 import OnboardingScreen, { checkOnboardingComplete } from "@/screens/OnboardingScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { HeaderButton } from "@react-navigation/elements";
@@ -19,6 +20,7 @@ export type RootStackParamList = {
   BookingFlow: undefined;
   ServiceEditor: { serviceId?: string };
   QuickSale: undefined;
+  VoiceBooking: { businessSlug: string; businessName?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -111,6 +113,20 @@ export default function RootStackNavigator() {
           ...opaqueScreenOptions,
           presentation: "modal",
           headerTitle: "Quick Sale",
+          headerLeft: () => (
+            <HeaderButton onPress={() => navigation.goBack()}>
+              Close
+            </HeaderButton>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="VoiceBooking"
+        component={VoiceBookingScreen}
+        options={({ navigation }) => ({
+          ...opaqueScreenOptions,
+          presentation: "modal",
+          headerTitle: "Voice Booking",
           headerLeft: () => (
             <HeaderButton onPress={() => navigation.goBack()}>
               Close
