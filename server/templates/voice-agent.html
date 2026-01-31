@@ -335,11 +335,6 @@
     const transcriptArea = document.getElementById('transcriptArea');
     const errorMessage = document.getElementById('errorMessage');
 
-    // Force hide any safari required messages if they exist in DOM (safety)
-    // Force hide any safari required messages if they exist in DOM (safety)
-    const safariMsg = document.querySelector('.safari-required-overlay');
-    if (safariMsg) safariMsg.remove();
-
     let mediaRecorder = null;
     let audioChunks = [];
     let conversationHistory = [];
