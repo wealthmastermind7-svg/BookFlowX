@@ -106,6 +106,14 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - **Implementation Files**: `server/voiceAgent.ts`, `server/templates/voice-agent.html`
   - **Booking Page Integration**: "Try Voice Booking" link added to booking page header
   - **App Store Link**: https://apps.apple.com/app/bookflowx/id6756943439
+- **Native Expo Voice Booking**: In-app voice booking with reliable iOS microphone access.
+  - **Components**: `client/components/VoiceRecorder.tsx`, `client/screens/VoiceBookingScreen.tsx`
+  - **Library**: `expo-av` for native audio recording (WAV format, 16kHz, mono)
+  - **Push-to-Talk**: Hold mic button to record, release to send
+  - **Permissions**: Native iOS/Android microphone permission handling
+  - **Access**: Settings → Booking → Voice Booking card
+  - **Navigation**: Modal screen via `RootStackNavigator`
+  - **Benefits**: No WebView issues, reliable TestFlight/App Store compatibility, guaranteed microphone access
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
