@@ -35,7 +35,7 @@ export interface DynamicMessage {
   ctaText: string;
 }
 
-const INDUSTRY_CONTEXT: Record<string, { tone: string; verbs: string[]; values: string[] }> = {
+export const INDUSTRY_CONTEXT: Record<string, { tone: string; verbs: string[]; values: string[] }> = {
   auto_detailing: {
     tone: "confident, premium, results-focused",
     verbs: ["SHINE", "RESTORE", "PERFECT", "PROTECT"],
@@ -73,7 +73,7 @@ const INDUSTRY_CONTEXT: Record<string, { tone: string; verbs: string[]; values: 
   },
 };
 
-function detectIndustry(businessName: string, serviceName: string): string {
+export function detectIndustry(businessName: string, serviceName: string): string {
   const combined = `${businessName} ${serviceName}`.toLowerCase();
   
   if (combined.match(/detail|auto|car|wash|ceramic|polish|wax/)) return "auto_detailing";

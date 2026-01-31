@@ -34,6 +34,12 @@ import {
   getRevenueInsightExplanation,
   type BookingContext 
 } from "./context4all";
+import { 
+  getVoiceAgentConfig, 
+  voiceAgentRespond, 
+  createVoiceAgentWelcome 
+} from "./voiceAgent";
+import { convertWebmToWav } from "./replit_integrations/audio/client";
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -43,6 +49,7 @@ const __dirname = dirname(__filename);
 let bookingHtmlContent: string = "";
 let embedHtmlContent: string = "";
 let embedJsContent: string = "";
+let voiceAgentHtmlContent: string = "";
 
 async function loadBookingHtml() {
   const paths = [
@@ -98,6 +105,24 @@ async function loadEmbedJs() {
   console.warn("Warning: Could not load embed.js. Paths tried:", paths);
 }
 
+async function loadVoiceAgentHtml() {
+  const paths = [
+    path.resolve(__dirname, "templates/voice-agent.html"),
+    path.resolve(process.cwd(), "server/templates/voice-agent.html"),
+    path.resolve(process.cwd(), "templates/voice-agent.html"),
+  ];
+  
+  for (const p of paths) {
+    try {
+      voiceAgentHtmlContent = fs.readFileSync(p, "utf-8");
+      console.log(`Loaded voice-agent.html from: ${p}`);
+      return;
+    } catch {}
+  }
+  
+  console.warn("Warning: Could not load voice-agent.html. Paths tried:", paths);
+}
+
 function getEmbedOrigin(req: Request): string {
   // API_DOMAIN is set at runtime for production deployments
   const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
@@ -129,6 +154,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadBookingHtml();
   await loadEmbedHtml();
   await loadEmbedJs();
+  await loadVoiceAgentHtml();
 
   // === BUSINESSES API ===
   
@@ -1678,6 +1704,118 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("[Context4All] Error getting revenue insight:", error);
       res.status(500).json({ error: "Failed to get revenue insight" });
+    }
+  });
+
+  // === VOICE AGENT API ===
+
+  // Serve voice booking page
+  app.get("/voice/:slug", async (req: Request, res: Response) => {
+    try {
+      if (!voiceAgentHtmlContent) {
+        return res.status(500).json({ error: "Voice agent page not available" });
+      }
+
+      const config = await getVoiceAgentConfig(req.params.slug);
+      if (!config) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const html = voiceAgentHtmlContent
+        .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
+        .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug);
+
+      res.setHeader("Content-Type", "text/html");
+      res.send(html);
+    } catch (error) {
+      console.error("[VoiceAgent] Error serving page:", error);
+      res.status(500).json({ error: "Failed to load voice agent" });
+    }
+  });
+
+  // Get voice agent config (for clients)
+  app.get("/api/voice/:slug/config", async (req: Request, res: Response) => {
+    try {
+      const config = await getVoiceAgentConfig(req.params.slug);
+      if (!config) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      res.json({
+        businessId: config.businessId,
+        businessName: config.businessName,
+        industry: config.industry,
+        services: config.services,
+        voice: config.voice,
+      });
+    } catch (error) {
+      console.error("[VoiceAgent] Error getting config:", error);
+      res.status(500).json({ error: "Failed to get voice agent config" });
+    }
+  });
+
+  // Get welcome audio for voice agent
+  app.get("/api/voice/:slug/welcome", async (req: Request, res: Response) => {
+    try {
+      const config = await getVoiceAgentConfig(req.params.slug);
+      if (!config) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const audioBuffer = await createVoiceAgentWelcome(config);
+      res.setHeader("Content-Type", "audio/mpeg");
+      res.send(audioBuffer);
+    } catch (error) {
+      console.error("[VoiceAgent] Error generating welcome:", error);
+      res.status(500).json({ error: "Failed to generate welcome message" });
+    }
+  });
+
+  // Process voice message with streaming response
+  app.post("/api/voice/:slug/message", async (req: Request, res: Response) => {
+    try {
+      const config = await getVoiceAgentConfig(req.params.slug);
+      if (!config) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const { audio, inputFormat = "webm", conversationHistory = [] } = req.body;
+
+      if (!audio) {
+        return res.status(400).json({ error: "Audio data is required" });
+      }
+
+      // Convert base64 to buffer and handle webm format
+      let audioBuffer = Buffer.from(audio, "base64");
+      
+      // Convert WebM to WAV if needed
+      if (inputFormat === "webm") {
+        try {
+          audioBuffer = await convertWebmToWav(audioBuffer);
+        } catch (convErr) {
+          console.warn("[VoiceAgent] WebM conversion failed, trying direct:", convErr);
+        }
+      }
+
+      // Set up SSE
+      res.setHeader("Content-Type", "text/event-stream");
+      res.setHeader("Cache-Control", "no-cache");
+      res.setHeader("Connection", "keep-alive");
+
+      // Stream the voice agent response
+      for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, "wav")) {
+        res.write(`data: ${JSON.stringify(event)}\n\n`);
+      }
+
+      res.end();
+    } catch (error) {
+      console.error("[VoiceAgent] Error processing message:", error);
+      if (res.headersSent) {
+        res.write(`data: ${JSON.stringify({ type: "error", data: "Failed to process message" })}\n\n`);
+        res.end();
+      } else {
+        res.status(500).json({ error: "Failed to process voice message" });
+      }
     }
   });
 
