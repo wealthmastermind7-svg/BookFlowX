@@ -1819,6 +1819,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Convert base64 to buffer
       let audioBuffer = Buffer.from(audio, "base64");
       console.log(`[VoiceAgent] Received ${audioBuffer.length} bytes, format: ${inputFormat}`);
+
+      if (audioBuffer.length < 100) {
+        console.error("[VoiceAgent] Audio buffer suspiciously small, might be malformed base64");
+      }
       
       // Convert WebM to WAV if needed (from web client)
       if (inputFormat === "webm") {
@@ -1836,7 +1840,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader("Connection", "keep-alive");
 
       // Stream the voice agent response
-      for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, "wav")) {
+      for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, inputFormat as any)) {
         res.write(`data: ${JSON.stringify(event)}\n\n`);
         if ((res as any).flush) (res as any).flush();
       }

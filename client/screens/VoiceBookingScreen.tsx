@@ -53,15 +53,14 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
       let response;
 
       if (Platform.OS === "web") {
-        const formData = new FormData();
         const audioResponse = await fetch(uri);
         const blob = await audioResponse.blob();
         
         // Web uses Base64 for simplicity in this specific endpoint
         const reader = new FileReader();
-        const base64Promise = new Promise((resolve) => {
+        const base64Promise = new Promise<string>((resolve) => {
           reader.onloadend = () => {
-            const base64data = reader.result?.toString().split(",")[1];
+            const base64data = reader.result?.toString().split(",")[1] || "";
             resolve(base64data);
           };
         });
@@ -79,8 +78,10 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
         });
       } else {
         // Native Expo sends WAV directly as Base64 to avoid Multipart boundary issues
-        const { readAsStringAsync, EncodingType } = await import("expo-file-system");
-        const audioBase64 = await readAsStringAsync(uri, { encoding: EncodingType.Base64 });
+        const FileSystem = await import("expo-file-system");
+        const audioBase64 = await FileSystem.readAsStringAsync(uri, { 
+          encoding: "base64"
+        });
 
         response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
           method: "POST",
