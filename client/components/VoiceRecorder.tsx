@@ -44,12 +44,12 @@ export function VoiceRecorder({
           Animated.timing(pulseAnim, {
             toValue: 1.1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
           Animated.timing(pulseAnim, {
             toValue: 1,
             duration: 800,
-            useNativeDriver: true,
+            useNativeDriver: false,
           }),
         ])
       ).start();
@@ -60,7 +60,6 @@ export function VoiceRecorder({
       }).start();
     } else {
       pulseAnim.stopAnimation();
-      // Animation stopped, safe to reset to 1
       pulseAnim.setValue(1);
       Animated.timing(glowAnim, {
         toValue: 0,
