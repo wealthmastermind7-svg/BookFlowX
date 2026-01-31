@@ -87,17 +87,22 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - `POST /api/smart-suggestions/revenue-insight` - Get revenue insight explanations
   - **Client Hook**: `useSmartSuggestions` hook in `client/hooks/useSmartSuggestions.ts`
   - **Industries Supported**: auto_detailing, salon, fitness, medical, consulting, trades, wellness (7 verticals)
-- **Voice Agent**: AI-powered voice booking assistant using OpenAI gpt-audio-mini model.
+- **Voice Agent**: AI-powered voice booking assistant using Split STT + LLM + TTS pipeline.
+  - **Architecture**: Reliable 3-stage pipeline (recommended for iOS Safari compatibility)
+    1. **STT**: `gpt-4o-mini-transcribe` for speech-to-text
+    2. **LLM**: `gpt-4o-mini` for reasoning and booking logic
+    3. **TTS**: `gpt-4o-mini-tts` for text-to-speech (MP3 output)
   - **Shareable Voice Page**: `/voice/{businessSlug}` - Customers can book via voice conversation
+  - **Push-to-Talk**: Hold button to record, release to send (prevents accidental triggers)
   - **Industry Personalities**: Uses same INDUSTRY_CONTEXT system for consistent brand voice
-  - **Voice Options**: nova (salon), alloy (trades), echo (consulting), onyx (fitness)
-  - **Real-time Streaming**: SSE-based audio response streaming for natural conversation flow
-  - **Format Handling**: WebM from browser → WAV conversion via ffmpeg → gpt-audio-mini → PCM16 output
+  - **Voice Options**: nova (salon/wellness), alloy (trades/auto), echo (medical/consulting), onyx (fitness)
+  - **Comprehensive Logging**: STT duration, reasoning duration, TTS duration, audio sizes tracked
+  - **Format Handling**: WebM from browser → STT transcription → LLM response → MP3 TTS output
   - **API Endpoints**:
     - `GET /voice/{slug}` - Serve voice booking page
     - `GET /api/voice/{slug}/config` - Get business config for voice agent
-    - `GET /api/voice/{slug}/welcome` - Get welcome audio message
-    - `POST /api/voice/${slug}/message` - Process voice message with streaming response
+    - `GET /api/voice/{slug}/welcome` - Get welcome audio message (MP3)
+    - `POST /api/voice/${slug}/message` - Process voice message with SSE streaming response
   - **Implementation Files**: `server/voiceAgent.ts`, `server/templates/voice-agent.html`
   - **Booking Page Integration**: "Try Voice Booking" link added to booking page header
   - **App Store Link**: https://apps.apple.com/app/bookflowx/id6756943439
