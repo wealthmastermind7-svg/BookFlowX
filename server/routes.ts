@@ -1721,15 +1721,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
+      const turbo = req.query.turbo === 'true';
       const html = voiceAgentHtmlContent
         .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
-        .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug);
+        .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
+        .replace(/\{\{INDUSTRY\}\}/g, config.industry || "consulting")
+        .replace(/\{\{IS_TURBO\}\}/g, turbo.toString())
+        .replace(/\{\{TURBO_TEXT\}\}/g, turbo ? "Switch to Standard" : "Switch to Turbo")
+        .replace(/\{\{NEXT_TURBO\}\}/g, (!turbo).toString());
 
       res.setHeader("Content-Type", "text/html");
       res.send(html);
     } catch (error) {
       console.error("[VoiceAgent] Error serving page:", error);
       res.status(500).json({ error: "Failed to load voice agent" });
+    }
+  });
+
+  app.get("/api/voice/:slug/token", async (req: Request, res: Response) => {
+    try {
+      // Create an ephemeral token for OpenAI Realtime API (WebRTC)
+      const response = await fetch("https://api.openai.com/v1/realtime/sessions", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${process.env.AI_INTEGRATIONS_OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "gpt-4o-realtime-preview-2024-12-17",
+          voice: "verse",
+          instructions: "You are a helpful booking assistant.",
+          input_audio_transcription: { model: "whisper-1" }
+        }),
+      });
+
+      const data = await response.json();
+      res.json(data);
+    } catch (error) {
+      console.error("Error creating session token:", error);
+      res.status(500).json({ error: "Failed to create session token" });
     }
   });
 

@@ -317,6 +317,7 @@
 
     <div class="footer-links">
       <a href="/book/{{BUSINESS_SLUG}}" class="footer-link">Text Booking</a>
+      <a href="/voice/{{BUSINESS_SLUG}}?turbo={{NEXT_TURBO}}" class="footer-link">{{TURBO_TEXT}}</a>
       <a href="https://apps.apple.com/app/bookflowx/id6756943439" class="footer-link">Get the App</a>
     </div>
 
@@ -327,6 +328,7 @@
 
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
+    const isTurbo = '{{IS_TURBO}}' === 'true';
     const voiceButton = document.getElementById('voiceButton');
     const statusText = document.getElementById('statusText');
     const transcriptArea = document.getElementById('transcriptArea');
@@ -359,6 +361,11 @@
     async function startRecording() {
       if (isProcessing) return;
       
+      if (isTurbo) {
+        startTurboMode();
+        return;
+      }
+
       // Stop any playing audio
       if (currentAudio) {
         currentAudio.pause();
@@ -433,114 +440,97 @@
       }
     }
 
-    async function sendAudio(audioBlob) {
-      isProcessing = true;
+    // Turbo Mode (Realtime WebRTC) Implementation
+    let pc = null;
+    let dataChannel = null;
+
+    async function startTurboMode() {
+      if (pc) return;
       
+      statusText.textContent = 'CONNECTING TURBO...';
+      voiceButton.classList.add('processing');
+
       try {
-        const reader = new FileReader();
+        const tokenRes = await fetch(`/api/voice/${businessSlug}/token`);
+        const { client_secret } = await tokenRes.json();
+
+        pc = new RTCPeerConnection();
         
-        const base64Audio = await new Promise((resolve, reject) => {
-          reader.onloadend = () => resolve(reader.result.split(',')[1]);
-          reader.onerror = reject;
-          reader.readAsDataURL(audioBlob);
-        });
+        const audioEl = document.createElement("audio");
+        audioEl.autoplay = true;
+        pc.ontrack = e => audioEl.srcObject = e.streams[0];
 
-        const response = await fetch(`/api/voice/${businessSlug}/message`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            audio: base64Audio,
-            inputFormat: 'webm',
-            conversationHistory
-          })
-        });
+        const ms = await navigator.mediaDevices.getUserMedia({ audio: true });
+        pc.addTrack(ms.getTracks()[0]);
 
-        if (!response.ok) {
-          throw new Error(`Server error: ${response.status}`);
-        }
-
-        const eventReader = response.body.getReader();
-        const decoder = new TextDecoder();
-        let buffer = '';
-
-        statusText.textContent = 'RESPONDING...';
-
-        while (true) {
-          const { done, value } = await eventReader.read();
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n\n');
-          buffer = lines.pop() || '';
-
-          for (const line of lines) {
-            if (!line.startsWith('data: ')) continue;
-            
-            try {
-              const event = JSON.parse(line.slice(6));
-              
-              if (event.type === 'user_transcript' && event.data) {
-                addTranscript('user', event.data);
-                conversationHistory.push({ role: 'user', content: event.data });
-              }
-              
-              if (event.type === 'audio' && event.data) {
-                // Play MP3 audio directly
-                await playAudioMP3(event.data);
-              }
-              
-              if (event.type === 'done' && event.data) {
-                addTranscript('assistant', event.data);
-                conversationHistory.push({ role: 'assistant', content: event.data });
-              }
-              
-              if (event.type === 'error' && event.data) {
-                showError(event.data);
-              }
-            } catch (e) {
-              console.warn('Parse error:', e);
+        dataChannel = pc.createDataChannel("oai-events");
+        dataChannel.addEventListener("open", () => {
+          statusText.textContent = 'TURBO ACTIVE';
+          voiceButton.classList.remove('processing');
+          voiceButton.classList.add('recording');
+          
+          // Configure the session
+          dataChannel.send(JSON.stringify({
+            type: "session.update",
+            session: {
+              instructions: `You are a booking assistant for ${document.querySelector('.business-name').textContent}. Be concise and helpful.`,
+              voice: "verse",
+              input_audio_format: "pcm16",
+              output_audio_format: "pcm16",
+              turn_detection: { type: "server_vad" }
             }
+          }));
+        });
+
+        dataChannel.addEventListener("message", (e) => {
+          const serverEvent = JSON.parse(e.data);
+          if (serverEvent.type === "response.audio_transcript.done") {
+            addTranscript('assistant', serverEvent.transcript);
           }
-        }
-      } catch (error) {
-        console.error('Send error:', error);
-        showError('Failed to process your message. Please try again.');
-      } finally {
-        isProcessing = false;
-        voiceButton.classList.remove('processing');
+          if (serverEvent.type === "conversation.item.input_audio_transcription.completed") {
+            addTranscript('user', serverEvent.transcript);
+          }
+        });
+
+        const offer = await pc.createOffer();
+        await pc.setLocalDescription(offer);
+
+        const baseUrl = "https://api.openai.com/v1/realtime";
+        const model = "gpt-4o-realtime-preview-2024-12-17";
+        const sdpRes = await fetch(`${baseUrl}?model=${model}`, {
+          method: "POST",
+          body: offer.sdp,
+          headers: {
+            Authorization: `Bearer ${client_secret.value}`,
+            "Content-Type": "application/sdp"
+          }
+        });
+
+        const answer = { type: "answer", sdp: await sdpRes.text() };
+        await pc.setRemoteDescription(answer);
+
+      } catch (err) {
+        console.error("Turbo Mode Error:", err);
+        showError("Turbo Mode failed to start.");
         statusText.textContent = 'HOLD TO SPEAK';
+        voiceButton.classList.remove('processing');
       }
     }
 
-    async function playAudioMP3(base64Data) {
-      return new Promise((resolve, reject) => {
-        try {
-          const audioSrc = `data:audio/mp3;base64,${base64Data}`;
-          currentAudio = new Audio(audioSrc);
-          
-          currentAudio.onended = () => {
-            currentAudio = null;
-            resolve();
-          };
-          
-          currentAudio.onerror = (e) => {
-            console.error('Audio playback error:', e);
-            currentAudio = null;
-            reject(e);
-          };
-          
-          currentAudio.play().catch(err => {
-            console.error('Audio play failed:', err);
-            reject(err);
-          });
-        } catch (e) {
-          reject(e);
-        }
-      });
+    function stopTurboMode() {
+      if (pc) {
+        pc.close();
+        pc = null;
+        dataChannel = null;
+        voiceButton.classList.remove('recording');
+        voiceButton.classList.add('processing');
+        statusText.textContent = 'DISCONNECTING...';
+        setTimeout(() => {
+          voiceButton.classList.remove('processing');
+          statusText.textContent = 'HOLD TO SPEAK';
+        }, 500);
+      }
     }
-
-    // Push-to-talk: Hold to record, release to send
-    let isHolding = false;
 
     voiceButton.addEventListener('mousedown', (e) => {
       e.preventDefault();
@@ -554,7 +544,11 @@
       e.preventDefault();
       if (isHolding) {
         isHolding = false;
-        stopRecording();
+        if (isTurbo) {
+           stopTurboMode();
+        } else {
+           stopRecording();
+        }
       }
     });
 
@@ -578,7 +572,11 @@
       e.preventDefault();
       if (isHolding) {
         isHolding = false;
-        stopRecording();
+        if (isTurbo) {
+          // No action needed for VAD
+        } else {
+          stopRecording();
+        }
       }
     }, { passive: false });
 
