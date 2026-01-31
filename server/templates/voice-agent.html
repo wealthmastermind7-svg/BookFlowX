@@ -339,6 +339,7 @@
     let conversationHistory = [];
     let isProcessing = false;
     let currentAudio = null;
+    let recordingStartTime = 0;
 
     function showError(message) {
       errorMessage.textContent = message;
@@ -416,6 +417,14 @@
         mediaRecorder.onstop = async () => {
           stream.getTracks().forEach(track => track.stop());
           
+          const recordedDuration = Date.now() - recordingStartTime;
+          if (recordedDuration < 800) {
+            showError('Please hold the button slightly longer to record.');
+            statusText.textContent = 'HOLD TO SPEAK';
+            voiceButton.classList.remove('processing');
+            return;
+          }
+
           if (audioChunks.length === 0) {
             showError('No audio recorded. Please try again.');
             statusText.textContent = 'HOLD TO SPEAK';
@@ -423,11 +432,12 @@
           }
           
           const audioBlob = new Blob(audioChunks, { type: mimeType || 'audio/webm' });
-          console.log(`[VoiceAgent] Recorded ${audioBlob.size} bytes of audio`);
+          console.log(`[VoiceAgent] Recorded ${audioBlob.size} bytes of audio, duration: ${recordedDuration}ms`);
           
-          if (audioBlob.size < 1000) {
-            showError('Recording too short. Please hold longer and speak clearly.');
+          if (audioBlob.size < 3000) {
+            showError('Recording too short or silent. Please speak clearly.');
             statusText.textContent = 'HOLD TO SPEAK';
+            voiceButton.classList.remove('processing');
             return;
           }
           
@@ -435,6 +445,7 @@
         };
 
         mediaRecorder.start(100); // Collect data every 100ms
+        recordingStartTime = Date.now();
         voiceButton.classList.add('recording');
         statusText.textContent = 'LISTENING...';
       } catch (error) {
