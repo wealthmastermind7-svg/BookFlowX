@@ -518,8 +518,9 @@
       source.start();
     }
 
-    voiceButton.addEventListener('click', () => {
+    voiceButton.addEventListener('click', async () => {
       if (isProcessing) return;
+      await initAudio();
 
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         stopRecording();
@@ -528,16 +529,26 @@
       }
     });
 
-    voiceButton.addEventListener('touchstart', (e) => {
+    // Handle touch separately but with same logic for better mobile responsiveness
+    let touchStartTime = 0;
+    voiceButton.addEventListener('touchstart', async (e) => {
       e.preventDefault();
       if (isProcessing) return;
+      touchStartTime = Date.now();
+      await initAudio();
       startRecording();
-    });
+    }, { passive: false });
 
     voiceButton.addEventListener('touchend', (e) => {
       e.preventDefault();
-      stopRecording();
-    });
+      const duration = Date.now() - touchStartTime;
+      // If it was a very short tap, we handle it via click or just keep recording
+      // For now, we follow "Tap to start, Tap to stop" or "Hold to speak"
+      // Let's implement robust "Hold to speak" but allow "Tap" toggle too
+      if (duration > 300) {
+        stopRecording();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
