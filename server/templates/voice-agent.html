@@ -329,6 +329,7 @@
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
     const isTurbo = '{{IS_TURBO}}' === 'true';
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
     const voiceButton = document.getElementById('voiceButton');
     const statusText = document.getElementById('statusText');
     const transcriptArea = document.getElementById('transcriptArea');
@@ -361,8 +362,6 @@
     async function startRecording() {
       if (isProcessing) return;
       
-      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-
       if (isTurbo) {
         if (isIOS) {
           showError("Turbo Mode is currently unavailable on iOS TestFlight. Switching to Standard.");
@@ -392,7 +391,6 @@
         });
         
         // Choose best available format
-        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
         const mimeType = isIOS 
           ? 'audio/wav' 
           : MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
