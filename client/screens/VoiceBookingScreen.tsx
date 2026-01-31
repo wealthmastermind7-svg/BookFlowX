@@ -49,31 +49,57 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
     setError(null);
 
     try {
-      const formData = new FormData();
-      
-      if (Platform.OS === "web") {
-        const response = await fetch(uri);
-        const blob = await response.blob();
-        formData.append("audio", blob, "voice.wav");
-      } else {
-        const file = new File(uri);
-        formData.append("audio", file as any);
-      }
-
-      formData.append("history", JSON.stringify(conversationHistory));
-
       const apiUrl = getApiUrl();
-      const response = await fetch(
-        `${apiUrl}/api/voice/${businessSlug}/message`,
-        {
+      let response;
+
+      if (Platform.OS === "web") {
+        const formData = new FormData();
+        const audioResponse = await fetch(uri);
+        const blob = await audioResponse.blob();
+        
+        // Web uses Base64 for simplicity in this specific endpoint
+        const reader = new FileReader();
+        const base64Promise = new Promise((resolve) => {
+          reader.onloadend = () => {
+            const base64data = reader.result?.toString().split(",")[1];
+            resolve(base64data);
+          };
+        });
+        reader.readAsDataURL(blob);
+        const audioBase64 = await base64Promise;
+
+        response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
           method: "POST",
-          body: formData,
-        }
-      );
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audio: audioBase64,
+            inputFormat: "webm",
+            conversationHistory
+          }),
+        });
+      } else {
+        // Native Expo sends WAV directly as Base64 to avoid Multipart boundary issues
+        const { readAsStringAsync, EncodingType } = await import("expo-file-system");
+        const audioBase64 = await readAsStringAsync(uri, { encoding: EncodingType.Base64 });
+
+        response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            audio: audioBase64,
+            inputFormat: "wav",
+            conversationHistory
+          }),
+        });
+      }
 
       if (!response.ok) {
-        throw new Error("Failed to process voice message");
+        throw new Error(`Server error: ${response.status}`);
       }
+
+      // The backend uses SSE for streaming, but we can also handle it as a single chunk if needed
+      // However, the current backend implementation uses for await (const event of voiceAgentRespond)
+      // which is perfect for streaming.
 
       let userText = "";
       let assistantText = "";

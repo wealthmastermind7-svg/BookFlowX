@@ -1809,16 +1809,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
-      const { audio, inputFormat = "webm", conversationHistory = [] } = req.body;
+      const { audio, inputFormat = "wav", conversationHistory = [] } = req.body;
 
       if (!audio) {
+        console.error("[VoiceAgent] Missing audio in request body");
         return res.status(400).json({ error: "Audio data is required" });
       }
 
-      // Convert base64 to buffer and handle webm format
+      // Convert base64 to buffer
       let audioBuffer = Buffer.from(audio, "base64");
+      console.log(`[VoiceAgent] Received ${audioBuffer.length} bytes, format: ${inputFormat}`);
       
-      // Convert WebM to WAV if needed
+      // Convert WebM to WAV if needed (from web client)
       if (inputFormat === "webm") {
         try {
           const converted = await convertWebmToWav(audioBuffer);
