@@ -327,6 +327,10 @@
     const transcriptArea = document.getElementById('transcriptArea');
     const errorMessage = document.getElementById('errorMessage');
 
+    // Make "TAP TO START" text clickable too
+    statusText.style.cursor = 'pointer';
+    statusText.addEventListener('click', () => voiceButton.click());
+
     let mediaRecorder = null;
     let audioChunks = [];
     let conversationHistory = [];
@@ -368,7 +372,15 @@
         await initAudio();
         
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-        mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' });
+        
+        // Supported types check
+        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+          ? 'audio/webm;codecs=opus' 
+          : MediaRecorder.isTypeSupported('audio/webm') 
+            ? 'audio/webm' 
+            : 'audio/mp4';
+
+        mediaRecorder = new MediaRecorder(stream, { mimeType });
         audioChunks = [];
 
         mediaRecorder.ondataavailable = (event) => {
@@ -518,36 +530,40 @@
       source.start();
     }
 
-    voiceButton.addEventListener('click', async () => {
+    voiceButton.addEventListener('click', async (e) => {
+      e.preventDefault();
       if (isProcessing) return;
       await initAudio();
 
       if (mediaRecorder && mediaRecorder.state === 'recording') {
         stopRecording();
       } else {
-        startRecording();
+        await startRecording();
       }
     });
 
     // Handle touch separately but with same logic for better mobile responsiveness
     let touchStartTime = 0;
+    let isTouching = false;
+
     voiceButton.addEventListener('touchstart', async (e) => {
       e.preventDefault();
-      if (isProcessing) return;
+      if (isProcessing || isTouching) return;
+      isTouching = true;
       touchStartTime = Date.now();
       await initAudio();
-      startRecording();
+      await startRecording();
     }, { passive: false });
 
     voiceButton.addEventListener('touchend', (e) => {
       e.preventDefault();
+      isTouching = false;
       const duration = Date.now() - touchStartTime;
-      // If it was a very short tap, we handle it via click or just keep recording
-      // For now, we follow "Tap to start, Tap to stop" or "Hold to speak"
-      // Let's implement robust "Hold to speak" but allow "Tap" toggle too
-      if (duration > 300) {
+      // For "Hold to Speak" behavior
+      if (duration > 500) {
         stopRecording();
       }
+      // If it's a short tap, the click event will handle the toggle
     }, { passive: false });
   </script>
 </body>
