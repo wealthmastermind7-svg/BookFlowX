@@ -60,7 +60,7 @@ export function VoiceRecorder({
       }).start();
     } else {
       pulseAnim.stopAnimation();
-      // Only set value if not using native driver or if animation stopped
+      // Animation stopped, safe to reset to 1
       pulseAnim.setValue(1);
       Animated.timing(glowAnim, {
         toValue: 0,

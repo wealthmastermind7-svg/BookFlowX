@@ -9,6 +9,7 @@ import OnboardingScreen, { checkOnboardingComplete } from "@/screens/OnboardingS
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { HeaderButton } from "@react-navigation/elements";
 import { useTheme } from "@/hooks/useTheme";
+import { ThemedText } from "@/components/ThemedText";
 import { View, ActivityIndicator, StyleSheet } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { PaywallModal } from "@/components/PaywallModal";
