@@ -334,6 +334,28 @@
     const transcriptArea = document.getElementById('transcriptArea');
     const errorMessage = document.getElementById('errorMessage');
 
+    // iOS WebView Detection
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+    const isWebView = isIOS && (window.webkit && window.webkit.messageHandlers);
+    const isSafari = isIOS && !isWebView && !navigator.userAgent.match(/CriOS/i) && !navigator.userAgent.match(/FxiOS/i);
+
+    if (isIOS && !isSafari) {
+      // Show handoff UI
+      document.querySelector('.subtitle').innerHTML = `
+        <div style="background: rgba(255,255,255,0.05); padding: 20px; border-radius: 12px; margin-bottom: 20px;">
+          <p style="color: var(--pearl); margin-bottom: 12px; font-weight: 500;">Safari is required for voice booking on iOS.</p>
+          <a href="https://confirmbooking.online/voice/${businessSlug}" target="_blank" 
+             style="display: inline-block; background: var(--pearl); color: var(--pure-black); padding: 12px 24px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 14px;">
+            Open in Safari
+          </a>
+        </div>
+        Alternatively, use text booking below.
+      `;
+      document.getElementById('voiceButton').style.opacity = '0.3';
+      document.getElementById('voiceButton').style.pointerEvents = 'none';
+      document.getElementById('statusText').textContent = 'SAFARI REQUIRED';
+    }
+
     let mediaRecorder = null;
     let audioChunks = [];
     let conversationHistory = [];
