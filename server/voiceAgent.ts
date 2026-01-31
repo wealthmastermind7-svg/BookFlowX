@@ -89,8 +89,15 @@ export async function* voiceAgentRespond(
   const startTime = Date.now();
   
   try {
+    // Step 0: Validation
+    if (audioBuffer.length < 3200) {
+      console.warn(`[VoiceAgent] Audio too short: ${audioBuffer.length} bytes`);
+      yield { type: "error", data: "I didn't catch that. Please hold the button longer and speak clearly." };
+      return;
+    }
+
     // Step 1: Speech-to-Text with gpt-4o-mini-transcribe
-    console.log(`[VoiceAgent] STT starting, audio size: ${audioBuffer.length} bytes`);
+    console.log(`[VoiceAgent] STT starting, audio size: ${audioBuffer.length} bytes, format: ${inputFormat}`);
     
     const file = await toFile(audioBuffer, `audio.${inputFormat}`);
     const transcription = await openai.audio.transcriptions.create({

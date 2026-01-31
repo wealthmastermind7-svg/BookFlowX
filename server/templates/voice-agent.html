@@ -361,7 +361,16 @@
     async function startRecording() {
       if (isProcessing) return;
       
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
       if (isTurbo) {
+        if (isIOS) {
+          showError("Turbo Mode is currently unavailable on iOS TestFlight. Switching to Standard.");
+          setTimeout(() => {
+            window.location.href = `/voice/${businessSlug}?turbo=false`;
+          }, 2000);
+          return;
+        }
         startTurboMode();
         return;
       }
@@ -383,13 +392,16 @@
         });
         
         // Choose best available format
-        const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
-          ? 'audio/webm;codecs=opus' 
-          : MediaRecorder.isTypeSupported('audio/webm') 
-            ? 'audio/webm' 
-            : MediaRecorder.isTypeSupported('audio/mp4')
-              ? 'audio/mp4'
-              : '';
+        const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+        const mimeType = isIOS 
+          ? 'audio/wav' 
+          : MediaRecorder.isTypeSupported('audio/webm;codecs=opus') 
+            ? 'audio/webm;codecs=opus' 
+            : MediaRecorder.isTypeSupported('audio/webm') 
+              ? 'audio/webm' 
+              : MediaRecorder.isTypeSupported('audio/mp4')
+                ? 'audio/mp4'
+                : '';
 
         const options = mimeType ? { mimeType } : {};
         mediaRecorder = new MediaRecorder(stream, options);
@@ -583,7 +595,11 @@
     voiceButton.addEventListener('touchcancel', (e) => {
       if (isHolding) {
         isHolding = false;
-        stopRecording();
+        if (isTurbo) {
+          stopTurboMode();
+        } else {
+          stopRecording();
+        }
       }
     }, { passive: false });
 
