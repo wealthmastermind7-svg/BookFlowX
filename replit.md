@@ -87,6 +87,19 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - `POST /api/smart-suggestions/revenue-insight` - Get revenue insight explanations
   - **Client Hook**: `useSmartSuggestions` hook in `client/hooks/useSmartSuggestions.ts`
   - **Industries Supported**: auto_detailing, salon, fitness, medical, consulting, trades, wellness (7 verticals)
+- **Voice Agent**: AI-powered voice booking assistant using OpenAI gpt-audio-mini model.
+  - **Shareable Voice Page**: `/voice/{businessSlug}` - Customers can book via voice conversation
+  - **Industry Personalities**: Uses same INDUSTRY_CONTEXT system for consistent brand voice
+  - **Voice Options**: nova (salon), alloy (trades), echo (consulting), onyx (fitness)
+  - **Real-time Streaming**: SSE-based audio response streaming for natural conversation flow
+  - **Format Handling**: WebM from browser → WAV conversion via ffmpeg → gpt-audio-mini → PCM16 output
+  - **API Endpoints**:
+    - `GET /voice/{slug}` - Serve voice booking page
+    - `GET /api/voice/{slug}/config` - Get business config for voice agent
+    - `GET /api/voice/{slug}/welcome` - Get welcome audio message
+    - `POST /api/voice/{slug}/message` - Process voice message with streaming response
+  - **Implementation Files**: `server/voiceAgent.ts`, `server/templates/voice-agent.html`
+  - **Booking Page Integration**: "Try Voice Booking" link added to booking page header
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
