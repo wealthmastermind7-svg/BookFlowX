@@ -50,52 +50,32 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
 
     try {
       const apiUrl = getApiUrl();
-      let response;
-
+      const formData = new FormData();
+      
       if (Platform.OS === "web") {
         const audioResponse = await fetch(uri);
         const blob = await audioResponse.blob();
-        
-        // Web uses Base64 for simplicity in this specific endpoint
-        const reader = new FileReader();
-        const base64Promise = new Promise<string>((resolve) => {
-          reader.onloadend = () => {
-            const base64data = reader.result?.toString().split(",")[1] || "";
-            resolve(base64data);
-          };
-        });
-        reader.readAsDataURL(blob);
-        const audioBase64 = await base64Promise;
-
-        response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audio: audioBase64,
-            inputFormat: "webm",
-            conversationHistory
-          }),
-        });
+        formData.append("audio", blob, "voice.wav");
       } else {
-        // Native Expo sends WAV directly as Base64 to avoid Multipart boundary issues
-        const FileSystem = await import("expo-file-system");
-        const audioBase64 = await FileSystem.readAsStringAsync(uri, { 
-          encoding: "base64"
-        });
-
-        response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            audio: audioBase64,
-            inputFormat: "wav",
-            conversationHistory
-          }),
-        });
+        // Native Expo: Just append the uri object, fetch/FormData handles it
+        formData.append("audio", {
+          uri,
+          name: "voice.wav",
+          type: "audio/wav",
+        } as any);
       }
 
+      formData.append("conversationHistory", JSON.stringify(conversationHistory));
+
+      console.log("[VoiceBooking] Sending audio to backend...");
+      const response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
+        method: "POST",
+        body: formData,
+      });
+
       if (!response.ok) {
-        throw new Error(`Server error: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Server error (${response.status}): ${errorText}`);
       }
 
       // The backend uses SSE for streaming, but we can also handle it as a single chunk if needed

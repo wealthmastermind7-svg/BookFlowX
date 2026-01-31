@@ -39,7 +39,15 @@ import {
   voiceAgentRespond, 
   createVoiceAgentWelcome 
 } from "./voiceAgent";
+import multer from "multer";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 10 * 1024 * 1024, // 10MB limit
+  },
+});
 
 // ES module equivalent of __dirname
 const __filename = fileURLToPath(import.meta.url);
@@ -1802,30 +1810,39 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Process voice message with streaming response
-  app.post("/api/voice/:slug/message", async (req: Request, res: Response) => {
+  app.post("/api/voice/:slug/message", upload.single("audio"), async (req: Request, res: Response) => {
     try {
       const config = await getVoiceAgentConfig(req.params.slug);
       if (!config) {
         return res.status(404).json({ error: "Business not found" });
       }
 
-      const { audio, inputFormat = "wav", conversationHistory = [] } = req.body;
+      const { inputFormat = "wav", conversationHistory: conversationHistoryStr = "[]" } = req.body;
+      const conversationHistory = typeof conversationHistoryStr === 'string' 
+        ? JSON.parse(conversationHistoryStr) 
+        : conversationHistoryStr;
 
-      if (!audio) {
-        console.error("[VoiceAgent] Missing audio in request body");
+      let audioBuffer: Buffer;
+      
+      const multerRequest = req as any;
+      if (multerRequest.file) {
+        audioBuffer = multerRequest.file.buffer;
+        console.log(`[VoiceAgent] Received file ${multerRequest.file.originalname}, size: ${audioBuffer.length} bytes`);
+      } else if (req.body.audio) {
+        // Fallback for base64 if still sent
+        audioBuffer = Buffer.from(req.body.audio, "base64");
+        console.log(`[VoiceAgent] Received base64 audio, size: ${audioBuffer.length} bytes`);
+      } else {
+        console.error("[VoiceAgent] Missing audio in request");
         return res.status(400).json({ error: "Audio data is required" });
       }
 
-      // Convert base64 to buffer
-      let audioBuffer = Buffer.from(audio, "base64");
-      console.log(`[VoiceAgent] Received ${audioBuffer.length} bytes, format: ${inputFormat}`);
-
       if (audioBuffer.length < 100) {
-        console.error("[VoiceAgent] Audio buffer suspiciously small, might be malformed base64");
+        console.error("[VoiceAgent] Audio buffer suspiciously small");
       }
       
       // Convert WebM to WAV if needed (from web client)
-      if (inputFormat === "webm") {
+      if (inputFormat === "webm" || (multerRequest.file && multerRequest.file.mimetype === "audio/webm")) {
         try {
           const converted = await convertWebmToWav(audioBuffer);
           audioBuffer = Buffer.from(converted);
@@ -1840,7 +1857,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.setHeader("Connection", "keep-alive");
 
       // Stream the voice agent response
-      for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, inputFormat as any)) {
+      for await (const event of voiceAgentRespond(audioBuffer, config, conversationHistory, "wav")) {
         res.write(`data: ${JSON.stringify(event)}\n\n`);
         if ((res as any).flush) (res as any).flush();
       }
