@@ -115,7 +115,7 @@ export default function RootStackNavigator() {
           headerTitle: "Quick Sale",
           headerLeft: () => (
             <HeaderButton onPress={() => navigation.goBack()}>
-              Close
+              <ThemedText>Close</ThemedText>
             </HeaderButton>
           ),
         })}
@@ -129,7 +129,7 @@ export default function RootStackNavigator() {
           headerTitle: "Voice Booking",
           headerLeft: () => (
             <HeaderButton onPress={() => navigation.goBack()}>
-              Close
+              <ThemedText>Close</ThemedText>
             </HeaderButton>
           ),
         })}
