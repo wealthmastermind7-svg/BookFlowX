@@ -1315,6 +1315,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
+        console.error(`[Booking] Business not found for slug: ${req.params.slug}`);
         return res.status(404).json({ error: "Business not found" });
       }
 
@@ -1400,6 +1401,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
+        console.error(`[Booking] Business not found for slug: ${req.params.slug}`);
         return res.status(404).json({ error: "Business not found" });
       }
 
@@ -1482,6 +1484,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
+        console.error(`[Booking] Business not found for slug: ${req.params.slug}`);
         return res.status(404).json({ error: "Business not found" });
       }
       
