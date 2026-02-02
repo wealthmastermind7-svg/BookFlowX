@@ -2,6 +2,7 @@ import express from "express";
 import type { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { registerStripeRoutes } from "./stripeRoutes";
+import vapiRoutes from "./vapiRoutes";
 import { WebhookHandlers } from "./webhookHandlers";
 import { runMigrations } from "stripe-replit-sync";
 import { getStripeSync } from "./stripeClient";
@@ -761,6 +762,8 @@ import { processReminders } from "./workflowEngine";
   await initStripe();
 
   registerStripeRoutes(app);
+  
+  app.use(vapiRoutes);
 
   const server = await registerRoutes(app);
 

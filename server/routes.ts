@@ -58,6 +58,7 @@ let bookingHtmlContent: string = "";
 let embedHtmlContent: string = "";
 let embedJsContent: string = "";
 let voiceAgentHtmlContent: string = "";
+let voiceAgentVapiHtmlContent: string = "";
 
 async function loadBookingHtml() {
   const paths = [
@@ -124,11 +125,29 @@ async function loadVoiceAgentHtml() {
     try {
       voiceAgentHtmlContent = fs.readFileSync(p, "utf-8");
       console.log(`Loaded voice-agent.html from: ${p}`);
+      break;
+    } catch {}
+  }
+  
+  if (!voiceAgentHtmlContent) {
+    console.warn("Warning: Could not load voice-agent.html. Paths tried:", paths);
+  }
+
+  const vapiPaths = [
+    path.resolve(__dirname, "templates/voice-agent-vapi.html"),
+    path.resolve(process.cwd(), "server/templates/voice-agent-vapi.html"),
+    path.resolve(process.cwd(), "templates/voice-agent-vapi.html"),
+  ];
+  
+  for (const p of vapiPaths) {
+    try {
+      voiceAgentVapiHtmlContent = fs.readFileSync(p, "utf-8");
+      console.log(`Loaded voice-agent-vapi.html from: ${p}`);
       return;
     } catch {}
   }
   
-  console.warn("Warning: Could not load voice-agent.html. Paths tried:", paths);
+  console.warn("Warning: Could not load voice-agent-vapi.html. Paths tried:", vapiPaths);
 }
 
 function getEmbedOrigin(req: Request): string {
@@ -1720,16 +1739,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === VOICE AGENT API ===
 
-  // Serve voice booking page
+  // Serve voice booking page (Vapi-powered streaming voice)
   app.get("/voice/:slug", async (req: Request, res: Response) => {
     try {
-      if (!voiceAgentHtmlContent) {
-        return res.status(500).json({ error: "Voice agent page not available" });
-      }
-
       const config = await getVoiceAgentConfig(req.params.slug);
       if (!config) {
         return res.status(404).json({ error: "Business not found" });
+      }
+
+      const vapiPublicKey = process.env.VAPI_PUBLIC_KEY || "";
+      const vapiAssistantId = process.env.VAPI_ASSISTANT_ID || "fbc1fe60-e500-4e20-9537-0fb1ade6cd56";
+      const useLegacy = req.query.legacy === 'true';
+
+      if (vapiPublicKey && voiceAgentVapiHtmlContent && !useLegacy) {
+        const html = voiceAgentVapiHtmlContent
+          .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
+          .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
+          .replace(/\{\{VAPI_PUBLIC_KEY\}\}/g, vapiPublicKey)
+          .replace(/\{\{VAPI_ASSISTANT_ID\}\}/g, vapiAssistantId);
+
+        res.setHeader("Content-Type", "text/html");
+        return res.send(html);
+      }
+
+      if (!voiceAgentHtmlContent) {
+        return res.status(500).json({ error: "Voice agent page not available" });
       }
 
       const turbo = req.query.turbo === 'true';
