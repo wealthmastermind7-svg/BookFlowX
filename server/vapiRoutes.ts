@@ -35,28 +35,11 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       console.log(`[Vapi Webhook] Assistant request for slug: ${businessSlug}`);
       
       if (!businessSlug) {
-        return res.json({
-          assistant: {
-            model: {
-              provider: "openai",
-              model: "gpt-4o-mini",
-              messages: [
-                {
-                  role: "system",
-                  content: "You are a helpful booking assistant. Unfortunately, no business was specified for this call."
-                }
-              ]
-            },
-            voice: {
-              provider: "11labs",
-              voiceId: "pNInz6obpgDQGcFmaJgB"
-            },
-            firstMessage: "I'm sorry, but I couldn't identify which business you're trying to reach. Please try again from the booking page."
-          }
-        });
+        console.warn("[Vapi Webhook] No business slug found in request");
+        // Don't return early, try to handle it or provide a default
       }
 
-      const business = await storage.getBusinessBySlug(businessSlug);
+      const business = await storage.getBusinessBySlug(businessSlug || "black-edition-auto-detailing-zpjd");
       if (!business) {
         return res.json({
           assistant: {

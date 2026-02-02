@@ -316,12 +316,17 @@
         updateTranscript('Starting voice conversation...', true);
         
         // Pass serverUrl in assistantOverrides to ensure it connects to our dynamic assistant
+        console.log('[Vapi] Starting call with slug:', businessSlug);
+        
         vapiInstance.start(assistant, {
           assistantOverrides: {
             variableValues: {
               businessSlug: businessSlug
             },
             serverUrl: window.location.origin + '/api/vapi/server-url'
+          },
+          metadata: {
+            businessSlug: businessSlug
           }
         });
       }
