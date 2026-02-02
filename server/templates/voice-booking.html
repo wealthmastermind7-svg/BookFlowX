@@ -315,6 +315,7 @@
         updateStatus('connecting', 'Connecting...');
         updateTranscript('Starting voice conversation...', true);
         
+        // Pass serverUrl in assistantOverrides to ensure it connects to our dynamic assistant
         vapiInstance.start(assistant, {
           assistantOverrides: {
             variableValues: {

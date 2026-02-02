@@ -30,7 +30,9 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
     console.log(`[Vapi Webhook] Received: ${messageType}`);
 
     if (messageType === "assistant-request") {
-      const businessSlug = payload.message.call?.metadata?.businessSlug;
+      const businessSlug = payload.message.call?.metadata?.businessSlug || (payload.message as any).assistantOverrides?.variableValues?.businessSlug;
+      
+      console.log(`[Vapi Webhook] Assistant request for slug: ${businessSlug}`);
       
       if (!businessSlug) {
         return res.json({
