@@ -2285,13 +2285,27 @@ IMPORTANT:
       // - 21m00Tcm4TlvDq8ikWAM = Rachel (female, calm)
       // - ErXwobaYiN019PkySvjV = Antoni (male, friendly)
       const voiceMap: Record<string, string> = {
-        salon: "EXAVITQu4vr4xnSDxMaL",      // Sarah - warm female
-        wellness: "EXAVITQu4vr4xnSDxMaL",   // Sarah - warm female
-        medical: "pNInz6obpgDQGcFmaJgB",    // Adam - professional male
-        consulting: "pNInz6obpgDQGcFmaJgB", // Adam - professional male
-        fitness: "ErXwobaYiN019PkySvjV",    // Antoni - friendly male
-        trades: "pNInz6obpgDQGcFmaJgB",     // Adam - professional male
+        // Service industries - warm, welcoming
+        salon: "EXAVITQu4vr4xnSDxMaL",         // Sarah - warm female
+        wellness: "EXAVITQu4vr4xnSDxMaL",      // Sarah - warm female
+        pet_services: "EXAVITQu4vr4xnSDxMaL",  // Sarah - warm female
+        retail: "EXAVITQu4vr4xnSDxMaL",        // Sarah - warm female
+        
+        // Professional industries - authoritative, trustworthy
+        medical: "pNInz6obpgDQGcFmaJgB",       // Adam - professional male
+        consulting: "pNInz6obpgDQGcFmaJgB",    // Adam - professional male
+        legal: "pNInz6obpgDQGcFmaJgB",         // Adam - professional male
+        real_estate: "pNInz6obpgDQGcFmaJgB",   // Adam - professional male
+        trades: "pNInz6obpgDQGcFmaJgB",        // Adam - professional male
         auto_detailing: "pNInz6obpgDQGcFmaJgB", // Adam - professional male
+        
+        // Friendly/energetic industries
+        fitness: "ErXwobaYiN019PkySvjV",       // Antoni - friendly male
+        restaurant: "ErXwobaYiN019PkySvjV",    // Antoni - friendly, welcoming
+        
+        // Creative/calm industries
+        education: "21m00Tcm4TlvDq8ikWAM",     // Rachel - calm, patient
+        photography: "21m00Tcm4TlvDq8ikWAM",   // Rachel - calm, creative
       };
 
       const inlineAssistant = {
