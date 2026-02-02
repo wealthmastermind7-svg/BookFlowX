@@ -32,6 +32,7 @@ import {
   getSmartUpsellSuggestion, 
   getDynamicMessage,
   getRevenueInsightExplanation,
+  INDUSTRY_CONTEXT,
   type BookingContext 
 } from "./context4all";
 import { 
@@ -1770,18 +1771,79 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const vapiPublicKey = process.env.VAPI_PUBLIC_KEY || "";
-      const vapiAssistantId = process.env.VAPI_ASSISTANT_ID || "fbc1fe60-e500-4e20-9537-0fb1ade6cd56";
+
+      // Build inline assistant configuration for Vapi
+      const industryContext = INDUSTRY_CONTEXT[config.industry] || INDUSTRY_CONTEXT.consulting;
+      const servicesList = config.services
+        .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
+        .join("\n");
+
+      const systemPrompt = `You are a friendly, professional voice booking assistant for ${config.businessName}.
+
+PERSONALITY:
+- Tone: ${industryContext.tone}
+- Core values: ${industryContext.values.join(", ")}
+- Be warm, helpful, and efficient
+- Speak naturally like a real receptionist
+- Keep responses concise (2-3 sentences max)
+
+AVAILABLE SERVICES:
+${servicesList}
+
+YOUR GOALS:
+1. Greet callers warmly
+2. Help them understand available services
+3. Answer questions about pricing and duration
+4. Guide them to book an appointment
+5. Collect their name, email, and preferred time
+
+BOOKING PROCESS:
+When a customer wants to book:
+1. Ask which service they'd like
+2. Ask for their preferred date and time
+3. Ask for their name and email
+4. Confirm the booking details
+
+IMPORTANT:
+- This is a ${config.industry.replace('_', ' ')} business.
+- If you don't understand, ask them to repeat
+- Keep responses SHORT - this is a voice call
+- Be personable and use their name when provided`;
+
+      const voiceMap: Record<string, string> = {
+        salon: "EXAVITQu4vr4xnSDxMaL",
+        wellness: "EXAVITQu4vr4xnSDxMaL", 
+        medical: "pNInz6obpgDQGcFmaJgB",
+        consulting: "pNInz6obpgDQGcFmaJgB",
+        fitness: "VR6AewLTigWG4xSOukaG",
+        trades: "VR6AewLTigWG4xSOukaG",
+        auto_detailing: "VR6AewLTigWG4xSOukaG",
+      };
+
+      const inlineAssistant = {
+        name: `${config.businessName} Booking Assistant`,
+        model: {
+          provider: "openai",
+          model: "gpt-4o-mini",
+          messages: [{ role: "system", content: systemPrompt }]
+        },
+        voice: {
+          provider: "11labs",
+          voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
+        },
+        firstMessage: `Hi there! Thanks for calling ${config.businessName}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`
+      };
 
       // Use the new voice-booking.html template (Vapi official approach)
       if (vapiPublicKey && voiceBookingHtmlContent) {
         res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-    res.setHeader("Pragma", "no-cache");
-    res.setHeader("Expires", "0");
-    const html = voiceBookingHtmlContent
+        res.setHeader("Pragma", "no-cache");
+        res.setHeader("Expires", "0");
+        const html = voiceBookingHtmlContent
           .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
           .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
           .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
-          .replace(/\{\{ASSISTANT_ID\}\}/g, vapiAssistantId);
+          .replace(/\{\{INLINE_ASSISTANT\}\}/g, JSON.stringify(inlineAssistant));
 
         res.setHeader("Content-Type", "text/html");
         res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
@@ -1789,6 +1851,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       // Fallback to old Vapi template
+      const vapiAssistantId = process.env.VAPI_ASSISTANT_ID || "fbc1fe60-e500-4e20-9537-0fb1ade6cd56";
       if (vapiPublicKey && voiceAgentVapiHtmlContent) {
         const html = voiceAgentVapiHtmlContent
           .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)

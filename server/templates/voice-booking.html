@@ -228,7 +228,8 @@
     var vapiInstance = null;
     var isCallActive = false;
     
-    const assistant = "{{ASSISTANT_ID}}";
+    // Inline assistant configuration - no serverUrl needed
+    const inlineAssistant = {{INLINE_ASSISTANT}};
     const apiKey = "{{PUBLIC_KEY}}";
     const businessSlug = "{{BUSINESS_SLUG}}";
     
@@ -315,20 +316,10 @@
         updateStatus('connecting', 'Connecting...');
         updateTranscript('Starting voice conversation...', true);
         
-        // Pass serverUrl in assistantOverrides to ensure it connects to our dynamic assistant
-        console.log('[Vapi] Starting call with slug:', businessSlug);
+        // Use inline assistant config - no serverUrl needed
+        console.log('[Vapi] Starting call with inline assistant for:', businessSlug);
         
-        vapiInstance.start(assistant, {
-          assistantOverrides: {
-            variableValues: {
-              businessSlug: businessSlug
-            },
-            serverUrl: window.location.origin + '/api/vapi/server-url'
-          },
-          metadata: {
-            businessSlug: businessSlug
-          }
-        });
+        vapiInstance.start(inlineAssistant);
       }
     }
     
@@ -347,7 +338,7 @@
         
         vapiInstance = window.vapiSDK.run({
           apiKey: apiKey,
-          assistant: assistant,
+          assistant: inlineAssistant,
           config: { 
             hide: true,
             position: "bottom-right"
