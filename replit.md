@@ -113,6 +113,27 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - **Access**: Settings → Booking → Voice Booking card
   - **Navigation**: Modal screen via `RootStackNavigator`
   - **Benefits**: No WebView issues, reliable TestFlight/App Store compatibility, guaranteed microphone access
+- **Voice Agent Subscription System**: Monetization for voice booking with tiered usage-based pricing.
+  - **Subscription Tiers**:
+    - Free Trial: 5 minutes (for testing)
+    - Starter ($49/mo): 60 minutes
+    - Pro ($149/mo): 200 minutes (recommended)
+    - Business ($349/mo): 500 minutes
+  - **Profit Margins**: ~75-95% (cost ~$0.12-0.15/min, pricing $0.70-0.82/min)
+  - **Database Schema**: `voiceSubscriptions`, `voiceCallLogs` tables
+  - **Call Tracking**: Automatic logging of call duration, customer info, booking conversions
+  - **Usage Enforcement**: Blocks voice page when minutes exhausted, redirects to online booking
+  - **Billing Portal**: `/billing/{businessId}` web page for Stripe subscription management
+  - **API Endpoints**:
+    - `GET /api/businesses/:id/voice-subscription` - Get subscription status and usage
+    - `GET /api/businesses/:id/voice-calls` - Get call history
+    - `GET /api/voice-tiers` - Get available subscription tiers
+    - `POST /api/voice-checkout` - Create Stripe checkout session
+    - `POST /api/voice-billing-portal` - Open Stripe billing portal
+  - **Stripe Integration**: Checkout sessions, subscription webhooks, billing portal
+  - **Client Hook**: `useVoiceSubscription` in `client/hooks/useVoiceSubscription.ts`
+  - **Settings UI**: Voice Agent Plan card showing tier, usage meter, calls, bookings, conversion rate
+  - **App Store Strategy**: Web billing portal for business owners (avoids Apple's 30% cut)
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
