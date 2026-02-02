@@ -315,13 +315,11 @@
         updateTranscript('Starting voice conversation...', true);
         
         vapiInstance.start(assistant, {
-          metadata: {
-            businessSlug: businessSlug
-          },
           assistantOverrides: {
             variableValues: {
               businessSlug: businessSlug
-            }
+            },
+            serverUrl: window.location.origin + '/api/vapi/server-url'
           }
         });
       }
