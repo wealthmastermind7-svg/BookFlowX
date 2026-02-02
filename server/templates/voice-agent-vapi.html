@@ -362,7 +362,28 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/index.js"></script>
+  <script>
+    (function() {
+      var script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.0.0/dist/index.js';
+      script.async = true;
+      script.onload = function() {
+        console.log('[Vapi] SDK loaded from jsDelivr');
+        if (typeof initVapi === 'function') initVapi();
+      };
+      script.onerror = function() {
+        console.error('[Vapi] jsDelivr failed, trying unpkg');
+        var fallback = document.createElement('script');
+        fallback.src = 'https://unpkg.com/@vapi-ai/web@2.0.0/dist/index.js';
+        fallback.onload = function() {
+          console.log('[Vapi] SDK loaded from unpkg');
+          if (typeof initVapi === 'function') initVapi();
+        };
+        document.head.appendChild(fallback);
+      };
+      document.head.appendChild(script);
+    })();
+  </script>
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
     const vapiAssistantId = '{{VAPI_ASSISTANT_ID}}';
@@ -454,9 +475,12 @@
         }
 
         if (!VapiClass) {
-          throw new Error('Vapi SDK not found on window object.');
+          console.warn('[Vapi] SDK not ready yet, will be initialized by script onload');
+          return;
         }
         
+        if (vapi) return; // Already initialized
+
         vapi = new VapiClass(vapiPublicKey);
         console.log("[Vapi] SDK initialized successfully");
 
