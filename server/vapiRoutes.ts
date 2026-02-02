@@ -365,6 +365,43 @@ IMPORTANT:
 
     if (messageType === "end-of-call-report") {
       console.log("[Vapi] Call ended:", payload.message);
+      
+      // Track call duration and log the call
+      try {
+        const callData = payload.message as any; // Vapi end-of-call-report has different structure
+        const businessSlug = callData.call?.metadata?.businessSlug || callData.metadata?.businessSlug;
+        const durationSeconds = callData.durationSeconds || callData.call?.durationSeconds || 0;
+        const durationMinutes = Math.ceil(durationSeconds / 60); // Round up to nearest minute
+        
+        if (businessSlug && durationMinutes > 0) {
+          const business = await storage.getBusinessBySlug(businessSlug);
+          
+          if (business) {
+            // Log the call
+            await storage.createVoiceCallLog({
+              businessId: business.id,
+              callId: callData.call?.id || callData.callId,
+              durationSeconds,
+              durationMinutes,
+              customerPhone: callData.call?.customer?.number,
+              customerName: callData.call?.metadata?.customerName,
+              bookingCreated: callData.call?.metadata?.bookingCreated || false,
+              bookingId: callData.call?.metadata?.bookingId,
+              status: callData.endedReason === "customer-ended" || callData.endedReason === "assistant-ended" ? "completed" : "failed",
+              cost: Math.round(durationMinutes * 15), // ~$0.15/min in cents
+            });
+            
+            // Increment usage minutes
+            await storage.incrementVoiceMinutes(business.id, durationMinutes);
+            
+            console.log(`[Vapi] Logged call: ${durationMinutes} minutes for ${business.name}`);
+          }
+        }
+      } catch (trackingError) {
+        console.error("[Vapi] Error tracking call:", trackingError);
+        // Don't fail the webhook, just log the error
+      }
+      
       return res.json({ received: true });
     }
 

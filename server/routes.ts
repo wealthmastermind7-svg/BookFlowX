@@ -1760,6 +1760,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === VOICE SUBSCRIPTION API ===
+
+  // Get voice subscription and usage for a business
+  app.get("/api/businesses/:businessId/voice-subscription", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const subscription = await storage.getOrCreateVoiceSubscription(businessId);
+      const usage = await storage.checkVoiceMinutesAvailable(businessId);
+      const stats = await storage.getVoiceUsageStats(businessId);
+      
+      res.json({
+        subscription: {
+          tier: subscription.tier,
+          status: subscription.status,
+          minutesLimit: subscription.minutesLimit,
+          minutesUsed: subscription.minutesUsed,
+          periodStart: subscription.periodStart,
+          periodEnd: subscription.periodEnd,
+          stripeSubscriptionId: subscription.stripeSubscriptionId,
+        },
+        usage: {
+          available: usage.available,
+          remaining: usage.remaining,
+          percentUsed: Math.round((usage.used / usage.limit) * 100),
+        },
+        stats: {
+          totalCalls: stats.totalCalls,
+          bookingsCreated: stats.bookingsCreated,
+          conversionRate: stats.totalCalls > 0 
+            ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) 
+            : 0,
+        },
+      });
+    } catch (error) {
+      console.error("[Voice Subscription] Error fetching subscription:", error);
+      res.status(500).json({ error: "Failed to fetch voice subscription" });
+    }
+  });
+
+  // Get voice call logs for a business
+  app.get("/api/businesses/:businessId/voice-calls", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const limit = parseInt(req.query.limit as string) || 50;
+      const calls = await storage.getVoiceCallLogs(businessId, limit);
+      
+      res.json({ calls });
+    } catch (error) {
+      console.error("[Voice Subscription] Error fetching call logs:", error);
+      res.status(500).json({ error: "Failed to fetch voice call logs" });
+    }
+  });
+
+  // Get available subscription tiers (public)
+  app.get("/api/voice-tiers", async (req: Request, res: Response) => {
+    const tiers = [
+      {
+        id: "free",
+        name: "Free Trial",
+        price: 0,
+        minutes: 5,
+        features: ["5 minutes free", "Basic voice booking", "Email confirmations"],
+      },
+      {
+        id: "starter",
+        name: "Starter",
+        price: 4900, // cents
+        priceDisplay: "$49",
+        minutes: 60,
+        features: ["60 minutes/month", "Voice booking", "Email confirmations", "Basic analytics"],
+      },
+      {
+        id: "pro",
+        name: "Pro",
+        price: 14900,
+        priceDisplay: "$149",
+        minutes: 200,
+        features: ["200 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics", "Priority support"],
+        popular: true,
+      },
+      {
+        id: "business",
+        name: "Business",
+        price: 34900,
+        priceDisplay: "$349",
+        minutes: 500,
+        features: ["500 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics", "Priority support", "Custom voice", "API access"],
+      },
+    ];
+    
+    res.json({ tiers });
+  });
+
   // === VOICE AGENT API ===
 
   // Serve voice booking page (Vapi-powered streaming voice)
