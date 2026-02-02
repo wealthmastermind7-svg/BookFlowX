@@ -2279,14 +2279,19 @@ IMPORTANT:
 - Keep responses SHORT - this is a voice call
 - Be personable and use their name when provided`;
 
+      // Valid ElevenLabs voice IDs for Vapi:
+      // - pNInz6obpgDQGcFmaJgB = Adam (male, professional)
+      // - EXAVITQu4vr4xnSDxMaL = Sarah (female, warm)
+      // - 21m00Tcm4TlvDq8ikWAM = Rachel (female, calm)
+      // - ErXwobaYiN019PkySvjV = Antoni (male, friendly)
       const voiceMap: Record<string, string> = {
-        salon: "EXAVITQu4vr4xnSDxMaL",
-        wellness: "EXAVITQu4vr4xnSDxMaL", 
-        medical: "pNInz6obpgDQGcFmaJgB",
-        consulting: "pNInz6obpgDQGcFmaJgB",
-        fitness: "VR6AewLTigWG4xSOukaG",
-        trades: "VR6AewLTigWG4xSOukaG",
-        auto_detailing: "VR6AewLTigWG4xSOukaG",
+        salon: "EXAVITQu4vr4xnSDxMaL",      // Sarah - warm female
+        wellness: "EXAVITQu4vr4xnSDxMaL",   // Sarah - warm female
+        medical: "pNInz6obpgDQGcFmaJgB",    // Adam - professional male
+        consulting: "pNInz6obpgDQGcFmaJgB", // Adam - professional male
+        fitness: "ErXwobaYiN019PkySvjV",    // Antoni - friendly male
+        trades: "pNInz6obpgDQGcFmaJgB",     // Adam - professional male
+        auto_detailing: "pNInz6obpgDQGcFmaJgB", // Adam - professional male
       };
 
       const inlineAssistant = {
