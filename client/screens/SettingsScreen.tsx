@@ -36,6 +36,7 @@ import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import Svg, { Circle } from "react-native-svg";
+import { useVoiceSubscription, getTierColor, getTierName, formatMinutes } from "@/hooks/useVoiceSubscription";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
@@ -134,6 +135,12 @@ export default function SettingsScreen() {
   const [bookingsCount, setBookingsCount] = useState(0);
   const [servicesCount, setServicesCount] = useState(0);
   const [customersCount, setCustomersCount] = useState(0);
+  const [ownerToken, setOwnerToken] = useState<string | null>(null);
+
+  const { data: voiceSubscription } = useVoiceSubscription(
+    business?.id || "",
+    ownerToken || ""
+  );
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -167,6 +174,8 @@ export default function SettingsScreen() {
     try {
       const biz = await api.getOrCreateBusiness();
       setBusiness(biz);
+      const token = await api.getOwnerToken();
+      setOwnerToken(token);
     } catch (error) {
       console.error("Error initializing business:", error);
     }
@@ -561,6 +570,73 @@ export default function SettingsScreen() {
               </View>
             </GlassCard>
 
+            {voiceSubscription && (
+              <GlassCard style={[styles.automationCard, { marginTop: 12 }]}>
+                <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+                  <View style={{ flexDirection: "row", alignItems: "center" }}>
+                    <View style={[styles.tierBadge, { backgroundColor: getTierColor(voiceSubscription.subscription.tier) }]}>
+                      <ThemedText style={styles.tierText}>{getTierName(voiceSubscription.subscription.tier).toUpperCase()}</ThemedText>
+                    </View>
+                    <ThemedText style={styles.automationTitle}>Voice Agent Plan</ThemedText>
+                  </View>
+                  {voiceSubscription.subscription.tier !== "free" && (
+                    <Pressable 
+                      onPress={() => Linking.openURL(`https://confirmbooking.online/billing/${business?.id}?token=${ownerToken}`)}
+                      hitSlop={8}
+                    >
+                      <ThemedText style={{ color: "rgba(255,255,255,0.5)", fontSize: 12 }}>Manage</ThemedText>
+                    </Pressable>
+                  )}
+                </View>
+                
+                <View style={styles.usageMeterContainer}>
+                  <View style={styles.usageMeterTrack}>
+                    <View 
+                      style={[
+                        styles.usageMeterFill, 
+                        { 
+                          width: `${voiceSubscription.usage.percentUsed}%`,
+                          backgroundColor: voiceSubscription.usage.percentUsed > 80 ? "#EF4444" : "#fff"
+                        }
+                      ]} 
+                    />
+                  </View>
+                  <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 6 }}>
+                    <ThemedText style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>
+                      {formatMinutes(voiceSubscription.subscription.minutesUsed)} used
+                    </ThemedText>
+                    <ThemedText style={{ color: "rgba(255,255,255,0.5)", fontSize: 11 }}>
+                      {formatMinutes(voiceSubscription.usage.remaining)} remaining
+                    </ThemedText>
+                  </View>
+                </View>
+
+                <View style={{ flexDirection: "row", justifyContent: "space-between", marginTop: 12 }}>
+                  <View style={{ alignItems: "center", flex: 1 }}>
+                    <ThemedText style={{ color: "#fff", fontSize: 20, fontWeight: "700" }}>{voiceSubscription.stats.totalCalls}</ThemedText>
+                    <ThemedText style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, letterSpacing: 1 }}>CALLS</ThemedText>
+                  </View>
+                  <View style={{ alignItems: "center", flex: 1 }}>
+                    <ThemedText style={{ color: "#fff", fontSize: 20, fontWeight: "700" }}>{voiceSubscription.stats.bookingsCreated}</ThemedText>
+                    <ThemedText style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, letterSpacing: 1 }}>BOOKED</ThemedText>
+                  </View>
+                  <View style={{ alignItems: "center", flex: 1 }}>
+                    <ThemedText style={{ color: "#fff", fontSize: 20, fontWeight: "700" }}>{voiceSubscription.stats.conversionRate}%</ThemedText>
+                    <ThemedText style={{ color: "rgba(255,255,255,0.4)", fontSize: 10, letterSpacing: 1 }}>CONVERT</ThemedText>
+                  </View>
+                </View>
+
+                {voiceSubscription.subscription.tier === "free" && (
+                  <Pressable 
+                    style={styles.upgradeButton}
+                    onPress={() => Linking.openURL(`https://confirmbooking.online/pricing?business=${business?.id}`)}
+                  >
+                    <ThemedText style={styles.upgradeButtonText}>Upgrade Plan</ThemedText>
+                  </Pressable>
+                )}
+              </GlassCard>
+            )}
+
             <View style={{ height: 32 }} />
 
             <SectionTitle>Data</SectionTitle>
@@ -753,4 +829,11 @@ const styles = StyleSheet.create({
   demoTypeLabel: { fontSize: 16, fontWeight: "700", color: "#fff" },
   currencyRow: { padding: 16, borderRadius: 16 },
   currencyLabel: { fontSize: 16, color: "#fff" },
+  tierBadge: { paddingHorizontal: 8, paddingVertical: 4, borderRadius: 6, marginRight: 12 },
+  tierText: { fontSize: 9, fontWeight: "800", letterSpacing: 1, color: "#fff" },
+  usageMeterContainer: { marginBottom: 8 },
+  usageMeterTrack: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" as const },
+  usageMeterFill: { height: "100%" as const, borderRadius: 3 },
+  upgradeButton: { marginTop: 16, height: 48, backgroundColor: "#fff", borderRadius: 12, alignItems: "center" as const, justifyContent: "center" as const },
+  upgradeButtonText: { fontSize: 14, fontWeight: "700", color: "#000" },
 });
