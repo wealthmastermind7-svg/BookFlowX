@@ -2196,6 +2196,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
+      // Check voice subscription usage limits
+      const usage = await storage.checkVoiceMinutesAvailable(config.businessId);
+      
+      if (!usage.available) {
+        // Return a user-friendly page when voice minutes are exhausted
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Booking Unavailable - ${config.businessName}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(180deg, #000 0%, #111 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+    .container { text-align: center; max-width: 400px; }
+    .icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
+    h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
+    p { color: rgba(255,255,255,0.6); font-size: 16px; line-height: 1.6; margin-bottom: 24px; }
+    .btn { display: inline-block; padding: 16px 32px; background: #fff; color: #000; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="icon">🔇</div>
+    <h1>Voice Booking Unavailable</h1>
+    <p>${config.businessName}'s voice booking is temporarily unavailable. Please try again later or use the regular booking page.</p>
+    <a href="/book/${req.params.slug}" class="btn">Book Online Instead</a>
+  </div>
+</body>
+</html>`;
+        return res.send(html);
+      }
+
       const vapiPublicKey = process.env.VAPI_PUBLIC_KEY || "";
 
       // Build inline assistant configuration for Vapi
