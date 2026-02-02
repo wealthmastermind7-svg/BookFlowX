@@ -247,6 +247,47 @@ export const pushTokens = pgTable("push_tokens", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Voice agent subscriptions table
+export const voiceSubscriptions = pgTable("voice_subscriptions", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .unique()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  tier: text("tier").notNull().default("free"), // 'free' | 'starter' | 'pro' | 'business'
+  minutesLimit: integer("minutes_limit").notNull().default(5), // Monthly limit
+  minutesUsed: integer("minutes_used").notNull().default(0), // Current month usage
+  periodStart: timestamp("period_start").defaultNow(), // Billing period start
+  periodEnd: timestamp("period_end"), // Billing period end
+  stripeSubscriptionId: text("stripe_subscription_id"), // Stripe subscription ID
+  stripeCustomerId: text("stripe_customer_id"), // Stripe customer ID
+  status: text("status").notNull().default("active"), // 'active' | 'canceled' | 'past_due'
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+// Voice call logs table (for tracking usage)
+export const voiceCallLogs = pgTable("voice_call_logs", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  callId: text("call_id"), // Vapi call ID
+  durationSeconds: integer("duration_seconds").notNull().default(0),
+  durationMinutes: integer("duration_minutes").notNull().default(0), // Rounded up
+  customerPhone: text("customer_phone"),
+  customerName: text("customer_name"),
+  bookingCreated: boolean("booking_created").default(false),
+  bookingId: varchar("booking_id"),
+  status: text("status").notNull().default("completed"), // 'in_progress' | 'completed' | 'failed'
+  cost: integer("cost").default(0), // Cost in cents
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 // Relations
 export const businessesRelations = relations(businesses, ({ many, one }) => ({
   users: many(users),
@@ -260,6 +301,22 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   workflows: many(workflows),
   theme: one(businessThemes),
   apiKeys: many(apiKeys),
+  voiceSubscription: one(voiceSubscriptions),
+  voiceCallLogs: many(voiceCallLogs),
+}));
+
+export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
+  business: one(businesses, {
+    fields: [voiceSubscriptions.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const voiceCallLogsRelations = relations(voiceCallLogs, ({ one }) => ({
+  business: one(businesses, {
+    fields: [voiceCallLogs.businessId],
+    references: [businesses.id],
+  }),
 }));
 
 export const blockedSlotsRelations = relations(blockedSlots, ({ one }) => ({
@@ -433,6 +490,17 @@ export const insertWorkflowLogSchema = createInsertSchema(workflowLogs).omit({
   createdAt: true,
 });
 
+export const insertVoiceSubscriptionSchema = createInsertSchema(voiceSubscriptions).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertVoiceCallLogSchema = createInsertSchema(voiceCallLogs).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -452,6 +520,12 @@ export type InsertBlockedSlot = z.infer<typeof insertBlockedSlotSchema>;
 
 export type PushToken = typeof pushTokens.$inferSelect;
 export type InsertPushToken = z.infer<typeof insertPushTokenSchema>;
+
+export type VoiceSubscription = typeof voiceSubscriptions.$inferSelect;
+export type InsertVoiceSubscription = z.infer<typeof insertVoiceSubscriptionSchema>;
+
+export type VoiceCallLog = typeof voiceCallLogs.$inferSelect;
+export type InsertVoiceCallLog = z.infer<typeof insertVoiceCallLogSchema>;
 
 export type QuickSale = typeof quickSales.$inferSelect;
 export type InsertQuickSale = z.infer<typeof insertQuickSaleSchema>;

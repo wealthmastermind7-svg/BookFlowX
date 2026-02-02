@@ -12,6 +12,8 @@ import {
   businessThemes,
   apiKeys,
   workflowLogs,
+  voiceSubscriptions,
+  voiceCallLogs,
   type User,
   type InsertUser,
   type Business,
@@ -38,6 +40,10 @@ import {
   type InsertApiKey,
   type WorkflowLog,
   type InsertWorkflowLog,
+  type VoiceSubscription,
+  type InsertVoiceSubscription,
+  type VoiceCallLog,
+  type InsertVoiceCallLog,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -1065,6 +1071,119 @@ export class DatabaseStorage implements IStorage {
     
     // Delete the workflows
     await db.delete(workflows).where(eq(workflows.businessId, businessId));
+  }
+
+  // Voice Subscriptions
+  async getVoiceSubscription(businessId: string): Promise<VoiceSubscription | undefined> {
+    const [subscription] = await db
+      .select()
+      .from(voiceSubscriptions)
+      .where(eq(voiceSubscriptions.businessId, businessId));
+    return subscription || undefined;
+  }
+
+  async createVoiceSubscription(subscription: InsertVoiceSubscription): Promise<VoiceSubscription> {
+    const [created] = await db.insert(voiceSubscriptions).values(subscription).returning();
+    return created;
+  }
+
+  async updateVoiceSubscription(businessId: string, updates: Partial<InsertVoiceSubscription>): Promise<VoiceSubscription | undefined> {
+    const [updated] = await db
+      .update(voiceSubscriptions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(voiceSubscriptions.businessId, businessId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async getOrCreateVoiceSubscription(businessId: string): Promise<VoiceSubscription> {
+    const existing = await this.getVoiceSubscription(businessId);
+    if (existing) return existing;
+    
+    // Create free tier subscription
+    const now = new Date();
+    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    
+    return await this.createVoiceSubscription({
+      businessId,
+      tier: "free",
+      minutesLimit: 5,
+      minutesUsed: 0,
+      periodStart: now,
+      periodEnd,
+      status: "active",
+    });
+  }
+
+  async incrementVoiceMinutes(businessId: string, minutes: number): Promise<VoiceSubscription | undefined> {
+    const subscription = await this.getOrCreateVoiceSubscription(businessId);
+    
+    // Check if we need to reset the period
+    const now = new Date();
+    if (subscription.periodEnd && now > subscription.periodEnd) {
+      // Reset for new billing period
+      const newPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+      return await this.updateVoiceSubscription(businessId, {
+        minutesUsed: minutes,
+        periodStart: now,
+        periodEnd: newPeriodEnd,
+      });
+    }
+    
+    // Increment minutes
+    const [updated] = await db
+      .update(voiceSubscriptions)
+      .set({ 
+        minutesUsed: sql`${voiceSubscriptions.minutesUsed} + ${minutes}`,
+        updatedAt: new Date() 
+      })
+      .where(eq(voiceSubscriptions.businessId, businessId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async checkVoiceMinutesAvailable(businessId: string): Promise<{ available: boolean; remaining: number; limit: number; used: number }> {
+    const subscription = await this.getOrCreateVoiceSubscription(businessId);
+    const remaining = subscription.minutesLimit - subscription.minutesUsed;
+    return {
+      available: remaining > 0,
+      remaining: Math.max(0, remaining),
+      limit: subscription.minutesLimit,
+      used: subscription.minutesUsed,
+    };
+  }
+
+  // Voice Call Logs
+  async createVoiceCallLog(log: InsertVoiceCallLog): Promise<VoiceCallLog> {
+    const [created] = await db.insert(voiceCallLogs).values(log).returning();
+    return created;
+  }
+
+  async getVoiceCallLogs(businessId: string, limit = 50): Promise<VoiceCallLog[]> {
+    return await db
+      .select()
+      .from(voiceCallLogs)
+      .where(eq(voiceCallLogs.businessId, businessId))
+      .orderBy(desc(voiceCallLogs.createdAt))
+      .limit(limit);
+  }
+
+  async getVoiceUsageStats(businessId: string): Promise<{ totalMinutes: number; totalCalls: number; bookingsCreated: number }> {
+    const subscription = await this.getOrCreateVoiceSubscription(businessId);
+    
+    const result = await db
+      .select({
+        totalCalls: sql<number>`COUNT(*)::int`,
+        bookingsCreated: sql<number>`SUM(CASE WHEN ${voiceCallLogs.bookingCreated} THEN 1 ELSE 0 END)::int`,
+      })
+      .from(voiceCallLogs)
+      .where(eq(voiceCallLogs.businessId, businessId));
+    
+    return {
+      totalMinutes: subscription.minutesUsed,
+      totalCalls: result[0]?.totalCalls || 0,
+      bookingsCreated: result[0]?.bookingsCreated || 0,
+    };
   }
 }
 
