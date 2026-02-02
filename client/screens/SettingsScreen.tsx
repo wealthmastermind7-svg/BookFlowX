@@ -541,7 +541,7 @@ export default function SettingsScreen() {
 
             <GlassCard 
               style={[styles.automationCard, { marginTop: 12 }]} 
-              onPress={() => navigation.navigate("NativeVoiceBooking" as any, { 
+              onPress={() => navigation.navigate("VoiceBooking" as any, { 
                 businessSlug: business?.slug, 
                 businessName: business?.name 
               })}

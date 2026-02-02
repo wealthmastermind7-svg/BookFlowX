@@ -5,7 +5,6 @@ import BookingFlowNavigator from "@/navigation/BookingFlowNavigator";
 import ServiceEditorScreen from "@/screens/ServiceEditorScreen";
 import QuickSaleScreen from "@/screens/QuickSaleScreen";
 import VoiceBookingScreen from "@/screens/VoiceBookingScreen";
-import NativeVoiceBookingScreen from "@/screens/NativeVoiceBookingScreen";
 import OnboardingScreen, { checkOnboardingComplete } from "@/screens/OnboardingScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 import { HeaderButton } from "@react-navigation/elements";
@@ -23,7 +22,6 @@ export type RootStackParamList = {
   ServiceEditor: { serviceId?: string };
   QuickSale: undefined;
   VoiceBooking: { businessSlug: string; businessName?: string };
-  NativeVoiceBooking: { businessSlug: string; businessName?: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -136,14 +134,6 @@ export default function RootStackNavigator() {
             </HeaderButton>
           ),
         })}
-      />
-      <Stack.Screen
-        name="NativeVoiceBooking"
-        component={NativeVoiceBookingScreen}
-        options={{
-          headerShown: false,
-          presentation: "modal",
-        }}
       />
     </Stack.Navigator>
     <PaywallContainer />
