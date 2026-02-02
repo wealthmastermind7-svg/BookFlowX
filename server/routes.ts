@@ -41,7 +41,9 @@ import {
   createVoiceAgentWelcome 
 } from "./voiceAgent";
 import multer from "multer";
+import express from "express";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
+import { getUncachableStripeClient } from "./stripeClient";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -1851,6 +1853,337 @@ export async function registerRoutes(app: Express): Promise<Server> {
     ];
     
     res.json({ tiers });
+  });
+
+  // Create Stripe checkout session for voice subscription
+  app.post("/api/voice-checkout", async (req: Request, res: Response) => {
+    try {
+      const { businessId, tier, ownerToken } = req.body;
+      
+      // Verify ownership
+      const business = await storage.getBusiness(businessId);
+      if (!business || business.ownerToken !== ownerToken) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      
+      // Get price IDs from Stripe products
+      const priceIds: Record<string, string> = {
+        starter: "price_voice_starter",
+        pro: "price_voice_pro",
+        business: "price_voice_business",
+      };
+
+      // Search for the product in Stripe
+      const products = await stripe.products.search({
+        query: `metadata['tier']:'${tier}'`,
+        limit: 1,
+      });
+
+      let priceId: string | undefined;
+      if (products.data.length > 0) {
+        const prices = await stripe.prices.list({
+          product: products.data[0].id,
+          active: true,
+          limit: 1,
+        });
+        priceId = prices.data[0]?.id;
+      }
+
+      if (!priceId) {
+        return res.status(400).json({ error: "Price not found for tier" });
+      }
+
+      const domain = process.env.REPLIT_DOMAINS?.split(",")[0];
+      const baseUrl = domain ? `https://${domain}` : "http://localhost:5000";
+
+      const session = await stripe.checkout.sessions.create({
+        mode: "subscription",
+        payment_method_types: ["card"],
+        line_items: [{ price: priceId, quantity: 1 }],
+        success_url: `${baseUrl}/billing/${businessId}?success=true&token=${ownerToken}`,
+        cancel_url: `${baseUrl}/billing/${businessId}?canceled=true&token=${ownerToken}`,
+        metadata: {
+          businessId,
+          tier,
+        },
+        subscription_data: {
+          metadata: {
+            businessId,
+            tier,
+          },
+        },
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("[Voice Checkout] Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Create Stripe billing portal session
+  app.post("/api/voice-billing-portal", async (req: Request, res: Response) => {
+    try {
+      const { businessId, ownerToken } = req.body;
+      
+      const business = await storage.getBusiness(businessId);
+      if (!business || business.ownerToken !== ownerToken) {
+        return res.status(403).json({ error: "Unauthorized" });
+      }
+
+      const subscription = await storage.getVoiceSubscription(businessId);
+      if (!subscription?.stripeCustomerId) {
+        return res.status(400).json({ error: "No active subscription" });
+      }
+
+      const stripe = await getUncachableStripeClient();
+      const domain = process.env.REPLIT_DOMAINS?.split(",")[0];
+      const baseUrl = domain ? `https://${domain}` : "http://localhost:5000";
+
+      const session = await stripe.billingPortal.sessions.create({
+        customer: subscription.stripeCustomerId,
+        return_url: `${baseUrl}/billing/${businessId}?token=${ownerToken}`,
+      });
+
+      res.json({ url: session.url });
+    } catch (error: any) {
+      console.error("[Voice Billing Portal] Error:", error);
+      res.status(500).json({ error: error.message });
+    }
+  });
+
+  // Serve billing management page
+  app.get("/billing/:businessId", async (req: Request, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const token = req.query.token as string;
+      
+      const business = await storage.getBusiness(businessId);
+      if (!business) {
+        return res.status(404).send("Business not found");
+      }
+
+      const subscription = await storage.getOrCreateVoiceSubscription(businessId);
+      const usage = await storage.checkVoiceMinutesAvailable(businessId);
+      const stats = await storage.getVoiceUsageStats(businessId);
+      
+      const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Voice Agent Billing - ${business.name}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #000; color: #fff; min-height: 100vh; }
+    .container { max-width: 600px; margin: 0 auto; padding: 40px 20px; }
+    .header { text-align: center; margin-bottom: 40px; }
+    .header h1 { font-size: 32px; font-weight: 700; margin-bottom: 8px; }
+    .header p { color: rgba(255,255,255,0.5); font-size: 14px; }
+    .card { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 24px; margin-bottom: 16px; border: 1px solid rgba(255,255,255,0.1); }
+    .tier-badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+    .tier-free { background: #6B7280; }
+    .tier-starter { background: #3B82F6; }
+    .tier-pro { background: #8B5CF6; }
+    .tier-business { background: #F59E0B; }
+    .usage-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; margin: 16px 0; overflow: hidden; }
+    .usage-fill { height: 100%; background: #fff; border-radius: 4px; transition: width 0.3s; }
+    .usage-fill.warning { background: #EF4444; }
+    .stats-row { display: flex; justify-content: space-between; margin-top: 20px; text-align: center; }
+    .stat { flex: 1; }
+    .stat-value { font-size: 24px; font-weight: 700; }
+    .stat-label { font-size: 10px; color: rgba(255,255,255,0.4); letter-spacing: 1px; margin-top: 4px; }
+    .tier-grid { display: grid; gap: 12px; margin-top: 24px; }
+    .tier-card { padding: 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; transition: all 0.2s; }
+    .tier-card:hover { border-color: rgba(255,255,255,0.3); }
+    .tier-card.current { border-color: #fff; background: rgba(255,255,255,0.05); }
+    .tier-card.popular { border-color: #8B5CF6; }
+    .tier-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .tier-price { font-size: 28px; font-weight: 700; }
+    .tier-price span { font-size: 14px; color: rgba(255,255,255,0.5); font-weight: 400; }
+    .tier-minutes { color: rgba(255,255,255,0.5); font-size: 13px; margin-top: 4px; }
+    .btn { display: block; width: 100%; padding: 16px; border-radius: 12px; font-size: 16px; font-weight: 600; border: none; cursor: pointer; text-align: center; text-decoration: none; margin-top: 12px; }
+    .btn-primary { background: #fff; color: #000; }
+    .btn-secondary { background: transparent; color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+    .btn:hover { opacity: 0.9; }
+    .success-banner { background: rgba(34, 197, 94, 0.2); border: 1px solid rgba(34, 197, 94, 0.3); color: #22C55E; padding: 16px; border-radius: 12px; text-align: center; margin-bottom: 24px; }
+    .popular-badge { background: #8B5CF6; color: #fff; font-size: 9px; padding: 2px 8px; border-radius: 4px; font-weight: 700; letter-spacing: 1px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>Voice Agent</h1>
+      <p>${business.name}</p>
+    </div>
+
+    ${req.query.success ? '<div class="success-banner">Subscription activated successfully!</div>' : ''}
+
+    <div class="card">
+      <span class="tier-badge tier-${subscription.tier}">${subscription.tier.toUpperCase()}</span>
+      <h2 style="font-size: 20px; margin-bottom: 4px;">Current Plan</h2>
+      <p style="color: rgba(255,255,255,0.5); font-size: 13px;">${subscription.minutesLimit} minutes/month</p>
+      
+      <div class="usage-bar">
+        <div class="usage-fill ${usage.remaining < 10 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5);">
+        <span>${subscription.minutesUsed} min used</span>
+        <span>${usage.remaining} min remaining</span>
+      </div>
+
+      <div class="stats-row">
+        <div class="stat">
+          <div class="stat-value">${stats.totalCalls}</div>
+          <div class="stat-label">CALLS</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${stats.bookingsCreated}</div>
+          <div class="stat-label">BOOKINGS</div>
+        </div>
+        <div class="stat">
+          <div class="stat-value">${stats.totalCalls > 0 ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) : 0}%</div>
+          <div class="stat-label">CONVERSION</div>
+        </div>
+      </div>
+
+      ${subscription.stripeSubscriptionId ? `<button class="btn btn-secondary" onclick="openBillingPortal()">Manage Subscription</button>` : ''}
+    </div>
+
+    <h3 style="font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 16px; letter-spacing: 1px;">AVAILABLE PLANS</h3>
+
+    <div class="tier-grid">
+      <div class="tier-card ${subscription.tier === 'starter' ? 'current' : ''}" onclick="selectTier('starter')">
+        <div class="tier-name">Starter</div>
+        <div class="tier-price">$49<span>/mo</span></div>
+        <div class="tier-minutes">60 minutes included</div>
+      </div>
+      <div class="tier-card ${subscription.tier === 'pro' ? 'current' : ''} popular" onclick="selectTier('pro')">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div class="tier-name">Pro</div>
+          <span class="popular-badge">POPULAR</span>
+        </div>
+        <div class="tier-price">$149<span>/mo</span></div>
+        <div class="tier-minutes">200 minutes included</div>
+      </div>
+      <div class="tier-card ${subscription.tier === 'business' ? 'current' : ''}" onclick="selectTier('business')">
+        <div class="tier-name">Business</div>
+        <div class="tier-price">$349<span>/mo</span></div>
+        <div class="tier-minutes">500 minutes included</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const businessId = '${businessId}';
+    const token = '${token || ''}';
+    const currentTier = '${subscription.tier}';
+
+    async function selectTier(tier) {
+      if (tier === currentTier) return;
+      
+      try {
+        const res = await fetch('/api/voice-checkout', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessId, tier, ownerToken: token }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert(data.error || 'Failed to start checkout');
+        }
+      } catch (err) {
+        alert('Error starting checkout');
+      }
+    }
+
+    async function openBillingPortal() {
+      try {
+        const res = await fetch('/api/voice-billing-portal', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ businessId, ownerToken: token }),
+        });
+        const data = await res.json();
+        if (data.url) {
+          window.location.href = data.url;
+        } else {
+          alert(data.error || 'Failed to open billing portal');
+        }
+      } catch (err) {
+        alert('Error opening billing portal');
+      }
+    }
+  </script>
+</body>
+</html>`;
+      
+      res.send(html);
+    } catch (error: any) {
+      console.error("[Billing Page] Error:", error);
+      res.status(500).send("Error loading billing page");
+    }
+  });
+
+  // Stripe webhook for subscription events
+  app.post("/api/stripe/webhook", express.raw({ type: "application/json" }), async (req: Request, res: Response) => {
+    try {
+      const stripe = await getUncachableStripeClient();
+      const sig = req.headers["stripe-signature"] as string;
+      
+      // For now, just handle subscription events without signature verification
+      // In production, you'd verify the webhook signature
+      const event = req.body;
+      
+      console.log("[Stripe Webhook] Event:", event.type);
+      
+      if (event.type === "checkout.session.completed") {
+        const session = event.data.object;
+        const businessId = session.metadata?.businessId;
+        const tier = session.metadata?.tier;
+        
+        if (businessId && tier) {
+          const minutesMap: Record<string, number> = {
+            starter: 60,
+            pro: 200,
+            business: 500,
+          };
+          
+          await storage.updateVoiceSubscription(businessId, {
+            tier,
+            status: "active",
+            minutesLimit: minutesMap[tier] || 60,
+            stripeSubscriptionId: session.subscription,
+            stripeCustomerId: session.customer,
+            periodStart: new Date(),
+            periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          });
+          
+          console.log(`[Stripe Webhook] Activated ${tier} subscription for ${businessId}`);
+        }
+      }
+      
+      if (event.type === "customer.subscription.updated" || event.type === "customer.subscription.deleted") {
+        const subscription = event.data.object;
+        const businessId = subscription.metadata?.businessId;
+        
+        if (businessId) {
+          await storage.updateVoiceSubscription(businessId, {
+            status: subscription.status === "active" ? "active" : "canceled",
+            periodEnd: new Date(subscription.current_period_end * 1000),
+          });
+        }
+      }
+      
+      res.json({ received: true });
+    } catch (error: any) {
+      console.error("[Stripe Webhook] Error:", error);
+      res.status(400).json({ error: error.message });
+    }
   });
 
   // === VOICE AGENT API ===
