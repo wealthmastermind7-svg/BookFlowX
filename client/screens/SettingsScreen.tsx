@@ -541,7 +541,7 @@ export default function SettingsScreen() {
 
             <GlassCard 
               style={[styles.automationCard, { marginTop: 12 }]} 
-              onPress={() => Alert.alert("Coming Soon", "The AI Voice Receptionist is currently undergoing maintenance and will be available soon.")}
+              onPress={() => navigation.navigate("VoiceBooking" as any)}
             >
               <View style={styles.automationHeader}>
                 <ParallaxIcon name="mic" delay={0} />
@@ -550,21 +550,11 @@ export default function SettingsScreen() {
               </View>
               <View style={{ flexDirection: "row", alignItems: "center", justifyContent: "space-between" }}>
                 <ThemedText style={styles.automationTitle}>Voice Booking</ThemedText>
-                <View style={{ 
-                  backgroundColor: "rgba(255,255,255,0.1)", 
-                  paddingHorizontal: 8, 
-                  paddingVertical: 4, 
-                  borderRadius: 4,
-                  borderWidth: 1,
-                  borderColor: "rgba(255,255,255,0.2)"
-                }}>
-                  <ThemedText style={{ fontSize: 9, fontWeight: "700", color: "#fff" }}>COMING SOON</ThemedText>
-                </View>
               </View>
               <ThemedText style={styles.automationDesc}>Let customers book appointments using natural voice conversation with AI.</ThemedText>
               <View style={styles.automationActionRow}>
-                <ThemedText style={[styles.automationAction, { color: "rgba(255,255,255,0.3)" }]}>PREVIEW</ThemedText>
-                <Feather name="lock" size={14} color="rgba(255,255,255,0.2)" style={{ marginLeft: 4 }} />
+                <ThemedText style={styles.automationAction}>PREVIEW</ThemedText>
+                <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" style={{ marginLeft: 4 }} />
               </View>
             </GlassCard>
 

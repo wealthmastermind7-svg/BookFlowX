@@ -442,8 +442,23 @@
         return;
       }
 
+      console.log("[Vapi] Initializing with:", { publicKey: vapiPublicKey, assistantId: vapiAssistantId });
+
       try {
+        if (typeof window.Vapi === 'undefined') {
+          // Try to load the SDK if it's missing
+          console.warn("[Vapi] SDK missing, attempting to load...");
+          await new Promise((resolve, reject) => {
+            const script = document.createElement('script');
+            script.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-sdk@latest/dist/vapi.js";
+            script.onload = resolve;
+            script.onerror = reject;
+            document.head.appendChild(script);
+          });
+        }
+        
         vapi = new window.Vapi(vapiPublicKey);
+        console.log("[Vapi] SDK initialized successfully");
 
         vapi.on('call-start', () => {
           console.log('[Vapi] Call started');
@@ -505,7 +520,7 @@
       setConnectingState();
 
       try {
-        await vapi.start(assistantId, {
+        await vapi.start(vapiAssistantId, {
           metadata: {
             businessSlug: businessSlug
           }
