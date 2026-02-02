@@ -1801,8 +1801,17 @@ BOOKING PROCESS:
 When a customer wants to book:
 1. Ask which service they'd like
 2. Ask for their preferred date and time
-3. Ask for their name and email
-4. Confirm the booking details
+3. Ask for their name
+4. Ask for their email address
+5. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
+6. If they correct you, spell it back again until confirmed
+7. Confirm the booking details
+
+EMAIL VERIFICATION:
+- Email addresses are easy to mishear. ALWAYS spell them back.
+- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
+- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
+- Only proceed with booking once email is confirmed
 
 IMPORTANT:
 - This is a ${config.industry.replace('_', ' ')} business.

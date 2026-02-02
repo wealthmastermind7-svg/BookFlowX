@@ -106,9 +106,12 @@ export default function CalendarScreen() {
 
   useFocusEffect(
     React.useCallback(() => {
-      if (api.getBusinessId()) {
+      const businessId = api.getBusinessId();
+      if (businessId) {
+        console.log("[Calendar] Screen focused, reloading bookings...");
         loadBookings();
       }
+      return () => {};
     }, [])
   );
 

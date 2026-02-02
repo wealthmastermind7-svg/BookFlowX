@@ -86,9 +86,19 @@ BOOKING PROCESS:
 When a customer wants to book:
 1. Ask which service they'd like
 2. Ask for their preferred date and time
-3. Ask for their name and email
-4. Use the create_booking function to complete the booking
-5. Confirm the booking details
+3. Ask for their name
+4. Ask for their email address
+5. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
+6. If they correct you, spell it back again until confirmed
+7. Use the create_booking function to complete the booking
+8. Confirm the booking details
+
+EMAIL VERIFICATION:
+- Email addresses are easy to mishear. ALWAYS spell them back.
+- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
+- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
+- Common mishearings: "dot com" vs "dot calm", numbers vs letters (5 vs S)
+- Only proceed with booking once email is confirmed
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
@@ -275,6 +285,17 @@ IMPORTANT:
 
           else if (toolCall.name === "create_booking") {
             const { customerName, customerEmail, customerPhone, serviceName, date, time } = toolCall.parameters;
+            
+            // Email validation
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!customerEmail || !emailRegex.test(customerEmail)) {
+              result = { 
+                error: "Invalid email address format. Please ask the customer to spell out their email address again.",
+                invalidEmail: customerEmail
+              };
+              console.log(`[Vapi] Invalid email rejected: ${customerEmail}`);
+            } else {
+            
             const business = await storage.getBusinessBySlug(businessSlug || "");
             
             if (business) {
@@ -318,6 +339,7 @@ IMPORTANT:
               }
             } else {
               result = { error: "Business not found" };
+            }
             }
           }
 
@@ -416,8 +438,17 @@ BOOKING PROCESS:
 When a customer wants to book:
 1. Ask which service they'd like
 2. Ask for their preferred date and time
-3. Ask for their name and email
-4. Confirm the booking details
+3. Ask for their name
+4. Ask for their email address
+5. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
+6. If they correct you, spell it back again until confirmed
+7. Confirm the booking details
+
+EMAIL VERIFICATION:
+- Email addresses are easy to mishear. ALWAYS spell them back.
+- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
+- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
+- Only proceed with booking once email is confirmed
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
