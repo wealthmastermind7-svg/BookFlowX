@@ -204,7 +204,9 @@ IMPORTANT:
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
           firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
-          serverUrl: `${process.env.REPLIT_DOMAINS?.split(",")[0] ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}` : ""}/api/vapi/server-url`,
+          serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
+            ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
+            : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
           serverMessages: ["tool-calls", "end-of-call-report"]
         }
       });
