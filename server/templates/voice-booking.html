@@ -303,6 +303,7 @@
     }
     
     function toggleCall() {
+      console.log('[Vapi] toggleCall called, isCallActive:', isCallActive);
       if (!vapiInstance) {
         showError('Voice system is still loading. Please wait a moment.');
         return;
@@ -341,7 +342,10 @@
         vapiInstance = window.vapiSDK.run({
           apiKey: apiKey,
           assistant: assistant,
-          config: { ...buttonConfig, hide: true }
+          config: { 
+            hide: true,
+            position: "bottom-right"
+          }
         });
         
         if (vapiInstance) {
