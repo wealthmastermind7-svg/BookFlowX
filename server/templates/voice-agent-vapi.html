@@ -362,10 +362,10 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@latest/dist/vapi.umd.min.js"></script>
+  <script src="https://unpkg.com/@vapi-ai/web/dist/index.js"></script>
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
-    const assistantId = '{{VAPI_ASSISTANT_ID}}';
+    const vapiAssistantId = '{{VAPI_ASSISTANT_ID}}';
     const vapiPublicKey = '{{VAPI_PUBLIC_KEY}}';
     
     const voiceButton = document.getElementById('voiceButton');
@@ -445,19 +445,29 @@
       console.log("[Vapi] Initializing with:", { publicKey: vapiPublicKey, assistantId: vapiAssistantId });
 
       try {
-        if (typeof window.Vapi === 'undefined') {
+        // The SDK exposes Vapi as the default export
+        const VapiClass = window.Vapi || window.Vapi?.default;
+        
+        if (!VapiClass) {
           // Try to load the SDK if it's missing
           console.warn("[Vapi] SDK missing, attempting to load...");
           await new Promise((resolve, reject) => {
             const script = document.createElement('script');
-            script.src = "https://cdn.jsdelivr.net/gh/VapiAI/html-sdk@latest/dist/vapi.js";
-            script.onload = resolve;
+            script.src = "https://unpkg.com/@vapi-ai/web/dist/index.js";
+            script.onload = () => {
+              setTimeout(resolve, 100); // Give SDK time to initialize
+            };
             script.onerror = reject;
             document.head.appendChild(script);
           });
         }
         
-        vapi = new window.Vapi(vapiPublicKey);
+        const FinalVapiClass = window.Vapi || window.Vapi?.default;
+        if (!FinalVapiClass) {
+          throw new Error('Vapi SDK not available after loading');
+        }
+        
+        vapi = new FinalVapiClass(vapiPublicKey);
         console.log("[Vapi] SDK initialized successfully");
 
         vapi.on('call-start', () => {

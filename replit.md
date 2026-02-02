@@ -87,25 +87,24 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - `POST /api/smart-suggestions/revenue-insight` - Get revenue insight explanations
   - **Client Hook**: `useSmartSuggestions` hook in `client/hooks/useSmartSuggestions.ts`
   - **Industries Supported**: auto_detailing, salon, fitness, medical, consulting, trades, wellness (7 verticals)
-- **Voice Agent**: AI-powered voice booking assistant using Split STT + LLM + TTS pipeline.
-  - **Architecture**: Reliable 3-stage pipeline (recommended for iOS Safari compatibility)
-    1. **STT**: `gpt-4o-mini-transcribe` for speech-to-text
-    2. **LLM**: `gpt-4o-mini` for reasoning and booking logic
-    3. **TTS**: `gpt-4o-mini-tts` for text-to-speech (MP3 output)
-  - **Shareable Voice Page**: `/voice/{businessSlug}` - Customers can book via voice conversation
-  - **Push-to-Talk**: Hold button to record, release to send (prevents accidental triggers)
-  - **Industry Personalities**: Uses same INDUSTRY_CONTEXT system for consistent brand voice
-  - **Voice Options**: nova (salon/wellness), alloy (trades/auto), echo (medical/consulting), onyx (fitness)
-  - **Comprehensive Logging**: STT duration, reasoning duration, TTS duration, audio sizes tracked
-  - **Format Handling**: WebM from browser → STT transcription → LLM response → MP3 TTS output
+- **Voice Agent (Vapi.ai Streaming)**: Real-time streaming voice booking powered by Vapi.ai WebRTC.
+  - **Architecture**: Vapi.ai Web SDK for low-latency streaming voice conversations
+  - **Technology**: WebRTC-based bidirectional audio streaming (no file uploads)
+  - **Shareable Voice Page**: `/voice/{businessSlug}` - Customers can book via streaming voice
+  - **Tap-to-Talk**: Tap button to start/stop real-time conversation
+  - **Vapi Assistant**: Pre-configured assistant (ID: `fbc1fe60-e500-4e20-9537-0fb1ade6cd56`)
+  - **Environment Variables**:
+    - `VAPI_PUBLIC_KEY` - Vapi public API key for web SDK
+    - `VAPI_PRIVATE_KEY` - Vapi private key for server-side operations
+    - `VAPI_ASSISTANT_ID` - Pre-configured booking assistant ID
   - **API Endpoints**:
-    - `GET /voice/{slug}` - Serve voice booking page
-    - `GET /api/voice/{slug}/config` - Get business config for voice agent
-    - `GET /api/voice/{slug}/welcome` - Get welcome audio message (MP3)
-    - `POST /api/voice/${slug}/message` - Process voice message with SSE streaming response
-  - **Implementation Files**: `server/voiceAgent.ts`, `server/templates/voice-agent.html`
+    - `GET /voice/{slug}` - Serve Vapi-powered voice booking page
+    - `GET /api/vapi/config/{slug}` - Get Vapi config for business
+    - `POST /api/vapi/webhook` - Handle Vapi function calls (tools)
+  - **Function Tools**: `list_services`, `get_available_slots`, `create_booking` - integrated with BookFlow backend
+  - **Implementation Files**: `server/vapiRoutes.ts`, `server/templates/voice-agent-vapi.html`
   - **Booking Page Integration**: "Try Voice Booking" link added to booking page header
-  - **App Store Link**: https://apps.apple.com/app/bookflowx/id6756943439
+  - **Fallback**: Legacy file-based voice agent available via `?legacy=true` query param
 - **Native Expo Voice Booking**: In-app voice booking with reliable iOS microphone access.
   - **Components**: `client/components/VoiceRecorder.tsx`, `client/screens/VoiceBookingScreen.tsx`
   - **Library**: `expo-av` for native audio recording (WAV format, 16kHz, mono)
