@@ -59,6 +59,7 @@ let embedHtmlContent: string = "";
 let embedJsContent: string = "";
 let voiceAgentHtmlContent: string = "";
 let voiceAgentVapiHtmlContent: string = "";
+let voiceBookingHtmlContent: string = "";
 
 async function loadBookingHtml() {
   const paths = [
@@ -148,6 +149,23 @@ async function loadVoiceAgentHtml() {
   }
   
   console.warn("Warning: Could not load voice-agent-vapi.html. Paths tried:", vapiPaths);
+
+  // Load new voice-booking.html (Vapi official approach)
+  const voiceBookingPaths = [
+    path.resolve(__dirname, "templates/voice-booking.html"),
+    path.resolve(process.cwd(), "server/templates/voice-booking.html"),
+    path.resolve(process.cwd(), "templates/voice-booking.html"),
+  ];
+  
+  for (const p of voiceBookingPaths) {
+    try {
+      voiceBookingHtmlContent = fs.readFileSync(p, "utf-8");
+      console.log(`Loaded voice-booking.html from: ${p}`);
+      return;
+    } catch {}
+  }
+  
+  console.warn("Warning: Could not load voice-booking.html. Paths tried:", voiceBookingPaths);
 }
 
 function getEmbedOrigin(req: Request): string {
@@ -1749,9 +1767,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const vapiPublicKey = process.env.VAPI_PUBLIC_KEY || "";
       const vapiAssistantId = process.env.VAPI_ASSISTANT_ID || "fbc1fe60-e500-4e20-9537-0fb1ade6cd56";
-      const useLegacy = req.query.legacy === 'true';
 
-      if (vapiPublicKey && voiceAgentVapiHtmlContent && !useLegacy) {
+      // Use the new voice-booking.html template (Vapi official approach)
+      if (vapiPublicKey && voiceBookingHtmlContent) {
+        const html = voiceBookingHtmlContent
+          .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
+          .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
+          .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
+          .replace(/\{\{ASSISTANT_ID\}\}/g, vapiAssistantId);
+
+        res.setHeader("Content-Type", "text/html");
+        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
+        return res.send(html);
+      }
+
+      // Fallback to old Vapi template
+      if (vapiPublicKey && voiceAgentVapiHtmlContent) {
         const html = voiceAgentVapiHtmlContent
           .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
           .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
@@ -1762,6 +1793,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.send(html);
       }
 
+      // Fallback to legacy voice agent
       if (!voiceAgentHtmlContent) {
         return res.status(500).json({ error: "Voice agent page not available" });
       }
