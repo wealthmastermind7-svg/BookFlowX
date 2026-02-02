@@ -1,240 +1,119 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useRef } from "react";
 import {
   View,
   StyleSheet,
-  ScrollView,
   Platform,
-  Linking,
+  ActivityIndicator,
+  Pressable,
 } from "react-native";
-import { Audio } from "expo-av";
+import WebView from "react-native-webview";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { NativeStackScreenProps } from "@react-navigation/native-stack";
-import { File } from "expo-file-system";
+import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
-import { VoiceRecorder } from "@/components/VoiceRecorder";
-import { Button } from "@/components/Button";
 import { useTheme } from "@/hooks/useTheme";
-import { getApiUrl } from "@/lib/query-client";
-import { Spacing, BorderRadius, Typography } from "@/constants/theme";
+import { Spacing } from "@/constants/theme";
 
 type Props = NativeStackScreenProps<any, "VoiceBooking">;
-
-interface TranscriptLine {
-  role: "user" | "assistant";
-  text: string;
-}
 
 export default function VoiceBookingScreen({ route, navigation }: Props) {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
   const { businessSlug, businessName } = route.params || {};
+  const webViewRef = useRef<WebView>(null);
   
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [transcript, setTranscript] = useState<TranscriptLine[]>([]);
-  const [error, setError] = useState<string | null>(null);
-  const [conversationHistory, setConversationHistory] = useState<any[]>([]);
-  const soundRef = useRef<Audio.Sound | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [hasError, setHasError] = useState(false);
 
-  useEffect(() => {
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-    };
-  }, []);
+  const voiceUrl = `https://confirmbooking.online/voice/${businessSlug}`;
 
-  async function handleRecordingComplete(uri: string) {
-    setIsProcessing(true);
-    setError(null);
+  const handleWebViewError = () => {
+    setHasError(true);
+    setIsLoading(false);
+  };
 
-    try {
-      const apiUrl = getApiUrl();
-      const formData = new FormData();
-      
-      if (Platform.OS === "web") {
-        const audioResponse = await fetch(uri);
-        const blob = await audioResponse.blob();
-        formData.append("audio", blob, "voice.wav");
-      } else {
-        // Native Expo: Just append the uri object, fetch/FormData handles it
-        formData.append("audio", {
-          uri,
-          name: "voice.wav",
-          type: "audio/wav",
-        } as any);
-      }
+  const handleRetry = () => {
+    setHasError(false);
+    setIsLoading(true);
+    webViewRef.current?.reload();
+  };
 
-      formData.append("conversationHistory", JSON.stringify(conversationHistory));
-
-      console.log(`[VoiceBooking] Sending audio to backend for slug: "${businessSlug}"`);
-      const response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
-        method: "POST",
-        headers: {
-          'Accept': 'text/event-stream',
-        },
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Server error (${response.status}): ${errorText}`);
-      }
-
-      // The backend uses SSE for streaming, but we can also handle it as a single chunk if needed
-      // However, the current backend implementation uses for await (const event of voiceAgentRespond)
-      // which is perfect for streaming.
-
-      let userText = "";
-      let assistantText = "";
-      let audioBase64 = "";
-
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-
-      if (reader) {
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-
-          const chunk = decoder.decode(value);
-          const lines = chunk.split("\n");
-
-          for (const line of lines) {
-            if (line.startsWith("data: ")) {
-              try {
-                const data = JSON.parse(line.slice(6));
-                if (data.type === "transcript") {
-                  userText = data.text;
-                  setTranscript((prev) => [...prev, { role: "user", text: data.text }]);
-                } else if (data.type === "response") {
-                  assistantText = data.text;
-                  setTranscript((prev) => [...prev, { role: "assistant", text: data.text }]);
-                } else if (data.type === "audio") {
-                  audioBase64 = data.audio;
-                } else if (data.type === "history") {
-                  setConversationHistory(data.history);
-                }
-              } catch {}
-            }
-          }
-        }
-      }
-
-      if (audioBase64) {
-        await playAudioResponse(audioBase64);
-      }
-    } catch (err) {
-      console.error("Voice processing error:", err);
-      setError("Failed to process your message. Please try again.");
-    } finally {
-      setIsProcessing(false);
-    }
+  if (Platform.OS === "web") {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.webFallback}>
+          <ThemedText style={[styles.title, { color: theme.text }]}>
+            VOICE BOOKING
+          </ThemedText>
+          <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
+            Voice booking works best on mobile devices.
+          </ThemedText>
+          <Pressable
+            style={[styles.openButton, { backgroundColor: theme.text }]}
+            onPress={() => window.open(voiceUrl, "_blank")}
+          >
+            <Feather name="external-link" size={18} color={theme.backgroundRoot} />
+            <ThemedText style={[styles.openButtonText, { color: theme.backgroundRoot }]}>
+              Open Voice Booking
+            </ThemedText>
+          </Pressable>
+        </View>
+      </ThemedView>
+    );
   }
 
-  async function playAudioResponse(base64Audio: string) {
-    try {
-      if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-      }
-
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: `data:audio/mp3;base64,${base64Audio}` },
-        { shouldPlay: true }
-      );
-      soundRef.current = sound;
-
-      sound.setOnPlaybackStatusUpdate((status: any) => {
-        if (status.isLoaded && status.didJustFinish) {
-          sound.unloadAsync();
-        }
-      });
-    } catch (err) {
-      console.error("Failed to play audio:", err);
-    }
-  }
-
-  function handleTextBooking() {
-    if (Platform.OS === "web") {
-      window.open(`/book/${businessSlug}`, "_blank");
-    } else {
-      Linking.openURL(`https://confirmbooking.online/book/${businessSlug}`);
-    }
+  if (hasError) {
+    return (
+      <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
+        <View style={styles.errorContainer}>
+          <Feather name="wifi-off" size={48} color={theme.textTertiary} />
+          <ThemedText style={[styles.errorTitle, { color: theme.text }]}>
+            Connection Error
+          </ThemedText>
+          <ThemedText style={[styles.errorText, { color: theme.textSecondary }]}>
+            Unable to load voice booking. Please check your connection.
+          </ThemedText>
+          <Pressable
+            style={[styles.retryButton, { backgroundColor: theme.text }]}
+            onPress={handleRetry}
+          >
+            <Feather name="refresh-cw" size={18} color={theme.backgroundRoot} />
+            <ThemedText style={[styles.retryButtonText, { color: theme.backgroundRoot }]}>
+              Try Again
+            </ThemedText>
+          </Pressable>
+        </View>
+      </ThemedView>
+    );
   }
 
   return (
-    <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
-      <ScrollView
-        contentContainerStyle={styles.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.header}>
-          <ThemedText style={[styles.businessName, { color: theme.textSecondary }]}>
-            {businessName || "Business"}
-          </ThemedText>
-          <ThemedText style={[styles.title, { color: theme.text }]}>
-            VOICE{"\n"}BOOKING
-          </ThemedText>
-          <ThemedText style={[styles.subtitle, { color: theme.textTertiary }]}>
-            Tap and hold to speak, then release to send your message.
+    <ThemedView style={styles.container}>
+      {isLoading && (
+        <View style={[styles.loadingOverlay, { backgroundColor: theme.backgroundRoot }]}>
+          <ActivityIndicator size="large" color={theme.text} />
+          <ThemedText style={[styles.loadingText, { color: theme.textSecondary }]}>
+            Loading voice assistant...
           </ThemedText>
         </View>
-
-        <VoiceRecorder
-          onRecordingComplete={handleRecordingComplete}
-          isProcessing={isProcessing}
-        />
-
-        {error && (
-          <View style={[styles.errorContainer, { backgroundColor: "rgba(220, 38, 38, 0.1)" }]}>
-            <ThemedText style={styles.errorText}>{error}</ThemedText>
-          </View>
-        )}
-
-        {transcript.length > 0 && (
-          <View
-            style={[
-              styles.transcriptContainer,
-              { backgroundColor: theme.backgroundSecondary },
-            ]}
-          >
-            {transcript.map((line, index) => (
-              <View key={index} style={styles.transcriptLine}>
-                <ThemedText
-                  style={[
-                    styles.transcriptRole,
-                    { color: theme.textTertiary },
-                  ]}
-                >
-                  {line.role === "user" ? "You" : "Agent"}:
-                </ThemedText>
-                <ThemedText
-                  style={[
-                    styles.transcriptText,
-                    {
-                      color:
-                        line.role === "user"
-                          ? theme.textSecondary
-                          : theme.text,
-                    },
-                  ]}
-                >
-                  {line.text}
-                </ThemedText>
-              </View>
-            ))}
-          </View>
-        )}
-
-        <View style={styles.footer}>
-          <Button
-            onPress={handleTextBooking}
-            style={styles.footerButton}
-          >
-            Text Booking
-          </Button>
-        </View>
-      </ScrollView>
+      )}
+      <WebView
+        ref={webViewRef}
+        source={{ uri: voiceUrl }}
+        style={styles.webview}
+        onLoadEnd={() => setIsLoading(false)}
+        onError={handleWebViewError}
+        onHttpError={handleWebViewError}
+        mediaPlaybackRequiresUserAction={false}
+        allowsInlineMediaPlayback={true}
+        javaScriptEnabled={true}
+        domStorageEnabled={true}
+        startInLoadingState={false}
+        scalesPageToFit={true}
+        allowsFullscreenVideo={false}
+        mediaCapturePermissionGrantType="grant"
+      />
     </ThemedView>
   );
 }
@@ -243,72 +122,75 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
-    padding: Spacing["2xl"],
+  webview: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  loadingOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    justifyContent: "center",
     alignItems: "center",
-    minHeight: "100%",
+    zIndex: 10,
   },
-  header: {
-    alignItems: "center",
-    marginBottom: Spacing["4xl"],
-  },
-  businessName: {
-    ...Typography.body,
-    fontFamily: "CormorantGaramond-SemiBold",
-    fontSize: 24,
-    marginBottom: Spacing.sm,
-  },
-  title: {
-    ...Typography.h1,
-    fontSize: 48,
-    textAlign: "center",
-    lineHeight: 52,
-  },
-  subtitle: {
-    ...Typography.body,
-    fontSize: 16,
-    textAlign: "center",
+  loadingText: {
     marginTop: Spacing.lg,
-    maxWidth: 280,
+    fontSize: 16,
   },
   errorContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing["2xl"],
+  },
+  errorTitle: {
+    fontSize: 24,
+    fontWeight: "600",
     marginTop: Spacing.xl,
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
-    borderWidth: 1,
-    borderColor: "rgba(220, 38, 38, 0.3)",
+    marginBottom: Spacing.sm,
   },
   errorText: {
-    color: "#fca5a5",
-    fontSize: 14,
+    fontSize: 16,
     textAlign: "center",
+    marginBottom: Spacing["2xl"],
   },
-  transcriptContainer: {
-    marginTop: Spacing["2xl"],
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.lg,
-    width: "100%",
-    maxHeight: 200,
-  },
-  transcriptLine: {
+  retryButton: {
     flexDirection: "row",
-    marginBottom: Spacing.sm,
-    flexWrap: "wrap",
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: 12,
+    gap: Spacing.sm,
   },
-  transcriptRole: {
-    fontSize: 14,
-    marginRight: Spacing.xs,
+  retryButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
-  transcriptText: {
-    fontSize: 14,
+  webFallback: {
     flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    padding: Spacing["2xl"],
   },
-  footer: {
-    marginTop: Spacing["3xl"],
-    width: "100%",
-    gap: Spacing.md,
+  title: {
+    fontSize: 36,
+    fontWeight: "700",
+    marginBottom: Spacing.md,
   },
-  footerButton: {
-    width: "100%",
+  subtitle: {
+    fontSize: 16,
+    textAlign: "center",
+    marginBottom: Spacing["2xl"],
+  },
+  openButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.md,
+    paddingHorizontal: Spacing.xl,
+    borderRadius: 12,
+    gap: Spacing.sm,
+  },
+  openButtonText: {
+    fontSize: 16,
+    fontWeight: "600",
   },
 });
