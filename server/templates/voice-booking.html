@@ -317,6 +317,11 @@
         vapiInstance.start(assistant, {
           metadata: {
             businessSlug: businessSlug
+          },
+          assistantOverrides: {
+            variableValues: {
+              businessSlug: businessSlug
+            }
           }
         });
       }
