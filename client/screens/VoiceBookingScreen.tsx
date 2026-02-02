@@ -67,9 +67,12 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
 
       formData.append("conversationHistory", JSON.stringify(conversationHistory));
 
-      console.log("[VoiceBooking] Sending audio to backend...");
+      console.log(`[VoiceBooking] Sending audio to backend for slug: "${businessSlug}"`);
       const response = await fetch(`${apiUrl}/api/voice/${businessSlug}/message`, {
         method: "POST",
+        headers: {
+          'Accept': 'text/event-stream',
+        },
         body: formData,
       });
 

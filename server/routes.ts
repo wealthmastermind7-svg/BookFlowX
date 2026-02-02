@@ -1849,8 +1849,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Process voice message with streaming response
   app.post("/api/voice/:slug/message", upload.single("audio"), async (req: Request, res: Response) => {
     try {
-      const config = await getVoiceAgentConfig(req.params.slug);
+      const slug = req.params.slug;
+      console.log(`[VoiceAgent] Processing message for slug: ${slug}`);
+      const config = await getVoiceAgentConfig(slug);
       if (!config) {
+        console.error(`[VoiceAgent] Business not found for slug: ${slug}`);
         return res.status(404).json({ error: "Business not found" });
       }
 
