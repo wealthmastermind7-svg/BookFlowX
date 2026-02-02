@@ -1774,7 +1774,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // Use the new voice-booking.html template (Vapi official approach)
       if (vapiPublicKey && voiceBookingHtmlContent) {
-        const html = voiceBookingHtmlContent
+        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader("Pragma", "no-cache");
+    res.setHeader("Expires", "0");
+    const html = voiceBookingHtmlContent
           .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
           .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
           .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
