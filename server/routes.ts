@@ -144,11 +144,13 @@ async function loadVoiceAgentHtml() {
     try {
       voiceAgentVapiHtmlContent = fs.readFileSync(p, "utf-8");
       console.log(`Loaded voice-agent-vapi.html from: ${p}`);
-      return;
+      break;
     } catch {}
   }
   
-  console.warn("Warning: Could not load voice-agent-vapi.html. Paths tried:", vapiPaths);
+  if (!voiceAgentVapiHtmlContent) {
+    console.warn("Warning: Could not load voice-agent-vapi.html. Paths tried:", vapiPaths);
+  }
 
   // Load new voice-booking.html (Vapi official approach)
   const voiceBookingPaths = [
@@ -161,11 +163,13 @@ async function loadVoiceAgentHtml() {
     try {
       voiceBookingHtmlContent = fs.readFileSync(p, "utf-8");
       console.log(`Loaded voice-booking.html from: ${p}`);
-      return;
+      break;
     } catch {}
   }
   
-  console.warn("Warning: Could not load voice-booking.html. Paths tried:", voiceBookingPaths);
+  if (!voiceBookingHtmlContent) {
+    console.warn("Warning: Could not load voice-booking.html. Paths tried:", voiceBookingPaths);
+  }
 }
 
 function getEmbedOrigin(req: Request): string {
