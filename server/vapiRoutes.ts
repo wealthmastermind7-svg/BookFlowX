@@ -376,4 +376,99 @@ router.get("/api/vapi/config/:slug", async (req: Request, res: Response) => {
   }
 });
 
+router.get("/api/vapi/assistant-config/:slug", async (req: Request, res: Response) => {
+  try {
+    const { slug } = req.params;
+    const business = await storage.getBusinessBySlug(slug);
+    
+    if (!business) {
+      return res.status(404).json({ error: "Business not found" });
+    }
+
+    const services = await storage.getServices(business.id);
+    const industry = detectIndustry(business.name, services[0]?.name || "");
+    const industryContext = INDUSTRY_CONTEXT[industry] || INDUSTRY_CONTEXT.consulting;
+
+    const servicesList = services
+      .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
+      .join("\n");
+
+    const systemPrompt = `You are a friendly, professional voice booking assistant for ${business.name}.
+
+PERSONALITY:
+- Tone: ${industryContext.tone}
+- Core values: ${industryContext.values.join(", ")}
+- Be warm, helpful, and efficient
+- Speak naturally like a real receptionist
+- Keep responses concise (2-3 sentences max)
+
+AVAILABLE SERVICES:
+${servicesList || "No services configured yet."}
+
+YOUR GOALS:
+1. Greet callers warmly
+2. Help them understand available services
+3. Answer questions about pricing and duration
+4. Guide them to book an appointment
+5. Collect their name, email, and preferred time
+
+BOOKING PROCESS:
+When a customer wants to book:
+1. Ask which service they'd like
+2. Ask for their preferred date and time
+3. Ask for their name and email
+4. Confirm the booking details
+
+IMPORTANT:
+- This is a ${industry.replace('_', ' ')} business.
+- If you don't understand, ask them to repeat
+- Keep responses SHORT - this is a voice call
+- Be personable and use their name when provided`;
+
+    const voiceMap: Record<string, string> = {
+      salon: "EXAVITQu4vr4xnSDxMaL",
+      wellness: "EXAVITQu4vr4xnSDxMaL",
+      medical: "pNInz6obpgDQGcFmaJgB",
+      consulting: "pNInz6obpgDQGcFmaJgB",
+      fitness: "VR6AewLTigWG4xSOukaG",
+      trades: "VR6AewLTigWG4xSOukaG",
+      auto_detailing: "VR6AewLTigWG4xSOukaG",
+    };
+
+    const assistantConfig = {
+      name: `${business.name} Booking Assistant`,
+      model: {
+        provider: "openai",
+        model: "gpt-4o-mini",
+        messages: [{ role: "system", content: systemPrompt }]
+      },
+      voice: {
+        provider: "11labs",
+        voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
+      },
+      firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
+      serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
+        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
+        : undefined,
+      serverMessages: ["tool-calls", "end-of-call-report"],
+      metadata: {
+        businessSlug: slug
+      }
+    };
+
+    return res.json(assistantConfig);
+  } catch (error: any) {
+    console.error("[Vapi Assistant Config] Error:", error);
+    return res.status(500).json({ error: error.message });
+  }
+});
+
+router.get("/api/vapi/public-key", async (_req: Request, res: Response) => {
+  const publicKey = process.env.VAPI_PUBLIC_KEY || "";
+  if (!publicKey) {
+    return res.status(500).json({ error: "VAPI_PUBLIC_KEY not configured" });
+  }
+  return res.json({ publicKey });
+});
+
 export default router;
