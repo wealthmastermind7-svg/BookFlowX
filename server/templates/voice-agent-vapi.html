@@ -362,7 +362,7 @@
     </div>
   </div>
 
-  <script src="https://unpkg.com/@vapi-ai/web/dist/index.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web/dist/index.js"></script>
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
     const vapiAssistantId = '{{VAPI_ASSISTANT_ID}}';
@@ -445,23 +445,18 @@
       console.log("[Vapi] Initializing with:", { publicKey: vapiPublicKey, assistantId: vapiAssistantId });
 
       try {
-        // The SDK exposes Vapi as a global class when loaded via script tag
-        // Depending on the version/build, it might be window.Vapi or window.Vapi.default
+        // Vapi SDK v2+ usually exports as a global 'Vapi' class when using the CDN
         let VapiClass = window.Vapi;
         
-        if (!VapiClass && typeof window.Vapi === 'undefined') {
-          console.warn("[Vapi] Global Vapi object not found, checking for alternative exports...");
-          // Some builds export as a default property on the global
-          if (window.default && typeof window.default === 'function' && window.default.name === 'Vapi') {
-            VapiClass = window.default;
-          }
+        // If it's not directly on window, it might be in .default
+        if (!VapiClass && window.Vapi?.default) {
+          VapiClass = window.Vapi.default;
         }
 
         if (!VapiClass) {
-          throw new Error('Vapi SDK not found on window object. Ensure script loaded correctly.');
+          throw new Error('Vapi SDK not found on window object.');
         }
         
-        // Vapi SDK v2+ might require 'new Vapi(key)' or 'Vapi(key)'
         vapi = new VapiClass(vapiPublicKey);
         console.log("[Vapi] SDK initialized successfully");
 
@@ -497,10 +492,6 @@
               addTranscript(message.role, message.transcript);
             }
           }
-          
-          if (message.type === 'function-call') {
-            console.log('[Vapi] Function call:', message.functionCall);
-          }
         });
 
         vapi.on('error', (error) => {
@@ -508,8 +499,6 @@
           showError('Voice connection error. Please try again.');
           setActiveState(false);
         });
-
-        console.log('[Vapi] Initialized successfully');
       } catch (error) {
         console.error('[Vapi] Init error:', error);
         showError('Failed to initialize voice assistant.');
