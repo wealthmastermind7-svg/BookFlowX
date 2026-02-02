@@ -362,28 +362,7 @@
     </div>
   </div>
 
-  <script>
-    (function() {
-      var script = document.createElement('script');
-      script.src = 'https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.0.0/dist/index.js';
-      script.async = true;
-      script.onload = function() {
-        console.log('[Vapi] SDK loaded from jsDelivr');
-        if (typeof initVapi === 'function') initVapi();
-      };
-      script.onerror = function() {
-        console.error('[Vapi] jsDelivr failed, trying unpkg');
-        var fallback = document.createElement('script');
-        fallback.src = 'https://unpkg.com/@vapi-ai/web@2.0.0/dist/index.js';
-        fallback.onload = function() {
-          console.log('[Vapi] SDK loaded from unpkg');
-          if (typeof initVapi === 'function') initVapi();
-        };
-        document.head.appendChild(fallback);
-      };
-      document.head.appendChild(script);
-    })();
-  </script>
+  <script src="https://cdn.jsdelivr.net/npm/@vapi-ai/web@2.0.0/dist/index.js"></script>
   <script>
     const businessSlug = '{{BUSINESS_SLUG}}';
     const vapiAssistantId = '{{VAPI_ASSISTANT_ID}}';
@@ -466,20 +445,25 @@
       console.log("[Vapi] Initializing with:", { publicKey: vapiPublicKey, assistantId: vapiAssistantId });
 
       try {
-        // Vapi SDK v2+ usually exports as a global 'Vapi' class when using the CDN
+        // Simple synchronous check first
         let VapiClass = window.Vapi;
-        
-        // If it's not directly on window, it might be in .default
-        if (!VapiClass && window.Vapi?.default) {
-          VapiClass = window.Vapi.default;
+        if (!VapiClass && window.Vapi?.default) VapiClass = window.Vapi.default;
+
+        if (!VapiClass) {
+          // If not loaded, wait and try again (fail-safe for slow CDNs)
+          let attempts = 0;
+          while (!VapiClass && attempts < 10) {
+            await new Promise(r => setTimeout(r, 500));
+            VapiClass = window.Vapi || window.Vapi?.default;
+            attempts++;
+          }
         }
 
         if (!VapiClass) {
-          console.warn('[Vapi] SDK not ready yet, will be initialized by script onload');
-          return;
+          throw new Error('Vapi SDK not found. Please refresh.');
         }
         
-        if (vapi) return; // Already initialized
+        if (vapi) return;
 
         vapi = new VapiClass(vapiPublicKey);
         console.log("[Vapi] SDK initialized successfully");
@@ -565,7 +549,8 @@
       }
     });
 
-    initVapi();
+    // Initial attempt after brief delay to ensure DOM and script are ready
+    setTimeout(initVapi, 1000);
   </script>
 </body>
 </html>
