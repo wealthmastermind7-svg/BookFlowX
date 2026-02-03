@@ -58,6 +58,7 @@ const __dirname = dirname(__filename);
 
 // Load booking HTML into memory for production reliability
 let bookingHtmlContent: string = "";
+let expiredHtmlContent: string = "";
 let embedHtmlContent: string = "";
 let embedJsContent: string = "";
 let voiceAgentHtmlContent: string = "";
@@ -75,11 +76,21 @@ async function loadBookingHtml() {
     try {
       bookingHtmlContent = fs.readFileSync(p, "utf-8");
       console.log(`Loaded booking.html from: ${p}`);
-      return;
+      break;
     } catch {}
   }
   
-  console.warn("Warning: Could not load booking.html. Paths tried:", paths);
+  const expiredPaths = [
+    path.resolve(__dirname, "templates/expired.html"),
+    path.resolve(process.cwd(), "server/templates/expired.html"),
+  ];
+  for (const p of expiredPaths) {
+    try {
+      expiredHtmlContent = fs.readFileSync(p, "utf-8");
+      console.log(`Loaded expired.html from: ${p}`);
+      break;
+    } catch {}
+  }
 }
 
 async function loadEmbedHtml() {
@@ -1372,19 +1383,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const isWithinTrial = (now.getTime() - createdAt.getTime()) < sevenDaysMs;
 
         if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
-          return res.status(402).send(`
+          if (expiredHtmlContent) {
+            return res.type("text/html").send(expiredHtmlContent.replace(/{{businessName}}/g, business.name));
+          }
+          return res.status(403).send(`
             <!DOCTYPE html>
             <html>
             <head>
-              <title>Booking Locked | BookFlow</title>
+              <title>Booking Link Expired | BookFlow</title>
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
                 body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
-                .card { background: #111; padding: 40px; border-radius: 24px; border: 1px solid #222; max-width: 400px; }
-                h1 { font-size: 24px; margin-bottom: 16px; font-weight: 800; letter-spacing: -0.02em; }
-                p { color: #888; line-height: 1.5; margin-bottom: 24px; font-size: 16px; }
-                .logo { font-weight: 800; font-size: 32px; margin-bottom: 40px; display: block; letter-spacing: -0.05em; }
-                .btn { display: inline-block; padding: 12px 24px; background: #fff; color: #000; text-decoration: none; border-radius: 12px; font-weight: 600; }
+                .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 48px 32px; border-radius: 32px; max-width: 400px; width: 100%; }
+                h1 { font-size: 24px; margin-bottom: 16px; font-weight: 700; }
+                p { color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 0; font-size: 16px; }
+                .logo { font-weight: 800; font-size: 28px; margin-bottom: 40px; display: block; letter-spacing: -0.5px; }
               </style>
             </head>
             <body>
