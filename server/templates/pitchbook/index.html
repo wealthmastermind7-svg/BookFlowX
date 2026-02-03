@@ -60,9 +60,19 @@
             pointer-events: none;
             z-index: 10;
         }
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 2px;
+            background: #fff;
+            transition: width 0.3s ease;
+            z-index: 100;
+        }
     </style>
 </head>
 <body class="bg-black text-white font-sans antialiased cinematic-grain">
+    <div id="progressBar" class="progress-bar" style="width: 8.33%"></div>
 
     <!-- Navigation Overlay -->
     <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 glass px-6 py-3 rounded-full">
@@ -77,7 +87,11 @@
 
     <!-- Slide 1: Cover -->
     <div class="slide active">
-        <div class="max-w-4xl text-center space-y-8">
+        <div class="absolute inset-0 z-0">
+            <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoZ5T5QJNpt1ZBiZWkxzvZakeY1Fl2Ad9jnjksncIXiZFsXRR50i6To5127M8yFOeCymOC428OP7wdwGcN5_AwIusGR0iQTaGfLbbrEqAdWixQedhPebguYEILnDsguT4X8I_0uEMmxk69eG_fRfncHdEOT3vhChs_LG1FLYIhXQpxnNSlMYUV2fOJvtDqyPiS6jagRL9DrPGdw3kd4DRZaf_GuA7qXp498swQF6G6K8EVq9w2Jby4gdQCyASvqDb11OvQfqTh6s0" class="w-full h-full object-cover opacity-20 grayscale" />
+            <div class="absolute inset-0 bg-gradient-to-b from-black/0 via-black/40 to-black"></div>
+        </div>
+        <div class="relative z-10 max-w-4xl text-center space-y-8">
             <div class="flex items-center justify-center space-x-2 mb-12">
                 <span class="font-serif text-5xl font-bold tracking-tight">Book</span>
                 <span class="font-display text-5xl font-light tracking-tighter">Flow</span>
@@ -302,6 +316,8 @@
                 s.classList.toggle('active', i === currentSlide);
             });
             counter.innerText = `${currentSlide + 1} / ${slides.length}`;
+            const progress = ((currentSlide + 1) / slides.length) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
         }
 
         function nextSlide() {
