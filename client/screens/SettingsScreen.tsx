@@ -588,17 +588,6 @@ export default function SettingsScreen() {
               </View>
             </GlassCard>
 
-            <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
-              <View style={styles.embedIconBox}>
-                <Feather name="code" size={20} color="#fff" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 20 }}>
-                <ThemedText style={styles.embedTitle}>Website Widget</ThemedText>
-                <ThemedText style={styles.embedDesc}>Embed your booking flow into any existing website</ThemedText>
-              </View>
-              <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
-            </GlassCard>
-
             <View style={{ height: 32 }} />
 
             <SectionTitleBadge label="BUSINESS DETAILS">Public Profile</SectionTitleBadge>
