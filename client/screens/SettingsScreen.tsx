@@ -434,7 +434,9 @@ export default function SettingsScreen() {
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.88)" }}>
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
-            <SectionTitle badge={isPremium ? "PREMIUM" : "BASIC PLAN"}>Premium</SectionTitle>
+            <SectionTitle badge={isPremium ? "PREMIUM" : "BASIC PLAN"}>
+              {isPremium ? "Premium" : "Membership"}
+            </SectionTitle>
             
             <GlassCard style={styles.premiumBanner} onPress={() => showPaywall("soft_upsell")} highlight>
               <View style={styles.premiumBannerHeader}>
