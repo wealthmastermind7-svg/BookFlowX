@@ -473,6 +473,10 @@ export default function SettingsScreen() {
                   <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
                   <ThemedText style={styles.featureText}>Unlimited booking links & QR codes</ThemedText>
                 </View>
+                <View style={{ height: 12 }} />
+                <ThemedText style={[styles.featureText, { fontSize: 12, fontStyle: 'italic', opacity: 0.7 }]}>
+                  Voice Booking available as optional add-on.
+                </ThemedText>
               </View>
 
               {!isPremium && (
@@ -589,6 +593,31 @@ export default function SettingsScreen() {
                 </Pressable>
               </View>
             </GlassCard>
+
+            <View style={{ height: 32 }} />
+
+            <SectionTitleBadge label="PLAN OVERVIEW">Your Plans</SectionTitleBadge>
+            <View style={{ gap: 12 }}>
+              <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => showPaywall("soft_upsell")}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="link" size={14} color="#fff" /></View>
+                  <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Booking Links</ThemedText>
+                </View>
+                <View style={{ backgroundColor: isPremium ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                  <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isPremium ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
+                </View>
+              </GlassCard>
+
+              <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => {}}>
+                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                  <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16, backgroundColor: 'rgba(255,255,255,0.05)' }]}><Feather name="mic" size={14} color="rgba(255,255,255,0.4)" /></View>
+                  <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Booking</ThemedText>
+                </View>
+                <View style={{ backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                  <ThemedText style={{ fontSize: 10, fontWeight: '800', color: 'rgba(255,255,255,0.4)' }}>NOT ACTIVE</ThemedText>
+                </View>
+              </GlassCard>
+            </View>
 
             <View style={{ height: 32 }} />
 
