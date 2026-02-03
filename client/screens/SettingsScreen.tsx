@@ -611,10 +611,6 @@ export default function SettingsScreen() {
 
             <View style={{ height: 32 }} />
 
-            <SectionTitleBadge label="BUSINESS DETAILS">Public Profile</SectionTitleBadge>
-
-            <View style={{ height: 32 }} />
-
             <SectionTitle>Data</SectionTitle>
             <View style={styles.gridRow}>
               <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}>
