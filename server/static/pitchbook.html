@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookFlow Pitch Deck</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        display: ["Outfit", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                    },
+                },
+            },
+        };
+    </script>
+    <style>
+        body {
+            background-color: #000;
+            color: #fff;
+            overflow-x: hidden;
+        }
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            position: relative;
+            scroll-snap-align: start;
+            overflow: hidden;
+        }
+        .slides-container {
+            height: 100vh;
+            overflow-y: scroll;
+            scroll-snap-type: y mandatory;
+        }
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 2rem;
+            padding: 3rem;
+        }
+        .text-huge {
+            font-size: clamp(3rem, 10vw, 8rem);
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+        }
+        .gradient-text {
+            background: linear-gradient(to right, #fff, #666);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .badge {
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.1);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 2rem;
+        }
+        .cinematic-bg {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.3;
+            filter: grayscale(100%);
+        }
+        .video-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.5) 0%, rgba(0,0,0,0.9) 100%);
+            z-index: -1;
+        }
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float {
+            animation: float 6s ease-in-out infinite;
+        }
+    </style>
+</head>
+<body>
+    <div class="slides-container">
+        <!-- Slide 1: Cover -->
+        <div class="slide">
+            <div class="absolute inset-0 z-0">
+                <img src="https://lh3.googleusercontent.com/aida-public/AB6AXuBoZ5T5QJNpt1ZBiZWkxzvZakeY1Fl2Ad9jnjksncIXiZFsXRR50i6To5127M8yFOeCymOC428OP7wdwGcN5_AwIusGR0iQTaGfLbbrEqAdWixQedhPebguYEILnDsguT4X8I_0uEMmxk69eG_fRfncHdEOT3vhChs_LG1FLYIhXQpxnNSlMYUV2fOJvtDqyPiS6jagRL9DrPGdw3kd4DRZaf_GuA7qXp498swQF6G6K8EVq9w2Jby4gdQCyASvqDb11OvQfqTh6s0" class="cinematic-bg object-cover w-full h-full">
+                <div class="video-overlay"></div>
+            </div>
+            <div class="badge">Mobile-First SaaS</div>
+            <h1 class="text-huge font-display font-extrabold mb-4">Book<span class="text-white/40">Flow</span></h1>
+            <p class="text-2xl font-light mb-12 tracking-tight opacity-60">Smart Booking & Revenue Platform for Service Businesses</p>
+            <div class="flex space-x-8 opacity-40 text-sm font-mono uppercase tracking-widest">
+                <span>Investor Relations 2026</span>
+                <span>•</span>
+                <span>Confidential</span>
+            </div>
+        </div>
+
+        <!-- Slide 2: The Problem -->
+        <div class="slide">
+            <div class="max-w-5xl w-full">
+                <div class="badge">The Friction</div>
+                <h2 class="text-6xl font-display font-bold mb-12 leading-tight">Service businesses are <span class="gradient-text">losing revenue daily.</span></h2>
+                <div class="grid grid-cols-2 gap-8">
+                    <div class="glass">
+                        <span class="material-icons-round text-4xl mb-4 text-red-400">event_busy</span>
+                        <h3 class="text-xl font-bold mb-2">No-show Chaos</h3>
+                        <p class="opacity-60 font-light">Manual scheduling and fragmented tools lead to lost time and missed reminders.</p>
+                    </div>
+                    <div class="glass">
+                        <span class="material-icons-round text-4xl mb-4 text-yellow-400">payments</span>
+                        <h3 class="text-xl font-bold mb-2">Leaked Revenue</h3>
+                        <p class="opacity-60 font-light">Undervalued services and forgotten add-ons mean money is left on the table.</p>
+                    </div>
+                </div>
+                <p class="mt-12 text-2xl font-serif italic opacity-40">“Small businesses are leaving money on the table.”</p>
+            </div>
+        </div>
+
+        <!-- Slide 3: The Solution -->
+        <div class="slide">
+            <div class="max-w-5xl w-full">
+                <div class="badge">The Innovation</div>
+                <h2 class="text-6xl font-display font-bold mb-12 leading-tight">An intelligent, <span class="gradient-text">mobile-first</span> revenue engine.</h2>
+                <div class="grid grid-cols-3 gap-6">
+                    <div class="glass">
+                        <h4 class="font-bold mb-2">Instant QR</h4>
+                        <p class="text-sm opacity-60">Frictionless entry point via physical & digital touchpoints.</p>
+                    </div>
+                    <div class="glass">
+                        <h4 class="font-bold mb-2">Smart Upsell</h4>
+                        <p class="text-sm opacity-60">AI-driven suggestions that maximize transaction value.</p>
+                    </div>
+                    <div class="glass">
+                        <h4 class="font-bold mb-2">AI Voice</h4>
+                        <p class="text-sm opacity-60">Autonomous agents handling bookings 24/7 with zero overhead.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Product Showcase -->
+        <div class="slide">
+            <div class="badge">The Experience</div>
+            <div class="grid grid-cols-3 gap-8 w-full max-w-6xl">
+                <div class="flex flex-col items-center">
+                    <div class="glass w-full aspect-[9/16] mb-4 overflow-hidden relative group">
+                        <img src="/attached_assets/image_1770108831377.png" class="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    <p class="font-bold uppercase tracking-widest text-xs opacity-40">Frictionless Booking</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="glass w-full aspect-[9/16] mb-4 overflow-hidden relative group">
+                         <img src="/attached_assets/IMG_3393_1770102713106.jpeg" class="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    <p class="font-bold uppercase tracking-widest text-xs opacity-40">Smart Revenue Engine</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="glass w-full aspect-[9/16] mb-4 overflow-hidden relative group">
+                        <img src="/attached_assets/IMG_3394_1770102713106.jpeg" class="w-full h-full object-cover grayscale opacity-60 group-hover:grayscale-0 transition-all duration-700">
+                    </div>
+                    <p class="font-bold uppercase tracking-widest text-xs opacity-40">Automated Engagement</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 5: Market -->
+        <div class="slide">
+            <div class="max-w-4xl text-center">
+                <div class="badge">The Opportunity</div>
+                <h2 class="text-huge font-display font-extrabold mb-8">Massive <span class="opacity-40">&</span> Recurring</h2>
+                <p class="text-2xl font-light opacity-60 leading-relaxed">
+                    Millions of appointment-based businesses globally. Salons, Fitness, Trades, and Consultants moving to a unified SaaS layer.
+                </p>
+            </div>
+        </div>
+
+        <!-- Slide 6: Business Model -->
+        <div class="slide">
+            <div class="max-w-5xl w-full">
+                <div class="badge">Monetization</div>
+                <h2 class="text-6xl font-display font-bold mb-12">Core SaaS <span class="text-white/20">+</span> Add-ons</h2>
+                <div class="flex flex-col space-y-4">
+                    <div class="glass flex justify-between items-center">
+                        <span class="text-xl">Premium Subscription</span>
+                        <span class="font-mono text-white/40 uppercase tracking-tighter">Recurring</span>
+                    </div>
+                    <div class="glass flex justify-between items-center border-l-4 border-l-white">
+                        <span class="text-xl">AI Voice Minutes</span>
+                        <span class="font-mono text-white/40 uppercase tracking-tighter">Usage-Based</span>
+                    </div>
+                    <div class="glass flex justify-between items-center">
+                        <span class="text-xl">Revenue Optimization AI</span>
+                        <span class="font-mono text-white/40 uppercase tracking-tighter">Enterprise</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 8: Competitive Advantage -->
+        <div class="slide">
+             <div class="max-w-4xl text-center">
+                <div class="badge">The Edge</div>
+                <h2 class="text-6xl font-display font-bold mb-12">Most tools schedule. <br><span class="gradient-text">BookFlow optimizes.</span></h2>
+                <div class="flex justify-center space-x-12">
+                    <div class="text-left">
+                        <h4 class="font-bold text-red-400 mb-2">The Legacy</h4>
+                        <ul class="text-sm opacity-40 space-y-1">
+                            <li>• Static Calendars</li>
+                            <li>• Passive Booking</li>
+                            <li>• High Churn</li>
+                        </ul>
+                    </div>
+                    <div class="w-px bg-white/10"></div>
+                    <div class="text-left">
+                        <h4 class="font-bold text-green-400 mb-2">BookFlow</h4>
+                        <ul class="text-sm opacity-60 space-y-1">
+                            <li>• Dynamic Revenue AI</li>
+                            <li>• Autonomous Voice</li>
+                            <li>• Viral QR Loops</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 12: The Ask -->
+        <div class="slide">
+            <div class="max-w-4xl text-center">
+                <div class="badge">The Future</div>
+                <h2 class="text-huge font-display font-extrabold mb-8">Ready <span class="opacity-40">for</span> Scale.</h2>
+                <p class="text-2xl font-light mb-12 opacity-60 leading-relaxed">
+                    Seeking strategic partnerships and investment to accelerate distribution and finalize our global AI infrastructure.
+                </p>
+                <div class="glass inline-block text-left px-12 py-8">
+                    <p class="text-xs uppercase tracking-widest opacity-40 mb-2">Connect with us</p>
+                    <p class="text-xl font-bold">hello@confirmbooking.online</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
