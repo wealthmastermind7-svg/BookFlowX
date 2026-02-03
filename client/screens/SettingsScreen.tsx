@@ -435,11 +435,11 @@ export default function SettingsScreen() {
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
             {isTrialActive && !isPremium && (
-              <GlassCard style={{ marginBottom: 24, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <View style={{ flex: 1 }}>
+              <GlassCard style={{ marginBottom: 24, paddingVertical: 16, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                  <View style={{ flex: 1, minWidth: 200 }}>
                     <ThemedText style={{ fontSize: 16, fontWeight: '700', marginBottom: 4 }}>Free Trial Active</ThemedText>
-                    <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                    <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 18 }}>
                       {trialDaysLeft} days left to use booking links & QR codes for free.
                     </ThemedText>
                   </View>
@@ -450,9 +450,18 @@ export default function SettingsScreen() {
               </GlassCard>
             )}
 
-            <SectionTitle badge={isPremium ? "PREMIUM" : (isTrialActive ? "TRIAL" : "BASIC PLAN")}>
-              {isPremium ? "Premium" : "Membership"}
-            </SectionTitle>
+            <View style={styles.sectionHeader}>
+              <ThemedText style={styles.sectionTitle}>
+                {isPremium ? "Premium" : "Membership"}
+              </ThemedText>
+              {isPremium ? (
+                <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>PREMIUM</ThemedText></View>
+              ) : isTrialActive ? (
+                <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>TRIAL</ThemedText></View>
+              ) : (
+                <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>BASIC PLAN</ThemedText></View>
+              )}
+            </View>
             
             <GlassCard style={styles.premiumBanner} onPress={() => showPaywall("soft_upsell")} highlight>
               <View style={styles.premiumBannerHeader}>
@@ -795,7 +804,23 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   overlay: { flex: 1 },
-  sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12 },
+  sectionTitleRow: { 
+    flexDirection: "row", 
+    alignItems: "flex-end", 
+    justifyContent: "space-between", 
+    marginBottom: 24, 
+    marginTop: 12,
+    flexWrap: 'wrap',
+    gap: 12,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 20,
+    flexWrap: 'wrap',
+    gap: 12,
+  },
   sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2.5 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
