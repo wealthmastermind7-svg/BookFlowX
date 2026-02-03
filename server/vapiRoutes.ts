@@ -268,8 +268,37 @@ IMPORTANT:
               );
               
               if (service) {
-                const availability = await storage.getAvailability(business.id);
+                let availability = await storage.getAvailability(business.id);
                 const bookings = await storage.getBookings(business.id);
+                
+                // If no availability records exist, create default ones (Mon-Fri 9-5, Sat 10-2)
+                if (!availability || availability.length === 0) {
+                  console.log(`[Vapi] No availability found for ${business.id}, creating defaults`);
+                  for (let day = 1; day <= 5; day++) {
+                    await storage.setAvailability({
+                      businessId: business.id,
+                      dayOfWeek: day,
+                      startTime: "09:00",
+                      endTime: "17:00",
+                      isActive: true,
+                    });
+                  }
+                  await storage.setAvailability({
+                    businessId: business.id,
+                    dayOfWeek: 6,
+                    startTime: "10:00",
+                    endTime: "14:00",
+                    isActive: true,
+                  });
+                  await storage.setAvailability({
+                    businessId: business.id,
+                    dayOfWeek: 0,
+                    startTime: "09:00",
+                    endTime: "17:00",
+                    isActive: false,
+                  });
+                  availability = await storage.getAvailability(business.id);
+                }
                 
                 // Parse date to check day of week correctly (adjusting for local timezone)
                 const [year, month, day] = date.split('-').map(Number);
@@ -309,11 +338,17 @@ IMPORTANT:
                       : `Sorry, there are no available slots for ${serviceName} on ${date}. Please try another date.`
                   };
                 } else {
-                  console.log(`[Vapi] Day ${dayOfWeek} is not active or no availability found for business ${business.id}`);
+                  // Provide more helpful message with next available days
+                  const dayNames = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+                  const openDays = availability.filter(a => a.isActive).map(a => dayNames[a.dayOfWeek]);
+                  
+                  console.log(`[Vapi] Day ${dayOfWeek} (${dayNames[dayOfWeek]}) is not active. Open days: ${openDays.join(", ")}`);
                   result = { 
                     date, 
                     availableSlots: [],
-                    message: `Sorry, we're not open on that day (Day ${dayOfWeek}). Please choose a different date.`
+                    message: openDays.length > 0
+                      ? `Sorry, we're not open on ${dayNames[dayOfWeek]}. We're available on ${openDays.join(", ")}. Would you like to book on one of those days?`
+                      : `Sorry, we're not open on that day. Please try another date.`
                   };
                 }
               } else {

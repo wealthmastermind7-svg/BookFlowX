@@ -255,6 +255,40 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       const business = await storage.createBusiness(data);
+      
+      // Create default availability for new business (Mon-Fri 9am-5pm, Sat 10am-2pm)
+      try {
+        for (let day = 1; day <= 5; day++) {
+          await storage.setAvailability({
+            businessId: business.id,
+            dayOfWeek: day,
+            startTime: "09:00",
+            endTime: "17:00",
+            isActive: true,
+          });
+        }
+        // Saturday with reduced hours
+        await storage.setAvailability({
+          businessId: business.id,
+          dayOfWeek: 6,
+          startTime: "10:00",
+          endTime: "14:00",
+          isActive: true,
+        });
+        // Sunday closed
+        await storage.setAvailability({
+          businessId: business.id,
+          dayOfWeek: 0,
+          startTime: "09:00",
+          endTime: "17:00",
+          isActive: false,
+        });
+        console.log(`[Business] Created default availability for ${business.name}`);
+      } catch (availError) {
+        console.error("Error creating default availability:", availError);
+        // Don't fail the business creation if availability setup fails
+      }
+      
       const bookingUrl = getBookingUrlForBusiness(business, req);
       res.status(201).json({ ...business, bookingUrl });
     } catch (error) {
