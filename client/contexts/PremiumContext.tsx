@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect, ReactNode, useMemo } from "react";
 import { Alert, Platform } from "react-native";
 import * as Haptics from "expo-haptics";
 import { PaywallType, PlanType } from "@/components/PaywallModal";
@@ -15,10 +15,13 @@ import {
 
 interface PremiumState {
   isPremium: boolean;
+  trialEndsAt: string | null;
 }
 
 interface PremiumContextType {
   isPremium: boolean;
+  isTrialActive: boolean;
+  trialDaysLeft: number;
   canShare: boolean;
   canGenerateQr: boolean;
   canUseEmbeds: boolean;
@@ -46,6 +49,7 @@ interface PremiumProviderProps {
 
 export function PremiumProvider({ children, initialState }: PremiumProviderProps) {
   const [isPremium, setIsPremium] = useState(false);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
   const [stats, setStats] = useState({ services: 0, bookings: 0 });
   
   const [paywallVisible, setPaywallVisible] = useState(false);
@@ -56,6 +60,31 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   useEffect(() => {
     async function initPurchases() {
       const initialized = await initializeRevenueCat();
+      
+      // Load business and stats first to determine trial
+      try {
+        const business = await api.getBusiness();
+        if (business) {
+          if (business.createdAt) {
+            const createdDate = new Date(business.createdAt);
+            const trialDays = 7;
+            const endsAt = new Date(createdDate.getTime() + trialDays * 24 * 60 * 60 * 1000);
+            setTrialEndsAt(endsAt.toISOString());
+          }
+
+          const [services, bookings] = await Promise.all([
+            api.getServices(),
+            api.getBookings()
+          ]);
+          setStats({ 
+            services: services?.length || 0, 
+            bookings: bookings?.length || 0 
+          });
+        }
+      } catch (error) {
+        console.error("Error loading stats/trial for gating:", error);
+      }
+
       if (initialized) {
         const premium = await checkPremiumStatus();
         setIsPremium(premium);
@@ -63,49 +92,25 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
         const currentOfferings = await getOfferings();
         setOfferings(currentOfferings);
       }
-      
-      // Load stats for soft gating regardless of premium status
-      try {
-        const [services, bookings] = await Promise.all([
-          api.getServices(),
-          api.getBookings()
-        ]);
-        setStats({ 
-          services: services?.length || 0, 
-          bookings: bookings?.length || 0 
-        });
-      } catch (error) {
-        console.error("Error loading stats for gating:", error);
-      }
-
-      if (!initialized) {
-        // Fallback for web or Expo Go
-        try {
-          const businessId = await api.loadBusinessId();
-          if (businessId) {
-            const business = await api.getBusiness();
-            if (business && business.createdAt) {
-              const createdDate = new Date(business.createdAt);
-              const now = new Date();
-              const trialDays = 7;
-              const msPerDay = 24 * 60 * 60 * 1000;
-              const isTrialActive = now.getTime() - createdDate.getTime() < trialDays * msPerDay;
-              
-              // In trial, we consider them premium for gating purposes to allow testing in Expo Go
-              setIsPremium(isTrialActive);
-            }
-          }
-        } catch (error) {
-          console.error("Error checking trial status:", error);
-        }
-      }
     }
     initPurchases();
   }, []);
 
-  const canShare = isPremium;
-  const canGenerateQr = isPremium;
-  const canUseEmbeds = isPremium;
+  const isTrialActive = useMemo(() => {
+    if (isPremium) return false;
+    if (!trialEndsAt) return true; // Default to active if we don't know yet
+    return new Date() < new Date(trialEndsAt);
+  }, [isPremium, trialEndsAt]);
+
+  const trialDaysLeft = useMemo(() => {
+    if (!trialEndsAt) return 0;
+    const diff = new Date(trialEndsAt).getTime() - new Date().getTime();
+    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
+  }, [trialEndsAt]);
+
+  const canShare = isPremium || isTrialActive;
+  const canGenerateQr = isPremium || isTrialActive;
+  const canUseEmbeds = isPremium; // Embeds still premium-only
 
   const showPaywall = useCallback((type: PaywallType) => {
     try {
@@ -122,20 +127,16 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   }, []);
 
   const checkShareAccess = useCallback((): boolean => {
-    if (isPremium) return true;
-    // Allow if they have 0 or 1 booking (soft gate after first test booking)
-    if (stats.bookings <= 1) return true;
+    if (isPremium || isTrialActive) return true;
     showPaywall("share_limit");
     return false;
-  }, [isPremium, stats.bookings, showPaywall]);
+  }, [isPremium, isTrialActive, showPaywall]);
 
   const checkQrAccess = useCallback((): boolean => {
-    if (isPremium) return true;
-    // Allow if they have 0 or 1 booking
-    if (stats.bookings <= 1) return true;
+    if (isPremium || isTrialActive) return true;
     showPaywall("qr_limit");
     return false;
-  }, [isPremium, stats.bookings, showPaywall]);
+  }, [isPremium, isTrialActive, showPaywall]);
 
   const checkEmbedAccess = useCallback((): boolean => {
     if (isPremium) return true;
@@ -250,6 +251,8 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
     <PremiumContext.Provider
       value={{
         isPremium,
+        isTrialActive,
+        trialDaysLeft,
         canShare,
         canGenerateQr,
         canUseEmbeds,
