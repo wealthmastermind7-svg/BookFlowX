@@ -273,8 +273,11 @@ IMPORTANT:
                 
                 // Parse date to check day of week correctly (adjusting for local timezone)
                 const [year, month, day] = date.split('-').map(Number);
-                const bookingDate = new Date(year, month - 1, day);
-                const dayOfWeek = bookingDate.getDay();
+                // Create date in UTC to avoid local timezone shifts
+                const bookingDate = new Date(Date.UTC(year, month - 1, day));
+                const dayOfWeek = bookingDate.getUTCDay(); 
+                
+                console.log(`[Vapi] Checking availability for ${date}: Year=${year}, Month=${month}, Day=${day}, Calculated DayOfWeek=${dayOfWeek}`);
                 
                 const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
                 
@@ -295,6 +298,8 @@ IMPORTANT:
                       }
                     }
                   }
+
+                  console.log(`[Vapi] Found ${slots.length} available slots for ${date}`);
                   
                   result = { 
                     date, 
@@ -304,10 +309,11 @@ IMPORTANT:
                       : `Sorry, there are no available slots for ${serviceName} on ${date}. Please try another date.`
                   };
                 } else {
+                  console.log(`[Vapi] Day ${dayOfWeek} is not active or no availability found for business ${business.id}`);
                   result = { 
                     date, 
                     availableSlots: [],
-                    message: `Sorry, we're not open on that day. Please choose a different date.`
+                    message: `Sorry, we're not open on that day (Day ${dayOfWeek}). Please choose a different date.`
                   };
                 }
               } else {
