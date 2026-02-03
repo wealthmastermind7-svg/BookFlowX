@@ -30,12 +30,14 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
     console.log(`[Vapi Webhook] Received: ${messageType}`);
 
     if (messageType === "assistant-request") {
-      const businessSlug = payload.message.call?.metadata?.businessSlug || (payload.message as any).assistantOverrides?.variableValues?.businessSlug;
+      const businessSlug = payload.message.call?.metadata?.businessSlug || 
+                         (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
+                         (payload.message as any).metadata?.businessSlug;
       
       console.log(`[Vapi Webhook] Assistant request for slug: ${businessSlug}`);
       
       if (!businessSlug) {
-        console.warn("[Vapi Webhook] No business slug found in request");
+        console.warn("[Vapi Webhook] No business slug found in request. Payload:", JSON.stringify(payload, null, 2));
       }
 
       const business = await storage.getBusinessBySlug(businessSlug || "black-edition-auto-detailing-zpjd");
@@ -226,7 +228,9 @@ IMPORTANT:
 
     if (messageType === "tool-calls") {
       const toolCalls = payload.message.toolCalls || [];
-      const businessSlug = payload.message.call?.metadata?.businessSlug;
+      const businessSlug = payload.message.call?.metadata?.businessSlug || 
+                         (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
+                         (payload.message as any).metadata?.businessSlug;
       const results: any[] = [];
 
       for (const toolCall of toolCalls) {
@@ -265,7 +269,13 @@ IMPORTANT:
               
               if (service) {
                 const availability = await storage.getAvailability(business.id);
-                const dayOfWeek = new Date(date).getDay();
+                const bookings = await storage.getBookings(business.id);
+                
+                // Parse date to check day of week correctly (adjusting for local timezone)
+                const [year, month, day] = date.split('-').map(Number);
+                const bookingDate = new Date(year, month - 1, day);
+                const dayOfWeek = bookingDate.getDay();
+                
                 const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
                 
                 if (dayAvailability && dayAvailability.isActive) {
@@ -274,14 +284,24 @@ IMPORTANT:
                   const endHour = parseInt(dayAvailability.endTime.split(":")[0]);
                   
                   for (let hour = startHour; hour < endHour; hour++) {
-                    slots.push(`${hour.toString().padStart(2, "0")}:00`);
-                    slots.push(`${hour.toString().padStart(2, "0")}:30`);
+                    const times = ["00", "30"];
+                    for (const minute of times) {
+                      const timeStr = `${hour.toString().padStart(2, "0")}:${minute}`;
+                      
+                      // Check if slot is already booked
+                      const isBooked = bookings.some(b => b.date === date && b.time === timeStr && b.status !== 'cancelled');
+                      if (!isBooked) {
+                        slots.push(timeStr);
+                      }
+                    }
                   }
                   
                   result = { 
                     date, 
                     availableSlots: slots,
-                    message: `Available times on ${date}: ${slots.join(", ")}`
+                    message: slots.length > 0 
+                      ? `Available times on ${date}: ${slots.join(", ")}`
+                      : `Sorry, there are no available slots for ${serviceName} on ${date}. Please try another date.`
                   };
                 } else {
                   result = { 
