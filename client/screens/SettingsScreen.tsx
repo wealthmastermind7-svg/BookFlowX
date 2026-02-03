@@ -435,16 +435,16 @@ export default function SettingsScreen() {
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
             {isTrialActive && !isPremium && (
-              <GlassCard style={{ marginBottom: 24, paddingVertical: 16, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                  <View style={{ flex: 1, minWidth: 200 }}>
-                    <ThemedText style={{ fontSize: 16, fontWeight: '700', marginBottom: 4 }}>Free Trial Active</ThemedText>
-                    <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)', lineHeight: 18 }}>
+              <GlassCard style={{ marginBottom: 24, paddingHorizontal: 20, paddingVertical: 20, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: 16 }}>
+                  <View style={{ flex: 1 }}>
+                    <ThemedText style={{ fontSize: 18, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5 }}>Free Trial Active</ThemedText>
+                    <ThemedText style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 20, fontWeight: '400' }}>
                       {trialDaysLeft} days left to use booking links & QR codes for free.
                     </ThemedText>
                   </View>
-                  <View style={{ backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
-                    <ThemedText style={{ fontSize: 12, fontWeight: '800', color: '#000' }}>TRIAL</ThemedText>
+                  <View style={{ backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12, shadowColor: '#fff', shadowOffset: { width: 0, height: 0 }, shadowOpacity: 0.3, shadowRadius: 10 }}>
+                    <ThemedText style={{ fontSize: 12, fontWeight: '900', color: '#000', letterSpacing: 1 }}>TRIAL</ThemedText>
                   </View>
                 </View>
               </GlassCard>
