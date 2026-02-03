@@ -1868,21 +1868,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const stripe = await getUncachableStripeClient();
       
-      // Get price IDs from Stripe products
-      const priceIds: Record<string, string> = {
-        starter: "price_voice_starter",
-        pro: "price_voice_pro",
-        business: "price_voice_business",
+      // Voice tier pricing and details
+      const tierConfig: Record<string, { name: string; price: number; minutes: number }> = {
+        starter: { name: "Voice Agent Starter", price: 4900, minutes: 60 },
+        pro: { name: "Voice Agent Pro", price: 14900, minutes: 200 },
+        business: { name: "Voice Agent Business", price: 34900, minutes: 500 },
       };
+
+      const config = tierConfig[tier];
+      if (!config) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
 
       // Search for the product in Stripe
       const products = await stripe.products.search({
-        query: `metadata['tier']:'${tier}'`,
+        query: `metadata['tier']:'${tier}' AND metadata['type']:'voice_subscription'`,
         limit: 1,
       });
 
       let priceId: string | undefined;
+      
       if (products.data.length > 0) {
+        // Product exists, get its price
         const prices = await stripe.prices.list({
           product: products.data[0].id,
           active: true,
@@ -1890,9 +1897,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
         priceId = prices.data[0]?.id;
       }
-
+      
+      // Auto-create product and price if not found
       if (!priceId) {
-        return res.status(400).json({ error: "Price not found for tier" });
+        console.log(`[Voice Checkout] Creating Stripe product for tier: ${tier}`);
+        
+        const product = await stripe.products.create({
+          name: config.name,
+          description: `${config.minutes} minutes/month of AI voice booking`,
+          metadata: {
+            tier,
+            type: "voice_subscription",
+            minutes: String(config.minutes),
+          },
+        });
+
+        const price = await stripe.prices.create({
+          product: product.id,
+          unit_amount: config.price,
+          currency: "usd",
+          recurring: { interval: "month" },
+          metadata: { tier },
+        });
+
+        priceId = price.id;
+        console.log(`[Voice Checkout] Created product ${product.id} with price ${priceId}`);
       }
 
       const domain = process.env.REPLIT_DOMAINS?.split(",")[0];
