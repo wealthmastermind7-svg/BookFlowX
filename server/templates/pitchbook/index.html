@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>BookFlow Pitchbook</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,700;1,700&family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Round" rel="stylesheet"/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: "#000000",
+                        "background-dark": "#0A0A0A",
+                    },
+                    fontFamily: {
+                        display: ["Outfit", "sans-serif"],
+                        sans: ["Inter", "sans-serif"],
+                        serif: ["Playfair Display", "serif"],
+                    }
+                }
+            }
+        };
+    </script>
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .slide {
+            height: 100vh;
+            width: 100vw;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 4rem;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
+        .slide.active {
+            display: flex;
+        }
+        .text-huge {
+            font-size: clamp(3rem, 10vw, 6rem);
+            line-height: 0.9;
+            letter-spacing: -0.04em;
+        }
+        .cinematic-grain::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background-image: url(https://lh3.googleusercontent.com/aida-public/AB6AXuD5iEArMtwC3IEsYaJcLoJwqithXBbmQyY7JYaux6cN4z0ATbmAQ_6NdafzauqjuefUjeh9hpaFiPpM6GozoPIdtera99MuZBC0JPwAkFK1ydmV1fN0JhZQ-Yh6-YrxvfcckPlSBCH376k_qZfnGagUbUiyojpOV_HoXfmpu-0U5gCw9IGC-I4-vE1wp7ujRYk9Yo-km1lNlA9NQrSLDxerGC2_IG_NAfEdM7Js0ORthjJz8PprmekamuCVZTGbl_z6r3L9eCSuAyw);
+            opacity: 0.05;
+            pointer-events: none;
+            z-index: 10;
+        }
+    </style>
+</head>
+<body class="bg-black text-white font-sans antialiased cinematic-grain">
+
+    <!-- Navigation Overlay -->
+    <div class="fixed bottom-10 left-1/2 -translate-x-1/2 z-50 flex items-center gap-4 glass px-6 py-3 rounded-full">
+        <button onclick="prevSlide()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <span class="material-icons-round">chevron_left</span>
+        </button>
+        <span id="slideCounter" class="text-xs font-bold tracking-widest opacity-50 uppercase">1 / 12</span>
+        <button onclick="nextSlide()" class="p-2 hover:bg-white/10 rounded-full transition-colors">
+            <span class="material-icons-round">chevron_right</span>
+        </button>
+    </div>
+
+    <!-- Slide 1: Cover -->
+    <div class="slide active">
+        <div class="max-w-4xl text-center space-y-8">
+            <div class="flex items-center justify-center space-x-2 mb-12">
+                <span class="font-serif text-5xl font-bold tracking-tight">Book</span>
+                <span class="font-display text-5xl font-light tracking-tighter">Flow</span>
+            </div>
+            <h1 class="text-huge font-display font-extrabold uppercase">Smart Booking <br/>& Revenue Platform</h1>
+            <p class="text-xl text-white/40 tracking-widest uppercase font-bold">Mobile-First SaaS for Service Businesses</p>
+        </div>
+    </div>
+
+    <!-- Slide 2: The Problem -->
+    <div class="slide">
+        <div class="max-w-5xl w-full grid grid-cols-1 md:grid-cols-2 gap-20">
+            <div class="space-y-8">
+                <h2 class="text-6xl font-display font-extrabold tracking-tight">Service businesses are <span class="text-white/30">losing revenue daily.</span></h2>
+                <p class="text-2xl font-serif italic text-white/60">"Small businesses are leaving money on the table."</p>
+            </div>
+            <div class="space-y-6">
+                <div class="glass p-6 rounded-2xl flex items-center gap-4">
+                    <span class="material-icons-round text-red-500">cancel</span>
+                    <span class="text-lg opacity-80">No-shows and missed reminders</span>
+                </div>
+                <div class="glass p-6 rounded-2xl flex items-center gap-4">
+                    <span class="material-icons-round text-red-500">warning</span>
+                    <span class="text-lg opacity-80">Manual scheduling chaos</span>
+                </div>
+                <div class="glass p-6 rounded-2xl flex items-center gap-4">
+                    <span class="material-icons-round text-red-500">trending_down</span>
+                    <span class="text-lg opacity-80">Undervalued services & forgotten add-ons</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3: The Solution -->
+    <div class="slide">
+        <div class="max-w-5xl w-full text-center space-y-12">
+            <h2 class="text-7xl font-display font-extrabold uppercase tracking-tighter">The Solution: <span class="text-white/30">BookFlow</span></h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div class="glass p-8 rounded-3xl space-y-4">
+                    <span class="material-icons-round text-4xl">qr_code_2</span>
+                    <h3 class="text-xl font-bold">Instant QR Booking</h3>
+                </div>
+                <div class="glass p-8 rounded-3xl space-y-4">
+                    <span class="material-icons-round text-4xl">mic</span>
+                    <h3 class="text-xl font-bold">AI Voice Agent</h3>
+                </div>
+                <div class="glass p-8 rounded-3xl space-y-4">
+                    <span class="material-icons-round text-4xl">auto_fix_high</span>
+                    <h3 class="text-xl font-bold">Smart Upsells</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4: Product Demo -->
+    <div class="slide">
+        <div class="max-w-6xl w-full grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
+            <div class="grid grid-cols-2 gap-4">
+                <div class="aspect-[9/16] bg-zinc-900 rounded-2xl overflow-hidden glass">
+                    <img src="/attached_assets/IMG_3393_1770102713106.jpeg" class="w-full h-full object-cover opacity-80" />
+                </div>
+                <div class="aspect-[9/16] bg-zinc-900 rounded-2xl overflow-hidden glass translate-y-8">
+                    <img src="/attached_assets/IMG_3394_1770102713106.jpeg" class="w-full h-full object-cover opacity-80" />
+                </div>
+            </div>
+            <div class="space-y-8">
+                <h2 class="text-6xl font-display font-extrabold uppercase tracking-tighter leading-none">Smart <br/>Revenue <br/><span class="text-white/30">Engine</span></h2>
+                <ul class="space-y-4 text-xl opacity-60">
+                    <li>• Frictionless booking flow</li>
+                    <li>• Automated engagement</li>
+                    <li>• AI-powered insights</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5: Market Opportunity -->
+    <div class="slide">
+        <div class="max-w-4xl text-center space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase">Massive Market Opportunity</h2>
+            <div class="text-left space-y-8 glass p-12 rounded-[3rem]">
+                <div class="flex items-center justify-between border-b border-white/10 pb-6">
+                    <span class="text-2xl opacity-60">Global Service Economy</span>
+                    <span class="text-4xl font-serif">$XX Trillion</span>
+                </div>
+                <div class="grid grid-cols-2 gap-8 text-lg opacity-40">
+                    <span>Salons & Beauty</span>
+                    <span>Fitness Trainers</span>
+                    <span>Auto Detailing</span>
+                    <span>Medical Clinics</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 6: Business Model -->
+    <div class="slide">
+        <div class="max-w-4xl w-full space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase text-center">Business Model</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="glass p-10 rounded-[2.5rem] space-y-4">
+                    <h3 class="text-3xl font-bold">Core SaaS</h3>
+                    <p class="opacity-60">Premium booking features on a recurring monthly subscription.</p>
+                </div>
+                <div class="glass p-10 rounded-[2.5rem] space-y-4 border-white/20">
+                    <h3 class="text-3xl font-bold">Usage Add-Ons</h3>
+                    <p class="opacity-60">Voice agent minutes and advanced AI revenue tools.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 7: Traction -->
+    <div class="slide">
+        <div class="max-w-4xl w-full space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase text-center">Traction & Proof</h2>
+            <div class="space-y-6">
+                <div class="flex items-center gap-6 glass p-8 rounded-3xl">
+                    <span class="material-icons-round text-4xl text-green-500">check_circle</span>
+                    <div>
+                        <h4 class="text-2xl font-bold">iOS App in Review</h4>
+                        <p class="opacity-60">Functional product ready for App Store launch.</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-6 glass p-8 rounded-3xl">
+                    <span class="material-icons-round text-4xl text-green-500">check_circle</span>
+                    <div>
+                        <h4 class="text-2xl font-bold">Live Voice Agent</h4>
+                        <p class="opacity-60">Fully integrated Vapi.ai streaming voice booking.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 8: Competitive Advantage -->
+    <div class="slide">
+        <div class="max-w-5xl w-full text-center space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase">The Advantage</h2>
+            <div class="text-4xl font-serif italic opacity-80 leading-relaxed">
+                "Most tools schedule. <br/><span class="text-white underline underline-offset-8 decoration-1">BookFlow optimizes revenue.</span>"
+            </div>
+            <div class="flex flex-wrap justify-center gap-4 pt-8">
+                <span class="glass px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest">QR Instant Booking</span>
+                <span class="glass px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest">AI Insights</span>
+                <span class="glass px-6 py-2 rounded-full text-sm font-bold uppercase tracking-widest">Mobile-First UX</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 9: GTM Strategy -->
+    <div class="slide">
+        <div class="max-w-4xl w-full space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase text-center">Go-To-Market</h2>
+            <div class="grid grid-cols-2 gap-8">
+                <div class="glass p-8 rounded-3xl space-y-4">
+                    <h3 class="text-xl font-bold">Organic Discovery</h3>
+                    <p class="text-sm opacity-50">App Store optimization and niche community outreach.</p>
+                </div>
+                <div class="glass p-8 rounded-3xl space-y-4">
+                    <h3 class="text-xl font-bold">Viral Loops</h3>
+                    <p class="text-sm opacity-50">QR code distribution in physical stores.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 10: Roadmap -->
+    <div class="slide">
+        <div class="max-w-4xl w-full space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase text-center">The Roadmap</h2>
+            <div class="relative pt-8">
+                <div class="absolute left-1/2 top-0 bottom-0 w-px bg-white/10 -translate-x-1/2"></div>
+                <div class="space-y-12">
+                    <div class="flex justify-between items-center w-full">
+                        <div class="w-5/12 text-right opacity-40">2026 Q1</div>
+                        <div class="w-1 h-1 bg-white rounded-full z-10"></div>
+                        <div class="w-5/12 text-left font-bold uppercase">iOS Launch & Beta</div>
+                    </div>
+                    <div class="flex justify-between items-center w-full">
+                        <div class="w-5/12 text-right font-bold uppercase">Android & Web Portal</div>
+                        <div class="w-1 h-1 bg-white rounded-full z-10"></div>
+                        <div class="w-5/12 text-left opacity-40">2026 Q2</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 11: Team -->
+    <div class="slide">
+        <div class="max-w-4xl text-center space-y-12">
+            <h2 class="text-6xl font-display font-extrabold uppercase">The Team</h2>
+            <div class="glass p-16 rounded-[3rem] inline-block">
+                <div class="w-32 h-32 bg-zinc-800 rounded-full mx-auto mb-8 flex items-center justify-center">
+                    <span class="material-icons-round text-5xl">person</span>
+                </div>
+                <h3 class="text-3xl font-bold">Founder</h3>
+                <p class="text-xl opacity-50">Technical Vision & Execution</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 12: The Ask -->
+    <div class="slide">
+        <div class="max-w-4xl text-center space-y-12">
+            <h2 class="text-huge font-display font-extrabold uppercase">Join the <br/>Future</h2>
+            <div class="glass p-12 rounded-[2.5rem] space-y-6">
+                <p class="text-2xl opacity-60">Seeking partnerships & investment to scale infrastructure and AI expansion.</p>
+                <div class="pt-8 text-xl font-serif">bookflow.online</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentSlide = 0;
+        const slides = document.querySelectorAll('.slide');
+        const counter = document.getElementById('slideCounter');
+
+        function updateSlide() {
+            slides.forEach((s, i) => {
+                s.classList.toggle('active', i === currentSlide);
+            });
+            counter.innerText = `${currentSlide + 1} / ${slides.length}`;
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                updateSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                updateSlide();
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+            if (e.key === 'ArrowLeft') prevSlide();
+        });
+    </script>
+</body>
+</html>
