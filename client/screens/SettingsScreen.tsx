@@ -560,6 +560,47 @@ export default function SettingsScreen() {
 
             <View style={{ height: 32 }} />
 
+            <SectionTitleBadge label="REVENUE & SHARING">Booking Links</SectionTitleBadge>
+            <GlassCard style={styles.bookingCard}>
+              <View style={styles.bookingHeader}>
+                <View style={{ flex: 1 }}>
+                  <ThemedText style={styles.bookingTitle}>Share Booking Page</ThemedText>
+                  <ThemedText style={styles.bookingLinkText} numberOfLines={1}>
+                    {business?.bookingUrl || `https://${getBookingDomain()}/book/${business?.slug}`}
+                  </ThemedText>
+                </View>
+                <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}>
+                  <Feather name="copy" size={18} color="rgba(255,255,255,0.6)" />
+                </Pressable>
+              </View>
+              
+              <ThemedText style={styles.qrPlacementHint}>Place QR codes at checkout or in windows</ThemedText>
+              
+              <View style={styles.bookingActions}>
+                <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}>
+                  <Feather name="share-2" size={18} color="#fff" />
+                  <ThemedText style={styles.shareBtnText}>Share Link</ThemedText>
+                </Pressable>
+                <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}>
+                  <Feather name="maximize" size={18} color="#000" />
+                  <ThemedText style={styles.shareQrText}>Show QR</ThemedText>
+                </Pressable>
+              </View>
+            </GlassCard>
+
+            <GlassCard style={styles.embedCard} onPress={handleShowEmbedModal}>
+              <View style={styles.embedIconBox}>
+                <Feather name="code" size={20} color="#fff" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 20 }}>
+                <ThemedText style={styles.embedTitle}>Website Widget</ThemedText>
+                <ThemedText style={styles.embedDesc}>Embed your booking flow into any existing website</ThemedText>
+              </View>
+              <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" />
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
+
             <SectionTitleBadge label="BUSINESS DETAILS">Public Profile</SectionTitleBadge>
             <View style={styles.gridRow}>
               <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}>
