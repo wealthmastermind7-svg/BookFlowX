@@ -515,19 +515,32 @@ export default function SettingsScreen() {
               highlight
             >
               <View style={styles.voiceCardHeader}>
-                <View style={[styles.voiceIconCircle, { backgroundColor: getTierColor(voiceSubscription?.subscription.tier || "free") }]}>
-                  <Feather name="mic" size={20} color="#fff" />
+                <View style={styles.voiceIconGroup}>
+                  <View style={styles.voiceIconCircle}>
+                    <Feather name="mic" size={16} color="#fff" />
+                  </View>
+                  <View style={[styles.voiceIconCircle, { marginLeft: -8, backgroundColor: "rgba(255,255,255,0.1)" }]}>
+                    <Feather name="message-square" size={14} color="#fff" />
+                  </View>
+                  <View style={[styles.voiceIconCircle, { marginLeft: -8, backgroundColor: "rgba(255,255,255,0.05)" }]}>
+                    <Feather name="volume-2" size={14} color="#fff" />
+                  </View>
                 </View>
                 <View style={{ flex: 1, marginLeft: 16 }}>
-                  <ThemedText style={styles.voiceCardTitle}>Voice Agent Plan</ThemedText>
+                  <ThemedText style={styles.voiceCardTitle}>Voice Booking</ThemedText>
                   <ThemedText style={styles.voiceCardTier}>{getTierName(voiceSubscription?.subscription.tier || "free")}</ThemedText>
                 </View>
-                <View style={styles.upgradeBadge}>
-                  <ThemedText style={styles.upgradeBadgeText}>UPGRADE</ThemedText>
-                </View>
+                <Pressable onPress={() => setVoicePaywallVisible(true)} style={styles.previewLink}>
+                  <ThemedText style={styles.previewText}>PREVIEW</ThemedText>
+                  <Feather name="arrow-right" size={12} color="rgba(255,255,255,0.4)" />
+                </Pressable>
               </View>
 
-              {voiceSubscription && (
+              <ThemedText style={styles.voiceCardDesc}>
+                Let customers book appointments using natural voice conversation with AI.
+              </ThemedText>
+
+              {voiceSubscription && voiceSubscription.subscription.tier !== 'free' && (
                 <View style={styles.usageContainer}>
                   <View style={styles.usageHeader}>
                     <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
@@ -882,10 +895,14 @@ const styles = StyleSheet.create({
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
   shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
   voiceCard: { padding: 24, marginTop: 12 },
-  voiceCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
-  voiceIconCircle: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  voiceCardTitle: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
-  voiceCardTier: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: 2 },
+  voiceCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
+  voiceIconGroup: { flexDirection: "row", alignItems: "center" },
+  voiceIconCircle: { width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
+  voiceCardTitle: { fontSize: 28, fontWeight: "600", color: "#fff", letterSpacing: -0.5 },
+  voiceCardTier: { fontSize: 12, fontWeight: "500", color: "rgba(255,255,255,0.4)", marginTop: 2 },
+  voiceCardDesc: { fontSize: 16, color: "rgba(255,255,255,0.5)", lineHeight: 24, marginBottom: 24 },
+  previewLink: { flexDirection: "row", alignItems: "center", gap: 8 },
+  previewText: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
   upgradeBadge: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   upgradeBadgeText: { fontSize: 10, fontWeight: "800", color: "#fff", letterSpacing: 1 },
   usageContainer: { marginTop: 8 },

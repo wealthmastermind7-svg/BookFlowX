@@ -682,6 +682,24 @@
         business = await res.json();
         document.getElementById('business-name').textContent = business.name;
         document.getElementById('voice-link').href = `/voice/${businessSlug}`;
+
+        // Fetch voice subscription status
+        try {
+          const subRes = await fetch(`/api/businesses/${business.id}/voice-subscription`, {
+            headers: { 'x-owner-token': business.ownerToken || '' }
+          });
+          if (subRes.ok) {
+            const subData = await subRes.json();
+            // Only show voice booking if they have an active paid tier
+            if (!subData.subscription || subData.subscription.tier === 'free') {
+              document.getElementById('voice-link').style.display = 'none';
+            }
+          } else {
+            document.getElementById('voice-link').style.display = 'none';
+          }
+        } catch (e) {
+          document.getElementById('voice-link').style.display = 'none';
+        }
         
         const servicesRes = await fetch(`/api/businesses/${business.id}/services`);
         services = await servicesRes.json();
