@@ -36,7 +36,6 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       
       if (!businessSlug) {
         console.warn("[Vapi Webhook] No business slug found in request");
-        // Don't return early, try to handle it or provide a default
       }
 
       const business = await storage.getBusinessBySlug(businessSlug || "black-edition-auto-detailing-zpjd");
@@ -50,6 +49,22 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
             },
             voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
             firstMessage: "I'm sorry, but I couldn't find that business. Please check the booking link and try again."
+          }
+        });
+      }
+
+      // Enforcement: Check if business has minutes left
+      const sub = await storage.getVoiceSubscription(business.id);
+      if (sub && sub.minutesUsed >= sub.minutesLimit) {
+        return res.json({
+          assistant: {
+            model: {
+              provider: "openai",
+              model: "gpt-4o-mini",
+              messages: [{ role: "system", content: "Trial minutes exhausted." }]
+            },
+            voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
+            firstMessage: `I'm sorry, but ${business.name} has reached their voice booking limit for this month. Please use our online booking link instead.`
           }
         });
       }

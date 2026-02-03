@@ -756,7 +756,16 @@ export default function SettingsScreen() {
         onRequestClose={() => setVoicePaywallVisible(false)}
       >
         <VoiceAgentPaywall 
-          onClose={() => setVoicePaywallVisible(false)}
+          businessId={business?.id || ""}
+          onClose={() => {
+            setVoicePaywallVisible(false);
+            // Open voice preview link after closing paywall if not exhausted
+            const minutesUsed = voiceSubscription?.subscription.minutesUsed || 0;
+            const minutesLimit = voiceSubscription?.subscription.minutesLimit || 5;
+            if (minutesUsed < minutesLimit) {
+              navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" });
+            }
+          }}
           onSubscribe={handleVoiceSubscribe}
           isLoading={voiceCheckoutLoading}
         />
