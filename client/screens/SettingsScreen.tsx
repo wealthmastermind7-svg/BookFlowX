@@ -336,25 +336,12 @@ export default function SettingsScreen() {
   };
 
   const handleVoiceSubscribe = async (tierId: string) => {
-    if (!business) return;
-    setVoiceCheckoutLoading(true);
+    // Voice subscriptions are now handled via RevenueCat in VoiceAgentPaywall
+    // This callback is kept for compatibility but purchases happen inside the paywall
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-      
-      const response = await api.createVoiceCheckout(business.id, tierId);
-      if (response.url) {
-        if (Platform.OS === 'web') {
-          window.location.href = response.url;
-        } else {
-          await Linking.openURL(response.url);
-        }
-      }
-    } catch (error) {
-      console.error("Voice checkout error:", error);
-      Alert.alert("Error", "Failed to start checkout. Please try again.");
-    } finally {
-      setVoiceCheckoutLoading(false);
-    }
+    } catch {}
+    setVoicePaywallVisible(false);
   };
 
   const handleSaveBusinessField = async () => {
