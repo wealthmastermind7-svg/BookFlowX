@@ -434,7 +434,7 @@ export default function SettingsScreen() {
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.88)" }}>
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
-            <SectionTitle badge={isPremium ? "ACTIVE" : "FREE"}>Premium</SectionTitle>
+            <SectionTitle badge={isPremium ? "PREMIUM" : "BASIC PLAN"}>Premium</SectionTitle>
             
             <GlassCard style={styles.premiumBanner} onPress={() => showPaywall("soft_upsell")} highlight>
               <View style={styles.premiumBannerHeader}>
@@ -461,7 +461,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={styles.featureRow}>
                   <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
-                  <ThemedText style={styles.featureText}>Instant service setup in seconds</ThemedText>
+                  <ThemedText style={styles.featureText}>Smart service setup in seconds</ThemedText>
                 </View>
                 <View style={styles.featureRow}>
                   <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
