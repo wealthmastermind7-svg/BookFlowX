@@ -72,16 +72,51 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
 
                 <View style={styles.tierMinutes}>
                   <Feather name="clock" size={16} color="rgba(255,255,255,0.6)" />
-                  <ThemedText style={styles.minutesText}>{formatMinutes(tier.minutes)} included</ThemedText>
+                  <ThemedText style={styles.minutesText}>
+                    {tier.id === 'business' ? '8 hr 20 min included' : `${formatMinutes(tier.minutes)} included`}
+                  </ThemedText>
                 </View>
 
                 <View style={styles.featuresList}>
-                  {tier.features.map((feature, idx) => (
-                    <View key={idx} style={styles.featureItem}>
-                      <Feather name="check" size={14} color="#fff" />
-                      <ThemedText style={styles.featureText}>{feature}</ThemedText>
-                    </View>
-                  ))}
+                  {tier.id === 'business' ? (
+                    <>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>500 minutes/month</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>Voice booking</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>Email confirmations</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>Advanced analytics</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>Priority support</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>Custom voice</ThemedText>
+                      </View>
+                      <View style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>API access</ThemedText>
+                      </View>
+                    </>
+                  ) : (
+                    tier.features.map((feature, idx) => (
+                      <View key={idx} style={styles.featureItem}>
+                        <Feather name="check" size={14} color="#fff" />
+                        <ThemedText style={styles.featureText}>{feature}</ThemedText>
+                      </View>
+                    ))
+                  )}
                 </View>
 
                 <View style={[styles.subscribeBtn, tier.popular && styles.popularBtn]}>

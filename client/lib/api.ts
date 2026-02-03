@@ -552,6 +552,10 @@ class ApiClient {
   async getOwnerToken(): Promise<string | null> {
     return getSecureToken();
   }
+
+  async createVoiceCheckout(businessId: string, tierId: string): Promise<{ url: string }> {
+    return makeRequest<{ url: string }>("POST", "/api/voice-checkout", { businessId, tierId });
+  }
 }
 
 export interface EmbedCode {
