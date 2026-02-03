@@ -123,17 +123,20 @@ BookFlow utilizes a decoupled frontend and backend architecture.
   - **Database Schema**: `voiceSubscriptions`, `voiceCallLogs` tables
   - **Call Tracking**: Automatic logging of call duration, customer info, booking conversions
   - **Usage Enforcement**: Blocks voice page when minutes exhausted, redirects to online booking
-  - **Billing Portal**: `/billing/{businessId}` web page for Stripe subscription management
+  - **Billing Architecture (Apple-Compliant)**:
+    - **Layer 1 (In-App)**: RevenueCat + Apple App Store for iOS purchases
+      - `client/lib/revenuecat.ts`: Voice entitlements (voice_starter, voice_pro, voice_business)
+      - `client/components/VoiceAgentPaywall.tsx`: RevenueCat paywall with restore purchases
+      - Entitlement verification via `getVoiceEntitlement()`
+      - Platform-specific handling: Web users directed to App Store
+    - **Layer 2 (Web - Future)**: Stripe for web-only billing portal (deferred)
   - **API Endpoints**:
     - `GET /api/businesses/:id/voice-subscription` - Get subscription status and usage
     - `GET /api/businesses/:id/voice-calls` - Get call history
     - `GET /api/voice-tiers` - Get available subscription tiers
-    - `POST /api/voice-checkout` - Create Stripe checkout session
-    - `POST /api/voice-billing-portal` - Open Stripe billing portal
-  - **Stripe Integration**: Checkout sessions, subscription webhooks, billing portal
   - **Client Hook**: `useVoiceSubscription` in `client/hooks/useVoiceSubscription.ts`
+  - **RevenueCat Setup**: Entitlements: `voice_starter`, `voice_pro`, `voice_business`
   - **Settings UI**: Voice Agent Plan card showing tier, usage meter, calls, bookings, conversion rate
-  - **App Store Strategy**: Web billing portal for business owners (avoids Apple's 30% cut)
 
 ## AI Feature Messaging (Apple-Safe)
 - Use: "Smart suggestions", "Automatically adapts", "Learns from patterns", "Helps reduce no-shows"
