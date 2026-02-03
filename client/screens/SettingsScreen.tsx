@@ -38,6 +38,8 @@ import { CURRENCY_OPTIONS } from "@/lib/currency";
 import Svg, { Circle } from "react-native-svg";
 import { useVoiceSubscription, getTierColor, getTierName, formatMinutes } from "@/hooks/useVoiceSubscription";
 
+import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
+
 type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
@@ -131,6 +133,8 @@ export default function SettingsScreen() {
   const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
+  const [voicePaywallVisible, setVoicePaywallVisible] = useState(false);
+  const [voiceCheckoutLoading, setVoiceCheckoutLoading] = useState(false);
 
   const [bookingsCount, setBookingsCount] = useState(0);
   const [servicesCount, setServicesCount] = useState(0);
@@ -331,6 +335,28 @@ export default function SettingsScreen() {
     setEditModalVisible(true);
   };
 
+  const handleVoiceSubscribe = async (tierId: string) => {
+    if (!business) return;
+    setVoiceCheckoutLoading(true);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      
+      const response = await api.createVoiceCheckout(business.id, tierId);
+      if (response.url) {
+        if (Platform.OS === 'web') {
+          window.location.href = response.url;
+        } else {
+          await Linking.openURL(response.url);
+        }
+      }
+    } catch (error) {
+      console.error("Voice checkout error:", error);
+      Alert.alert("Error", "Failed to start checkout. Please try again.");
+    } finally {
+      setVoiceCheckoutLoading(false);
+    }
+  };
+
   const handleSaveBusinessField = async () => {
     if (!business || !editingField) return;
     setEditLoading(true);
@@ -479,6 +505,46 @@ export default function SettingsScreen() {
               <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
               <ThemedText style={styles.restoreText}>Restore Previous Purchases</ThemedText>
               {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
+            </GlassCard>
+
+            <View style={{ height: 32 }} />
+
+            <GlassCard 
+              style={styles.voiceCard} 
+              onPress={() => setVoicePaywallVisible(true)}
+              highlight
+            >
+              <View style={styles.voiceCardHeader}>
+                <View style={[styles.voiceIconCircle, { backgroundColor: getTierColor(voiceSubscription?.subscription.tier || "free") }]}>
+                  <Feather name="mic" size={20} color="#fff" />
+                </View>
+                <View style={{ flex: 1, marginLeft: 16 }}>
+                  <ThemedText style={styles.voiceCardTitle}>Voice Agent Plan</ThemedText>
+                  <ThemedText style={styles.voiceCardTier}>{getTierName(voiceSubscription?.subscription.tier || "free")}</ThemedText>
+                </View>
+                <View style={styles.upgradeBadge}>
+                  <ThemedText style={styles.upgradeBadgeText}>UPGRADE</ThemedText>
+                </View>
+              </View>
+
+              {voiceSubscription && (
+                <View style={styles.usageContainer}>
+                  <View style={styles.usageHeader}>
+                    <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
+                    <ThemedText style={styles.usageValue}>
+                      {voiceSubscription.subscription.minutesUsed} / {voiceSubscription.subscription.minutesLimit}
+                    </ThemedText>
+                  </View>
+                  <View style={styles.progressBarBg}>
+                    <View 
+                      style={[
+                        styles.progressBarFill, 
+                        { width: `${Math.min(voiceSubscription.usage.percentUsed, 100)}%` }
+                      ]} 
+                    />
+                  </View>
+                </View>
+              )}
             </GlassCard>
 
             <View style={{ height: 32 }} />
@@ -670,6 +736,19 @@ export default function SettingsScreen() {
         </View>
       </ImageBackground>
 
+      <Modal
+        visible={voicePaywallVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setVoicePaywallVisible(false)}
+      >
+        <VoiceAgentPaywall 
+          onClose={() => setVoicePaywallVisible(false)}
+          onSubscribe={handleVoiceSubscribe}
+          isLoading={voiceCheckoutLoading}
+        />
+      </Modal>
+
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
@@ -802,6 +881,19 @@ const styles = StyleSheet.create({
   shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
   shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
+  voiceCard: { padding: 24, marginTop: 12 },
+  voiceCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 20 },
+  voiceIconCircle: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  voiceCardTitle: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
+  voiceCardTier: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: 2 },
+  upgradeBadge: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
+  upgradeBadgeText: { fontSize: 10, fontWeight: "800", color: "#fff", letterSpacing: 1 },
+  usageContainer: { marginTop: 8 },
+  usageHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
+  usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },
+  progressBarBg: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" },
+  progressBarFill: { height: "100%", backgroundColor: "#fff", borderRadius: 3 },
   embedCard: { flexDirection: "row", alignItems: "center", padding: 24, marginTop: 16 },
   embedIconBox: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
   embedTitle: { fontSize: 18, fontWeight: "700", color: "#fff" },
