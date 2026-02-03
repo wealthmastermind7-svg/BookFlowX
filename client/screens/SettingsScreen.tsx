@@ -113,7 +113,7 @@ export default function SettingsScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings } = usePremium();
+  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings, isTrialActive, trialDaysLeft } = usePremium();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -434,7 +434,23 @@ export default function SettingsScreen() {
         <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.88)" }}>
           <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
-            <SectionTitle badge={isPremium ? "PREMIUM" : "BASIC PLAN"}>
+            {isTrialActive && !isPremium && (
+              <GlassCard style={{ marginBottom: 24, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <View style={{ flex: 1 }}>
+                    <ThemedText style={{ fontSize: 16, fontWeight: '700', marginBottom: 4 }}>Free Trial Active</ThemedText>
+                    <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.6)' }}>
+                      {trialDaysLeft} days left to use booking links & QR codes for free.
+                    </ThemedText>
+                  </View>
+                  <View style={{ backgroundColor: '#fff', paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 }}>
+                    <ThemedText style={{ fontSize: 12, fontWeight: '800', color: '#000' }}>TRIAL</ThemedText>
+                  </View>
+                </View>
+              </GlassCard>
+            )}
+
+            <SectionTitle badge={isPremium ? "PREMIUM" : (isTrialActive ? "TRIAL" : "BASIC PLAN")}>
               {isPremium ? "Premium" : "Membership"}
             </SectionTitle>
             
@@ -490,6 +506,14 @@ export default function SettingsScreen() {
                     <ThemedText style={styles.priceAmount}>Lifetime</ThemedText>
                     <ThemedText style={styles.pricePeriod}>access available</ThemedText>
                   </View>
+                </View>
+              )}
+              
+              {!isPremium && isTrialActive && (
+                <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' }}>
+                  <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+                    Includes 7-day free trial for booking links and QR codes.
+                  </ThemedText>
                 </View>
               )}
             </GlassCard>
