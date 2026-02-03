@@ -220,6 +220,10 @@ function configureExpoAndLanding(app: express.Application) {
       });
     }
 
+    if (req.path === "/pitch") {
+      return res.sendFile(path.join(process.cwd(), "server", "static", "pitchbook.html"));
+    }
+
     next();
   });
 
