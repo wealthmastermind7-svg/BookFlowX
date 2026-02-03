@@ -2265,7 +2265,13 @@ When a customer wants to book:
 4. Ask for their email address
 5. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
 6. If they correct you, spell it back again until confirmed
-7. Confirm the booking details
+7. Once you have all information (service, date, time, name, email), USE THE create_booking FUNCTION to create the booking
+8. Confirm the booking details and provide the confirmation number
+
+FUNCTION TOOLS AVAILABLE:
+- list_services: Call this to get updated service information
+- get_available_slots: Call this to check availability for a specific date
+- create_booking: ALWAYS call this to finalize a booking - you MUST use this function to complete the booking
 
 EMAIL VERIFICATION:
 - Email addresses are easy to mishear. ALWAYS spell them back.
@@ -2308,18 +2314,100 @@ IMPORTANT:
         photography: "21m00Tcm4TlvDq8ikWAM",   // Rachel - calm, creative
       };
 
+      // Build serverUrl from production domain or current host
+      const serverUrl = process.env.REPLIT_DOMAINS?.split(",")[0]
+        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
+        : `${req.protocol}://${req.get('host')}/api/vapi/server-url`;
+
       const inlineAssistant = {
         name: `${config.businessName} Booking Assistant`,
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
-          messages: [{ role: "system", content: systemPrompt }]
+          messages: [{ role: "system", content: systemPrompt }],
+          tools: [
+            {
+              type: "function",
+              function: {
+                name: "list_services",
+                description: "List all available services with their prices and durations",
+                parameters: {
+                  type: "object",
+                  properties: {},
+                  required: []
+                }
+              }
+            },
+            {
+              type: "function",
+              function: {
+                name: "get_available_slots",
+                description: "Get available time slots for a specific date and service",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    date: {
+                      type: "string",
+                      description: "The date in YYYY-MM-DD format"
+                    },
+                    serviceName: {
+                      type: "string",
+                      description: "The name of the service"
+                    }
+                  },
+                  required: ["date", "serviceName"]
+                }
+              }
+            },
+            {
+              type: "function",
+              function: {
+                name: "create_booking",
+                description: "Create a new booking for a customer. Call this after collecting all required information.",
+                parameters: {
+                  type: "object",
+                  properties: {
+                    customerName: {
+                      type: "string",
+                      description: "The customer's full name"
+                    },
+                    customerEmail: {
+                      type: "string",
+                      description: "The customer's email address"
+                    },
+                    customerPhone: {
+                      type: "string",
+                      description: "The customer's phone number (optional)"
+                    },
+                    serviceName: {
+                      type: "string",
+                      description: "The name of the service to book"
+                    },
+                    date: {
+                      type: "string",
+                      description: "The booking date in YYYY-MM-DD format"
+                    },
+                    time: {
+                      type: "string",
+                      description: "The booking time in HH:MM format (24-hour)"
+                    }
+                  },
+                  required: ["customerName", "customerEmail", "serviceName", "date", "time"]
+                }
+              }
+            }
+          ]
         },
         voice: {
           provider: "11labs",
           voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
         },
-        firstMessage: `Hi there! Thanks for calling ${config.businessName}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`
+        firstMessage: `Hi there! Thanks for calling ${config.businessName}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
+        serverUrl: serverUrl,
+        serverMessages: ["tool-calls", "end-of-call-report"],
+        metadata: {
+          businessSlug: req.params.slug
+        }
       };
 
       // Use the new voice-booking.html template (Vapi official approach)
