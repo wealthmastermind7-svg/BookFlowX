@@ -98,24 +98,18 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
                       </View>
                       <View style={styles.featureItem}>
                         <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>Priority support</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
                         <ThemedText style={styles.featureText}>Custom voice</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>API access</ThemedText>
                       </View>
                     </>
                   ) : (
-                    tier.features.map((feature, idx) => (
-                      <View key={idx} style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>{feature}</ThemedText>
-                      </View>
-                    ))
+                    tier.features
+                      .filter(f => !f.toLowerCase().includes('api access') && !f.toLowerCase().includes('priority support'))
+                      .map((feature, idx) => (
+                        <View key={idx} style={styles.featureItem}>
+                          <Feather name="check" size={14} color="#fff" />
+                          <ThemedText style={styles.featureText}>{feature}</ThemedText>
+                        </View>
+                      ))
                   )}
                 </View>
 
