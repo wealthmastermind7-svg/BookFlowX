@@ -152,10 +152,10 @@
 
         <div class="relative z-20 max-w-4xl">
             <h1 class="text-huge font-display font-extrabold mb-8 animate-in fade-in slide-in-from-bottom-8 duration-1000">
-                Turn a link or QR code into <span class="text-black/40 dark:text-white/40">instant bookings.</span>
+                Turn a link or <span class="text-black/40 dark:text-white/40">voice call</span> into <span class="text-black/40 dark:text-white/40">instant bookings.</span>
             </h1>
             <p class="text-xl md:text-2xl text-black/60 dark:text-white/60 font-light mb-12 max-w-2xl leading-relaxed animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-200">
-                BookFlow lets service businesses accept appointments in under 30 seconds, without calls, back-and-forth messages, or customer accounts.
+                BookFlow lets service businesses accept appointments in under 30 seconds via link, QR code, or our intelligent 24/7 Voice Booking Assistant.
             </p>
             <div class="flex flex-col sm:flex-row items-center gap-6 animate-in fade-in slide-in-from-bottom-8 duration-1000 delay-500">
                 <a href="https://apps.apple.com/app/bookflowx/id6756943439" class="group relative px-8 py-5 bg-black dark:bg-white text-white dark:text-black rounded-2xl font-bold text-lg overflow-hidden transition-all hover:scale-105 active:scale-95 flex items-center space-x-3">
@@ -203,6 +203,25 @@
     </header>
 
     <main class="max-w-lg mx-auto px-4 pb-32 space-y-12 cinematic-grain relative">
+        <section class="group relative overflow-hidden rounded-large min-h-[500px] flex flex-col justify-end p-8 reveal-on-scroll">
+            <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
+                <img alt="Voice booking assistant UI" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[2s] ease-out opacity-60 grayscale" src="/attached_assets/IMG_3393_1770102713106.jpeg"/>
+                <div class="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent"></div>
+            </div>
+            <div class="relative z-20 space-y-4">
+                <div class="text-white/50 text-xs font-bold tracking-widest uppercase mb-2">The Future</div>
+                <h2 class="text-4xl font-display font-bold text-white leading-tight">AI Voice <br/>Booking</h2>
+                <p class="text-neutral-400 font-light leading-relaxed">
+                    Deploy an intelligent assistant that speaks to your customers and manages your schedule in real-time.
+                </p>
+                <div class="pt-4 flex items-center gap-4">
+                    <div class="bg-white/20 text-white px-3 py-1.5 rounded-lg text-xs font-medium border border-white/30 flex items-center gap-2">
+                        <span class="material-symbols-rounded text-sm">mic</span> Live Streaming
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section class="group relative overflow-hidden rounded-large min-h-[500px] flex flex-col justify-end p-8 reveal-on-scroll">
             <div class="absolute inset-0 bg-neutral-900 overflow-hidden">
                 <img alt="Availability calendar background" class="w-full h-full object-cover scale-110 group-hover:scale-100 transition-transform duration-[2s] ease-out opacity-60 grayscale" src="/attached_assets/stock_images/modern_calendar_app_ec4b3b2f.jpg"/>
@@ -328,7 +347,27 @@
                 </p>
             </header>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Voice Booking Assistant -->
+                <div class="group relative p-8 rounded-3xl bg-white/10 border border-white/20 hover:bg-white/20 transition-all duration-500 reveal-on-scroll scale-105 shadow-2xl">
+                    <div class="absolute -top-4 -right-4 bg-white text-black text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tighter">New: Vapi AI</div>
+                    <div class="flex items-center gap-4 mb-6">
+                        <div class="w-12 h-12 rounded-2xl bg-white/20 flex items-center justify-center animate-pulse">
+                            <span class="material-symbols-rounded text-white text-2xl">mic</span>
+                        </div>
+                        <div>
+                            <h3 class="font-display font-bold text-xl">24/7 Voice Assistant</h3>
+                            <span class="text-xs text-white/40 uppercase tracking-widest font-bold">Never Miss a Call</span>
+                        </div>
+                    </div>
+                    <p class="text-white/80 leading-relaxed mb-6 font-medium">
+                        Our intelligent voice agent answers calls, answers questions, and books appointments directly into your calendar while you sleep.
+                    </p>
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 rounded-full bg-white/10 text-white text-xs">Vapi.ai Streaming</span>
+                        <span class="px-3 py-1 rounded-full bg-white/10 text-white text-xs">Human-like Voice</span>
+                    </div>
+                </div>
+
                 <!-- Smart No-Show Prevention -->
                 <div class="group relative p-8 rounded-3xl bg-white/5 border border-white/10 hover:bg-white/10 transition-all duration-500 reveal-on-scroll">
                     <div class="flex items-center gap-4 mb-6">
