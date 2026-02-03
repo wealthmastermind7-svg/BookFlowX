@@ -45,7 +45,8 @@ interface PremiumProviderProps {
 }
 
 export function PremiumProvider({ children, initialState }: PremiumProviderProps) {
-  const [isPremium, setIsPremium] = useState(true);
+  const [isPremium, setIsPremium] = useState(false);
+  const [stats, setStats] = useState({ services: 0, bookings: 0 });
   
   const [paywallVisible, setPaywallVisible] = useState(false);
   const [paywallType, setPaywallType] = useState<PaywallType>("soft_upsell");
@@ -61,7 +62,23 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
         
         const currentOfferings = await getOfferings();
         setOfferings(currentOfferings);
-      } else {
+      }
+      
+      // Load stats for soft gating regardless of premium status
+      try {
+        const [services, bookings] = await Promise.all([
+          api.getServices(),
+          api.getBookings()
+        ]);
+        setStats({ 
+          services: services?.length || 0, 
+          bookings: bookings?.length || 0 
+        });
+      } catch (error) {
+        console.error("Error loading stats for gating:", error);
+      }
+
+      if (!initialized) {
         // Fallback for web or Expo Go
         try {
           const businessId = await api.loadBusinessId();
@@ -106,15 +123,19 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
 
   const checkShareAccess = useCallback((): boolean => {
     if (isPremium) return true;
+    // Allow if they have 0 or 1 booking (soft gate after first test booking)
+    if (stats.bookings <= 1) return true;
     showPaywall("share_limit");
     return false;
-  }, [isPremium, showPaywall]);
+  }, [isPremium, stats.bookings, showPaywall]);
 
   const checkQrAccess = useCallback((): boolean => {
     if (isPremium) return true;
+    // Allow if they have 0 or 1 booking
+    if (stats.bookings <= 1) return true;
     showPaywall("qr_limit");
     return false;
-  }, [isPremium, showPaywall]);
+  }, [isPremium, stats.bookings, showPaywall]);
 
   const checkEmbedAccess = useCallback((): boolean => {
     if (isPremium) return true;
