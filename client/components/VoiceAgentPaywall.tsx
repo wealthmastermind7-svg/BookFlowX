@@ -1,11 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator, Dimensions, Alert } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, ActivityIndicator, Dimensions, Alert, Platform } from "react-native";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { ThemedText } from "@/components/ThemedText";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { useVoiceTiers, formatMinutes, useVoiceSubscription } from "@/hooks/useVoiceSubscription";
 import { api } from "@/lib/api";
+import { 
+  getVoiceOfferings, 
+  purchaseVoicePackage, 
+  getVoiceEntitlement,
+  restorePurchases,
+  VOICE_TIER_CONFIG,
+  VoiceTier,
+  PurchasesPackage,
+  PurchasesOffering
+} from "@/lib/revenuecat";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
@@ -19,24 +29,89 @@ interface VoiceAgentPaywallProps {
 export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({ 
   onClose, 
   onSubscribe, 
-  isLoading,
+  isLoading: externalLoading,
   businessId
 }) => {
   const { isDark } = useTheme();
   const [ownerToken, setOwnerToken] = useState<string | null>(null);
+  const [offerings, setOfferings] = useState<PurchasesOffering | null>(null);
+  const [purchaseLoading, setPurchaseLoading] = useState(false);
+  const [restoreLoading, setRestoreLoading] = useState(false);
+  const [voiceTier, setVoiceTier] = useState<VoiceTier>("free");
   
   useEffect(() => {
     api.getOwnerToken().then(setOwnerToken);
+    loadOfferings();
+    checkVoiceTier();
   }, []);
 
-  const { data: tiersData, isLoading: tiersLoading } = useVoiceTiers();
-  const { data: voiceSub, refetch: refetchSub } = useVoiceSubscription(businessId, ownerToken || "");
+  const loadOfferings = async () => {
+    const off = await getVoiceOfferings();
+    setOfferings(off);
+  };
 
-  const tiers = tiersData?.tiers || [];
-  const currentTier = voiceSub?.subscription.tier || "free";
+  const checkVoiceTier = async () => {
+    const tier = await getVoiceEntitlement();
+    setVoiceTier(tier);
+  };
+
+  const handlePurchase = async (pkg: PurchasesPackage) => {
+    if (Platform.OS === "web") {
+      Alert.alert("Not Available", "Purchases are only available in the mobile app. Please download BookFlowX from the App Store.");
+      return;
+    }
+
+    setPurchaseLoading(true);
+    try {
+      const result = await purchaseVoicePackage(pkg);
+      if (result.success) {
+        setVoiceTier(result.tier);
+        Alert.alert("Success!", "Your voice subscription is now active.", [
+          { text: "OK", onPress: onClose }
+        ]);
+      } else if (result.error !== "cancelled") {
+        Alert.alert("Purchase Failed", result.error || "Please try again.");
+      }
+    } finally {
+      setPurchaseLoading(false);
+    }
+  };
+
+  const handleRestore = async () => {
+    if (Platform.OS === "web") {
+      Alert.alert("Not Available", "Restore is only available in the mobile app.");
+      return;
+    }
+
+    setRestoreLoading(true);
+    try {
+      const result = await restorePurchases();
+      const tier = await getVoiceEntitlement();
+      setVoiceTier(tier);
+      
+      if (tier !== "free") {
+        Alert.alert("Restored!", `Your ${VOICE_TIER_CONFIG[tier]?.name || tier} plan has been restored.`);
+      } else {
+        Alert.alert("No Purchases Found", "We couldn't find any previous purchases to restore.");
+      }
+    } finally {
+      setRestoreLoading(false);
+    }
+  };
+
+  const { data: voiceSub, refetch: refetchSub } = useVoiceSubscription(businessId, ownerToken || "");
   const minutesUsed = voiceSub?.subscription.minutesUsed || 0;
   const minutesLimit = voiceSub?.subscription.minutesLimit || 5;
   const isExhausted = minutesUsed >= minutesLimit;
+  
+  const isLoading = externalLoading || purchaseLoading;
+  
+  // Voice tiers for display (fallback if RevenueCat offerings aren't loaded)
+  const displayTiers = [
+    { id: "voice_starter", name: "Starter", price: "$49", minutes: 60, features: ["60 minutes/month", "Voice booking", "Email confirmations", "Basic analytics"] },
+    { id: "voice_pro", name: "Pro", price: "$149", minutes: 200, popular: true, features: ["200 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics"] },
+    { id: "voice_business", name: "Business", price: "$349", minutes: 500, features: ["500 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics", "Custom voice"] },
+  ];
 
   return (
     <View style={styles.container}>
@@ -98,91 +173,92 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
         <View style={{ height: 40 }} />
         <ThemedText style={styles.sectionLabel}>CHOOSE A PLAN</ThemedText>
 
-        {tiersLoading ? (
-          <ActivityIndicator size="large" color="#fff" style={{ marginTop: 40 }} />
-        ) : (
-          <View style={styles.tiersContainer}>
-            {tiers.filter(t => t.id !== 'free').map((tier) => (
+        <View style={styles.tiersContainer}>
+          {displayTiers.map((tier) => {
+            const rcPackage = offerings?.availablePackages?.find(
+              (pkg: PurchasesPackage) => pkg.identifier.toLowerCase().includes(tier.id.replace("voice_", ""))
+            );
+            const priceDisplay = rcPackage?.product?.priceString || `${tier.price}/mo`;
+            const isCurrent = voiceTier === tier.id;
+            
+            return (
               <Pressable
                 key={tier.id}
-                onPress={() => onSubscribe(tier.id)}
+                onPress={() => {
+                  if (isCurrent) return;
+                  if (rcPackage) {
+                    handlePurchase(rcPackage);
+                  } else if (Platform.OS === "web") {
+                    Alert.alert("App Store Required", "Voice subscriptions are available in the BookFlowX app. Download from the App Store to subscribe.");
+                  } else {
+                    Alert.alert("Setup Required", "Voice plans are being set up. Please try again shortly.");
+                  }
+                }}
                 style={[
                   styles.tierCard,
-                  tier.popular && styles.popularCard
+                  tier.popular && styles.popularCard,
+                  isCurrent && styles.currentTierCard
                 ]}
+                disabled={isCurrent}
               >
-                {tier.popular && (
+                {tier.popular && !isCurrent && (
                   <View style={styles.popularBadge}>
                     <ThemedText style={styles.popularBadgeText}>MOST POPULAR</ThemedText>
+                  </View>
+                )}
+                {isCurrent && (
+                  <View style={[styles.popularBadge, { backgroundColor: "#22C55E" }]}>
+                    <ThemedText style={styles.popularBadgeText}>CURRENT PLAN</ThemedText>
                   </View>
                 )}
                 
                 <View style={styles.tierHeader}>
                   <ThemedText style={styles.tierName}>{tier.name}</ThemedText>
                   <View style={styles.priceRow}>
-                    <ThemedText style={styles.tierPrice}>{tier.priceDisplay || `$${tier.price}/mo`}</ThemedText>
+                    <ThemedText style={styles.tierPrice}>{priceDisplay}</ThemedText>
                   </View>
                 </View>
 
                 <View style={styles.tierMinutes}>
                   <Feather name="clock" size={16} color="rgba(255,255,255,0.6)" />
                   <ThemedText style={styles.minutesText}>
-                    {tier.id === 'business' ? '8 hr 20 min included' : `${formatMinutes(tier.minutes)} included`}
+                    {tier.id === 'voice_business' ? '8 hr 20 min included' : `${formatMinutes(tier.minutes)} included`}
                   </ThemedText>
                 </View>
 
                 <View style={styles.featuresList}>
-                  {tier.id === 'business' ? (
-                    <>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>500 minutes/month</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>Voice booking</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>Email confirmations</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>Advanced analytics</ThemedText>
-                      </View>
-                      <View style={styles.featureItem}>
-                        <Feather name="check" size={14} color="#fff" />
-                        <ThemedText style={styles.featureText}>Custom voice</ThemedText>
-                      </View>
-                    </>
-                  ) : (
-                    tier.features
-                      .filter(f => !f.toLowerCase().includes('api access') && !f.toLowerCase().includes('priority support'))
-                      .map((feature, idx) => (
-                        <View key={idx} style={styles.featureItem}>
-                          <Feather name="check" size={14} color="#fff" />
-                          <ThemedText style={styles.featureText}>{feature}</ThemedText>
-                        </View>
-                      ))
-                  )}
+                  {tier.features.map((feature: string, idx: number) => (
+                    <View key={idx} style={styles.featureItem}>
+                      <Feather name="check" size={14} color="#fff" />
+                      <ThemedText style={styles.featureText}>{feature}</ThemedText>
+                    </View>
+                  ))}
                 </View>
 
-                <View style={[styles.subscribeBtn, tier.popular && styles.popularBtn]}>
+                <View style={[styles.subscribeBtn, tier.popular && styles.popularBtn, isCurrent && styles.disabledBtn]}>
                   {isLoading ? (
                     <ActivityIndicator size="small" color={tier.popular ? "#000" : "#fff"} />
                   ) : (
                     <ThemedText style={[styles.subscribeBtnText, tier.popular && styles.popularBtnText]}>
-                      Select {tier.name}
+                      {isCurrent ? "Current Plan" : `Select ${tier.name}`}
                     </ThemedText>
                   )}
                 </View>
               </Pressable>
-            ))}
-          </View>
-        )}
+            );
+          })}
+        </View>
+
+        <Pressable onPress={handleRestore} style={styles.restoreBtn} disabled={restoreLoading}>
+          {restoreLoading ? (
+            <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
+          ) : (
+            <ThemedText style={styles.restoreBtnText}>Restore Purchases</ThemedText>
+          )}
+        </Pressable>
 
         <ThemedText style={styles.disclaimer}>
-          Voice Agent plans are optional subscriptions that provide monthly voice booking minutes for automated customer calls and confirmations. Auto-renews monthly. Cancel anytime.
+          Voice Agent plans are optional in-app subscriptions that provide monthly voice booking minutes. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period. Cancel anytime in Settings.
         </ThemedText>
       </ScrollView>
     </View>
@@ -403,6 +479,21 @@ const styles = StyleSheet.create({
   },
   popularBtnText: {
     color: "#000",
+  },
+  currentTierCard: {
+    borderColor: "#22C55E",
+    opacity: 0.8,
+  },
+  restoreBtn: {
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 16,
+    marginTop: 24,
+  },
+  restoreBtnText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    textDecorationLine: "underline",
   },
   disclaimer: {
     fontSize: 12,

@@ -9,6 +9,22 @@ import Purchases, {
 const ENTITLEMENT_ID = "BookFlowX Pro";
 const IOS_REVENUECAT_API_KEY = "appl_LqjVbACDADybafbTUXlheXxxhkF";
 
+// Voice Agent Entitlements (App Store Connect products)
+export const VOICE_ENTITLEMENTS = {
+  STARTER: "voice_starter",
+  PRO: "voice_pro", 
+  BUSINESS: "voice_business",
+} as const;
+
+// Voice tier configuration with minutes
+export const VOICE_TIER_CONFIG = {
+  voice_starter: { minutes: 60, price: "$49", name: "Starter" },
+  voice_pro: { minutes: 200, price: "$149", name: "Pro" },
+  voice_business: { minutes: 500, price: "$349", name: "Business" },
+} as const;
+
+export type VoiceTier = keyof typeof VOICE_TIER_CONFIG | "free";
+
 function getApiKey(): string | null {
   if (Platform.OS === "ios") {
     return IOS_REVENUECAT_API_KEY;
@@ -148,6 +164,84 @@ export async function restorePurchases(): Promise<{
   } catch (error: any) {
     console.error("RevenueCat: Restore failed", error);
     return { success: false, isPremium: false, error: error.message || "Restore failed" };
+  }
+}
+
+// Get voice offerings specifically
+export async function getVoiceOfferings(): Promise<PurchasesOffering | null> {
+  if (Platform.OS === "web") {
+    return null;
+  }
+
+  try {
+    const offerings = await Purchases.getOfferings();
+    // Try to get the voice-specific offering, fallback to current
+    if (offerings.all["default_voice"]) {
+      return offerings.all["default_voice"];
+    }
+    // Fallback to current offering if no voice-specific one
+    return offerings.current;
+  } catch (error) {
+    console.error("RevenueCat: Failed to get voice offerings", error);
+    return null;
+  }
+}
+
+// Check which voice tier the user has access to
+export async function getVoiceEntitlement(): Promise<VoiceTier> {
+  if (Platform.OS === "web") {
+    return "free";
+  }
+
+  try {
+    const customerInfo = await Purchases.getCustomerInfo();
+    const active = customerInfo.entitlements.active;
+
+    // Check in order of highest tier first
+    if (active[VOICE_ENTITLEMENTS.BUSINESS]) {
+      return "voice_business";
+    }
+    if (active[VOICE_ENTITLEMENTS.PRO]) {
+      return "voice_pro";
+    }
+    if (active[VOICE_ENTITLEMENTS.STARTER]) {
+      return "voice_starter";
+    }
+    return "free";
+  } catch (error) {
+    console.error("RevenueCat: Failed to check voice entitlement", error);
+    return "free";
+  }
+}
+
+// Get minutes limit for current voice tier
+export function getVoiceMinutesLimit(tier: VoiceTier): number {
+  if (tier === "free") return 5; // 5 minute trial
+  return VOICE_TIER_CONFIG[tier]?.minutes || 5;
+}
+
+// Purchase a voice package
+export async function purchaseVoicePackage(pkg: PurchasesPackage): Promise<{
+  success: boolean;
+  tier: VoiceTier;
+  error?: string;
+}> {
+  if (Platform.OS === "web") {
+    return { success: false, tier: "free", error: "Purchases not available on web" };
+  }
+
+  try {
+    const { customerInfo } = await Purchases.purchasePackage(pkg);
+    const tier = await getVoiceEntitlement();
+    console.log(`RevenueCat: Voice purchase successful, tier = ${tier}`);
+    return { success: true, tier };
+  } catch (error: any) {
+    if (error.userCancelled) {
+      console.log("RevenueCat: User cancelled voice purchase");
+      return { success: false, tier: "free", error: "cancelled" };
+    }
+    console.error("RevenueCat: Voice purchase failed", error);
+    return { success: false, tier: "free", error: error.message || "Purchase failed" };
   }
 }
 
