@@ -514,31 +514,31 @@ export default function SettingsScreen() {
               onPress={() => setVoicePaywallVisible(true)}
               highlight
             >
-              <View style={styles.voiceCardHeader}>
-                <View style={styles.voiceIconGroup}>
-                  <View style={styles.voiceIconCircle}>
-                    <Feather name="mic" size={16} color="#fff" />
-                  </View>
-                  <View style={[styles.voiceIconCircle, { marginLeft: -8, backgroundColor: "rgba(255,255,255,0.1)" }]}>
-                    <Feather name="message-square" size={14} color="#fff" />
-                  </View>
-                  <View style={[styles.voiceIconCircle, { marginLeft: -8, backgroundColor: "rgba(255,255,255,0.05)" }]}>
-                    <Feather name="volume-2" size={14} color="#fff" />
-                  </View>
+              <View style={styles.voiceIconGroup}>
+                <View style={styles.voiceIconBox}>
+                  <Feather name="mic" size={20} color="#fff" />
                 </View>
-                <View style={{ flex: 1, marginLeft: 16 }}>
-                  <ThemedText style={styles.voiceCardTitle}>Voice Booking</ThemedText>
-                  <ThemedText style={styles.voiceCardTier}>{getTierName(voiceSubscription?.subscription.tier || "free")}</ThemedText>
+                <View style={styles.voiceIconBox}>
+                  <Feather name="message-square" size={20} color="#fff" />
                 </View>
-                <Pressable onPress={() => setVoicePaywallVisible(true)} style={styles.previewLink}>
-                  <ThemedText style={styles.previewText}>PREVIEW</ThemedText>
-                  <Feather name="arrow-right" size={12} color="rgba(255,255,255,0.4)" />
-                </Pressable>
+                <View style={styles.voiceIconBox}>
+                  <Feather name="volume-2" size={20} color="#fff" />
+                </View>
               </View>
 
-              <ThemedText style={styles.voiceCardDesc}>
-                Let customers book appointments using natural voice conversation with AI.
-              </ThemedText>
+              <View style={{ marginTop: 24 }}>
+                <ThemedText style={styles.voiceCardTitle}>Voice Booking</ThemedText>
+                <ThemedText style={styles.voiceCardDesc}>
+                  Let customers book appointments using natural voice conversation with AI.
+                </ThemedText>
+              </View>
+
+              <View style={styles.previewContainer}>
+                <Pressable onPress={() => setVoicePaywallVisible(true)} style={styles.previewLink}>
+                  <ThemedText style={styles.previewText}>PREVIEW</ThemedText>
+                  <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
+                </Pressable>
+              </View>
 
               {voiceSubscription && voiceSubscription.subscription.tier !== 'free' && (
                 <View style={styles.usageContainer}>
@@ -894,18 +894,18 @@ const styles = StyleSheet.create({
   shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
   shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
-  voiceCard: { padding: 24, marginTop: 12 },
-  voiceCardHeader: { flexDirection: "row", alignItems: "center", marginBottom: 16 },
-  voiceIconGroup: { flexDirection: "row", alignItems: "center" },
-  voiceIconCircle: { width: 36, height: 36, borderRadius: 10, backgroundColor: "rgba(255,255,255,0.15)", alignItems: "center", justifyContent: "center" },
-  voiceCardTitle: { fontSize: 28, fontWeight: "600", color: "#fff", letterSpacing: -0.5 },
+  voiceCard: { padding: 32, marginTop: 12, borderRadius: 32 },
+  voiceIconGroup: { flexDirection: "row", gap: 12 },
+  voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  voiceCardTitle: { fontSize: 42, fontWeight: "500", color: "#fff", letterSpacing: -1, marginBottom: 16 },
+  voiceCardDesc: { fontSize: 18, color: "rgba(255,255,255,0.4)", lineHeight: 28, fontWeight: "400" },
+  previewContainer: { marginTop: 32 },
+  previewLink: { flexDirection: "row", alignItems: "center", gap: 12 },
+  previewText: { fontSize: 13, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 3 },
   voiceCardTier: { fontSize: 12, fontWeight: "500", color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  voiceCardDesc: { fontSize: 16, color: "rgba(255,255,255,0.5)", lineHeight: 24, marginBottom: 24 },
-  previewLink: { flexDirection: "row", alignItems: "center", gap: 8 },
-  previewText: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2 },
   upgradeBadge: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 10, paddingVertical: 6, borderRadius: 8 },
   upgradeBadgeText: { fontSize: 10, fontWeight: "800", color: "#fff", letterSpacing: 1 },
-  usageContainer: { marginTop: 8 },
+  usageContainer: { marginTop: 32, paddingTop: 24, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
   usageHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
   usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },

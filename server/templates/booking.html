@@ -123,26 +123,64 @@
     }
     
     .voice-link {
-      display: inline-flex;
+      display: none; /* Controlled by JS */
       align-items: center;
-      gap: 8px;
+      justify-content: space-between;
+      gap: 16px;
       margin-top: 16px;
-      color: var(--smoke);
-      font-size: 14px;
-      font-weight: 400;
+      padding: 24px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      color: var(--white);
       text-decoration: none;
-      transition: color 0.3s ease;
-      opacity: 0.7;
+      transition: all 0.3s ease;
+      animation: slideUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.2s both;
     }
     
     .voice-link:hover {
-      color: var(--white);
-      opacity: 1;
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .voice-content {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .voice-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .voice-text-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .voice-title {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+    }
+
+    .voice-subtitle {
+      font-size: 13px;
+      color: var(--smoke);
+      margin-top: 2px;
     }
     
-    .voice-link svg {
-      width: 16px;
-      height: 16px;
+    .voice-link svg.arrow {
+      width: 20px;
+      height: 20px;
+      opacity: 0.3;
     }
     
     .section-label {
@@ -574,13 +612,23 @@
       <h1 id="business-name">Business</h1>
       <p id="business-tagline">Premium Booking</p>
       <a href="#" id="voice-link" class="voice-link">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-          <line x1="12" y1="19" x2="12" y2="23"></line>
-          <line x1="8" y1="23" x2="16" y2="23"></line>
+        <div class="voice-content">
+          <div class="voice-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+              <line x1="12" y1="19" x2="12" y2="23"></line>
+              <line x1="8" y1="23" x2="16" y2="23"></line>
+            </svg>
+          </div>
+          <div class="voice-text-group">
+            <span class="voice-title">Book with Voice</span>
+            <span class="voice-subtitle">Talk to our AI booking assistant</span>
+          </div>
+        </div>
+        <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
-        Try Voice Booking
       </a>
     </div>
 
@@ -691,7 +739,9 @@
           if (subRes.ok) {
             const subData = await subRes.json();
             // Only show voice booking if they have an active paid tier
-            if (!subData.subscription || subData.subscription.tier === 'free') {
+            if (subData.subscription && subData.subscription.tier !== 'free') {
+              document.getElementById('voice-link').style.display = 'flex';
+            } else {
               document.getElementById('voice-link').style.display = 'none';
             }
           } else {
