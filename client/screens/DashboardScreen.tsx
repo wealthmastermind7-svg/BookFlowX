@@ -799,7 +799,7 @@ export default function DashboardScreen() {
           </Pressable>
         </Pressable>
       </Modal>
-    </ImageBackground>
+    </View>
   );
 }
 
