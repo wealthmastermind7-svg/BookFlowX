@@ -371,10 +371,10 @@ IMPORTANT:
                   // Check Google Calendar for conflicts if connected
                   let finalSlots = slots;
                   try {
-                    const gcalConnected = await isGoogleCalendarConnected();
+                    const gcalConnected = await isGoogleCalendarConnected(business.id);
                     if (gcalConnected) {
-                      console.log(`[Vapi] Checking Google Calendar for conflicts on ${dateClean}`);
-                      const busyTimes = await getGoogleBusyTimes(dateClean, dateClean);
+                      console.log(`[Vapi] Checking Google Calendar for conflicts on ${dateClean} for business ${business.id}`);
+                      const busyTimes = await getGoogleBusyTimes(dateClean, dateClean, business.timezone || 'Pacific/Auckland', business.id);
                       finalSlots = filterSlotsWithGoogleBusy(slots, dateClean, busyTimes, service.duration);
                       console.log(`[Vapi] After Google Cal filter: ${finalSlots.length} slots (was ${slots.length})`);
                     }
@@ -472,10 +472,11 @@ IMPORTANT:
 
                 // Sync to Google Calendar if connected
                 try {
-                  const gcalConnected = await isGoogleCalendarConnected();
+                  const gcalConnected = await isGoogleCalendarConnected(business.id);
                   if (gcalConnected) {
                     const eventId = await pushBookingToGoogleCalendar({
                       id: booking.id,
+                      businessId: business.id,
                       businessName: business.name,
                       serviceName: service.name,
                       customerName,

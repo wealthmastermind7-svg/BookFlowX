@@ -40,6 +40,12 @@ import {
   voiceAgentRespond, 
   createVoiceAgentWelcome 
 } from "./voiceAgent";
+import {
+  getGoogleAuthUrl,
+  handleGoogleCallback,
+  hasBusinessCalendar,
+  disconnectGoogleCalendar,
+} from "./googleCalendar";
 import multer from "multer";
 import express from "express";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
@@ -245,6 +251,86 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error in test-email route:", error);
       res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
+  // === GOOGLE CALENDAR OAUTH ===
+
+  // Get Google Calendar OAuth URL for a business
+  app.get("/api/businesses/:businessId/google-calendar/auth-url", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const ownerToken = req.headers['x-owner-token'] as string;
+      
+      if (!process.env.GOOGLE_CLIENT_ID || !process.env.GOOGLE_CLIENT_SECRET) {
+        return res.status(503).json({ 
+          error: "Google Calendar integration not configured",
+          message: "Contact support to enable Google Calendar sync"
+        });
+      }
+      
+      const authUrl = getGoogleAuthUrl(businessId, ownerToken);
+      res.json({ authUrl });
+    } catch (error: any) {
+      console.error("[GoogleCal] Error generating auth URL:", error);
+      res.status(500).json({ error: error.message || "Failed to generate auth URL" });
+    }
+  });
+
+  // Google Calendar OAuth callback (public - redirected from Google)
+  app.get("/api/google-calendar/callback", async (req: Request, res: Response) => {
+    try {
+      const { code, state, error: oauthError } = req.query;
+      
+      if (oauthError) {
+        console.error("[GoogleCal] OAuth error:", oauthError);
+        return res.redirect("/?calendar_error=denied");
+      }
+      
+      if (!code || !state) {
+        return res.redirect("/?calendar_error=missing_params");
+      }
+
+      const result = await handleGoogleCallback(code as string, state as string);
+      
+      if (result.success) {
+        // Redirect back to settings with success
+        res.redirect("/?calendar_connected=true");
+      } else {
+        res.redirect(`/?calendar_error=${encodeURIComponent(result.error || 'unknown')}`);
+      }
+    } catch (error: any) {
+      console.error("[GoogleCal] Callback error:", error);
+      res.redirect(`/?calendar_error=${encodeURIComponent(error.message)}`);
+    }
+  });
+
+  // Get Google Calendar connection status
+  app.get("/api/businesses/:businessId/google-calendar/status", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const status = await hasBusinessCalendar(businessId);
+      res.json(status);
+    } catch (error: any) {
+      console.error("[GoogleCal] Error checking status:", error);
+      res.status(500).json({ error: "Failed to check calendar status" });
+    }
+  });
+
+  // Disconnect Google Calendar
+  app.delete("/api/businesses/:businessId/google-calendar", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const success = await disconnectGoogleCalendar(businessId);
+      
+      if (success) {
+        res.json({ success: true, message: "Google Calendar disconnected" });
+      } else {
+        res.status(500).json({ error: "Failed to disconnect calendar" });
+      }
+    } catch (error: any) {
+      console.error("[GoogleCal] Error disconnecting:", error);
+      res.status(500).json({ error: "Failed to disconnect calendar" });
     }
   });
 

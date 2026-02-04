@@ -38,6 +38,7 @@ import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
 import Svg, { Circle } from "react-native-svg";
 import { useVoiceSubscription, getTierColor, getTierName, formatMinutes } from "@/hooks/useVoiceSubscription";
+import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
 
@@ -146,6 +147,16 @@ export default function SettingsScreen() {
     business?.id || "",
     ownerToken || ""
   );
+
+  const { 
+    isConnected: isCalendarConnected, 
+    connectedEmail: calendarEmail, 
+    isLoading: calendarLoading,
+    connectCalendar,
+    disconnect: disconnectCalendar
+  } = useGoogleCalendar(business?.id || "", ownerToken || "");
+
+  const [calendarConnecting, setCalendarConnecting] = useState(false);
 
   const DEMO_TYPES = [
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
@@ -616,6 +627,63 @@ export default function SettingsScreen() {
               </View>
             </GlassCard>
           </View>
+
+          <View style={{ height: 32 }} />
+          <SectionTitleBadge label="CALENDAR SYNC">Integrations</SectionTitleBadge>
+          <GlassCard 
+            style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]}
+            onPress={async () => {
+              if (isCalendarConnected) {
+                Alert.alert(
+                  "Disconnect Calendar",
+                  `Are you sure you want to disconnect ${calendarEmail || "your Google Calendar"}?`,
+                  [
+                    { text: "Cancel", style: "cancel" },
+                    { 
+                      text: "Disconnect", 
+                      style: "destructive", 
+                      onPress: () => {
+                        Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+                        disconnectCalendar.mutate();
+                      }
+                    }
+                  ]
+                );
+              } else {
+                setCalendarConnecting(true);
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                const result = await connectCalendar();
+                setCalendarConnecting(false);
+                if (!result.success) {
+                  Alert.alert("Connection Failed", result.error || "Could not connect Google Calendar. Please try again.");
+                }
+              }
+            }}
+          >
+            <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
+              <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16, backgroundColor: isCalendarConnected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)' }]}>
+                <Feather name="calendar" size={14} color={isCalendarConnected ? "#22C55E" : "#fff"} />
+              </View>
+              <View style={{ marginLeft: 12, flex: 1 }}>
+                <ThemedText style={[styles.gridLabel, { marginTop: 0 }]}>Google Calendar</ThemedText>
+                {isCalendarConnected && calendarEmail && (
+                  <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }} numberOfLines={1}>{calendarEmail}</ThemedText>
+                )}
+              </View>
+            </View>
+            {calendarLoading || calendarConnecting ? (
+              <ActivityIndicator size="small" color="#fff" />
+            ) : (
+              <View style={{ backgroundColor: isCalendarConnected ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isCalendarConnected ? '#22C55E' : '#3B82F6' }}>
+                  {isCalendarConnected ? "CONNECTED" : "CONNECT"}
+                </ThemedText>
+              </View>
+            )}
+          </GlassCard>
+          <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8, paddingHorizontal: 4 }}>
+            Sync bookings to your calendar and prevent double-booking
+          </ThemedText>
 
           <View style={{ height: 32 }} />
           <SectionTitleBadge label="BUSINESS IDENTITY">Profile Settings</SectionTitleBadge>
