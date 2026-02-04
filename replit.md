@@ -87,6 +87,18 @@ BookFlow utilizes a decoupled frontend and backend architecture.
     - `POST /api/smart-suggestions/revenue-insight` - Get revenue insight explanations
   - **Client Hook**: `useSmartSuggestions` hook in `client/hooks/useSmartSuggestions.ts`
   - **Industries Supported**: auto_detailing, salon, fitness, medical, consulting, trades, wellness (7 verticals)
+- **Google Calendar Two-Way Sync**: Full calendar integration using Replit's Google Calendar connector.
+  - **OAuth**: Managed automatically by Replit's connector (no custom token storage needed)
+  - **Free/Busy Check**: Voice agent queries Google Calendar before suggesting time slots
+  - **Event Push**: Confirmed bookings automatically sync to Google Calendar
+  - **Conflict Prevention**: Slots blocked by Google Calendar events are filtered out
+  - **Implementation**: `server/googleCalendar.ts` with functions:
+    - `isGoogleCalendarConnected()` - Check if connector is configured
+    - `getGoogleBusyTimes(startDate, endDate)` - Fetch busy blocks
+    - `filterSlotsWithGoogleBusy(slots, date, busyTimes, duration)` - Remove conflicting slots
+    - `pushBookingToGoogleCalendar(booking)` - Create calendar event
+    - `deleteGoogleCalendarEvent(eventId)` - Remove cancelled bookings
+  - **Voice Flow**: BookFlow DB remains source of truth; Google Calendar acts as mirror + conflict detector
 - **Voice Agent (Vapi.ai Streaming)**: Real-time streaming voice booking powered by Vapi.ai WebRTC.
   - **Architecture**: Vapi.ai Web SDK for low-latency streaming voice conversations
   - **Technology**: WebRTC-based bidirectional audio streaming (no file uploads)
