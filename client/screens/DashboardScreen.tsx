@@ -348,11 +348,10 @@ export default function DashboardScreen() {
   const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [voicePaywallVisible, setVoicePaywallVisible] = useState(false);
-  const [ownerToken, setOwnerToken] = useState<string | null>(null);
 
   const { data: voiceSubscription } = useVoiceSubscription(
     business?.id || "",
-    ownerToken || ""
+    business?.ownerToken || ""
   );
 
   const fadeIn = useSharedValue(0);
@@ -374,9 +373,7 @@ export default function DashboardScreen() {
     const maxRetries = 3;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        const biz = await api.getOrCreateBusiness();
-        const token = await api.getOwnerToken();
-        setOwnerToken(token);
+        await api.getOrCreateBusiness();
         const existingServices = await api.getServices();
         if (existingServices.length === 0) {
           await api.initializeDemoData();
