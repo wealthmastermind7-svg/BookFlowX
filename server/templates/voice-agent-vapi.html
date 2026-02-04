@@ -2,21 +2,23 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
   <title>Voice Booking - {{BUSINESS_NAME}}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     :root {
       --pure-black: #000000;
-      --charcoal: #1a1a1a;
-      --graphite: #2d2d2d;
-      --smoke: #404040;
-      --silver: #808080;
-      --pearl: #f5f5f5;
+      --charcoal: #111111;
+      --graphite: #222222;
+      --smoke: #444444;
+      --silver: #888888;
+      --pearl: #DDDDDD;
       --pure-white: #ffffff;
+      --safe-top: env(safe-area-inset-top);
+      --safe-bottom: env(safe-area-inset-bottom);
     }
     body {
       font-family: 'Inter', sans-serif;
@@ -25,162 +27,337 @@
       min-height: 100vh;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
       overflow: hidden;
     }
-    .container {
+
+    /* Premium Glass Header */
+    .nav-header {
+      padding: calc(var(--safe-top) + 20px) 24px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(0, 0, 0, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      position: fixed;
+      top: 0;
       width: 100%;
-      max-width: 480px;
-      padding: 40px 24px;
-      text-align: center;
+      z-index: 100;
+    }
+
+    .close-btn {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: white;
+      padding: 8px 18px;
+      border-radius: 100px;
+      font-size: 14px;
+      font-weight: 500;
+      text-decoration: none;
+      transition: all 0.3s ease;
+    }
+
+    .close-btn:active {
+      transform: scale(0.95);
+      background: rgba(255, 255, 255, 0.15);
+    }
+
+    .header-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      color: white;
+    }
+
+    /* Content Area */
+    .main-content {
+      flex: 1;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 32px;
+      justify-content: center;
+      padding: 120px 24px 100px;
+      gap: 48px;
+      text-align: center;
     }
+
+    .business-info {
+      animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
     .business-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 32px;
+      font-size: 42px;
       font-weight: 500;
-      color: var(--pearl);
-      letter-spacing: 1px;
-      text-transform: uppercase;
-      margin-bottom: -8px;
-    }
-    .title {
-      font-family: 'Cormorant Garamond', serif;
-      font-size: 72px;
-      font-weight: 400;
-      letter-spacing: -3px;
-      line-height: 0.9;
       color: var(--pure-white);
-      margin-bottom: 8px;
+      letter-spacing: -1px;
+      margin-bottom: 4px;
     }
-    .subtitle {
+
+    .business-tagline {
       font-family: 'Inter', sans-serif;
-      font-size: 18px;
+      font-size: 14px;
       color: var(--silver);
-      font-weight: 300;
-      max-width: 340px;
-      line-height: 1.6;
-      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      font-weight: 500;
     }
-    .voice-button-container {
+
+    /* AI Visualization */
+    .ai-visual-container {
       position: relative;
-      margin: 24px 0;
-    }
-    .pulse-ring {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      border: 2px solid rgba(255, 255, 255, 0.1);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-    }
-    .pulse-ring.active {
-      opacity: 1;
-      animation: pulse 2s ease-out infinite;
-    }
-    @keyframes pulse {
-      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; }
-    }
-    .voice-button {
-      width: 180px;
-      height: 180px;
-      border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      background: var(--charcoal);
-      cursor: pointer;
+      width: 240px;
+      height: 240px;
       display: flex;
       align-items: center;
       justify-content: center;
+    }
+
+    .wave-ring {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      opacity: 0;
+    }
+
+    .wave-ring.active {
+      animation: waveOut 3s linear infinite;
+    }
+
+    .wave-ring:nth-child(2) { animation-delay: 1s; }
+    .wave-ring:nth-child(3) { animation-delay: 2s; }
+
+    @keyframes waveOut {
+      0% { transform: scale(0.8); opacity: 0; }
+      20% { opacity: 0.5; }
+      100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    .voice-btn {
+      width: 160px;
+      height: 160px;
+      border-radius: 50%;
+      background: var(--charcoal);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
       position: relative;
-      z-index: 1;
-      transition: all 0.5s cubic-bezier(0.2, 1, 0.2, 1);
-      box-shadow: 0 0 0 rgba(255, 255, 255, 0);
+      z-index: 10;
+      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
     }
-    .voice-button:hover {
-      transform: scale(1.05);
-      border-color: rgba(255, 255, 255, 0.3);
+
+    .voice-btn.active {
+      background: white;
+      transform: scale(0.9);
+      box-shadow: 0 0 80px rgba(255, 255, 255, 0.4);
     }
-    .voice-button.active {
-      background: var(--pure-white);
-      transform: scale(1.1);
-      box-shadow: 0 0 80px rgba(255, 255, 255, 0.3);
-    }
-    .voice-button.connecting {
-      animation: pulse-button 1.5s ease-in-out infinite;
-    }
-    @keyframes pulse-button {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.6; }
-    }
-    .mic-icon {
-      width: 56px;
-      height: 56px;
-      color: var(--pure-white);
+
+    .voice-btn svg {
+      width: 48px;
+      height: 48px;
+      color: white;
       transition: all 0.4s ease;
       stroke-width: 1.5;
     }
-    .voice-button.active .mic-icon { color: var(--pure-black); }
+
+    .voice-btn.active svg {
+      color: black;
+      transform: scale(1.1);
+    }
+
+    .status-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+
+    .status-pill {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      padding: 6px 16px;
+      border-radius: 100px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      background: var(--silver);
+      border-radius: 50%;
+      transition: all 0.3s ease;
+    }
+
+    .status-dot.active {
+      background: #4ade80;
+      box-shadow: 0 0 10px #4ade80;
+      animation: blink 1s ease-in-out infinite;
+    }
+
     .status-text {
-      font-family: 'Inter', sans-serif;
-      font-size: 13px;
+      font-size: 12px;
+      font-weight: 600;
       color: var(--silver);
-      font-weight: 500;
+      letter-spacing: 1px;
       text-transform: uppercase;
-      letter-spacing: 4px;
-      min-height: 20px;
-      opacity: 0.6;
     }
-    .error-message {
-      background: rgba(220, 38, 38, 0.1);
-      border: 1px solid rgba(220, 38, 38, 0.3);
-      color: #fca5a5;
-      padding: 12px 16px;
-      border-radius: 8px;
+
+    .instruction-text {
+      font-size: 16px;
+      color: var(--silver);
+      font-weight: 400;
+      max-width: 260px;
+      line-height: 1.5;
+    }
+
+    /* Bottom Actions */
+    .bottom-actions {
+      padding: 24px 24px calc(var(--safe-bottom) + 24px);
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      background: linear-gradient(to top, black, transparent);
+      position: fixed;
+      bottom: 0;
+    }
+
+    .manual-booking-link {
+      color: var(--silver);
+      text-decoration: none;
       font-size: 14px;
-      opacity: 0;
-      transition: opacity 0.3s ease;
-      max-width: 300px;
+      font-weight: 500;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 2px;
+      transition: all 0.3s ease;
     }
-    .error-message.visible { opacity: 1; }
-    .footer-links { display: flex; gap: 24px; margin-top: 16px; }
-    .footer-link { color: var(--silver); text-decoration: none; font-size: 13px; transition: color 0.2s; }
-    .footer-link:hover { color: var(--pearl); }
-    /* Hide the default Vapi widget button */
-    #vapi-widget-button { display: none !important; }
-    .vapi-btn { display: none !important; }
+
+    .manual-booking-link:active {
+      color: white;
+      border-color: white;
+    }
+
+    /* Animations */
+    @keyframes fadeInDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blink {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* Sound Visualizer (Active) */
+    .visualizer {
+      display: none;
+      align-items: center;
+      gap: 4px;
+      height: 20px;
+    }
+
+    .visualizer.active { display: flex; }
+
+    .bar {
+      width: 3px;
+      height: 100%;
+      background: white;
+      border-radius: 10px;
+      animation: equalize 0.8s ease-in-out infinite;
+    }
+
+    .bar:nth-child(2) { animation-delay: 0.1s; }
+    .bar:nth-child(3) { animation-delay: 0.2s; }
+    .bar:nth-child(4) { animation-delay: 0.3s; }
+    .bar:nth-child(5) { animation-delay: 0.4s; }
+
+    @keyframes equalize {
+      0%, 100% { height: 4px; }
+      50% { height: 20px; }
+    }
+
+    #errorMessage {
+      position: fixed;
+      top: calc(var(--safe-top) + 80px);
+      left: 24px;
+      right: 24px;
+      background: rgba(220, 38, 38, 0.9);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 12px;
+      font-size: 14px;
+      font-weight: 500;
+      text-align: center;
+      opacity: 0;
+      transform: translateY(-10px);
+      transition: all 0.3s ease;
+      pointer-events: none;
+      z-index: 1000;
+    }
+    #errorMessage.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
   </style>
 </head>
 <body>
-  <div class="container">
-    <div class="business-name">{{BUSINESS_NAME}}</div>
-    <h1 class="title">VOICE<br>BOOKING</h1>
-    <p class="subtitle">Tap to start a conversation with our AI receptionist.</p>
-    <div class="voice-button-container">
-      <div class="pulse-ring" id="pulseRing"></div>
-      <button class="voice-button" id="voiceButton">
-        <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/>
-          <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
-          <line x1="12" x2="12" y1="19" y2="22"/>
+  <div id="errorMessage"></div>
+
+  <nav class="nav-header">
+    <a href="/book/{{BUSINESS_SLUG}}" class="close-btn">Close</a>
+    <div class="header-title">Voice Booking</div>
+    <div style="width: 60px;"></div> <!-- Spacer -->
+  </nav>
+
+  <main class="main-content">
+    <div class="business-info">
+      <h2 class="business-name">{{BUSINESS_NAME}}</h2>
+      <div class="business-tagline">AI Receptionist</div>
+    </div>
+
+    <div class="ai-visual-container">
+      <div class="wave-ring" id="ring1"></div>
+      <div class="wave-ring" id="ring2"></div>
+      <div class="wave-ring" id="ring3"></div>
+      
+      <button class="voice-btn" id="voiceButton">
+        <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+          <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+          <line x1="12" y1="19" x2="12" y2="23"></line>
+          <line x1="8" y1="23" x2="16" y2="23"></line>
         </svg>
       </button>
     </div>
-    <div class="status-text" id="statusText">TAP TO START</div>
-    <div class="error-message" id="errorMessage"></div>
-    <div class="footer-links">
-      <a href="/book/{{BUSINESS_SLUG}}" class="footer-link">Text Booking</a>
-      <a href="https://apps.apple.com/app/bookflowx/id6756943439" class="footer-link">Get the App</a>
+
+    <div class="status-area">
+      <div class="status-pill">
+        <div class="status-dot" id="statusDot"></div>
+        <div class="status-text" id="statusText">Ready to start</div>
+        <div class="visualizer" id="visualizer">
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+          <div class="bar"></div>
+        </div>
+      </div>
+      <p class="instruction-text" id="instructionText">Tap the microphone to start a conversation</p>
     </div>
+  </main>
+
+  <div class="bottom-actions">
+    <a href="/book/{{BUSINESS_SLUG}}" class="manual-booking-link">Switch to manual booking</a>
   </div>
 
   <script>
@@ -190,8 +367,11 @@
     
     const voiceButton = document.getElementById('voiceButton');
     const statusText = document.getElementById('statusText');
+    const statusDot = document.getElementById('statusDot');
+    const instructionText = document.getElementById('instructionText');
+    const visualizer = document.getElementById('visualizer');
     const errorMessage = document.getElementById('errorMessage');
-    const pulseRing = document.getElementById('pulseRing');
+    const rings = [document.getElementById('ring1'), document.getElementById('ring2'), document.getElementById('ring3')];
 
     let vapiInstance = null;
     let isActive = false;
@@ -203,28 +383,41 @@
       setTimeout(() => errorMessage.classList.remove('visible'), 5000);
     }
 
-    function setActive(active) {
-      isActive = active;
-      isConnecting = false;
-      if (active) {
-        voiceButton.classList.add('active');
-        voiceButton.classList.remove('connecting');
-        pulseRing.classList.add('active');
-        statusText.textContent = 'LISTENING...';
-      } else {
-        voiceButton.classList.remove('active', 'connecting');
-        pulseRing.classList.remove('active');
-        statusText.textContent = 'TAP TO START';
+    function updateUI(state) {
+      switch(state) {
+        case 'idle':
+          isActive = false;
+          isConnecting = false;
+          voiceButton.classList.remove('active');
+          statusDot.classList.remove('active');
+          statusText.textContent = 'Ready to start';
+          instructionText.textContent = 'Tap the microphone to start a conversation';
+          visualizer.classList.remove('active');
+          rings.forEach(r => r.classList.remove('active'));
+          break;
+        case 'connecting':
+          isConnecting = true;
+          statusText.textContent = 'Connecting...';
+          instructionText.textContent = 'Preparing your AI assistant';
+          break;
+        case 'active':
+          isActive = true;
+          isConnecting = false;
+          voiceButton.classList.add('active');
+          statusDot.classList.add('active');
+          statusText.textContent = 'Listening';
+          instructionText.textContent = 'Go ahead, I\'m listening';
+          visualizer.classList.add('active');
+          rings.forEach(r => r.classList.add('active'));
+          break;
+        case 'speaking':
+          statusText.textContent = 'AI is speaking';
+          visualizer.classList.add('active');
+          break;
       }
     }
 
-    function setConnecting() {
-      isConnecting = true;
-      voiceButton.classList.add('connecting');
-      statusText.textContent = 'CONNECTING...';
-    }
-
-    // Load the Vapi HTML script tag SDK
+    // Load Vapi SDK
     (function(d, t) {
       var g = document.createElement(t);
       var s = d.getElementsByTagName(t)[0];
@@ -234,78 +427,47 @@
       s.parentNode.insertBefore(g, s);
 
       g.onload = function() {
-        console.log('[Vapi] SDK loaded');
-        
         if (!vapiPublicKey) {
           showError('Voice booking not configured.');
           return;
         }
 
-        // Initialize Vapi with the widget SDK
         vapiInstance = window.vapiSDK.run({
           apiKey: vapiPublicKey,
           assistant: vapiAssistantId,
-          config: {
-            hide: true, // Hide the default widget button
-            position: 'bottom-right'
-          }
+          config: { hide: true }
         });
 
-        console.log('[Vapi] Instance created');
-
-        // Listen for call events
         if (vapiInstance) {
-          vapiInstance.on('call-start', () => {
-            console.log('[Vapi] Call started');
-            setActive(true);
-          });
-
-          vapiInstance.on('call-end', () => {
-            console.log('[Vapi] Call ended');
-            setActive(false);
-          });
-
-          vapiInstance.on('speech-start', () => {
-            statusText.textContent = 'SPEAKING...';
-          });
-
-          vapiInstance.on('speech-end', () => {
-            if (isActive) {
-              statusText.textContent = 'LISTENING...';
-            }
-          });
-
+          vapiInstance.on('call-start', () => updateUI('active'));
+          vapiInstance.on('call-end', () => updateUI('idle'));
+          vapiInstance.on('speech-start', () => updateUI('speaking'));
+          vapiInstance.on('speech-end', () => isActive && updateUI('active'));
           vapiInstance.on('error', (err) => {
-            console.error('[Vapi] Error:', err);
+            console.error(err);
             showError('Connection error. Please try again.');
-            setActive(false);
+            updateUI('idle');
           });
         }
-      };
-
-      g.onerror = function() {
-        console.error('[Vapi] Failed to load SDK');
-        showError('Voice service unavailable.');
       };
     })(document, 'script');
 
     voiceButton.addEventListener('click', async () => {
       if (!vapiInstance) {
-        showError('Voice service loading...');
+        showError('Service loading, please wait...');
         return;
       }
 
       if (isActive) {
         vapiInstance.stop();
-        setActive(false);
+        updateUI('idle');
       } else if (!isConnecting) {
-        setConnecting();
+        updateUI('connecting');
         try {
           await vapiInstance.start();
         } catch (err) {
-          console.error('[Vapi] Start error:', err);
           showError('Microphone access required.');
-          setActive(false);
+          updateUI('idle');
         }
       }
     });
