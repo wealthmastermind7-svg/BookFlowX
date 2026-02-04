@@ -16,6 +16,7 @@ import {
   Animated,
   Dimensions
 } from "react-native";
+import ViewShot from "react-native-view-shot";
 import * as Haptics from "expo-haptics";
 import * as Clipboard from "expo-clipboard";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
@@ -294,13 +295,13 @@ export default function SettingsScreen() {
     }
   };
 
+  const qrViewShotRef = useRef<ViewShot>(null);
+  
   const handleDownloadQRCode = async () => {
     if (!business || !checkQrAccess()) return;
     try {
-      const brandedQrUrl = `${getApiUrl()}/api/businesses/${business.id}/qrcode?format=image`;
-      console.log("Downloading branded QR from:", brandedQrUrl);
-      
       if (Platform.OS === "web") {
+        const brandedQrUrl = `${getApiUrl()}/api/businesses/${business.id}/qrcode?format=image`;
         const link = document.createElement("a");
         link.href = brandedQrUrl;
         link.download = `${business.slug}-booking-qr.png`;
@@ -308,19 +309,15 @@ export default function SettingsScreen() {
         return;
       }
       
-      // Download branded QR with business name and rounded corners
-      const downloadResult = await FileSystem.downloadAsync(
-        brandedQrUrl,
-        `${FileSystem.cacheDirectory}${business.slug}-booking-qr.png`
-      );
-      
-      if (downloadResult.status === 200) {
-        await Share.share({ url: downloadResult.uri });
+      // Capture the QR preview with branding using ViewShot
+      if (qrViewShotRef.current?.capture) {
+        const uri = await qrViewShotRef.current.capture();
+        await Share.share({ url: uri });
       } else {
-        Alert.alert("Error", "Failed to download QR code");
+        Alert.alert("Error", "Unable to capture QR code");
       }
     } catch (error) {
-      console.error("Error downloading QR:", error);
+      console.error("Error sharing QR:", error);
       Alert.alert("Error", "Failed to share QR code");
     }
   };
@@ -665,14 +662,16 @@ export default function SettingsScreen() {
                 onPress={() => bookingUrl && Linking.openURL(bookingUrl)} 
                 style={({ pressed }) => [styles.qrPressable, pressed && { opacity: 0.8 }]}
               >
-                <View style={styles.qrImageContainer}>
-                  <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
-                  <View style={styles.qrCenterOverlay}>
-                    <ThemedText style={styles.qrCenterText}>
-                      {business?.name?.toUpperCase() || "BOOK"}
-                    </ThemedText>
+                <ViewShot ref={qrViewShotRef} options={{ format: "png", quality: 1, result: "tmpfile" }}>
+                  <View style={styles.qrImageContainer}>
+                    <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
+                    <View style={styles.qrCenterOverlay}>
+                      <ThemedText style={styles.qrCenterText}>
+                        {business?.name?.toUpperCase() || "BOOK"}
+                      </ThemedText>
+                    </View>
                   </View>
-                </View>
+                </ViewShot>
                 <View style={styles.qrHintContainer}>
                   <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
                   <ThemedText style={styles.qrHint}>Tap to open link</ThemedText>
