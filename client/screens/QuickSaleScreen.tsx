@@ -733,8 +733,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 16,
+    padding: 40,
+    borderRadius: 24,
     marginBottom: 16,
   },
   qrCenterOverlay: {

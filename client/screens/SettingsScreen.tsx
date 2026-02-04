@@ -793,6 +793,9 @@ const styles = StyleSheet.create({
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
+    padding: 32,
+    backgroundColor: '#fff',
+    borderRadius: 24,
   },
   qrCenterOverlay: {
     position: 'absolute',
