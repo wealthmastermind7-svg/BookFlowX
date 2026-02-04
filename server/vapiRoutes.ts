@@ -83,18 +83,18 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
         .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
         .join("\n");
 
-      const systemPrompt = `You are a booking assistant for ${business.name}.
+      const systemPrompt = `You are a professional voice booking receptionist for ${business.name}.
 
-YOU MUST USE TOOLS TO:
-1. List available services
-2. Check real-time availability using get_available_slots
-3. Create bookings only after confirming a slot
+ABSOLUTE RULES:
+- You are NOT allowed to guess availability or times.
+- You MUST call get_available_slots before mentioning ANY time.
+- If you do not have availability data, ask for a date.
+- When a tool is running, wait silently for the result.
+- You MUST call create_booking to finalize a booking. Verbal confirmation alone is not allowed.
 
-STRICT RULES:
-- NEVER guess or invent time slots. 
-- ALWAYS call get_available_slots for the specific date the user mentions before confirming anything.
-- If the user is vague about a date, ask for a specific date.
-- Your primary goal is to book an appointment by collecting service, date, time, name, and email.
+VOICE STYLE:
+- Speak naturally, friendly, and concisely.
+- Keep responses to 1-2 sentences.
 
 AVAILABLE SERVICES:
 ${servicesList}`;
@@ -119,21 +119,32 @@ ${servicesList}`;
               {
                 type: "function",
                 function: {
-                  name: "get_available_slots",
-                  description: "Returns a list of available 30-minute booking slots for a business on a given date. You MUST call this tool before mentioning any time to the user.",
+                  name: "list_services",
+                  description: "List all available services with prices and durations.",
                   parameters: {
                     type: "object",
+                    properties: {}
+                  }
+                }
+              },
+              {
+                type: "function",
+                function: {
+                  name: "get_available_slots",
+                  description: "Returns available booking time slots for a given date. You MUST call this before mentioning or confirming any time.",
+                  parameters: {
+                    type: "object",
+                    required: ["date"],
                     properties: {
                       date: {
                         type: "string",
-                        description: "The date in YYYY-MM-DD format"
+                        description: "Date in YYYY-MM-DD format"
                       },
                       serviceName: {
                         type: "string",
-                        description: "The name of the service"
+                        description: "Optional service name to calculate duration-specific availability"
                       }
-                    },
-                    required: ["date", "serviceName"]
+                    }
                   }
                 }
               },
@@ -141,48 +152,18 @@ ${servicesList}`;
                 type: "function",
                 function: {
                   name: "create_booking",
-                  description: "Finalizes and creates a new booking in the database once service, date, time, name, and email are confirmed. You MUST confirm the email spelling before calling this.",
+                  description: "Creates a confirmed booking. You MUST use this function to finalize a booking. Do not confirm verbally unless this succeeds.",
                   parameters: {
                     type: "object",
+                    required: ["customerName", "customerEmail", "serviceName", "date", "time"],
                     properties: {
-                      customerName: {
-                        type: "string",
-                        description: "The customer's full name"
-                      },
-                      customerEmail: {
-                        type: "string",
-                        description: "The customer's email address"
-                      },
-                      customerPhone: {
-                        type: "string",
-                        description: "The customer's phone number (optional)"
-                      },
-                      serviceName: {
-                        type: "string",
-                        description: "The name of the service to book"
-                      },
-                      date: {
-                        type: "string",
-                        description: "The booking date in YYYY-MM-DD format"
-                      },
-                      time: {
-                        type: "string",
-                        description: "The booking time in HH:MM format (24-hour)"
-                      }
-                    },
-                    required: ["customerName", "customerEmail", "serviceName", "date", "time"]
-                  }
-                }
-              },
-              {
-                type: "function",
-                function: {
-                  name: "list_services",
-                  description: "Lists all available services with their prices and durations. Call this if the user asks what you offer.",
-                  parameters: {
-                    type: "object",
-                    properties: {},
-                    required: []
+                      customerName: { "type": "string" },
+                      customerEmail: { "type": "string" },
+                      customerPhone: { "type": "string" },
+                      serviceName: { "type": "string" },
+                      date: { "type": "string" },
+                      time: { "type": "string" }
+                    }
                   }
                 }
               }
