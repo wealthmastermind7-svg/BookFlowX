@@ -491,10 +491,7 @@ export default function DashboardScreen() {
 
           <Pressable onPress={() => {
             if (business?.slug) {
-              navigation.navigate("VoiceBooking" as any, { 
-                businessSlug: business.slug,
-                businessName: business.name 
-              });
+              navigation.navigate("VoiceAgentPaywall" as any);
             }
           }}>
             <GlassPanel style={styles.voiceAspirationalBanner}>
