@@ -9,7 +9,8 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
+import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
@@ -32,6 +33,9 @@ import { formatPrice } from "@/lib/currency";
 import { Text } from "react-native";
 import { usePremium } from "@/contexts/PremiumContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
+
+type DashboardNavigation = NativeStackNavigationProp<RootStackParamList>;
 
 const smokeBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
@@ -335,6 +339,7 @@ function BookingCardGlass({
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
+  const navigation = useNavigation<DashboardNavigation>();
   const { isPremium, showPaywall } = usePremium();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -467,20 +472,39 @@ export default function DashboardScreen() {
                   <Feather name="zap" size={20} color="#fff" />
                 </View>
                 <View style={styles.premiumContent}>
-                  <Animated.Text style={styles.premiumTitle}>Unlock Advanced Automation</Animated.Text>
+                  <Animated.Text style={styles.premiumTitle}>Enhance Your Booking Power</Animated.Text>
                   <Animated.Text style={styles.premiumSubtitle}>
-                    Smart reminders, instant setup, upsell suggestions
+                    Grow faster with smart reminders & automated upsells
                   </Animated.Text>
                   <View style={styles.premiumPricing}>
-                    <Animated.Text style={styles.premiumPrice}>Subscription</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>Explore Features</Animated.Text>
                     <View style={styles.premiumPriceDot} />
-                    <Animated.Text style={styles.premiumPrice}>Lifetime Access</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>See Plans</Animated.Text>
                   </View>
                 </View>
-                <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
+                <Feather name="arrow-right" size={20} color="rgba(255,255,255,0.4)" />
               </GlassPanel>
             </Pressable>
           )}
+
+          <Pressable onPress={() => navigation.navigate("SettingsTab" as any)}>
+            <GlassPanel style={styles.voiceAspirationalBanner}>
+              <View style={styles.voiceAspirationalHeader}>
+                <View style={styles.voiceIconStack}>
+                  <Feather name="mic" size={16} color="rgba(255,255,255,0.5)" />
+                  <Feather name="volume-2" size={16} color="rgba(255,255,255,0.5)" style={{ marginLeft: -8 }} />
+                </View>
+                <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Booking</Animated.Text>
+              </View>
+              <Animated.Text style={styles.voiceAspirationalDesc}>
+                Let your business breathe with AI that handles calls and bookings naturally.
+              </Animated.Text>
+              <View style={styles.voiceAspirationalAction}>
+                <Animated.Text style={styles.voiceAspirationalLink}>PREVIEW EXPERIENCE</Animated.Text>
+                <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
+              </View>
+            </GlassPanel>
+          </Pressable>
 
           <View style={styles.metersRow}>
             <GlassPanel style={styles.meterCard}>
@@ -875,33 +899,35 @@ const styles = StyleSheet.create({
   premiumBanner: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 24,
-    gap: 18,
-    backgroundColor: "rgba(255,255,255,0.06)",
+    padding: 20,
+    marginBottom: 24,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.12)",
+    borderColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(255,255,255,0.03)",
   },
   premiumIconContainer: {
-    width: 52,
-    height: 52,
-    borderRadius: 16,
+    width: 44,
+    height: 44,
+    borderRadius: 14,
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
+    marginRight: 16,
   },
   premiumContent: {
     flex: 1,
   },
   premiumTitle: {
-    fontSize: 18,
+    fontSize: 17,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
   },
   premiumSubtitle: {
-    fontSize: 14,
+    fontSize: 13,
     color: "rgba(255,255,255,0.5)",
-    lineHeight: 20,
+    lineHeight: 18,
     marginBottom: 8,
   },
   premiumPricing: {
@@ -910,15 +936,58 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   premiumPrice: {
-    fontSize: 13,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.7)",
+    fontSize: 11,
+    fontWeight: "700",
+    color: "rgba(255,255,255,0.4)",
+    letterSpacing: 1,
+    textTransform: "uppercase",
   },
   premiumPriceDot: {
     width: 3,
     height: 3,
     borderRadius: 2,
     backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  voiceAspirationalBanner: {
+    padding: 24,
+    marginBottom: 24,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "rgba(255,255,255,0.01)",
+  },
+  voiceAspirationalHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+  },
+  voiceIconStack: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginRight: 12,
+  },
+  voiceAspirationalTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.8)",
+    letterSpacing: -0.5,
+  },
+  voiceAspirationalDesc: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  voiceAspirationalAction: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  voiceAspirationalLink: {
+    fontSize: 10,
+    fontWeight: "800",
+    color: "rgba(255,255,255,0.3)",
+    letterSpacing: 2,
   },
   metersRow: {
     flexDirection: "row",
