@@ -316,8 +316,8 @@ IMPORTANT:
                 
                 if (dayAvailability && dayAvailability.isActive) {
                   const slots: string[] = [];
-                  const startHour = parseInt(dayAvailability.startTime.split(":")[0]);
-                  const endHour = parseInt(dayAvailability.endTime.split(":")[0]);
+                  const [startH, startM] = dayAvailability.startTime.split(':').map(Number);
+                  const [endH, endM] = dayAvailability.endTime.split(':').map(Number);
                   
                   // Check if this is "today" to filter out past times
                   const now = new Date();
@@ -325,24 +325,33 @@ IMPORTANT:
                                   now.getUTCMonth() === (month - 1) && 
                                   now.getUTCDate() === day;
 
-                  for (let hour = startHour; hour < endHour; hour++) {
-                    const times = ["00", "30"];
-                    for (const minute of times) {
-                      const timeStr = `${hour.toString().padStart(2, "0")}:${minute}`;
-                      
-                      // Skip past times if it's today
-                      if (isToday) {
-                        const [h, m] = timeStr.split(':').map(Number);
-                        const slotDate = new Date();
-                        slotDate.setHours(h, m, 0, 0);
-                        if (slotDate <= now) continue;
-                      }
+                  let currentH = startH;
+                  let currentM = startM;
 
+                  while (currentH < endH || (currentH === endH && currentM < endM)) {
+                    const timeStr = `${currentH.toString().padStart(2, "0")}:${currentM.toString().padStart(2, "0")}`;
+                    
+                    // Skip past times if it's today
+                    let skip = false;
+                    if (isToday) {
+                      const slotDate = new Date();
+                      slotDate.setHours(currentH, currentM, 0, 0);
+                      if (slotDate <= now) skip = true;
+                    }
+
+                    if (!skip) {
                       // Check if slot is already booked
                       const isBooked = bookings.some(b => b.date === dateClean && b.time === timeStr && b.status !== 'cancelled');
                       if (!isBooked) {
                         slots.push(timeStr);
                       }
+                    }
+
+                    // Increment by 30 mins
+                    currentM += 30;
+                    if (currentM >= 60) {
+                      currentH += 1;
+                      currentM = 0;
                     }
                   }
 
