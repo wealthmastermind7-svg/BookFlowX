@@ -75,6 +75,18 @@ const PAGES = [
   },
   {
     id: "2",
+    headline: "AI Voice Agent",
+    highlightText: "Always On",
+    description: "Our premium voice AI answers calls and books appointments naturally, so you never miss a lead while working.",
+    buttonText: "Continue",
+    showSkip: true,
+    features: [
+      { icon: "mic", text: "Natural voice conversations" },
+      { icon: "calendar", text: "Direct calendar integration" },
+    ],
+  },
+  {
+    id: "3",
     headline: "Reduce No-Shows",
     highlightText: "Automatically",
     description: "Smart reminders learn customer patterns and adjust timing to help reduce missed appointments.",
@@ -86,7 +98,7 @@ const PAGES = [
     ],
   },
   {
-    id: "3",
+    id: "4",
     headline: "Grow Smarter",
     highlightText: "Not Harder",
     description: "Customer insights, smart upsell suggestions, and availability optimization—all working quietly for you.",
@@ -404,7 +416,81 @@ function Page1Content({
   );
 }
 
+function Page4Content() {
+  const { theme: colors, isDark } = useTheme();
+
+  return (
+    <View style={styles.page3Content}>
+      <Animated.View
+        entering={FadeInDown.delay(300).springify()}
+        style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)" }]}
+      >
+        <BlurView intensity={isDark ? 30 : 50} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
+        <View style={styles.notificationContent}>
+          <Text style={[styles.notificationLabel, { color: colors.textSecondary }]}>UPCOMING BOOKING</Text>
+          <View style={styles.notificationRow}>
+            <View style={styles.notificationCheck}>
+              <Feather name="check" size={16} color="#FFFFFF" />
+            </View>
+            <View style={styles.notificationInfo}>
+              <Text style={[styles.notificationTitle, { color: colors.text }]}>Sarah J. - Consultation</Text>
+              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary }]}>Friday, 2:00 PM</Text>
+            </View>
+            <Text style={[styles.notificationTime, { color: colors.textTertiary }]}>Today</Text>
+          </View>
+        </View>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(500)}
+        style={[styles.calendarChip, { backgroundColor: "#3B82F6" }]}
+      >
+        <Feather name="calendar" size={16} color="#FFFFFF" />
+        <View style={[styles.calendarLine, { backgroundColor: "rgba(255,255,255,0.4)" }]} />
+      </Animated.View>
+    </View>
+  );
+}
+
 function Page2Content() {
+  const { theme: colors, isDark } = useTheme();
+
+  return (
+    <View style={styles.page3Content}>
+      <Animated.View
+        entering={FadeInDown.delay(300).springify()}
+        style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)", width: 280 }]}
+      >
+        <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
+        <View style={styles.notificationContent}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center' }}>
+              <Feather name="mic" size={20} color={isDark ? colors.backgroundRoot : colors.backgroundRoot} />
+            </View>
+            <View>
+              <Text style={[styles.notificationTitle, { color: colors.text, fontSize: 16 }]}>AI Assistant</Text>
+              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary, fontSize: 12 }]}>Handling incoming call...</Text>
+            </View>
+          </View>
+          <View style={{ padding: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
+            <Text style={{ color: colors.text, fontSize: 13, fontStyle: 'italic', lineHeight: 18 }}>
+              "Hi! I'd like to book a service for tomorrow at 2 PM..."
+            </Text>
+          </View>
+        </View>
+      </Animated.View>
+
+      <Animated.View
+        entering={FadeIn.delay(600)}
+        style={[styles.calendarChip, { backgroundColor: colors.text, width: 48, height: 48, borderRadius: 24 }]}
+      >
+        <Feather name="phone" size={20} color={isDark ? colors.backgroundRoot : colors.backgroundRoot} />
+      </Animated.View>
+    </View>
+  );
+}
+
+function Page3Content() {
   const { theme: colors, isDark } = useTheme();
 
   return (
@@ -497,42 +583,6 @@ function Page2Content() {
       >
         <Feather name="sun" size={14} color={colors.text} />
         <Text style={[styles.industryText, { color: colors.text }]}>Landscapers</Text>
-      </Animated.View>
-    </View>
-  );
-}
-
-function Page3Content() {
-  const { theme: colors, isDark } = useTheme();
-
-  return (
-    <View style={styles.page3Content}>
-      <Animated.View
-        entering={FadeInDown.delay(300).springify()}
-        style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)" }]}
-      >
-        <BlurView intensity={isDark ? 30 : 50} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-        <View style={styles.notificationContent}>
-          <Text style={[styles.notificationLabel, { color: colors.textSecondary }]}>UPCOMING BOOKING</Text>
-          <View style={styles.notificationRow}>
-            <View style={styles.notificationCheck}>
-              <Feather name="check" size={16} color="#FFFFFF" />
-            </View>
-            <View style={styles.notificationInfo}>
-              <Text style={[styles.notificationTitle, { color: colors.text }]}>Sarah J. - Consultation</Text>
-              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary }]}>Friday, 2:00 PM</Text>
-            </View>
-            <Text style={[styles.notificationTime, { color: colors.textTertiary }]}>Today</Text>
-          </View>
-        </View>
-      </Animated.View>
-
-      <Animated.View
-        entering={FadeIn.delay(500)}
-        style={[styles.calendarChip, { backgroundColor: "#3B82F6" }]}
-      >
-        <Feather name="calendar" size={16} color="#FFFFFF" />
-        <View style={[styles.calendarLine, { backgroundColor: "rgba(255,255,255,0.4)" }]} />
       </Animated.View>
     </View>
   );
@@ -633,6 +683,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
             )}
             {index === 1 && <Page2Content />}
             {index === 2 && <Page3Content />}
+            {index === 3 && <Page4Content />}
           </View>
 
           <View style={[styles.contentPanel, { backgroundColor: isDark ? colors.backgroundRoot : "#FAFAFA" }]}>
