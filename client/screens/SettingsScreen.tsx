@@ -298,6 +298,7 @@ export default function SettingsScreen() {
     if (!business || !checkQrAccess()) return;
     try {
       const brandedQrUrl = `${getApiUrl()}/api/businesses/${business.id}/qrcode?format=image`;
+      console.log("Downloading branded QR from:", brandedQrUrl);
       
       if (Platform.OS === "web") {
         const link = document.createElement("a");
