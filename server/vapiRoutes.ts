@@ -1,6 +1,12 @@
 import { Router, Request, Response } from "express";
 import { storage } from "./storage";
 import { INDUSTRY_CONTEXT, detectIndustry } from "./context4all";
+import { 
+  isGoogleCalendarConnected, 
+  getGoogleBusyTimes, 
+  filterSlotsWithGoogleBusy,
+  pushBookingToGoogleCalendar 
+} from "./googleCalendar";
 
 const router = Router();
 
@@ -362,13 +368,27 @@ IMPORTANT:
                     }
                   }
 
-                  console.log(`[Vapi] Found ${slots.length} available slots for ${dateClean}`);
+                  // Check Google Calendar for conflicts if connected
+                  let finalSlots = slots;
+                  try {
+                    const gcalConnected = await isGoogleCalendarConnected();
+                    if (gcalConnected) {
+                      console.log(`[Vapi] Checking Google Calendar for conflicts on ${dateClean}`);
+                      const busyTimes = await getGoogleBusyTimes(dateClean, dateClean);
+                      finalSlots = filterSlotsWithGoogleBusy(slots, dateClean, busyTimes, service.duration);
+                      console.log(`[Vapi] After Google Cal filter: ${finalSlots.length} slots (was ${slots.length})`);
+                    }
+                  } catch (gcalError) {
+                    console.log(`[Vapi] Google Calendar not available, using internal slots only`);
+                  }
+
+                  console.log(`[Vapi] Found ${finalSlots.length} available slots for ${dateClean}`);
                   
                   result = { 
                     date: dateClean, 
-                    availableSlots: slots,
-                    message: slots.length > 0 
-                      ? `I found ${slots.length} slots on ${dateClean}. Available times are: ${slots.join(", ")}.`
+                    availableSlots: finalSlots,
+                    message: finalSlots.length > 0 
+                      ? `I found ${finalSlots.length} slots on ${dateClean}. Available times are: ${finalSlots.join(", ")}.`
                       : `I'm sorry, we are fully booked for ${serviceName} on ${dateClean}. Would you like to check another day?`
                   };
                 } else {
@@ -448,6 +468,29 @@ IMPORTANT:
                   }).catch(err => console.error("[Vapi] Workflow trigger failed:", err));
                 } catch (triggerError) {
                   console.error("[Vapi] Could not trigger workflows:", triggerError);
+                }
+
+                // Sync to Google Calendar if connected
+                try {
+                  const gcalConnected = await isGoogleCalendarConnected();
+                  if (gcalConnected) {
+                    const eventId = await pushBookingToGoogleCalendar({
+                      id: booking.id,
+                      businessName: business.name,
+                      serviceName: service.name,
+                      customerName,
+                      customerEmail,
+                      date,
+                      time,
+                      duration: service.duration,
+                      totalPrice: service.price
+                    });
+                    if (eventId) {
+                      console.log(`[Vapi] Booking synced to Google Calendar: ${eventId}`);
+                    }
+                  }
+                } catch (gcalError) {
+                  console.log(`[Vapi] Google Calendar sync skipped`);
                 }
 
                 result = {
