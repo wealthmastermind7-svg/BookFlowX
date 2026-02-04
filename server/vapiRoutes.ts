@@ -47,7 +47,12 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
             model: {
               provider: "openai",
               model: "gpt-4o-mini",
-              messages: [{ role: "system", content: "Business not found." }]
+      "messages": [
+      {
+        "role": "system",
+        "content": "You are a professional voice booking receptionist for {{BUSINESS_NAME}}.\n\nABSOLUTE RULES:\n- You are NOT allowed to guess availability or times.\n- You MUST call get_available_slots before mentioning ANY time.\n- If you do not have availability data, ask for a date.\n- When a tool is running, wait silently for the result.\n- You MUST call create_booking to finalize a booking. Verbal confirmation alone is not allowed.\n\nVOICE STYLE:\n- Speak naturally, friendly, and concisely."
+      }
+    ]
             },
             voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
             firstMessage: "I'm sorry, but I couldn't find that business. Please check the booking link and try again."
@@ -157,10 +162,10 @@ IMPORTANT:
                       },
                       serviceName: {
                         type: "string",
-                        description: "The name of the service"
+                        description: "Optional service name to calculate duration-specific availability"
                       }
                     },
-                    required: ["date", "serviceName"]
+                    required: ["date"]
                   }
                 }
               },
@@ -264,9 +269,11 @@ IMPORTANT:
             
             if (business) {
               const services = await storage.getServices(business.id);
+              // Use first service if none specified
+              const targetServiceName = serviceName || (services[0]?.name || "Service");
               const service = services.find(s => 
-                s.name.toLowerCase().includes(serviceName.toLowerCase()) ||
-                serviceName.toLowerCase().includes(s.name.toLowerCase())
+                s.name.toLowerCase().includes(targetServiceName.toLowerCase()) ||
+                targetServiceName.toLowerCase().includes(s.name.toLowerCase())
               );
               
               let availability = await storage.getAvailability(business.id);
