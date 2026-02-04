@@ -407,7 +407,7 @@ export default function QuickSaleScreen() {
                 />
                 <View style={styles.qrCenterOverlay}>
                   <ThemedText style={styles.qrCenterText}>
-                    {business?.slug?.toUpperCase() || "PAY"}
+                    {business?.name?.toUpperCase() || "PAY"}
                   </ThemedText>
                 </View>
               </View>

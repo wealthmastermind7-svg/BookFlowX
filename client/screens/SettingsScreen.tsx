@@ -652,7 +652,7 @@ export default function SettingsScreen() {
                   <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
                   <View style={styles.qrCenterOverlay}>
                     <ThemedText style={styles.qrCenterText}>
-                      {business?.slug?.toUpperCase() || "BOOK"}
+                      {business?.name?.toUpperCase() || "BOOK"}
                     </ThemedText>
                   </View>
                 </View>
