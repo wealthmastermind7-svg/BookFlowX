@@ -301,17 +301,7 @@
       } else if (!isConnecting) {
         setConnecting();
         try {
-          // Pass businessSlug as metadata so our server knows which calendar to use
-          await vapiInstance.start({
-            metadata: {
-              businessSlug: businessSlug
-            },
-            assistantOverrides: {
-              variableValues: {
-                businessSlug: businessSlug
-              }
-            }
-          });
+          await vapiInstance.start();
         } catch (err) {
           console.error('[Vapi] Start error:', err);
           showError('Microphone access required.');

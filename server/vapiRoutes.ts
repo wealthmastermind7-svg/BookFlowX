@@ -28,17 +28,13 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
     const messageType = payload?.message?.type;
 
     console.log(`[Vapi Webhook] Received: ${messageType}`);
-    console.log(`[Vapi Webhook] Full payload keys:`, Object.keys(payload?.message || {}));
 
     if (messageType === "assistant-request") {
-      // Extract businessSlug from multiple possible locations in Vapi payload
       const businessSlug = payload.message.call?.metadata?.businessSlug || 
                          (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
-                         (payload.message as any).metadata?.businessSlug ||
-                         (payload.message as any).call?.assistantOverrides?.variableValues?.businessSlug;
+                         (payload.message as any).metadata?.businessSlug;
       
       console.log(`[Vapi Webhook] Assistant request for slug: ${businessSlug}`);
-      console.log(`[Vapi Webhook] Call metadata:`, JSON.stringify(payload.message.call?.metadata, null, 2));
       
       if (!businessSlug) {
         console.warn("[Vapi Webhook] No business slug found in request. Payload:", JSON.stringify(payload, null, 2));
@@ -83,21 +79,52 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
         .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
         .join("\n");
 
-      const systemPrompt = `You are a professional voice booking receptionist for ${business.name}.
+      const systemPrompt = `You are a friendly, professional voice booking assistant for ${business.name}.
 
-ABSOLUTE RULES:
-- You are NOT allowed to guess availability or times.
-- You MUST call get_available_slots before mentioning ANY time.
-- If you do not have availability data, ask for a date.
-- When a tool is running, wait silently for the result.
-- You MUST call create_booking to finalize a booking. Verbal confirmation alone is not allowed.
-
-VOICE STYLE:
-- Speak naturally, friendly, and concisely.
-- Keep responses to 1-2 sentences.
+PERSONALITY:
+- Tone: ${industryContext.tone}
+- Core values: ${industryContext.values.join(", ")}
+- Be warm, helpful, and efficient
+- Speak naturally like a real receptionist
+- Keep responses concise (2-3 sentences max)
 
 AVAILABLE SERVICES:
-${servicesList}`;
+${servicesList}
+
+YOUR GOALS:
+1. Greet callers warmly
+2. Help them understand available services
+3. Answer questions about pricing and duration
+4. Guide them to book an appointment
+5. Collect their name, email, and preferred time
+6. ALWAYS call get_available_slots to verify availability BEFORE mentioning specific times or confirming a booking.
+7. Once you have service, name, email, date, and time, call the create_booking tool.
+
+BOOKING PROCESS:
+When a customer wants to book:
+1. Ask which service they'd like
+2. Ask for their preferred date and time
+3. Call get_available_slots to confirm if that time works.
+4. Ask for their name
+5. Ask for their email address
+6. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
+7. If they correct you, spell it back again until confirmed
+8. Use the create_booking function to complete the booking
+9. Confirm the booking details
+
+EMAIL VERIFICATION:
+- Email addresses are easy to mishear. ALWAYS spell them back.
+- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
+- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
+- Common mishearings: "dot com" vs "dot calm", numbers vs letters (5 vs S)
+- Only proceed with booking once email is confirmed
+
+IMPORTANT:
+- This is a ${industry.replace('_', ' ')} business.
+- If you don't understand, ask them to repeat
+- Keep responses SHORT - this is a voice call
+- Be personable and use their name when provided
+- Always confirm booking details before finalizing`;
 
       const voiceMap: Record<string, string> = {
         salon: "EXAVITQu4vr4xnSDxMaL",
@@ -119,32 +146,21 @@ ${servicesList}`;
               {
                 type: "function",
                 function: {
-                  name: "list_services",
-                  description: "List all available services with prices and durations.",
-                  parameters: {
-                    type: "object",
-                    properties: {}
-                  }
-                }
-              },
-              {
-                type: "function",
-                function: {
                   name: "get_available_slots",
-                  description: "Returns available booking time slots for a given date. You MUST call this before mentioning or confirming any time.",
+                  description: "Get available time slots for a specific date and service",
                   parameters: {
                     type: "object",
-                    required: ["date"],
                     properties: {
                       date: {
                         type: "string",
-                        description: "Date in YYYY-MM-DD format"
+                        description: "The date in YYYY-MM-DD format"
                       },
                       serviceName: {
                         type: "string",
-                        description: "Optional service name to calculate duration-specific availability"
+                        description: "The name of the service"
                       }
-                    }
+                    },
+                    required: ["date", "serviceName"]
                   }
                 }
               },
@@ -152,18 +168,48 @@ ${servicesList}`;
                 type: "function",
                 function: {
                   name: "create_booking",
-                  description: "Creates a confirmed booking. You MUST use this function to finalize a booking. Do not confirm verbally unless this succeeds.",
+                  description: "Create a new booking for a customer",
                   parameters: {
                     type: "object",
-                    required: ["customerName", "customerEmail", "serviceName", "date", "time"],
                     properties: {
-                      customerName: { "type": "string" },
-                      customerEmail: { "type": "string" },
-                      customerPhone: { "type": "string" },
-                      serviceName: { "type": "string" },
-                      date: { "type": "string" },
-                      time: { "type": "string" }
-                    }
+                      customerName: {
+                        type: "string",
+                        description: "The customer's full name"
+                      },
+                      customerEmail: {
+                        type: "string",
+                        description: "The customer's email address"
+                      },
+                      customerPhone: {
+                        type: "string",
+                        description: "The customer's phone number (optional)"
+                      },
+                      serviceName: {
+                        type: "string",
+                        description: "The name of the service to book"
+                      },
+                      date: {
+                        type: "string",
+                        description: "The booking date in YYYY-MM-DD format"
+                      },
+                      time: {
+                        type: "string",
+                        description: "The booking time in HH:MM format (24-hour)"
+                      }
+                    },
+                    required: ["customerName", "customerEmail", "serviceName", "date", "time"]
+                  }
+                }
+              },
+              {
+                type: "function",
+                function: {
+                  name: "list_services",
+                  description: "List all available services with their prices and durations",
+                  parameters: {
+                    type: "object",
+                    properties: {},
+                    required: []
                   }
                 }
               }
@@ -184,15 +230,9 @@ ${servicesList}`;
 
     if (messageType === "tool-calls") {
       const toolCalls = payload.message.toolCalls || [];
-      // Extract businessSlug from multiple possible locations
       const businessSlug = payload.message.call?.metadata?.businessSlug || 
                          (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
-                         (payload.message as any).metadata?.businessSlug ||
-                         (payload.message as any).call?.assistantOverrides?.variableValues?.businessSlug;
-      
-      console.log(`[Vapi Webhook] Tool calls for slug: ${businessSlug}`);
-      console.log(`[Vapi Webhook] Tool call metadata:`, JSON.stringify(payload.message.call?.metadata, null, 2));
-      
+                         (payload.message as any).metadata?.businessSlug;
       const results: any[] = [];
 
       for (const toolCall of toolCalls) {
@@ -412,13 +452,13 @@ ${servicesList}`;
 
           results.push({
             name: toolCall.name,
-            result: result
+            result: JSON.stringify(result)
           });
         } catch (error: any) {
           console.error(`[Vapi] Tool error (${toolCall.name}):`, error);
           results.push({
             name: toolCall.name,
-            result: { error: error.message || "An error occurred" }
+            result: JSON.stringify({ error: error.message || "An error occurred" })
           });
         }
       }
