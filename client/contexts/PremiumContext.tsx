@@ -68,7 +68,8 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
           if (business.createdAt) {
             const createdDate = new Date(business.createdAt);
             const trialDays = 7;
-            const endsAt = new Date(createdDate.getTime() + trialDays * 24 * 60 * 60 * 1000);
+            // Ensure trial lasts full 7 days from creation
+            const endsAt = new Date(createdDate.getTime() + (trialDays + 1) * 24 * 60 * 60 * 1000);
             setTrialEndsAt(endsAt.toISOString());
           }
 
