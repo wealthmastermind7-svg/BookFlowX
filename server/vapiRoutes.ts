@@ -299,14 +299,15 @@ IMPORTANT:
                   });
                   availability = await storage.getAvailability(business.id);
                 }
-                
-                // Parse date to check day of week correctly (adjusting for local timezone)
-                const [year, month, day] = date.split('-').map(Number);
+
+                // Parse date string carefully - vapi might send ISO or simple YYYY-MM-DD
+                const dateClean = date.split('T')[0];
+                const [year, month, day] = dateClean.split('-').map(Number);
                 // Create date in UTC to avoid local timezone shifts
                 const bookingDate = new Date(Date.UTC(year, month - 1, day));
                 const dayOfWeek = bookingDate.getUTCDay(); 
                 
-                console.log(`[Vapi] Checking availability for ${date}: Year=${year}, Month=${month}, Day=${day}, Calculated DayOfWeek=${dayOfWeek}`);
+                console.log(`[Vapi] Checking availability for date=${date} (clean=${dateClean}): DayOfWeek=${dayOfWeek}`);
                 
                 const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
                 
@@ -315,27 +316,40 @@ IMPORTANT:
                   const startHour = parseInt(dayAvailability.startTime.split(":")[0]);
                   const endHour = parseInt(dayAvailability.endTime.split(":")[0]);
                   
+                  // Check if this is "today" to filter out past times
+                  const now = new Date();
+                  const isToday = now.getUTCFullYear() === year && 
+                                  now.getUTCMonth() === (month - 1) && 
+                                  now.getUTCDate() === day;
+
                   for (let hour = startHour; hour < endHour; hour++) {
                     const times = ["00", "30"];
                     for (const minute of times) {
                       const timeStr = `${hour.toString().padStart(2, "0")}:${minute}`;
                       
+                      // Skip past times if it's today
+                      if (isToday) {
+                        const [h, m] = timeStr.split(':').map(Number);
+                        const slotDate = new Date(Date.UTC(year, month - 1, day, h, m));
+                        if (slotDate <= now) continue;
+                      }
+
                       // Check if slot is already booked
-                      const isBooked = bookings.some(b => b.date === date && b.time === timeStr && b.status !== 'cancelled');
+                      const isBooked = bookings.some(b => b.date === dateClean && b.time === timeStr && b.status !== 'cancelled');
                       if (!isBooked) {
                         slots.push(timeStr);
                       }
                     }
                   }
 
-                  console.log(`[Vapi] Found ${slots.length} available slots for ${date}`);
+                  console.log(`[Vapi] Found ${slots.length} available slots for ${dateClean}`);
                   
                   result = { 
-                    date, 
+                    date: dateClean, 
                     availableSlots: slots,
                     message: slots.length > 0 
-                      ? `Available times on ${date}: ${slots.join(", ")}`
-                      : `Sorry, there are no available slots for ${serviceName} on ${date}. Please try another date.`
+                      ? `I found ${slots.length} slots on ${dateClean}. Available times are: ${slots.join(", ")}.`
+                      : `I'm sorry, we are fully booked for ${serviceName} on ${dateClean}. Would you like to check another day?`
                   };
                 } else {
                   // Provide more helpful message with next available days
