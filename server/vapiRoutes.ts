@@ -269,38 +269,39 @@ IMPORTANT:
                 serviceName.toLowerCase().includes(s.name.toLowerCase())
               );
               
-              if (service) {
-                let availability = await storage.getAvailability(business.id);
-                const bookings = await storage.getBookings(business.id);
-                
-                // If no availability records exist, create default ones (Mon-Fri 9-5, Sat 10-2)
-                if (!availability || availability.length === 0) {
-                  console.log(`[Vapi] No availability found for ${business.id}, creating defaults`);
-                  for (let day = 1; day <= 5; day++) {
-                    await storage.setAvailability({
-                      businessId: business.id,
-                      dayOfWeek: day,
-                      startTime: "09:00",
-                      endTime: "17:00",
-                      isActive: true,
-                    });
-                  }
+              let availability = await storage.getAvailability(business.id);
+              
+              // If no availability records exist, create default ones (Mon-Fri 9-5, Sat 10-2)
+              if (!availability || availability.length === 0) {
+                console.log(`[Vapi] No availability found for ${business.id}, creating defaults`);
+                for (let day = 1; day <= 5; day++) {
                   await storage.setAvailability({
                     businessId: business.id,
-                    dayOfWeek: 6,
-                    startTime: "10:00",
-                    endTime: "14:00",
-                    isActive: true,
-                  });
-                  await storage.setAvailability({
-                    businessId: business.id,
-                    dayOfWeek: 0,
+                    dayOfWeek: day,
                     startTime: "09:00",
                     endTime: "17:00",
-                    isActive: false,
+                    isActive: true,
                   });
-                  availability = await storage.getAvailability(business.id);
                 }
+                await storage.setAvailability({
+                  businessId: business.id,
+                  dayOfWeek: 6,
+                  startTime: "10:00",
+                  endTime: "14:00",
+                  isActive: true,
+                });
+                await storage.setAvailability({
+                  businessId: business.id,
+                  dayOfWeek: 0,
+                  startTime: "09:00",
+                  endTime: "17:00",
+                  isActive: false,
+                });
+                availability = await storage.getAvailability(business.id);
+              }
+
+              if (service) {
+                const bookings = await storage.getBookings(business.id);
 
                 // Parse date string carefully - vapi might send ISO or simple YYYY-MM-DD
                 const dateClean = date.split('T')[0];
