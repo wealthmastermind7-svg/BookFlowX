@@ -35,10 +35,13 @@ export function PremiumBanner({ onPress }: PremiumBannerProps) {
             Smart reminders, instant setup, upsell suggestions
           </Text>
           <View style={styles.pricingRow}>
-            <Text style={styles.priceText}>Subscription</Text>
+            <Text style={styles.priceText}>Booking Premium</Text>
             <View style={styles.priceDot} />
             <Text style={styles.priceText}>Lifetime Access</Text>
           </View>
+          <Text style={[styles.subtitle, { fontSize: 11, marginTop: 8, fontStyle: 'italic', opacity: 0.6 }]}>
+            Voice booking sold separately.
+          </Text>
         </View>
         <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
       </View>

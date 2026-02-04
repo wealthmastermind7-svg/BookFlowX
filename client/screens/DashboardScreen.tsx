@@ -435,7 +435,10 @@ export default function DashboardScreen() {
   }));
 
   return (
-    <ImageBackground source={smokeBackground} style={styles.background} resizeMode="cover">
+    <View style={styles.background}>
+      <ImageBackground source={smokeBackground} style={styles.backgroundImage} resizeMode="cover">
+        <View style={styles.backgroundOverlay} />
+      </ImageBackground>
       <Animated.View style={[styles.container, containerStyle]}>
         <ScrollView
           style={styles.scrollView}
@@ -805,6 +808,17 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#000",
   },
+  backgroundImage: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+  },
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.92)", // Increased contrast for data clarity
+  },
   container: {
     flex: 1,
   },
@@ -844,17 +858,18 @@ const styles = StyleSheet.create({
   },
   revenueLabel: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
+    color: "#fff",
     marginBottom: 8,
-    fontWeight: "500",
+    fontWeight: "600",
+    opacity: 0.9,
   },
   revenueValue: {
     fontSize: 56,
-    fontWeight: "700",
+    fontWeight: "800",
     color: "#fff",
-    textShadowColor: "rgba(255,255,255,0.2)",
+    textShadowColor: "rgba(255,255,255,0.4)",
     textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
+    textShadowRadius: 12,
     letterSpacing: -2,
   },
   premiumBanner: {

@@ -430,9 +430,13 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <ImageBackground source={silkBackground} style={styles.overlay} resizeMode="cover">
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.88)" }}>
-          <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
+      <View style={styles.backgroundWrapper}>
+        <ImageBackground source={silkBackground} style={styles.backgroundImage} resizeMode="cover">
+          <View style={styles.backgroundOverlay} />
+        </ImageBackground>
+      </View>
+      <View style={{ flex: 1 }}>
+        <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
             
             {isTrialActive && !isPremium && (
               <GlassCard style={{ marginBottom: 24, paddingHorizontal: 20, paddingVertical: 20, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
@@ -452,14 +456,14 @@ export default function SettingsScreen() {
 
             <View style={styles.sectionHeader}>
               <ThemedText style={styles.sectionTitle}>
-                {isPremium ? "Premium" : "Membership"}
+                {isPremium ? "Booking Premium" : "Booking Plan"}
               </ThemedText>
               {isPremium ? (
                 <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>PREMIUM</ThemedText></View>
               ) : isTrialActive ? (
                 <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>TRIAL</ThemedText></View>
               ) : (
-                <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>BASIC PLAN</ThemedText></View>
+                <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>BASIC</ThemedText></View>
               )}
             </View>
             
@@ -470,11 +474,11 @@ export default function SettingsScreen() {
                 </View>
                 <View style={{ flex: 1, marginLeft: 20 }}>
                   <ThemedText style={styles.premiumBannerTitle}>
-                    {isPremium ? "Premium Active" : "Unlock Premium"}
+                    {isPremium ? "Booking Premium" : "Unlock Booking Premium"}
                   </ThemedText>
                   <ThemedText style={styles.premiumBannerSubtitle}>
                     {isPremium 
-                      ? "All features unlocked" 
+                      ? "Advanced automation active" 
                       : "Smart automation & unlimited tools"}
                   </ThemedText>
                 </View>
@@ -500,7 +504,7 @@ export default function SettingsScreen() {
                 </View>
                 <View style={{ height: 12 }} />
                 <ThemedText style={[styles.featureText, { fontSize: 12, fontStyle: 'italic', opacity: 0.7 }]}>
-                  Voice Booking available as optional add-on.
+                  Voice Booking sold separately as optional add-on.
                 </ThemedText>
               </View>
 
@@ -560,10 +564,16 @@ export default function SettingsScreen() {
               </View>
 
               <View style={styles.previewContainer}>
-                <Pressable onPress={() => setVoicePaywallVisible(true)} style={styles.previewLink}>
-                  <ThemedText style={styles.previewText}>PREVIEW</ThemedText>
-                  <Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" />
+                <Pressable 
+                  style={styles.previewLink}
+                  onPress={() => navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" })}
+                >
+                  <Feather name="play-circle" size={18} color="rgba(255,255,255,0.4)" />
+                  <ThemedText style={styles.previewText}>QUICK PREVIEW</ThemedText>
                 </Pressable>
+                <ThemedText style={[styles.featureText, { fontSize: 11, marginTop: 12, fontStyle: 'italic', opacity: 0.6 }]}>
+                  Booking links and automation plans are separate.
+                </ThemedText>
               </View>
 
               {voiceSubscription && voiceSubscription.subscription.tier !== 'free' && (
@@ -802,8 +812,20 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
-  overlay: { flex: 1 },
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  backgroundWrapper: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  backgroundImage: {
+    flex: 1,
+  },
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.92)",
+  },
   sectionTitleRow: { 
     flexDirection: "row", 
     alignItems: "flex-end", 
