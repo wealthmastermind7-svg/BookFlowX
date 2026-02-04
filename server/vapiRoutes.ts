@@ -437,6 +437,19 @@ IMPORTANT:
                   notes: "Booked via Voice Agent"
                 });
 
+                // Trigger workflow automations (like Postmark email)
+                try {
+                  const { triggerWorkflows } = await import("./workflowEngine");
+                  console.log(`[Vapi] Triggering workflows for voice booking ${booking.id}`);
+                  triggerWorkflows("booking_created", business.id, {
+                    booking,
+                    service: service || undefined,
+                    customer: customer || undefined,
+                  }).catch(err => console.error("[Vapi] Workflow trigger failed:", err));
+                } catch (triggerError) {
+                  console.error("[Vapi] Could not trigger workflows:", triggerError);
+                }
+
                 result = {
                   success: true,
                   bookingId: booking.id.substring(0, 8).toUpperCase(),
