@@ -402,9 +402,14 @@ export default function QuickSaleScreen() {
             >
               <View style={styles.qrImageContainer}>
                 <Image
-                  source={{ uri: `${api.getBaseUrl()}api/businesses/${business?.id}/qrcode?format=image&t=${Date.now()}` }}
+                  source={{ uri: qrCode }}
                   style={styles.qrCode}
                 />
+                <View style={styles.qrCenterOverlay}>
+                  <ThemedText style={styles.qrCenterText} numberOfLines={1}>
+                    {business?.slug?.toUpperCase() || "PAY"}
+                  </ThemedText>
+                </View>
               </View>
               <ThemedText style={[styles.qrInstructions, { color: theme.textSecondary }]}>
                 Ask customer to scan with their phone or tap to open link
@@ -719,33 +724,9 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginVertical: Spacing.lg,
   },
-  qrImageContainer: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#fff',
-    padding: 16,
-    borderRadius: 32,
-    marginBottom: 16,
-  },
   qrCode: {
     width: 280,
     height: 280,
-  },
-  qrCenterOverlay: {
-    position: 'absolute',
-    backgroundColor: '#fff',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#000',
-    maxWidth: 80,
-  },
-  qrCenterText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#000',
-    textAlign: 'center',
   },
   qrInstructions: {
     ...Typography.body,

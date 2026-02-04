@@ -1043,52 +1043,43 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
       
+      // Use helper function to generate booking URL
       const bookingUrl = getBookingUrlForBusiness(business, req);
-      const textOverlay = business.slug.toUpperCase().substring(0, 10);
       
-      // Helper to generate the premium QR image
-      const generatePremiumQr = async (size: number) => {
-        const qrBuffer = await QRCode.toBuffer(bookingUrl, {
+      // Check if requesting as image (PNG) or JSON
+      const format = req.query.format || 'json';
+      
+      if (format === 'image' || format === 'png') {
+        // Return as PNG image file for direct download/sharing
+        const qrCodeBuffer = await new Promise<Buffer>((resolve, reject) => {
+          QRCode.toBuffer(bookingUrl, {
+            errorCorrectionLevel: 'H',
+            width: 1024,
+            margin: 2,
+            color: {
+              dark: '#000000',
+              light: '#FFFFFF'
+            }
+          }, (err, buffer) => {
+            if (err) reject(err);
+            else resolve(buffer);
+          });
+        });
+        
+        res.type('image/png');
+        res.setHeader('Content-Disposition', `attachment; filename="${business.slug}-booking-qr.png"`);
+        res.send(qrCodeBuffer);
+      } else {
+        // Return as JSON with base64 data URL
+        const qrCodeDataUrl = await QRCode.toDataURL(bookingUrl, {
           errorCorrectionLevel: 'H',
-          width: size,
-          margin: 4,
+          width: 600,
+          margin: 2,
           color: {
             dark: '#000000',
             light: '#FFFFFF'
           }
         });
-
-        // Create overlay with sharp
-        const overlayWidth = Math.floor(size * 0.25);
-        const overlayHeight = Math.floor(size * 0.1);
-        
-        const svgOverlay = `
-          <svg width="${size}" height="${size}">
-            <rect x="${(size - overlayWidth) / 2}" y="${(size - overlayHeight) / 2}" 
-                  width="${overlayWidth}" height="${overlayHeight}" 
-                  rx="4" ry="4" fill="white" stroke="black" stroke-width="2" />
-            <text x="50%" y="50%" dominant-baseline="middle" text-anchor="middle" 
-                  font-family="sans-serif" font-weight="900" font-size="${Math.floor(overlayHeight * 0.6)}px" 
-                  fill="black">${textOverlay}</text>
-          </svg>
-        `;
-
-        return sharp(qrBuffer)
-          .composite([{ input: Buffer.from(svgOverlay), blend: 'over' }])
-          .png()
-          .toBuffer();
-      };
-
-      const format = req.query.format || 'json';
-      
-      if (format === 'image' || format === 'png') {
-        const finalBuffer = await generatePremiumQr(1024);
-        res.type('image/png');
-        res.setHeader('Content-Disposition', `attachment; filename="${business.slug}-booking-qr.png"`);
-        res.send(finalBuffer);
-      } else {
-        const finalBuffer = await generatePremiumQr(600);
-        const qrCodeDataUrl = `data:image/png;base64,${finalBuffer.toString('base64')}`;
         
         res.json({ 
           qrCode: qrCodeDataUrl,
