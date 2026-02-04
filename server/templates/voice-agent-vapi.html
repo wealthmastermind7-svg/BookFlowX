@@ -17,6 +17,7 @@
       --silver: #888888;
       --pearl: #DDDDDD;
       --pure-white: #ffffff;
+      --vibrant-red: #D32F2F;
       --safe-top: env(safe-area-inset-top);
       --safe-bottom: env(safe-area-inset-bottom);
     }
@@ -28,223 +29,135 @@
       display: flex;
       flex-direction: column;
       overflow: hidden;
-    }
-
-    /* Premium Glass Header */
-    .nav-header {
-      padding: calc(var(--safe-top) + 20px) 24px 20px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: rgba(0, 0, 0, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-      position: fixed;
-      top: 0;
-      width: 100%;
-      z-index: 100;
-    }
-
-    .close-btn {
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      color: white;
-      padding: 8px 18px;
-      border-radius: 100px;
-      font-size: 14px;
-      font-weight: 500;
-      text-decoration: none;
-      transition: all 0.3s ease;
-    }
-
-    .close-btn:active {
-      transform: scale(0.95);
-      background: rgba(255, 255, 255, 0.15);
-    }
-
-    .header-title {
-      font-family: 'Inter', sans-serif;
-      font-size: 16px;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      color: white;
-    }
-
-    /* Content Area */
-    .main-content {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
       justify-content: center;
-      padding: 120px 24px 100px;
-      gap: 48px;
-      text-align: center;
     }
 
+    /* Premium Typography */
     .business-info {
-      animation: fadeInDown 1s cubic-bezier(0.16, 1, 0.3, 1);
+      animation: fadeInDown 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      margin-bottom: 20px;
     }
 
     .business-name {
       font-family: 'Cormorant Garamond', serif;
-      font-size: 42px;
+      font-size: 28px;
       font-weight: 500;
       color: var(--pure-white);
-      letter-spacing: -1px;
-      margin-bottom: 4px;
-    }
-
-    .business-tagline {
-      font-family: 'Inter', sans-serif;
-      font-size: 14px;
-      color: var(--silver);
+      letter-spacing: 2px;
       text-transform: uppercase;
-      letter-spacing: 3px;
-      font-weight: 500;
+      margin-bottom: 40px;
     }
 
-    /* AI Visualization */
+    .voice-booking-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 56px;
+      font-weight: 500;
+      color: var(--pure-white);
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      line-height: 1.1;
+      margin-bottom: 40px;
+    }
+
+    .instruction-text {
+      font-size: 18px;
+      color: var(--silver);
+      font-weight: 300;
+      max-width: 300px;
+      line-height: 1.6;
+      margin: 0 auto;
+    }
+
+    /* Mic Button */
     .ai-visual-container {
       position: relative;
-      width: 240px;
-      height: 240px;
+      width: 300px;
+      height: 300px;
       display: flex;
       align-items: center;
       justify-content: center;
+      margin: 40px auto;
     }
 
-    .wave-ring {
+    .mic-outer-ring {
       position: absolute;
       width: 100%;
       height: 100%;
       border-radius: 50%;
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      opacity: 0;
-    }
-
-    .wave-ring.active {
-      animation: waveOut 3s linear infinite;
-    }
-
-    .wave-ring:nth-child(2) { animation-delay: 1s; }
-    .wave-ring:nth-child(3) { animation-delay: 2s; }
-
-    @keyframes waveOut {
-      0% { transform: scale(0.8); opacity: 0; }
-      20% { opacity: 0.5; }
-      100% { transform: scale(1.8); opacity: 0; }
+      background: radial-gradient(circle, rgba(211, 47, 47, 0.1) 0%, transparent 70%);
+      transition: all 0.5s ease;
     }
 
     .voice-btn {
-      width: 160px;
-      height: 160px;
+      width: 180px;
+      height: 180px;
       border-radius: 50%;
-      background: var(--charcoal);
-      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: var(--vibrant-red);
+      border: none;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
       position: relative;
       z-index: 10;
-      transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
-      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 0 40px rgba(211, 47, 47, 0.4);
     }
 
-    .voice-btn.active {
-      background: white;
-      transform: scale(0.9);
-      box-shadow: 0 0 80px rgba(255, 255, 255, 0.4);
+    .voice-btn:active {
+      transform: scale(0.92);
     }
 
     .voice-btn svg {
-      width: 48px;
-      height: 48px;
+      width: 64px;
+      height: 64px;
       color: white;
-      transition: all 0.4s ease;
-      stroke-width: 1.5;
+      stroke-width: 2;
     }
 
-    .voice-btn.active svg {
-      color: black;
-      transform: scale(1.1);
-    }
-
-    .status-area {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .status-pill {
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid rgba(255, 255, 255, 0.1);
-      padding: 6px 16px;
-      border-radius: 100px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .status-dot {
-      width: 6px;
-      height: 6px;
-      background: var(--silver);
-      border-radius: 50%;
-      transition: all 0.3s ease;
-    }
-
-    .status-dot.active {
-      background: #4ade80;
-      box-shadow: 0 0 10px #4ade80;
-      animation: blink 1s ease-in-out infinite;
-    }
-
-    .status-text {
-      font-size: 12px;
-      font-weight: 600;
+    .listening-status {
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      letter-spacing: 4px;
       color: var(--silver);
-      letter-spacing: 1px;
       text-transform: uppercase;
+      margin-top: 20px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
-    .instruction-text {
-      font-size: 16px;
-      color: var(--silver);
-      font-weight: 400;
-      max-width: 260px;
-      line-height: 1.5;
+    .listening-status.active {
+      opacity: 1;
+      animation: pulse 2s infinite;
     }
 
-    /* Bottom Actions */
-    .bottom-actions {
-      padding: 24px 24px calc(var(--safe-bottom) + 24px);
-      width: 100%;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 20px;
-      background: linear-gradient(to top, black, transparent);
+    @keyframes pulse {
+      0% { opacity: 0.4; }
+      50% { opacity: 1; }
+      100% { opacity: 0.4; }
+    }
+
+    .bottom-links {
       position: fixed;
-      bottom: 0;
+      bottom: 40px;
+      left: 0;
+      right: 0;
+      display: flex;
+      justify-content: center;
+      gap: 32px;
     }
 
-    .manual-booking-link {
+    .bottom-link {
       color: var(--silver);
       text-decoration: none;
       font-size: 14px;
       font-weight: 500;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      padding-bottom: 2px;
-      transition: all 0.3s ease;
+      transition: color 0.3s ease;
     }
 
-    .manual-booking-link:active {
+    .bottom-link:hover {
       color: white;
-      border-color: white;
     }
 
     /* Animations */
@@ -313,22 +226,15 @@
 <body>
   <div id="errorMessage"></div>
 
-  <nav class="nav-header">
-    <a href="/book/{{BUSINESS_SLUG}}" class="close-btn">Close</a>
-    <div class="header-title">Voice Booking</div>
-    <div style="width: 60px;"></div> <!-- Spacer -->
-  </nav>
-
   <main class="main-content">
     <div class="business-info">
       <h2 class="business-name">{{BUSINESS_NAME}}</h2>
-      <div class="business-tagline">AI Receptionist</div>
+      <h1 class="voice-booking-title">Voice<br>Booking</h1>
+      <p class="instruction-text" id="instructionText">Tap the microphone and speak naturally to book an appointment or ask questions.</p>
     </div>
 
     <div class="ai-visual-container">
-      <div class="wave-ring" id="ring1"></div>
-      <div class="wave-ring" id="ring2"></div>
-      <div class="wave-ring" id="ring3"></div>
+      <div class="mic-outer-ring" id="outerRing"></div>
       
       <button class="voice-btn" id="voiceButton">
         <svg id="micIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -340,24 +246,12 @@
       </button>
     </div>
 
-    <div class="status-area">
-      <div class="status-pill">
-        <div class="status-dot" id="statusDot"></div>
-        <div class="status-text" id="statusText">Ready to start</div>
-        <div class="visualizer" id="visualizer">
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-          <div class="bar"></div>
-        </div>
-      </div>
-      <p class="instruction-text" id="instructionText">Tap the microphone to start a conversation</p>
-    </div>
+    <div class="listening-status" id="listeningStatus">Listening...</div>
   </main>
 
-  <div class="bottom-actions">
-    <a href="/book/{{BUSINESS_SLUG}}" class="manual-booking-link">Switch to manual booking</a>
+  <div class="bottom-links">
+    <a href="/book/{{BUSINESS_SLUG}}" class="bottom-link">Text Booking</a>
+    <a href="#" class="bottom-link">Get the App</a>
   </div>
 
   <script>
@@ -366,12 +260,10 @@
     const vapiPublicKey = '{{VAPI_PUBLIC_KEY}}';
     
     const voiceButton = document.getElementById('voiceButton');
-    const statusText = document.getElementById('statusText');
-    const statusDot = document.getElementById('statusDot');
     const instructionText = document.getElementById('instructionText');
-    const visualizer = document.getElementById('visualizer');
+    const listeningStatus = document.getElementById('listeningStatus');
     const errorMessage = document.getElementById('errorMessage');
-    const rings = [document.getElementById('ring1'), document.getElementById('ring2'), document.getElementById('ring3')];
+    const outerRing = document.getElementById('outerRing');
 
     let vapiInstance = null;
     let isActive = false;
@@ -389,30 +281,25 @@
           isActive = false;
           isConnecting = false;
           voiceButton.classList.remove('active');
-          statusDot.classList.remove('active');
-          statusText.textContent = 'Ready to start';
-          instructionText.textContent = 'Tap the microphone to start a conversation';
-          visualizer.classList.remove('active');
-          rings.forEach(r => r.classList.remove('active'));
+          listeningStatus.classList.remove('active');
+          outerRing.style.boxShadow = 'none';
           break;
         case 'connecting':
           isConnecting = true;
-          statusText.textContent = 'Connecting...';
-          instructionText.textContent = 'Preparing your AI assistant';
+          listeningStatus.textContent = 'Connecting...';
+          listeningStatus.classList.add('active');
           break;
         case 'active':
           isActive = true;
           isConnecting = false;
           voiceButton.classList.add('active');
-          statusDot.classList.add('active');
-          statusText.textContent = 'Listening';
-          instructionText.textContent = 'Go ahead, I\'m listening';
-          visualizer.classList.add('active');
-          rings.forEach(r => r.classList.add('active'));
+          listeningStatus.textContent = 'Listening...';
+          listeningStatus.classList.add('active');
+          outerRing.style.boxShadow = '0 0 100px rgba(211, 47, 47, 0.4)';
           break;
         case 'speaking':
-          statusText.textContent = 'AI is speaking';
-          visualizer.classList.add('active');
+          listeningStatus.textContent = 'AI is speaking...';
+          listeningStatus.classList.add('active');
           break;
       }
     }
