@@ -268,6 +268,24 @@ export const voiceSubscriptions = pgTable("voice_subscriptions", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Google Calendar tokens table (per-business OAuth)
+export const googleCalendarTokens = pgTable("google_calendar_tokens", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .unique()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  accessToken: text("access_token").notNull(),
+  refreshToken: text("refresh_token").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  calendarId: text("calendar_id").default("primary"), // Which calendar to sync with
+  email: text("email"), // Google account email for display
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Voice call logs table (for tracking usage)
 export const voiceCallLogs = pgTable("voice_call_logs", {
   id: varchar("id")
@@ -303,6 +321,7 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   apiKeys: many(apiKeys),
   voiceSubscription: one(voiceSubscriptions),
   voiceCallLogs: many(voiceCallLogs),
+  googleCalendarToken: one(googleCalendarTokens),
 }));
 
 export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
@@ -315,6 +334,13 @@ export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one 
 export const voiceCallLogsRelations = relations(voiceCallLogs, ({ one }) => ({
   business: one(businesses, {
     fields: [voiceCallLogs.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const googleCalendarTokensRelations = relations(googleCalendarTokens, ({ one }) => ({
+  business: one(businesses, {
+    fields: [googleCalendarTokens.businessId],
     references: [businesses.id],
   }),
 }));
@@ -501,6 +527,12 @@ export const insertVoiceCallLogSchema = createInsertSchema(voiceCallLogs).omit({
   createdAt: true,
 });
 
+export const insertGoogleCalendarTokenSchema = createInsertSchema(googleCalendarTokens).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -526,6 +558,9 @@ export type InsertVoiceSubscription = z.infer<typeof insertVoiceSubscriptionSche
 
 export type VoiceCallLog = typeof voiceCallLogs.$inferSelect;
 export type InsertVoiceCallLog = z.infer<typeof insertVoiceCallLogSchema>;
+
+export type GoogleCalendarToken = typeof googleCalendarTokens.$inferSelect;
+export type InsertGoogleCalendarToken = z.infer<typeof insertGoogleCalendarTokenSchema>;
 
 export type QuickSale = typeof quickSales.$inferSelect;
 export type InsertQuickSale = z.infer<typeof insertQuickSaleSchema>;
