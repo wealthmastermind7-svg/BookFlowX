@@ -189,6 +189,16 @@ export async function getVoiceOfferings(): Promise<PurchasesOffering | null> {
 
 // Check which voice tier the user has access to
 export async function getVoiceEntitlement(): Promise<VoiceTier> {
+  // Mock premium for testing in Expo Go
+  try {
+    const Constants = require("expo-constants").default;
+    const isExpoGo = Constants.executionEnvironment === "storeClient";
+    if (isExpoGo) {
+      console.log("RevenueCat: Running in Expo Go, granting mock premium entitlement for testing");
+      return "voice_business";
+    }
+  } catch (e) {}
+
   if (Platform.OS === "web") {
     return "free";
   }
