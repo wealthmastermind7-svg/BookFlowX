@@ -332,6 +332,9 @@ function BookingCardGlass({
   );
 }
 
+import { useVoiceSubscription } from "@/hooks/useVoiceSubscription";
+import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
+
 export default function DashboardScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
@@ -344,6 +347,13 @@ export default function DashboardScreen() {
   const [business, setBusiness] = useState<Business | null>(null);
   const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [voicePaywallVisible, setVoicePaywallVisible] = useState(false);
+  const [ownerToken, setOwnerToken] = useState<string | null>(null);
+
+  const { data: voiceSubscription } = useVoiceSubscription(
+    business?.id || "",
+    ownerToken || ""
+  );
 
   const fadeIn = useSharedValue(0);
 
@@ -364,7 +374,9 @@ export default function DashboardScreen() {
     const maxRetries = 3;
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
-        await api.getOrCreateBusiness();
+        const biz = await api.getOrCreateBusiness();
+        const token = await api.getOwnerToken();
+        setOwnerToken(token);
         const existingServices = await api.getServices();
         if (existingServices.length === 0) {
           await api.initializeDemoData();
@@ -459,6 +471,26 @@ export default function DashboardScreen() {
               {formatPrice(Math.round(totalRevenue * 100), business?.currency || "USD")}
             </Animated.Text>
           </GlassPanel>
+
+          {voiceSubscription?.subscription.tier === "free" && (
+            <Pressable onPress={() => setVoicePaywallVisible(true)} style={{ marginTop: 12 }}>
+              <GlassPanel style={[styles.premiumBanner, { borderColor: "rgba(255,255,255,0.2)" }]}>
+                <View style={[styles.premiumIconContainer, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
+                  <Feather name="mic" size={20} color="#fff" />
+                </View>
+                <View style={styles.premiumContent}>
+                  <Animated.Text style={styles.premiumTitle}>Voice Booking Active</Animated.Text>
+                  <Animated.Text style={styles.premiumSubtitle}>
+                    {voiceSubscription.subscription.minutesUsed} / {voiceSubscription.subscription.minutesLimit} trial minutes used
+                  </Animated.Text>
+                  <View style={styles.premiumPricing}>
+                    <Animated.Text style={styles.premiumPrice}>Upgrade to keep taking calls</Animated.Text>
+                  </View>
+                </View>
+                <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
+              </GlassPanel>
+            </Pressable>
+          )}
 
           {!isPremium && (
             <Pressable onPress={() => showPaywall("soft_upsell")}>
@@ -798,6 +830,20 @@ export default function DashboardScreen() {
             </BlurView>
           </Pressable>
         </Pressable>
+      </Modal>
+
+      <Modal
+        visible={voicePaywallVisible}
+        animationType="slide"
+        presentationStyle="pageSheet"
+        onRequestClose={() => setVoicePaywallVisible(false)}
+      >
+        <VoiceAgentPaywall 
+          businessId={business?.id || ""}
+          onClose={() => setVoicePaywallVisible(false)}
+          onSubscribe={() => setVoicePaywallVisible(false)}
+          isLoading={false}
+        />
       </Modal>
     </View>
   );
