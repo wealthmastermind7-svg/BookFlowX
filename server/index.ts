@@ -202,7 +202,7 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/home" && req.path !== "/manifest") {
+    if (req.path !== "/" && req.path !== "/home" && req.path !== "/manifest" && req.path !== "/pitch") {
       return next();
     }
 
