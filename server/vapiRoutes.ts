@@ -28,13 +28,17 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
     const messageType = payload?.message?.type;
 
     console.log(`[Vapi Webhook] Received: ${messageType}`);
+    console.log(`[Vapi Webhook] Full payload keys:`, Object.keys(payload?.message || {}));
 
     if (messageType === "assistant-request") {
+      // Extract businessSlug from multiple possible locations in Vapi payload
       const businessSlug = payload.message.call?.metadata?.businessSlug || 
                          (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
-                         (payload.message as any).metadata?.businessSlug;
+                         (payload.message as any).metadata?.businessSlug ||
+                         (payload.message as any).call?.assistantOverrides?.variableValues?.businessSlug;
       
       console.log(`[Vapi Webhook] Assistant request for slug: ${businessSlug}`);
+      console.log(`[Vapi Webhook] Call metadata:`, JSON.stringify(payload.message.call?.metadata, null, 2));
       
       if (!businessSlug) {
         console.warn("[Vapi Webhook] No business slug found in request. Payload:", JSON.stringify(payload, null, 2));
@@ -230,9 +234,15 @@ IMPORTANT:
 
     if (messageType === "tool-calls") {
       const toolCalls = payload.message.toolCalls || [];
+      // Extract businessSlug from multiple possible locations
       const businessSlug = payload.message.call?.metadata?.businessSlug || 
                          (payload.message as any).assistantOverrides?.variableValues?.businessSlug ||
-                         (payload.message as any).metadata?.businessSlug;
+                         (payload.message as any).metadata?.businessSlug ||
+                         (payload.message as any).call?.assistantOverrides?.variableValues?.businessSlug;
+      
+      console.log(`[Vapi Webhook] Tool calls for slug: ${businessSlug}`);
+      console.log(`[Vapi Webhook] Tool call metadata:`, JSON.stringify(payload.message.call?.metadata, null, 2));
+      
       const results: any[] = [];
 
       for (const toolCall of toolCalls) {
