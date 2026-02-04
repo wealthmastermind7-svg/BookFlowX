@@ -560,6 +560,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Trigger workflow automations for booking_created
       console.log(`[Booking] Triggering workflows for booking ${booking.id} (${customerName})`);
+      
+      // Ensure we have correct industry for blueprints
+      const industry = business.industry || "salon";
+      const workflows = await storage.getWorkflowsByTrigger(req.params.businessId, "booking_created");
+      if (workflows.length === 0) {
+        console.log(`[Booking] No workflows found for business ${req.params.businessId}, initializing ${industry} blueprints`);
+        await initializeIndustryBlueprints(req.params.businessId, industry);
+      }
+
       triggerWorkflows("booking_created", req.params.businessId, {
         booking,
         service: service || undefined,

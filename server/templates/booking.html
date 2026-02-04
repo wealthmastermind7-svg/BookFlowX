@@ -792,8 +792,9 @@
           });
           if (subRes.ok) {
             const subData = await subRes.json();
-            // Only show voice booking if they have an active paid tier
-            if (subData.subscription && subData.subscription.tier !== 'free') {
+            // Show voice booking for active trials or paid tiers
+            const isActive = subData.subscription && (subData.subscription.tier !== 'free' || subData.usage.minutesUsed < subData.usage.minutesLimit);
+            if (isActive) {
               document.getElementById('voice-link').style.display = 'flex';
               document.getElementById('header-voice-link').style.display = 'flex';
             } else {
