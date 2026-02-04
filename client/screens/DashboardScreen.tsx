@@ -456,7 +456,26 @@ export default function DashboardScreen() {
           ]}
           showsVerticalScrollIndicator={false}
         >
-          <Animated.Text style={styles.headerTitle}>BookFlow</Animated.Text>
+          <View style={styles.headerRow}>
+            <Animated.Text style={styles.headerTitle}>BookFlow</Animated.Text>
+            <Pressable 
+              onPress={() => {
+                if (business?.slug) {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                  navigation.navigate("VoiceBooking" as any, { 
+                    businessSlug: business.slug,
+                    businessName: business.name 
+                  });
+                }
+              }}
+              style={styles.headerVoiceButton}
+            >
+              <GlassPanel style={styles.headerVoiceButtonGlass}>
+                <Feather name="mic" size={16} color="white" />
+                <Text style={styles.headerVoiceButtonText}>Voice Booking</Text>
+              </GlassPanel>
+            </Pressable>
+          </View>
 
           <GlassPanel style={styles.revenueCard}>
             <Animated.Text style={styles.revenueLabel}>Total Revenue</Animated.Text>
@@ -860,12 +879,37 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     gap: 16,
   },
+  headerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  headerVoiceButton: {
+    overflow: "hidden",
+    borderRadius: 20,
+  },
+  headerVoiceButtonGlass: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
+    backgroundColor: "rgba(255,255,255,0.1)",
+  },
+  headerVoiceButtonText: {
+    color: "white",
+    fontSize: 12,
+    fontWeight: "600",
+    marginLeft: 6,
+    textTransform: "uppercase",
+    letterSpacing: 1,
+  },
   headerTitle: {
     fontSize: 36,
     fontWeight: "700",
     color: "#fff",
     textAlign: "center",
-    marginBottom: 16,
     textShadowColor: "rgba(255,255,255,0.3)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
