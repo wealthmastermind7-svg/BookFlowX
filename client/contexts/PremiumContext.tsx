@@ -106,6 +106,8 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   const trialDaysLeft = useMemo(() => {
     if (!trialEndsAt) return 0;
     const diff = new Date(trialEndsAt).getTime() - new Date().getTime();
+    // FORCED DEVELOPMENT OVERRIDE: Always show 30 days in dev
+    if (__DEV__) return 30;
     return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
   }, [trialEndsAt]);
 
