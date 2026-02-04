@@ -462,13 +462,13 @@ IMPORTANT:
 
           results.push({
             name: toolCall.name,
-            result: JSON.stringify(result)
+            result: result
           });
         } catch (error: any) {
           console.error(`[Vapi] Tool error (${toolCall.name}):`, error);
           results.push({
             name: toolCall.name,
-            result: JSON.stringify({ error: error.message || "An error occurred" })
+            result: { error: error.message || "An error occurred" }
           });
         }
       }
