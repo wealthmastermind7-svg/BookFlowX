@@ -562,7 +562,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`[Booking] Triggering workflows for booking ${booking.id} (${customerName})`);
       
       // Ensure we have correct industry for blueprints
-      const industry = business.industry || "salon";
+      const industry = (business as any).industry || "salon";
       const workflows = await storage.getWorkflowsByTrigger(req.params.businessId, "booking_created");
       if (workflows.length === 0) {
         console.log(`[Booking] No workflows found for business ${req.params.businessId}, initializing ${industry} blueprints`);
@@ -1915,6 +1915,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/businesses/:businessId/voice-subscription", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { businessId } = req.params;
+
+      // Mock premium for testing in Expo Go / Development
+      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true") {
+        return res.json({
+          subscription: {
+            tier: 'voice_business',
+            status: 'active',
+            minutesLimit: 500,
+            minutesUsed: 0,
+            periodStart: new Date(),
+            periodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
+            stripeSubscriptionId: 'mock_stripe_id',
+          },
+          usage: {
+            available: true,
+            remaining: 500,
+            percentUsed: 0,
+            limit: 500,
+            used: 0
+          },
+          stats: {
+            totalCalls: 0,
+            bookingsCreated: 0,
+            conversionRate: 0,
+          },
+        });
+      }
+
       const subscription = await storage.getOrCreateVoiceSubscription(businessId);
       const usage = await storage.checkVoiceMinutesAvailable(businessId);
       const stats = await storage.getVoiceUsageStats(businessId);
@@ -1933,6 +1961,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           available: usage.available,
           remaining: usage.remaining,
           percentUsed: Math.round((usage.used / usage.limit) * 100),
+          limit: usage.limit,
+          used: usage.used
         },
         stats: {
           totalCalls: stats.totalCalls,
