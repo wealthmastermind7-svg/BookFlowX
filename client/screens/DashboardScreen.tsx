@@ -487,7 +487,7 @@ export default function DashboardScreen() {
             </Pressable>
           )}
 
-          <Pressable onPress={() => navigation.navigate("SettingsTab" as any)}>
+          <Pressable onPress={() => navigation.navigate("VoiceBooking" as any)}>
             <GlassPanel style={styles.voiceAspirationalBanner}>
               <View style={styles.voiceAspirationalHeader}>
                 <View style={styles.voiceIconStack}>
