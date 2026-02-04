@@ -127,34 +127,34 @@
 
     .header-voice-btn {
       display: none; /* Controlled by JS */
-      background: rgba(255, 255, 255, 0.1);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      border-radius: 12px;
-      padding: 8px 12px;
-      color: white;
+      background: white;
+      border: 1px solid white;
+      border-radius: 100px;
+      padding: 10px 20px;
+      color: black;
       text-decoration: none;
-      font-size: 12px;
-      font-weight: 600;
+      font-size: 14px;
+      font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 1px;
       display: flex;
       align-items: center;
-      gap: 6px;
-      transition: all 0.3s ease;
+      gap: 8px;
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
       margin-left: 16px;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
     }
 
     .header-voice-btn:hover {
-      background: rgba(255, 255, 255, 0.15);
-      border-color: rgba(255, 255, 255, 0.3);
-      transform: translateY(-2px);
+      background: #f0f0f0;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 0 6px 16px rgba(255, 255, 255, 0.3);
     }
 
     .header-voice-btn svg {
-      width: 14px;
-      height: 14px;
+      width: 16px;
+      height: 16px;
+      stroke-width: 3px;
     }
     
     .header p {
