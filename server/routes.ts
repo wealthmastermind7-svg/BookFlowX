@@ -1050,11 +1050,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const format = req.query.format || 'json';
       
       if (format === 'image' || format === 'png') {
-        // Return as PNG image file for direct download/sharing
+        // Return as PNG image file for direct download/sharing with branding
+        const qrSize = 1024;
+        const padding = 80;
+        const cornerRadius = 48;
+        const totalSize = qrSize + padding * 2;
+        
+        // Generate raw QR code
         const qrCodeBuffer = await new Promise<Buffer>((resolve, reject) => {
           QRCode.toBuffer(bookingUrl, {
             errorCorrectionLevel: 'H',
-            width: 1024,
+            width: qrSize,
             margin: 2,
             color: {
               dark: '#000000',
@@ -1066,9 +1072,60 @@ export async function registerRoutes(app: Express): Promise<Server> {
           });
         });
         
+        // Create business name text overlay SVG
+        const businessName = (business.name || 'BOOK').toUpperCase();
+        const fontSize = Math.min(48, Math.max(24, Math.floor(200 / Math.max(businessName.length, 1))));
+        const textWidth = Math.min(businessName.length * fontSize * 0.6, qrSize * 0.6);
+        const textHeight = fontSize + 16;
+        const textX = totalSize / 2;
+        const textY = totalSize / 2;
+        
+        const textOverlaySvg = `
+          <svg width="${totalSize}" height="${totalSize}">
+            <rect x="${textX - textWidth/2 - 12}" y="${textY - textHeight/2}" 
+                  width="${textWidth + 24}" height="${textHeight}" 
+                  rx="8" ry="8" fill="white" stroke="black" stroke-width="4"/>
+            <text x="${textX}" y="${textY + fontSize/3}" 
+                  font-family="Arial, sans-serif" font-size="${fontSize}" font-weight="900" 
+                  fill="black" text-anchor="middle">${businessName}</text>
+          </svg>
+        `;
+        
+        // Create rounded corners mask
+        const roundedMask = Buffer.from(`
+          <svg width="${totalSize}" height="${totalSize}">
+            <rect x="0" y="0" width="${totalSize}" height="${totalSize}" 
+                  rx="${cornerRadius}" ry="${cornerRadius}" fill="white"/>
+          </svg>
+        `);
+        
+        // Compose final image with Sharp
+        const sharp = (await import('sharp')).default;
+        
+        const brandedQr = await sharp({
+          create: {
+            width: totalSize,
+            height: totalSize,
+            channels: 4,
+            background: { r: 255, g: 255, b: 255, alpha: 1 }
+          }
+        })
+        .composite([
+          { input: await sharp(qrCodeBuffer).resize(qrSize, qrSize).toBuffer(), left: padding, top: padding },
+          { input: Buffer.from(textOverlaySvg), left: 0, top: 0 }
+        ])
+        .png()
+        .toBuffer();
+        
+        // Apply rounded corners
+        const finalImage = await sharp(brandedQr)
+          .composite([{ input: roundedMask, blend: 'dest-in' }])
+          .png()
+          .toBuffer();
+        
         res.type('image/png');
         res.setHeader('Content-Disposition', `attachment; filename="${business.slug}-booking-qr.png"`);
-        res.send(qrCodeBuffer);
+        res.send(finalImage);
       } else {
         // Return as JSON with base64 data URL
         const qrCodeDataUrl = await QRCode.toDataURL(bookingUrl, {

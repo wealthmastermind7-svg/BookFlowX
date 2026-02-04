@@ -27,7 +27,7 @@ import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, Business, EmbedCode } from "@/lib/api";
-import { getBookingDomain } from "@/lib/query-client";
+import { getBookingDomain, getApiUrl } from "@/lib/query-client";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { usePremium } from "@/contexts/PremiumContext";
@@ -295,17 +295,33 @@ export default function SettingsScreen() {
   };
 
   const handleDownloadQRCode = async () => {
-    if (!business || !qrCode || !checkQrAccess()) return;
-    if (Platform.OS === "web") {
-      const link = document.createElement("a");
-      link.href = qrCode;
-      link.download = "qr.png";
-      link.click();
-      return;
+    if (!business || !checkQrAccess()) return;
+    try {
+      const brandedQrUrl = `${getApiUrl()}/api/businesses/${business.id}/qrcode?format=image`;
+      
+      if (Platform.OS === "web") {
+        const link = document.createElement("a");
+        link.href = brandedQrUrl;
+        link.download = `${business.slug}-booking-qr.png`;
+        link.click();
+        return;
+      }
+      
+      // Download branded QR with business name and rounded corners
+      const downloadResult = await FileSystem.downloadAsync(
+        brandedQrUrl,
+        `${FileSystem.cacheDirectory}${business.slug}-booking-qr.png`
+      );
+      
+      if (downloadResult.status === 200) {
+        await Share.share({ url: downloadResult.uri });
+      } else {
+        Alert.alert("Error", "Failed to download QR code");
+      }
+    } catch (error) {
+      console.error("Error downloading QR:", error);
+      Alert.alert("Error", "Failed to share QR code");
     }
-    const fileUri = `${FileSystem.cacheDirectory}qr.png`;
-    await FileSystem.writeAsStringAsync(fileUri, qrCode.split(",")[1], { encoding: FileSystem.EncodingType.Base64 });
-    await Share.share({ url: fileUri });
   };
 
   const handleShowEmbedModal = async () => {
