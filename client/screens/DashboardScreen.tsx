@@ -487,7 +487,14 @@ export default function DashboardScreen() {
             </Pressable>
           )}
 
-          <Pressable onPress={() => navigation.navigate("VoiceBooking" as any)}>
+          <Pressable onPress={() => {
+            if (business?.slug) {
+              navigation.navigate("VoiceBooking" as any, { 
+                businessSlug: business.slug,
+                businessName: business.name 
+              });
+            }
+          }}>
             <GlassPanel style={styles.voiceAspirationalBanner}>
               <View style={styles.voiceAspirationalHeader}>
                 <View style={styles.voiceIconStack}>
