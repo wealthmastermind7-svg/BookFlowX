@@ -458,23 +458,6 @@ export default function DashboardScreen() {
         >
           <View style={styles.headerRow}>
             <Animated.Text style={styles.headerTitle}>BookFlow</Animated.Text>
-            <Pressable 
-              onPress={() => {
-                if (business?.slug) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-                  navigation.navigate("VoiceBooking" as any, { 
-                    businessSlug: business.slug,
-                    businessName: business.name 
-                  });
-                }
-              }}
-              style={styles.headerVoiceButton}
-            >
-              <GlassPanel style={styles.headerVoiceButtonGlass}>
-                <Feather name="mic" size={16} color="white" />
-                <Text style={styles.headerVoiceButtonText}>Voice Booking</Text>
-              </GlassPanel>
-            </Pressable>
           </View>
 
           <GlassPanel style={styles.revenueCard}>
