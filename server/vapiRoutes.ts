@@ -120,7 +120,7 @@ ${servicesList}`;
                 type: "function",
                 function: {
                   name: "get_available_slots",
-                  description: "Get available time slots for a specific date and service",
+                  description: "Returns a list of available 30-minute booking slots for a business on a given date. You MUST call this tool before mentioning any time to the user.",
                   parameters: {
                     type: "object",
                     properties: {
@@ -141,7 +141,7 @@ ${servicesList}`;
                 type: "function",
                 function: {
                   name: "create_booking",
-                  description: "Create a new booking for a customer",
+                  description: "Finalizes and creates a new booking in the database once service, date, time, name, and email are confirmed. You MUST confirm the email spelling before calling this.",
                   parameters: {
                     type: "object",
                     properties: {
@@ -178,7 +178,7 @@ ${servicesList}`;
                 type: "function",
                 function: {
                   name: "list_services",
-                  description: "List all available services with their prices and durations",
+                  description: "Lists all available services with their prices and durations. Call this if the user asks what you offer.",
                   parameters: {
                     type: "object",
                     properties: {},
