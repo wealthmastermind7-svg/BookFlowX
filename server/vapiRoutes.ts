@@ -590,21 +590,6 @@ IMPORTANT:
 - Keep responses SHORT - this is a voice call
 - Be personable and use their name when provided
 - Always confirm booking details before finalizing`;
-5. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
-6. If they correct you, spell it back again until confirmed
-7. Confirm the booking details
-
-EMAIL VERIFICATION:
-- Email addresses are easy to mishear. ALWAYS spell them back.
-- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
-- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
-- Only proceed with booking once email is confirmed
-
-IMPORTANT:
-- This is a ${industry.replace('_', ' ')} business.
-- If you don't understand, ask them to repeat
-- Keep responses SHORT - this is a voice call
-- Be personable and use their name when provided`;
 
     const voiceMap: Record<string, string> = {
       salon: "EXAVITQu4vr4xnSDxMaL",
