@@ -295,17 +295,31 @@ export default function SettingsScreen() {
   };
 
   const handleDownloadQRCode = async () => {
-    if (!business || !qrCode || !checkQrAccess()) return;
-    if (Platform.OS === "web") {
-      const link = document.createElement("a");
-      link.href = qrCode;
-      link.download = "qr.png";
-      link.click();
-      return;
+    if (!business || !checkQrAccess()) return;
+    setLoading(true);
+    try {
+      const qrImageUrl = `${api.getBaseUrl()}api/businesses/${business.id}/qrcode?format=image&t=${Date.now()}`;
+      
+      if (Platform.OS === "web") {
+        const link = document.createElement("a");
+        link.href = qrImageUrl;
+        link.download = `${business.slug}-qr.png`;
+        link.click();
+        return;
+      }
+
+      const fileUri = `${FileSystem.cacheDirectory}${business.slug}-qr.png`;
+      const downloadRes = await FileSystem.downloadAsync(qrImageUrl, fileUri);
+      await Share.share({ 
+        url: downloadRes.uri,
+        title: `${business.name} Booking QR`
+      });
+    } catch (error) {
+      console.error("Error sharing QR code:", error);
+      Alert.alert("Error", "Failed to share high-quality QR code.");
+    } finally {
+      setLoading(false);
     }
-    const fileUri = `${FileSystem.cacheDirectory}qr.png`;
-    await FileSystem.writeAsStringAsync(fileUri, qrCode.split(",")[1], { encoding: FileSystem.EncodingType.Base64 });
-    await Share.share({ url: fileUri });
   };
 
   const handleShowEmbedModal = async () => {
@@ -650,11 +664,6 @@ export default function SettingsScreen() {
               >
                 <View style={styles.qrImageContainer}>
                   <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
-                  <View style={styles.qrCenterOverlay}>
-                    <ThemedText style={styles.qrCenterText} numberOfLines={1}>
-                      {business?.slug?.toUpperCase() || "BOOK"}
-                    </ThemedText>
-                  </View>
                 </View>
                 <View style={styles.qrHintContainer}>
                   <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
@@ -764,35 +773,22 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
   modalContent: { width: "100%", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 24 },
-  qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center" },
+  qrImage: { width: 200, height: 200, alignSelf: "center" },
   qrPressable: {
     padding: 16,
-    backgroundColor: "rgba(255,255,255,0.03)",
-    borderRadius: 24,
+    backgroundColor: "#fff",
+    borderRadius: 32,
     marginBottom: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    alignSelf: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
   },
   qrImageContainer: {
-    position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  qrCenterOverlay: {
-    position: 'absolute',
-    backgroundColor: '#fff',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    borderWidth: 2,
-    borderColor: '#000',
-    maxWidth: 80,
-  },
-  qrCenterText: {
-    fontSize: 10,
-    fontWeight: '900',
-    color: '#000',
-    textAlign: 'center',
   },
   qrHintContainer: {
     flexDirection: 'row',
@@ -800,10 +796,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     gap: 6,
     marginTop: 12,
+    borderTopWidth: 1,
+    borderTopColor: 'rgba(0,0,0,0.05)',
+    paddingTop: 12,
   },
   qrHint: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.4)",
+    color: "rgba(0,0,0,0.4)",
     fontWeight: "600",
     letterSpacing: 0.5,
   },

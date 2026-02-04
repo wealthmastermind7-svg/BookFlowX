@@ -288,39 +288,31 @@ export default function ServiceEditorScreen() {
   };
 
   const handleDownloadQRCode = async () => {
-    if (!qrRef.current) return;
-    
+    if (!serviceId || !business?.id) return;
+    setLoading(true);
     try {
-      try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {}); } catch {}
+      const qrImageUrl = `${api.getBaseUrl()}api/businesses/${business.id}/qrcode?format=image&t=${Date.now()}`;
       
-      qrRef.current.toDataURL(async (dataURL: string) => {
-        try {
-          if (Platform.OS === "web") {
-            const link = document.createElement("a");
-            link.href = `data:image/png;base64,${dataURL}`;
-            link.download = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-            link.click();
-            return;
-          }
+      if (Platform.OS === "web") {
+        const link = document.createElement("a");
+        link.href = qrImageUrl;
+        link.download = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+        link.click();
+        return;
+      }
 
-          const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
-          const file = new ExpoFile(Paths.cache, filename);
-          
-          const binaryData = Uint8Array.from(atob(dataURL), c => c.charCodeAt(0));
-          await file.write(binaryData);
-
-          await Share.share({
-            url: file.uri,
-            title: `${service.name} - Booking QR Code`,
-          });
-        } catch (innerError) {
-          console.error("Error processing QR code data:", innerError);
-          Alert.alert("Error", "Failed to process QR code image");
-        }
+      const filename = `${service.name?.replace(/\s+/g, "-").toLowerCase() || "service"}-qr.png`;
+      const fileUri = `${FileSystem.cacheDirectory}${filename}`;
+      const downloadRes = await FileSystem.downloadAsync(qrImageUrl, fileUri);
+      await Share.share({ 
+        url: downloadRes.uri,
+        title: `${service.name} Booking QR`
       });
     } catch (error) {
       console.error("Error sharing QR code:", error);
-      Alert.alert("Error", "Failed to share QR code image");
+      Alert.alert("Error", "Failed to share high-quality QR code.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -705,14 +697,14 @@ export default function ServiceEditorScreen() {
                 style={styles.qrContainer}
               >
                 {bookingLink && (
-                  <View style={{ padding: 16, backgroundColor: 'white', borderRadius: 16 }}>
-                    <QRCode
-                      value={bookingLink}
-                      size={200}
-                      backgroundColor="white"
-                      color="black"
-                      getRef={(ref: any) => (qrRef.current = ref)}
-                    />
+                  <View style={styles.qrPressable}>
+                    <View style={styles.qrImageContainer}>
+                      <Image 
+                        source={{ uri: `${api.getBaseUrl()}api/businesses/${business.id}/qrcode?format=image&t=${Date.now()}` }} 
+                        style={styles.qrImage} 
+                        contentFit="contain" 
+                      />
+                    </View>
                   </View>
                 )}
                 <Text style={styles.qrDescription}>
@@ -998,6 +990,26 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
+  },
+  qrPressable: {
+    padding: 16,
+    backgroundColor: "#fff",
+    borderRadius: 32,
+    marginBottom: 24,
+    alignSelf: 'center',
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.1,
+    shadowRadius: 20,
+    elevation: 5,
+  },
+  qrImageContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrImage: {
+    width: 200,
+    height: 200,
   },
   qrModalHeader: {
     flexDirection: "row",
