@@ -1035,6 +1035,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // === QR CODE API ===
   
   // Generate QR code for booking link
+  // QR Code generator endpoint
   app.get("/api/businesses/:businessId/qrcode", async (req: Request, res: Response) => {
     try {
       const business = await storage.getBusiness(req.params.businessId);
@@ -1052,7 +1053,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // Return as PNG image file for direct download/sharing
         const qrCodeBuffer = await new Promise<Buffer>((resolve, reject) => {
           QRCode.toBuffer(bookingUrl, {
-            width: 300,
+            errorCorrectionLevel: 'H',
+            width: 1024,
             margin: 2,
             color: {
               dark: '#000000',
@@ -1070,7 +1072,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         // Return as JSON with base64 data URL
         const qrCodeDataUrl = await QRCode.toDataURL(bookingUrl, {
-          width: 300,
+          errorCorrectionLevel: 'H',
+          width: 600,
           margin: 2,
           color: {
             dark: '#000000',
@@ -1081,6 +1084,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         res.json({ 
           qrCode: qrCodeDataUrl,
           bookingUrl,
+          businessSlug: business.slug,
+          businessName: business.name,
           qrImageUrl: `/api/businesses/${business.id}/qrcode?format=image`
         });
       }

@@ -640,7 +640,34 @@ export default function SettingsScreen() {
       </Modal>
 
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Booking QR Code</ThemedText>{qrCode && <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />}<Button onPress={handleDownloadQRCode}>Share QR Code Image</Button><Pressable onPress={() => setQrModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>Close</ThemedText></Pressable></View></View>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+            <ThemedText style={styles.modalTitle}>Booking QR Code</ThemedText>
+            {qrCode && (
+              <Pressable 
+                onPress={() => bookingUrl && Linking.openURL(bookingUrl)} 
+                style={({ pressed }) => [styles.qrPressable, pressed && { opacity: 0.8 }]}
+              >
+                <View style={styles.qrImageContainer}>
+                  <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
+                  <View style={styles.qrCenterOverlay}>
+                    <ThemedText style={styles.qrCenterText} numberOfLines={1}>
+                      {business?.slug?.toUpperCase() || "BOOK"}
+                    </ThemedText>
+                  </View>
+                </View>
+                <View style={styles.qrHintContainer}>
+                  <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
+                  <ThemedText style={styles.qrHint}>Tap to open link</ThemedText>
+                </View>
+              </Pressable>
+            )}
+            <Button onPress={handleDownloadQRCode}>Share QR Code Image</Button>
+            <Pressable onPress={() => setQrModalVisible(false)} style={styles.secondaryButton}>
+              <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
+            </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
@@ -737,7 +764,49 @@ const styles = StyleSheet.create({
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
   modalContent: { width: "100%", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 24 },
-  qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center", marginBottom: 24 },
+  qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center" },
+  qrPressable: {
+    padding: 16,
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 24,
+    marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  qrImageContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  qrCenterOverlay: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#000',
+    maxWidth: 80,
+  },
+  qrCenterText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#000',
+    textAlign: 'center',
+  },
+  qrHintContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  qrHint: {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.4)",
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
   secondaryButton: { height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginTop: 12 },
   secondaryButtonText: { fontSize: 16, fontWeight: "600", color: "#fff" },
   editInput: { height: 56, borderRadius: 16, paddingHorizontal: 16, fontSize: 16, borderWidth: 1, marginBottom: 24 },
