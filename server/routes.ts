@@ -1513,8 +1513,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
         const now = new Date();
         const createdAt = business.createdAt ? new Date(business.createdAt) : now;
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const isWithinTrial = (now.getTime() - createdAt.getTime()) < sevenDaysMs;
+        // Increase trial to 30 days in development to avoid immediate expiration
+        const trialDays = process.env.NODE_ENV === 'development' ? 30 : 7;
+        const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
+        const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
 
         if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
           if (expiredHtmlContent) {
@@ -1601,8 +1603,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
         const now = new Date();
         const createdAt = business.createdAt ? new Date(business.createdAt) : now;
-        const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
-        const isWithinTrial = (now.getTime() - createdAt.getTime()) < sevenDaysMs;
+        // Increase trial to 30 days in development to avoid immediate expiration
+        const trialDays = process.env.NODE_ENV === 'development' ? 30 : 7;
+        const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
+        const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
 
         if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
           return res.status(402).send(`
