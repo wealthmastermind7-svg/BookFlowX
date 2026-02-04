@@ -219,6 +219,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadEmbedJs();
   await loadVoiceAgentHtml();
 
+  // === WORKFLOWS API ===
+  
+  app.post("/api/test-email", async (req: Request, res: Response) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+    
+    try {
+      const success = await sendBookingConfirmation({
+        customerName: "Test User",
+        customerEmail: email,
+        serviceName: "Test Service",
+        date: new Date().toISOString().split('T')[0],
+        time: "10:00 AM",
+        price: 5000,
+        confirmationNumber: "TEST-123",
+        businessName: "BookFlow Test",
+      });
+      
+      if (success) {
+        res.json({ message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ error: "Failed to send test email. Check server logs." });
+      }
+    } catch (error) {
+      console.error("Error in test-email route:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   // === BUSINESSES API ===
   
   // Get business by ID (for admin dashboard)
