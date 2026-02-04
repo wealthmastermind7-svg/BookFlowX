@@ -330,7 +330,8 @@ IMPORTANT:
                       // Skip past times if it's today
                       if (isToday) {
                         const [h, m] = timeStr.split(':').map(Number);
-                        const slotDate = new Date(Date.UTC(year, month - 1, day, h, m));
+                        const slotDate = new Date();
+                        slotDate.setHours(h, m, 0, 0);
                         if (slotDate <= now) continue;
                       }
 
