@@ -254,51 +254,8 @@ export default function AgentTrainingScreen() {
           </GlassCard>
         </View>
 
-        <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Custom Q&A</ThemedText>
-          <ThemedText style={styles.cardInfo}>
-            Enter specific questions and answers to help your assistant understand your business better.
-          </ThemedText>
-          <GlassCard style={styles.qaInputCard}>
-            <TextInput
-              style={styles.input}
-              placeholder="Question (e.g., Where are you located?)"
-              placeholderTextColor="rgba(255,255,255,0.3)"
-              value={question}
-              onChangeText={setQuestion}
-              returnKeyType="next"
-              onSubmitEditing={() => answerRef.current?.focus()}
-              blurOnSubmit={false}
-              onFocus={() => setIsFocused('question')}
-              onBlur={() => setIsFocused(null)}
-            />
-            <TextInput
-              ref={answerRef}
-              style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
-              placeholder="Answer"
-              placeholderTextColor="rgba(255,255,255,0.3)"
-              value={qaAnswer}
-              onChangeText={setQaAnswer}
-              multiline
-              onFocus={() => setIsFocused('answer')}
-              onBlur={() => setIsFocused(null)}
-            />
-            <View style={styles.qaButtonRow}>
-              <Pressable 
-                style={[styles.addButton, addingQa && { opacity: 0.7 }]}
-                disabled={addingQa}
-                onPress={handleAddQa}
-              >
-                {addingQa ? (
-                  <ActivityIndicator size="small" color="#000" />
-                ) : (
-                  <ThemedText style={styles.addButtonText}>Add Q&A</ThemedText>
-                )}
-              </Pressable>
-            </View>
-          </GlassCard>
-        </View>
-
+        {/* Q&A Section removed due to typing issues on iOS */}
+        
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <ThemedText style={styles.sectionTitle}>Training Links</ThemedText>
