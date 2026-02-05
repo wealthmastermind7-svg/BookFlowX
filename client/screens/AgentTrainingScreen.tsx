@@ -53,6 +53,12 @@ export default function AgentTrainingScreen() {
   const [content, setContent] = useState("");
   const [qaAnswer, setQaAnswer] = useState("");
 
+  // Refs for focusing
+  const answerRef = React.useRef<TextInput>(null);
+
+  // Added focus tracking to prevent re-render blur
+  const [isFocused, setIsFocused] = useState<string | null>(null);
+
   useEffect(() => {
     loadTrainingData();
   }, []);
@@ -162,12 +168,12 @@ export default function AgentTrainingScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-        <GlassCard style={styles.headerCard}>
-          <ThemedText style={styles.headerTitle}>Train {businessName}</ThemedText>
-          <ThemedText style={styles.headerSubtitle}>
-            Add knowledge to help your assistant respond better
-          </ThemedText>
-        </GlassCard>
+          <GlassCard style={styles.headerCard}>
+            <ThemedText style={styles.headerTitle}>Assistant Training</ThemedText>
+            <ThemedText style={styles.headerSubtitle}>
+              Add knowledge to help your informational assistant respond better.
+            </ThemedText>
+          </GlassCard>
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>Web Crawler</ThemedText>
@@ -183,6 +189,8 @@ export default function AgentTrainingScreen() {
                 value={crawlUrl}
                 onChangeText={setCrawlUrl}
                 autoCapitalize="none"
+                keyboardType="url"
+                textContentType="URL"
               />
               <Pressable 
                 style={[styles.crawlButton, crawling && { opacity: 0.7 }]} 
@@ -212,6 +220,8 @@ export default function AgentTrainingScreen() {
               value={content}
               onChangeText={setContent}
               multiline
+              onFocus={() => setIsFocused('content')}
+              onBlur={() => setIsFocused(null)}
             />
             <View style={styles.qaButtonRow}>
               <Pressable 
@@ -256,14 +266,22 @@ export default function AgentTrainingScreen() {
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={question}
               onChangeText={setQuestion}
+              returnKeyType="next"
+              onSubmitEditing={() => answerRef.current?.focus()}
+              blurOnSubmit={false}
+              onFocus={() => setIsFocused('question')}
+              onBlur={() => setIsFocused(null)}
             />
             <TextInput
+              ref={answerRef}
               style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
               placeholder="Answer"
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={qaAnswer}
               onChangeText={setQaAnswer}
               multiline
+              onFocus={() => setIsFocused('answer')}
+              onBlur={() => setIsFocused(null)}
             />
             <View style={styles.qaButtonRow}>
               <Pressable 
