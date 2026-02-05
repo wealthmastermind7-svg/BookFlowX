@@ -511,7 +511,7 @@ export default function ServicesScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <View style={styles.headerTitleRow}>
-              <Text style={styles.hugeTitle}>Services</Text>
+              <Text style={styles.hugeTitle} numberOfLines={1} adjustsFontSizeToFit>Services</Text>
               <View style={styles.assistantContextContainer}>
                 <Text style={styles.assistantContextText}>Assistant Setup</Text>
                 <Pressable 
