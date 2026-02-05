@@ -10,6 +10,7 @@ import {
   ScrollView,
   ActivityIndicator,
   Linking,
+  KeyboardAvoidingView,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
@@ -185,8 +186,6 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
 }
 
 function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
-  const { theme: colors, isDark } = useTheme();
-  
   return (
     <View style={styles.stepIndicatorContainer}>
       {Array.from({ length: totalSteps }).map((_, index) => (
@@ -196,8 +195,8 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
             styles.stepDot,
             {
               backgroundColor: index <= currentStep 
-                ? colors.text 
-                : isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+                ? '#fff' 
+                : 'rgba(255,255,255,0.2)',
               width: index === currentStep ? 24 : 8,
             },
           ]}
@@ -216,7 +215,6 @@ function Step1NicheSelection({
   onSelect: (id: string) => void;
   onNext: () => void;
 }) {
-  const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   return (
@@ -225,15 +223,23 @@ function Step1NicheSelection({
       exiting={FadeOut.duration(200)}
       style={styles.stepContainer}
     >
+      <LinearGradient
+        colors={['#000', '#1a1a1a']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <View style={[styles.backgroundSmoke, { opacity: 0.4 }]}>
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
+      </View>
+
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.stepHeader}>
-          <Text style={[styles.stepTitle, { color: colors.text }]}>
+          <Text style={[styles.stepTitle, { color: '#fff' }]}>
             What's your business?
           </Text>
-          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+          <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
             Select your industry to personalize your experience
           </Text>
         </View>
@@ -253,23 +259,23 @@ function Step1NicheSelection({
                   styles.nicheCard,
                   {
                     backgroundColor: selectedType === type.id
-                      ? isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'
-                      : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                      ? 'rgba(255,255,255,0.15)'
+                      : 'rgba(255,255,255,0.05)',
                     borderColor: selectedType === type.id
-                      ? type.color
-                      : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                      ? '#fff'
+                      : 'rgba(255,255,255,0.1)',
                     borderWidth: selectedType === type.id ? 2 : 1,
                   },
                 ]}
               >
-                <View style={[styles.nicheIconContainer, { backgroundColor: type.color + '20' }]}>
-                  <Feather name={type.icon} size={22} color={type.color} />
+                <View style={[styles.nicheIconContainer, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+                  <Feather name={type.icon} size={22} color="#fff" />
                 </View>
                 <Text 
                   style={[
                     styles.nicheName, 
                     { 
-                      color: selectedType === type.id ? colors.text : colors.textSecondary,
+                      color: '#fff',
                       fontWeight: selectedType === type.id ? '600' : '500',
                     }
                   ]}
@@ -278,8 +284,8 @@ function Step1NicheSelection({
                   {type.name}
                 </Text>
                 {selectedType === type.id && (
-                  <View style={[styles.checkBadge, { backgroundColor: type.color }]}>
-                    <Feather name="check" size={10} color="#fff" />
+                  <View style={[styles.checkBadge, { backgroundColor: '#fff' }]}>
+                    <Feather name="check" size={10} color="#000" />
                   </View>
                 )}
               </Pressable>
@@ -288,10 +294,10 @@ function Step1NicheSelection({
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
-        <AnimatedPressable onPress={onNext} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
-          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
-          <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
+        <AnimatedPressable onPress={onNext} style={[styles.primaryButton, { backgroundColor: '#fff' }]}>
+          <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+          <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
       </View>
     </Animated.View>
@@ -311,7 +317,6 @@ function Step2BusinessName({
   onBack: () => void;
   isCreating: boolean;
 }) {
-  const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   
   const generateSlug = (name: string) => {
@@ -327,69 +332,82 @@ function Step2BusinessName({
       exiting={FadeOut.duration(200)}
       style={styles.stepContainer}
     >
-      <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 120 }]}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.stepHeader}>
-          <Text style={[styles.stepTitle, { color: colors.text }]}>
-            Name your business
-          </Text>
-          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-            This will appear on your booking page
-          </Text>
-        </View>
-
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[
-              styles.businessInput,
-              {
-                color: colors.text,
-                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
-                borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
-              },
-            ]}
-            value={businessName}
-            onChangeText={onNameChange}
-            placeholder="Enter business name"
-            placeholderTextColor={colors.textTertiary}
-            autoFocus
-            autoCapitalize="words"
-            autoCorrect={false}
-          />
-
-          <Animated.View entering={FadeInDown.delay(200)} style={styles.slugPreview}>
-            <Feather name="link" size={16} color={colors.textSecondary} />
-            <Text style={[styles.slugText, { color: colors.textSecondary }]}>
-              confirmbooking.online/book/{slug}
-            </Text>
-          </Animated.View>
-        </View>
-      </ScrollView>
-
-      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
-        <View style={styles.bottomActionsRow}>
-          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
-            <Feather name="arrow-left" size={20} color={colors.text} />
-          </AnimatedPressable>
-          <AnimatedPressable 
-            onPress={onNext} 
-            style={[styles.primaryButtonFlex, { backgroundColor: colors.text }]}
-            disabled={!canContinue || isCreating}
-          >
-            {isCreating ? (
-              <ActivityIndicator size="small" color={colors.backgroundRoot} />
-            ) : (
-              <>
-                <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
-                <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
-              </>
-            )}
-          </AnimatedPressable>
-        </View>
+      <LinearGradient
+        colors={['#000', '#1a1a1a']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <View style={[styles.backgroundSmoke, { opacity: 0.4 }]}>
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
       </View>
+
+      <KeyboardAvoidingView 
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        style={{ flex: 1 }}
+      >
+        <ScrollView 
+          contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 200 }]}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.stepHeader}>
+            <Text style={[styles.stepTitle, { color: '#fff' }]}>
+              Name your business
+            </Text>
+            <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
+              This will appear on your booking page
+            </Text>
+          </View>
+
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={[
+                styles.businessInput,
+                {
+                  color: '#fff',
+                  backgroundColor: 'rgba(255,255,255,0.08)',
+                  borderColor: 'rgba(255,255,255,0.15)',
+                },
+              ]}
+              value={businessName}
+              onChangeText={onNameChange}
+              placeholder="Enter business name"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              autoFocus
+              autoCapitalize="words"
+              autoCorrect={false}
+            />
+
+            <Animated.View entering={FadeInDown.delay(200)} style={styles.slugPreview}>
+              <Feather name="link" size={16} color="rgba(255,255,255,0.5)" />
+              <Text style={[styles.slugText, { color: 'rgba(255,255,255,0.5)' }]}>
+                confirmbooking.online/book/{slug}
+              </Text>
+            </Animated.View>
+          </View>
+        </ScrollView>
+
+        <View style={[styles.bottomActions, { bottom: Spacing.xl + 40, zIndex: 100 }]}>
+          <View style={styles.bottomActionsRow}>
+            <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+              <Feather name="arrow-left" size={20} color="#fff" />
+            </AnimatedPressable>
+            <AnimatedPressable 
+              onPress={onNext} 
+              style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}
+              disabled={!canContinue || isCreating}
+            >
+              {isCreating ? (
+                <ActivityIndicator size="small" color="#000" />
+              ) : (
+                <>
+                  <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+                  <Feather name="arrow-right" size={20} color="#000" />
+                </>
+              )}
+            </AnimatedPressable>
+          </View>
+        </View>
+      </KeyboardAvoidingView>
     </Animated.View>
   );
 }
@@ -407,7 +425,6 @@ function Step3AssetPreviews({
   onNext: () => void;
   onBack: () => void;
 }) {
-  const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
   
   const displayUrl = bookingUrl.replace(/^https?:\/\//, "");
@@ -426,32 +443,39 @@ function Step3AssetPreviews({
       exiting={FadeOut.duration(200)}
       style={styles.stepContainer}
     >
+      <LinearGradient
+        colors={['#000', '#1a1a1a']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <View style={[styles.backgroundSmoke, { opacity: 0.4 }]}>
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
+      </View>
+
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 100 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 140 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.stepHeader}>
-          <Text style={[styles.stepTitle, { color: colors.text }]}>
+          <Text style={[styles.stepTitle, { color: '#fff' }]}>
             Your booking assets
           </Text>
-          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+          <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
             Ready to share with customers
           </Text>
         </View>
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.previewSection}>
-          <Text style={[styles.previewLabel, { color: colors.textSecondary }]}>BOOKING LINK PREVIEW</Text>
+          <Text style={[styles.previewLabel, { color: 'rgba(255,255,255,0.5)' }]}>BOOKING LINK PREVIEW</Text>
           <Pressable onPress={handleOpenLink} style={styles.linkPreviewContainer}>
             <CinematicLinkPreview businessName={businessName} domain={domain} />
           </Pressable>
-          <Text style={[styles.tapHint, { color: colors.textTertiary }]}>Tap to open your live booking page</Text>
+          <Text style={[styles.tapHint, { color: 'rgba(255,255,255,0.4)' }]}>Tap to open your live booking page</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200)} style={styles.qrSection}>
-          <Text style={[styles.previewLabel, { color: colors.textSecondary }]}>QR CODE</Text>
-          <Pressable 
-            onPress={handleOpenLink}
-            style={[styles.qrContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+          <Text style={[styles.previewLabel, { color: 'rgba(255,255,255,0.5)' }]}>QR CODE</Text>
+          <View 
+            style={[styles.qrContainer, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 }]}
           >
             {qrCodeUrl ? (
               <View style={styles.qrImageWrapper}>
@@ -461,21 +485,21 @@ function Step3AssetPreviews({
                 </View>
               </View>
             ) : (
-              <ActivityIndicator size="large" color={colors.text} />
+              <ActivityIndicator size="large" color="#fff" />
             )}
-          </Pressable>
-          <Text style={[styles.tapHint, { color: colors.textTertiary }]}>Print this for your storefront</Text>
+          </View>
+          <Text style={[styles.tapHint, { color: 'rgba(255,255,255,0.4)' }]}>Print this for your storefront</Text>
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
         <View style={styles.bottomActionsRow}>
-          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
-            <Feather name="arrow-left" size={20} color={colors.text} />
+          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+            <Feather name="arrow-left" size={20} color="#fff" />
           </AnimatedPressable>
-          <AnimatedPressable onPress={onNext} style={[styles.primaryButtonFlex, { backgroundColor: colors.text }]}>
-            <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
-            <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+          <AnimatedPressable onPress={onNext} style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}>
+            <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+            <Feather name="arrow-right" size={20} color="#000" />
           </AnimatedPressable>
         </View>
       </View>
@@ -494,7 +518,6 @@ function Step4VoicePreview({
   onBack: () => void;
   navigation: any;
 }) {
-  const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
 
   const handleTestVoiceAgent = async () => {
@@ -518,67 +541,75 @@ function Step4VoicePreview({
       exiting={FadeOut.duration(200)}
       style={styles.stepContainer}
     >
+      <LinearGradient
+        colors={['#000', '#1a1a1a']}
+        style={StyleSheet.absoluteFillObject}
+      />
+      <View style={[styles.backgroundSmoke, { opacity: 0.4 }]}>
+        <View style={[StyleSheet.absoluteFillObject, { backgroundColor: 'rgba(0,0,0,0.4)' }]} />
+      </View>
+
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 140 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 180 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.stepHeader}>
-          <Text style={[styles.stepTitle, { color: colors.text }]}>
+          <Text style={[styles.stepTitle, { color: '#fff' }]}>
             Meet your Assistant
           </Text>
-          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+          <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
             Answers questions about your business 24/7
           </Text>
         </View>
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.voicePreviewContainer}>
-          <View style={[styles.voiceCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
-            <View style={[styles.voiceIconCircle, { backgroundColor: colors.text }]}>
-              <Feather name="mic" size={32} color={colors.backgroundRoot} />
+          <View style={[styles.voiceCard, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 }]}>
+            <View style={[styles.voiceIconCircle, { backgroundColor: '#fff' }]}>
+              <Feather name="mic" size={32} color="#000" />
             </View>
             
-            <Text style={[styles.voiceCardTitle, { color: colors.text }]}>
+            <Text style={[styles.voiceCardTitle, { color: '#fff' }]}>
               Informational Assistant
             </Text>
-            <Text style={[styles.voiceCardDescription, { color: colors.textSecondary }]}>
+            <Text style={[styles.voiceCardDescription, { color: 'rgba(255,255,255,0.6)' }]}>
               Answers questions about your services, pricing, and availability, then directs customers to book via Text Booking
             </Text>
 
             <View style={styles.voiceFeatures}>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>24/7 availability</Text>
+                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>24/7 availability</Text>
               </View>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Natural conversations</Text>
+                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>Natural conversations</Text>
               </View>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Trained on your services</Text>
+                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>Trained on your services</Text>
               </View>
             </View>
 
-            <View style={[styles.trialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
-              <Feather name="gift" size={14} color={colors.text} />
-              <Text style={[styles.trialBadgeText, { color: colors.text }]}>5 minutes free trial included</Text>
+            <View style={[styles.trialBadge, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
+              <Feather name="gift" size={14} color="#fff" />
+              <Text style={[styles.trialBadgeText, { color: '#fff' }]}>5 minutes free trial included</Text>
             </View>
           </View>
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
-        <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
-          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test Assistant Now</Text>
-          <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
+        <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: '#fff' }]}>
+          <Text style={[styles.primaryButtonText, { color: '#000' }]}>Test Assistant Now</Text>
+          <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
         
         <View style={[styles.bottomActionsRow, { marginTop: Spacing.md }]}>
-          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
-            <Feather name="arrow-left" size={20} color={colors.text} />
+          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+            <Feather name="arrow-left" size={20} color="#fff" />
           </AnimatedPressable>
           <Pressable onPress={handleSkipToHome} style={styles.skipButton}>
-            <Text style={[styles.skipButtonText, { color: colors.textSecondary }]}>Skip for now</Text>
+            <Text style={[styles.skipButtonText, { color: 'rgba(255,255,255,0.5)' }]}>Skip for now</Text>
           </Pressable>
         </View>
       </View>
@@ -587,7 +618,6 @@ function Step4VoicePreview({
 }
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
-  const { theme: colors, isDark } = useTheme();
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
   
@@ -632,15 +662,9 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       const finalBookingUrl = `https://confirmbooking.online/book/${slug}`;
       setBookingUrl(finalBookingUrl);
       
-      try {
-        const qrResponse = await fetch(`${getApiUrl()}/api/business/${updatedBiz.id}/qr?url=${encodeURIComponent(finalBookingUrl)}`);
-        const qrData = await qrResponse.json();
-        if (qrData?.qrCode) {
-          setQrCodeUrl(qrData.qrCode);
-        }
-      } catch (qrError) {
-        console.warn("Failed to get QR code:", qrError);
-      }
+      // Instantly generate QR code URL locally to avoid delay
+      const qrUrl = `${getApiUrl()}/api/business/${updatedBiz.id}/qr?url=${encodeURIComponent(finalBookingUrl)}`;
+      setQrCodeUrl(qrUrl);
       
       setCurrentStep(2);
     } catch (error) {
@@ -661,7 +685,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
+    <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
         <StepIndicator currentStep={currentStep} totalSteps={4} />
       </View>
@@ -709,6 +733,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: '#000',
   },
   header: {
     position: 'absolute',
@@ -755,7 +780,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: Spacing.md,
     justifyContent: 'space-between',
-    paddingBottom: 150,
   },
   nicheCard: {
     width: (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.md) / 2,
@@ -1070,5 +1094,8 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.3)',
     letterSpacing: 1,
     zIndex: 1,
+  },
+  backgroundSmoke: {
+    ...StyleSheet.absoluteFillObject,
   },
 });
