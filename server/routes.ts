@@ -2834,7 +2834,7 @@ IMPORTANT:
           provider: "11labs",
           voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
         },
-        firstMessage: `Hi! I'm the assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
+        firstMessage: `Hello, thank you for calling ${config.businessName}. I am the Informational Assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
         serverUrl: serverUrl,
         serverMessages: ["tool-calls", "end-of-call-report"],
         metadata: {

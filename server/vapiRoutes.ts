@@ -142,6 +142,7 @@ IMPORTANT:
 
       return res.json({
         assistant: {
+          firstMessage: `Hello, thank you for calling ${business.name}. I am the Informational Assistant for ${business.name}. I can answer questions about our services or check availability. How can I help you?`,
           model: {
             provider: "openai",
             model: "gpt-4o-mini",
