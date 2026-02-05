@@ -37,7 +37,7 @@ function BackgroundOverlay() {
     <View 
       style={{
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0,0,0,0.4)",
+        backgroundColor: "rgba(0,0,0,0.15)",
         zIndex: -1,
       }} 
     />
