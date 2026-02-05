@@ -2068,7 +2068,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ knowledge, scraped: true });
     } catch (error: any) {
-      console.error("[Knowledge] Error training from website:", error);
+      console.error("[Knowledge] TRAINING ERROR:", error?.message || error);
       let message = "Failed to learn from the website. You can still enter details manually.";
       if (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message?.includes("timeout") || error.code === 'ETIMEDOUT') {
         message = "The website took too long to respond. This can happen if the site is slow or protected. Please try again or enter details manually.";
@@ -2086,7 +2086,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else if (error.message?.includes("fetch failed")) {
         message = "Connection failed. Please check your internet connection or the website URL.";
       }
-      res.status(500).json({ error: message });
+      res.status(500).json({ error: message, detail: error.message });
     }
   });
 

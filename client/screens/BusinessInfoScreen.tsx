@@ -236,8 +236,10 @@ export default function BusinessInfoScreen() {
               <ThemedText style={styles.sectionTitle}>Website Training</ThemedText>
             </View>
             <ThemedText style={styles.sectionDescription}>
-              Enter your website URL and we'll automatically train your assistant on your business.
+              Enter your website URL or paste your business description below to train your assistant.
             </ThemedText>
+            
+            <ThemedText style={styles.inputLabel}>Website URL</ThemedText>
             <TextInput
               style={styles.textInput}
               value={websiteUrl}
@@ -248,10 +250,11 @@ export default function BusinessInfoScreen() {
               autoCorrect={false}
               keyboardType="url"
             />
+            
             <Pressable
               onPress={handleTrainFromWebsite}
               disabled={training || !websiteUrl.trim()}
-              style={[styles.actionButton, (training || !websiteUrl.trim()) && styles.actionButtonDisabled]}
+              style={[styles.actionButton, (training || !websiteUrl.trim()) && styles.actionButtonDisabled, { marginBottom: 20 }]}
             >
               {training ? (
                 <ActivityIndicator size="small" color="#fff" />
@@ -262,6 +265,21 @@ export default function BusinessInfoScreen() {
                 {training ? "Training..." : "Train from Website"}
               </ThemedText>
             </Pressable>
+
+            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginVertical: 10 }} />
+
+            <ThemedText style={styles.inputLabel}>Or Paste Business Description</ThemedText>
+            <TextInput
+              style={[styles.textInput, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
+              value={additionalInfo}
+              onChangeText={(text) => { setAdditionalInfo(text); markChanged(); }}
+              placeholder="Paste your business details, services, and any other info here..."
+              placeholderTextColor="rgba(255,255,255,0.4)"
+              multiline
+            />
+            <ThemedText style={styles.inputHint}>
+              Recommended if website training fails or if you have specific details to add.
+            </ThemedText>
           </GlassPanel>
         </Animated.View>
 
@@ -467,6 +485,19 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.08)",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
+  },
+  inputLabel: {
+    fontSize: 14,
+    fontFamily: 'Inter_600SemiBold',
+    color: 'rgba(255,255,255,0.7)',
+    marginBottom: 8,
+    marginTop: 12,
+  },
+  inputHint: {
+    fontSize: 12,
+    fontFamily: 'Inter_400Regular',
+    color: 'rgba(255,255,255,0.4)',
+    marginTop: 4,
   },
   section: {},
   sectionHeader: {

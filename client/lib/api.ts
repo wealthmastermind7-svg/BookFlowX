@@ -702,6 +702,7 @@ export async function scrapeWebsite(websiteUrl: string): Promise<{ knowledge: Bu
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
+    console.error("TRAIN RESPONSE ERROR:", error);
     throw new Error(error.error || "Failed to train from website");
   }
   return res.json();
