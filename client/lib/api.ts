@@ -707,3 +707,77 @@ export async function scrapeWebsite(websiteUrl: string): Promise<{ knowledge: Bu
   }
   return res.json();
 }
+
+// Training Data API (multi-page crawl, Q&A pairs)
+export interface TrainingDataItem {
+  id: string;
+  businessId: string;
+  type: 'qa_pair' | 'website_crawl' | 'manual_text';
+  question?: string;
+  answer?: string;
+  content?: string;
+  title?: string;
+  sourceUrl?: string;
+  status: string;
+  createdAt: string;
+}
+
+export async function getTrainingData(): Promise<TrainingDataItem[]> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/training`, {
+    headers: {
+      "x-business-token": (await getSecureToken()) || "",
+    },
+  });
+  if (!res.ok) throw new Error("Failed to fetch training data");
+  return res.json();
+}
+
+export async function crawlWebsite(url: string, maxPages: number = 10): Promise<{ pagesCrawled: number; results: TrainingDataItem[]; message: string }> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/training/crawl`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-business-token": (await getSecureToken()) || "",
+    },
+    body: JSON.stringify({ url, maxPages }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "Failed to crawl website");
+  }
+  return res.json();
+}
+
+export async function addQAPair(question: string, answer: string): Promise<TrainingDataItem> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/training/qa`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-business-token": (await getSecureToken()) || "",
+    },
+    body: JSON.stringify({ question, answer }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "Failed to add Q&A pair");
+  }
+  return res.json();
+}
+
+export async function deleteTrainingData(id: string): Promise<void> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/training/${id}`, {
+    method: "DELETE",
+    headers: {
+      "x-business-token": (await getSecureToken()) || "",
+    },
+  });
+  if (!res.ok) throw new Error("Failed to delete training data");
+}

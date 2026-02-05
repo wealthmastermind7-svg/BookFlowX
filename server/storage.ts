@@ -15,6 +15,7 @@ import {
   voiceSubscriptions,
   voiceCallLogs,
   businessKnowledge,
+  trainingData,
   type User,
   type InsertUser,
   type Business,
@@ -47,6 +48,8 @@ import {
   type InsertVoiceCallLog,
   type BusinessKnowledge,
   type InsertBusinessKnowledge,
+  type TrainingData,
+  type InsertTrainingData,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -144,6 +147,12 @@ export interface IStorage {
   // Business Knowledge
   getBusinessKnowledge(businessId: string): Promise<BusinessKnowledge | undefined>;
   createOrUpdateBusinessKnowledge(knowledge: InsertBusinessKnowledge): Promise<BusinessKnowledge>;
+  
+  // Training Data
+  getTrainingData(businessId: string): Promise<TrainingData[]>;
+  createTrainingData(data: InsertTrainingData): Promise<TrainingData>;
+  deleteTrainingData(id: string): Promise<void>;
+  deleteAllTrainingData(businessId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1219,6 +1228,28 @@ export class DatabaseStorage implements IStorage {
       .values(knowledge)
       .returning();
     return created;
+  }
+
+  // Training Data
+  async getTrainingData(businessId: string): Promise<TrainingData[]> {
+    return db
+      .select()
+      .from(trainingData)
+      .where(eq(trainingData.businessId, businessId))
+      .orderBy(desc(trainingData.createdAt));
+  }
+
+  async createTrainingData(data: InsertTrainingData): Promise<TrainingData> {
+    const [created] = await db.insert(trainingData).values(data).returning();
+    return created;
+  }
+
+  async deleteTrainingData(id: string): Promise<void> {
+    await db.delete(trainingData).where(eq(trainingData.id, id));
+  }
+
+  async deleteAllTrainingData(businessId: string): Promise<void> {
+    await db.delete(trainingData).where(eq(trainingData.businessId, businessId));
   }
 }
 

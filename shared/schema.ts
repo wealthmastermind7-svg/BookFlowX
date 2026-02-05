@@ -286,6 +286,24 @@ export const googleCalendarTokens = pgTable("google_calendar_tokens", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Training data table (multi-page crawl results, Q&A pairs, manual text)
+export const trainingData = pgTable("training_data", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'manual_text'
+  question: text("question"),
+  answer: text("answer"),
+  content: text("content"),
+  title: text("title"),
+  sourceUrl: text("source_url"),
+  status: text("status").default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Business knowledge base (scraped/edited info for voice assistant)
 export const businessKnowledge = pgTable("business_knowledge", {
   id: varchar("id")
@@ -306,24 +324,6 @@ export const businessKnowledge = pgTable("business_knowledge", {
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
-
-// Training data for more detailed knowledge (multi-page crawl, Q&A)
-export const trainingData = pgTable("training_data", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  businessId: varchar("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'manual_text'
-  question: text("question"),
-  answer: text("answer"),
-  content: text("content"),
-  title: text("title"),
-  sourceUrl: text("source_url"),
-  status: text("status").default("active").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-export const insertTrainingDataSchema = createInsertSchema(trainingData).omit({ id: true, createdAt: true });
-export type TrainingData = typeof trainingData.$inferSelect;
-export type InsertTrainingData = z.infer<typeof insertTrainingDataSchema>;
 
 // Voice call logs table (for tracking usage)
 export const voiceCallLogs = pgTable("voice_call_logs", {
@@ -346,6 +346,13 @@ export const voiceCallLogs = pgTable("voice_call_logs", {
 });
 
 // Relations
+export const trainingDataRelations = relations(trainingData, ({ one }) => ({
+  business: one(businesses, {
+    fields: [trainingData.businessId],
+    references: [businesses.id],
+  }),
+}));
+
 export const businessKnowledgeRelations = relations(businessKnowledge, ({ one }) => ({
   business: one(businesses, {
     fields: [businessKnowledge.businessId],
@@ -369,6 +376,7 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   voiceCallLogs: many(voiceCallLogs),
   googleCalendarToken: one(googleCalendarTokens),
   knowledge: one(businessKnowledge),
+  trainingData: many(trainingData),
 }));
 
 export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
@@ -581,8 +589,16 @@ export const insertBusinessKnowledgeSchema = createInsertSchema(businessKnowledg
   lastScrapedAt: true,
 });
 
+export const insertTrainingDataSchema = createInsertSchema(trainingData).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type BusinessKnowledge = typeof businessKnowledge.$inferSelect;
 export type InsertBusinessKnowledge = z.infer<typeof insertBusinessKnowledgeSchema>;
+
+export type TrainingData = typeof trainingData.$inferSelect;
+export type InsertTrainingData = z.infer<typeof insertTrainingDataSchema>;
 
 export const insertGoogleCalendarTokenSchema = createInsertSchema(googleCalendarTokens).omit({
   id: true,

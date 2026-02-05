@@ -14,6 +14,34 @@ export interface ScrapedBusinessInfo {
   additionalInfo: string;
 }
 
+export interface CrawledPage {
+  title: string;
+  content: string;
+  sourceUrl: string;
+  contentLength: number;
+}
+
+// Extract text from HTML, stripping scripts, styles, nav, footer, etc.
+export function extractTextFromHtml(html: string): string {
+  return html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 50000);
+}
+
+// Extract internal links from HTML for multi-page crawling
 export function extractInternalLinks(html: string, baseUrl: string): string[] {
   try {
     const urlObj = new URL(baseUrl);
@@ -21,23 +49,16 @@ export function extractInternalLinks(html: string, baseUrl: string): string[] {
     const links: string[] = [];
     const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
     let match;
+    
     while ((match = linkRegex.exec(html)) !== null) {
       let href = match[1];
       if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
       if (href.startsWith('/')) href = domain + href;
-      else if (!href.startsWith('http')) {
-        // Handle relative paths without leading slash
-        const pathParts = urlObj.pathname.split('/');
-        pathParts.pop();
-        const baseDir = pathParts.join('/');
-        href = domain + baseDir + '/' + href;
-      }
+      else if (!href.startsWith('http')) href = domain + '/' + href;
+      
       try {
         const linkUrl = new URL(href);
-        // Only crawl same domain and common content pages
-        if (linkUrl.origin === domain && 
-            !links.includes(linkUrl.href) && 
-            !linkUrl.pathname.match(/\.(jpg|jpeg|png|gif|pdf|zip|css|js)$/i)) {
+        if (linkUrl.origin === domain && !links.includes(linkUrl.href)) {
           links.push(linkUrl.href.split('#')[0].split('?')[0]);
         }
       } catch {}
@@ -48,57 +69,94 @@ export function extractInternalLinks(html: string, baseUrl: string): string[] {
   }
 }
 
-export async function scrapeWebsiteContent(url: string): Promise<string> {
+// Fetch a single page with proper headers
+async function fetchPage(url: string): Promise<string | null> {
   try {
     const response = await fetch(url, {
       headers: {
         'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
-        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8',
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache',
-        'Pragma': 'no-cache',
       },
       redirect: 'follow',
-      signal: AbortSignal.timeout(45000), // Increased to 45s
+      signal: AbortSignal.timeout(30000),
     });
     
     if (!response.ok) {
-      // Fallback for some sites that might block the standard fetch or return 403
-      console.warn(`[Scraper] Initial fetch returned ${response.status}, trying simple fetch`);
-      try {
-        const fallbackRes = await fetch(url, { 
-          headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' },
-          signal: AbortSignal.timeout(30000) 
-        });
-        if (fallbackRes.ok) return await fallbackRes.text();
-      } catch (e) {
-        console.error(`[Scraper] Fallback fetch failed:`, e);
-      }
-      throw new Error(`Failed to fetch: ${response.status}`);
+      console.warn(`[Scraper] Fetch returned ${response.status} for ${url}`);
+      // Try mobile user agent as fallback
+      const fallbackRes = await fetch(url, {
+        headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' },
+        signal: AbortSignal.timeout(20000),
+      });
+      if (fallbackRes.ok) return await fallbackRes.text();
+      return null;
     }
     
-    const html = await response.text();
-    
-    const textContent = html
-      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-      .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, ' ')
-      .replace(/<[^>]+>/g, ' ')
-      .replace(/&nbsp;/g, ' ')
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/\s+/g, ' ')
-      .trim();
-    
-    return textContent.substring(0, 15000);
+    return await response.text();
   } catch (error) {
-    console.error('[Scraper] Error fetching website:', error);
-    throw error;
+    console.error(`[Scraper] Error fetching ${url}:`, error);
+    return null;
   }
+}
+
+// Multi-page crawl function
+export async function crawlWebsite(url: string, maxPages: number = 10): Promise<CrawledPage[]> {
+  const crawledUrls = new Set<string>();
+  const urlsToCrawl = [url];
+  const results: CrawledPage[] = [];
+  const pageLimit = Math.min(maxPages, 50);
+  
+  console.log(`[Scraper] Starting multi-page crawl from: ${url} (max ${pageLimit} pages)`);
+  
+  while (urlsToCrawl.length > 0 && crawledUrls.size < pageLimit) {
+    const currentUrl = urlsToCrawl.shift()!;
+    if (crawledUrls.has(currentUrl)) continue;
+    crawledUrls.add(currentUrl);
+    
+    try {
+      console.log(`[Scraper] Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
+      
+      const html = await fetchPage(currentUrl);
+      if (!html) continue;
+      
+      const textContent = extractTextFromHtml(html);
+      if (textContent.length < 100) continue;
+      
+      const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+      const title = titleMatch ? titleMatch[1].trim() : currentUrl;
+      
+      results.push({
+        title,
+        content: textContent,
+        sourceUrl: currentUrl,
+        contentLength: textContent.length,
+      });
+      
+      // Extract and queue internal links
+      if (crawledUrls.size < pageLimit) {
+        const newLinks = extractInternalLinks(html, currentUrl);
+        for (const link of newLinks) {
+          if (!crawledUrls.has(link) && !urlsToCrawl.includes(link)) {
+            urlsToCrawl.push(link);
+          }
+        }
+      }
+    } catch (err) {
+      console.log(`[Scraper] Failed to crawl ${currentUrl}:`, err);
+    }
+  }
+  
+  console.log(`[Scraper] Crawl complete: ${results.length} pages saved`);
+  return results;
+}
+
+// Legacy single-page scrape for backward compatibility
+export async function scrapeWebsiteContent(url: string): Promise<string> {
+  const html = await fetchPage(url);
+  if (!html) throw new Error(`Failed to fetch: unable to reach ${url}`);
+  return extractTextFromHtml(html);
 }
 
 export async function extractBusinessInfo(websiteContent: string, businessName: string): Promise<ScrapedBusinessInfo> {
@@ -126,7 +184,7 @@ Extract the business information and respond with a JSON object:
   "servicesDescription": "List of services with details...",
   "hoursOfOperation": "Business hours info or 'Not specified - please update'",
   "locationInfo": "Address and location details...",
-  "faqJson": "[{\"question\": \"...\", \"answer\": \"...\"}, ...]",
+  "faqJson": "[{\\"question\\": \\"...\\", \\"answer\\": \\"...\\"}, ...]",
   "additionalInfo": "Other relevant details..."
 }`;
 

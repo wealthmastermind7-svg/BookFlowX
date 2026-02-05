@@ -2149,6 +2149,95 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === TRAINING DATA API (Multi-page crawl, Q&A pairs) ===
+
+  // Get all training data for a business
+  app.get("/api/businesses/:businessId/training", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const data = await storage.getTrainingData(businessId);
+      res.json(data);
+    } catch (error) {
+      console.error("[Training] Error fetching training data:", error);
+      res.status(500).json({ error: "Failed to fetch training data" });
+    }
+  });
+
+  // Multi-page crawl endpoint
+  app.post("/api/businesses/:businessId/training/crawl", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { url, maxPages = 10 } = req.body;
+      
+      if (!url) {
+        return res.status(400).json({ error: "URL is required" });
+      }
+
+      const { crawlWebsite } = await import("./websiteScraper");
+      const results = await crawlWebsite(url, maxPages);
+      
+      // Save each crawled page to training data
+      const savedData = [];
+      for (const page of results) {
+        const data = await storage.createTrainingData({
+          businessId,
+          type: "website_crawl",
+          title: page.title,
+          content: page.content,
+          sourceUrl: page.sourceUrl,
+          status: "active",
+        });
+        savedData.push({ ...data, contentLength: page.contentLength });
+      }
+      
+      res.status(201).json({
+        pagesCrawled: savedData.length,
+        results: savedData,
+        message: `Successfully crawled ${savedData.length} page(s) from ${url}`,
+      });
+    } catch (error: any) {
+      console.error("[Training] Error crawling website:", error);
+      res.status(500).json({ error: error.message || "Failed to crawl website" });
+    }
+  });
+
+  // Add Q&A pair
+  app.post("/api/businesses/:businessId/training/qa", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { question, answer } = req.body;
+      
+      if (!question || !answer) {
+        return res.status(400).json({ error: "Question and answer are required" });
+      }
+      
+      const data = await storage.createTrainingData({
+        businessId,
+        type: "qa_pair",
+        question,
+        answer,
+        status: "active",
+      });
+      
+      res.status(201).json(data);
+    } catch (error) {
+      console.error("[Training] Error adding Q&A pair:", error);
+      res.status(500).json({ error: "Failed to add Q&A pair" });
+    }
+  });
+
+  // Delete training data
+  app.delete("/api/businesses/:businessId/training/:id", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { id } = req.params;
+      await storage.deleteTrainingData(id);
+      res.status(204).send();
+    } catch (error) {
+      console.error("[Training] Error deleting training data:", error);
+      res.status(500).json({ error: "Failed to delete training data" });
+    }
+  });
+
   // === VOICE SUBSCRIPTION API ===
 
   // Get voice subscription and usage for a business

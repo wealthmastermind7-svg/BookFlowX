@@ -24,7 +24,7 @@ import Animated, {
 
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
-import { getBusinessKnowledge, updateBusinessKnowledge, scrapeWebsite, BusinessKnowledgeData } from "@/lib/api";
+import { getBusinessKnowledge, updateBusinessKnowledge, scrapeWebsite, BusinessKnowledgeData, getTrainingData, crawlWebsite, deleteTrainingData, addQAPair, TrainingDataItem } from "@/lib/api";
 import { ThemedText } from "@/components/ThemedText";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
@@ -75,18 +75,27 @@ export default function BusinessInfoScreen() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [training, setTraining] = useState(false);
+  const [crawling, setCrawling] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
   const [websiteUrl, setWebsiteUrl] = useState("");
+  const [crawlUrl, setCrawlUrl] = useState("");
   const [aboutBusiness, setAboutBusiness] = useState("");
   const [servicesDescription, setServicesDescription] = useState("");
   const [hoursOfOperation, setHoursOfOperation] = useState("");
   const [locationInfo, setLocationInfo] = useState("");
   const [additionalInfo, setAdditionalInfo] = useState("");
   const [faqs, setFaqs] = useState<FAQ[]>([]);
+  
+  // Training data (crawled pages and Q&A)
+  const [trainingData, setTrainingData] = useState<TrainingDataItem[]>([]);
+  const [newQuestion, setNewQuestion] = useState("");
+  const [newAnswer, setNewAnswer] = useState("");
+  const [showQaForm, setShowQaForm] = useState(false);
 
   useEffect(() => {
     loadBusinessKnowledge();
+    loadTrainingData();
   }, []);
 
   const loadBusinessKnowledge = async () => {
@@ -96,6 +105,7 @@ export default function BusinessInfoScreen() {
       if (response.knowledge) {
         const k = response.knowledge;
         setWebsiteUrl(k.websiteUrl || "");
+        setCrawlUrl(k.websiteUrl || "");
         setAboutBusiness(k.aboutBusiness || "");
         setServicesDescription(k.servicesDescription || "");
         setHoursOfOperation(k.hoursOfOperation || "");
@@ -112,6 +122,73 @@ export default function BusinessInfoScreen() {
       console.error("Error loading business knowledge:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadTrainingData = async () => {
+    try {
+      const data = await getTrainingData();
+      setTrainingData(data);
+    } catch (error) {
+      console.error("Error loading training data:", error);
+    }
+  };
+
+  const handleCrawlWebsite = async () => {
+    if (!crawlUrl.trim()) {
+      Alert.alert("URL Required", "Please enter a website URL.");
+      return;
+    }
+
+    let url = crawlUrl.trim();
+    if (!url.startsWith("http://") && !url.startsWith("https://")) {
+      url = "https://" + url;
+      setCrawlUrl(url);
+    }
+
+    setCrawling(true);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+
+    try {
+      const response = await crawlWebsite(url, 10);
+      await loadTrainingData();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      Alert.alert("Success", `Website content has been crawled and added to training data. ${response.pagesCrawled} page(s) processed.`);
+    } catch (error: any) {
+      console.error("Error crawling website:", error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      Alert.alert("Crawl Failed", error.message || "Could not crawl the website. Please try again.");
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  const handleDeleteTrainingItem = async (id: string) => {
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+      await deleteTrainingData(id);
+      setTrainingData(trainingData.filter(item => item.id !== id));
+    } catch (error) {
+      console.error("Error deleting training data:", error);
+      Alert.alert("Error", "Could not delete this item.");
+    }
+  };
+
+  const handleAddQa = async () => {
+    if (!newQuestion.trim() || !newAnswer.trim()) {
+      Alert.alert("Required", "Please enter both question and answer.");
+      return;
+    }
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      await addQAPair(newQuestion.trim(), newAnswer.trim());
+      setNewQuestion("");
+      setNewAnswer("");
+      setShowQaForm(false);
+      await loadTrainingData();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    } catch (error: any) {
+      Alert.alert("Error", error.message || "Could not add Q&A pair.");
     }
   };
 
@@ -229,57 +306,129 @@ export default function BusinessInfoScreen() {
           </ThemedText>
         </Animated.View>
 
+        {/* Web Crawler Section */}
         <Animated.View entering={FadeInDown.delay(100).duration(400)}>
+          <ThemedText style={styles.sectionLabel}>Web Crawler</ThemedText>
           <GlassPanel style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Feather name="globe" size={18} color="#fff" />
-              <ThemedText style={styles.sectionTitle}>Website Training</ThemedText>
-            </View>
             <ThemedText style={styles.sectionDescription}>
-              Enter your website URL or paste your business description below to train your assistant.
+              Enter a website URL to automatically extract content for training. For large sites, we'll start with the most relevant pages.
             </ThemedText>
             
-            <ThemedText style={styles.inputLabel}>Website URL</ThemedText>
-            <TextInput
-              style={styles.textInput}
-              value={websiteUrl}
-              onChangeText={(text) => { setWebsiteUrl(text); markChanged(); }}
-              placeholder="https://your-business.com"
-              placeholderTextColor="rgba(255,255,255,0.4)"
-              autoCapitalize="none"
-              autoCorrect={false}
-              keyboardType="url"
-            />
-            
-            <Pressable
-              onPress={handleTrainFromWebsite}
-              disabled={training || !websiteUrl.trim()}
-              style={[styles.actionButton, (training || !websiteUrl.trim()) && styles.actionButtonDisabled, { marginBottom: 20 }]}
-            >
-              {training ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Feather name="download" size={18} color="#fff" />
-              )}
-              <ThemedText style={styles.actionButtonText}>
-                {training ? "Training..." : "Train from Website"}
-              </ThemedText>
+            <View style={styles.crawlInputRow}>
+              <TextInput
+                style={[styles.textInput, { flex: 1, marginBottom: 0 }]}
+                value={crawlUrl}
+                onChangeText={setCrawlUrl}
+                placeholder="https://example.com"
+                placeholderTextColor="rgba(255,255,255,0.4)"
+                autoCapitalize="none"
+                autoCorrect={false}
+                keyboardType="url"
+              />
+              <Pressable
+                onPress={handleCrawlWebsite}
+                disabled={crawling || !crawlUrl.trim()}
+                style={[styles.getDataButton, (crawling || !crawlUrl.trim()) && styles.actionButtonDisabled]}
+              >
+                {crawling ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <ThemedText style={styles.getDataButtonText}>Get Data</ThemedText>
+                )}
+              </Pressable>
+            </View>
+          </GlassPanel>
+        </Animated.View>
+
+        {/* Uploaded Links Section */}
+        {trainingData.filter(d => d.type === 'website_crawl').length > 0 && (
+          <Animated.View entering={FadeInDown.delay(150).duration(400)}>
+            <View style={styles.sectionLabelRow}>
+              <ThemedText style={styles.sectionLabel}>Uploaded Links</ThemedText>
+              <View style={styles.countBadge}>
+                <ThemedText style={styles.countText}>{trainingData.filter(d => d.type === 'website_crawl').length}</ThemedText>
+              </View>
+            </View>
+            <GlassPanel style={styles.section}>
+              {trainingData.filter(d => d.type === 'website_crawl').map((item) => (
+                <View key={item.id} style={styles.uploadedLinkRow}>
+                  <View style={styles.linkIconContainer}>
+                    <Feather name="globe" size={16} color="rgba(100,150,255,0.8)" />
+                  </View>
+                  <View style={styles.linkTextContainer}>
+                    <ThemedText style={styles.linkTitle} numberOfLines={1}>
+                      {item.title || "Untitled Page"}
+                    </ThemedText>
+                    <ThemedText style={styles.linkUrl} numberOfLines={1}>
+                      {item.sourceUrl}
+                    </ThemedText>
+                  </View>
+                  <Pressable
+                    onPress={() => handleDeleteTrainingItem(item.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Feather name="trash-2" size={18} color="rgba(255,100,100,0.8)" />
+                  </Pressable>
+                </View>
+              ))}
+            </GlassPanel>
+          </Animated.View>
+        )}
+
+        {/* Custom Q&A Section */}
+        <Animated.View entering={FadeInDown.delay(200).duration(400)}>
+          <View style={styles.sectionLabelRow}>
+            <ThemedText style={styles.sectionLabel}>Custom Q&A</ThemedText>
+            <Pressable onPress={() => setShowQaForm(!showQaForm)}>
+              <ThemedText style={styles.addQaLink}>+ Add Q&A</ThemedText>
             </Pressable>
-
-            <View style={{ height: 1, backgroundColor: 'rgba(255,255,255,0.1)', marginVertical: 10 }} />
-
-            <ThemedText style={styles.inputLabel}>Or Paste Business Description</ThemedText>
-            <TextInput
-              style={[styles.textInput, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
-              value={additionalInfo}
-              onChangeText={(text) => { setAdditionalInfo(text); markChanged(); }}
-              placeholder="Paste your business details, services, and any other info here..."
-              placeholderTextColor="rgba(255,255,255,0.4)"
-              multiline
-            />
-            <ThemedText style={styles.inputHint}>
-              Recommended if website training fails or if you have specific details to add.
-            </ThemedText>
+          </View>
+          <GlassPanel style={styles.section}>
+            {showQaForm && (
+              <View style={styles.qaFormContainer}>
+                <TextInput
+                  style={styles.textInput}
+                  value={newQuestion}
+                  onChangeText={setNewQuestion}
+                  placeholder="Question (e.g., What are your hours?)"
+                  placeholderTextColor="rgba(255,255,255,0.4)"
+                />
+                <TextInput
+                  style={[styles.textInput, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
+                  value={newAnswer}
+                  onChangeText={setNewAnswer}
+                  placeholder="Answer..."
+                  placeholderTextColor="rgba(255,255,255,0.4)"
+                  multiline
+                />
+                <Pressable onPress={handleAddQa} style={styles.actionButton}>
+                  <Feather name="plus" size={18} color="#fff" />
+                  <ThemedText style={styles.actionButtonText}>Add Q&A</ThemedText>
+                </Pressable>
+              </View>
+            )}
+            
+            {trainingData.filter(d => d.type === 'qa_pair').length === 0 && !showQaForm ? (
+              <View style={styles.emptyQaContainer}>
+                <Feather name="message-square" size={32} color="rgba(255,255,255,0.3)" />
+                <ThemedText style={styles.emptyQaText}>No custom Q&A pairs yet</ThemedText>
+              </View>
+            ) : (
+              trainingData.filter(d => d.type === 'qa_pair').map((item) => (
+                <View key={item.id} style={styles.qaItemRow}>
+                  <View style={styles.qaItemContent}>
+                    <ThemedText style={styles.qaQuestion}>Q: {item.question}</ThemedText>
+                    <ThemedText style={styles.qaAnswer}>A: {item.answer}</ThemedText>
+                  </View>
+                  <Pressable
+                    onPress={() => handleDeleteTrainingItem(item.id)}
+                    style={styles.deleteButton}
+                  >
+                    <Feather name="trash-2" size={18} color="rgba(255,100,100,0.8)" />
+                  </Pressable>
+                </View>
+              ))
+            )}
           </GlassPanel>
         </Animated.View>
 
@@ -527,6 +676,7 @@ const styles = StyleSheet.create({
     color: "#fff",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
+    marginBottom: Spacing.sm,
   },
   multilineInput: {
     minHeight: 80,
@@ -610,5 +760,121 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
+  },
+  sectionLabel: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.6)",
+    letterSpacing: 1,
+    marginBottom: Spacing.sm,
+    textTransform: "uppercase",
+  },
+  sectionLabelRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: Spacing.sm,
+  },
+  crawlInputRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: Spacing.sm,
+  },
+  getDataButton: {
+    backgroundColor: "rgba(100,150,255,0.3)",
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm + 4,
+    borderRadius: BorderRadius.md,
+    borderWidth: 1,
+    borderColor: "rgba(100,150,255,0.4)",
+  },
+  getDataButtonText: {
+    color: "#fff",
+    fontWeight: "600",
+    fontSize: 14,
+  },
+  countBadge: {
+    backgroundColor: "rgba(100,150,255,0.25)",
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 12,
+  },
+  countText: {
+    color: "#fff",
+    fontSize: 12,
+    fontWeight: "600",
+  },
+  uploadedLinkRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.08)",
+  },
+  linkIconContainer: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: "rgba(100,150,255,0.15)",
+    justifyContent: "center",
+    alignItems: "center",
+    marginRight: Spacing.sm,
+  },
+  linkTextContainer: {
+    flex: 1,
+  },
+  linkTitle: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  linkUrl: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 12,
+    marginTop: 2,
+  },
+  deleteButton: {
+    padding: Spacing.sm,
+  },
+  addQaLink: {
+    color: "rgba(100,150,255,0.9)",
+    fontSize: 14,
+    fontWeight: "500",
+  },
+  qaFormContainer: {
+    marginBottom: Spacing.md,
+    paddingBottom: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.1)",
+  },
+  emptyQaContainer: {
+    alignItems: "center",
+    paddingVertical: Spacing.xl,
+    gap: Spacing.sm,
+  },
+  emptyQaText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 14,
+  },
+  qaItemRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    paddingVertical: Spacing.sm,
+    borderBottomWidth: 1,
+    borderBottomColor: "rgba(255,255,255,0.08)",
+  },
+  qaItemContent: {
+    flex: 1,
+  },
+  qaQuestion: {
+    color: "#fff",
+    fontSize: 14,
+    fontWeight: "500",
+    marginBottom: 4,
+  },
+  qaAnswer: {
+    color: "rgba(255,255,255,0.6)",
+    fontSize: 13,
+    lineHeight: 18,
   },
 });
