@@ -3,6 +3,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "@/screens/SettingsScreen";
 import SharePreviewScreen from "@/screens/SharePreviewScreen";
 import WorkflowsScreen from "@/screens/WorkflowsScreen";
+import BusinessInfoScreen from "@/screens/BusinessInfoScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type SettingsStackParamList = {
@@ -13,6 +14,7 @@ export type SettingsStackParamList = {
     slug: string;
   };
   Workflows: undefined;
+  BusinessInfo: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -41,6 +43,13 @@ export default function SettingsStackNavigator() {
         component={WorkflowsScreen}
         options={{
           headerTitle: "Workflows",
+        }}
+      />
+      <Stack.Screen
+        name="BusinessInfo"
+        component={BusinessInfoScreen}
+        options={{
+          headerTitle: "Voice Assistant Info",
         }}
       />
     </Stack.Navigator>

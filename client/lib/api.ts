@@ -644,4 +644,65 @@ export async function getUpsellSuggestions(
   }
 }
 
+// Business Knowledge types
+export interface BusinessKnowledgeData {
+  id?: string;
+  businessId?: string;
+  websiteUrl?: string;
+  aboutBusiness?: string;
+  servicesDescription?: string;
+  hoursOfOperation?: string;
+  locationInfo?: string;
+  faqJson?: string;
+  additionalInfo?: string;
+  lastScrapedAt?: string;
+}
+
 export const api = new ApiClient();
+
+export async function getBusinessKnowledge(): Promise<{ knowledge: BusinessKnowledgeData | null }> {
+  try {
+    const businessId = await api.loadBusinessId();
+    if (!businessId) return { knowledge: null };
+    const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/knowledge`, {
+      headers: { "x-business-token": (await getSecureToken()) || "" },
+    });
+    if (!res.ok) return { knowledge: null };
+    return res.json();
+  } catch {
+    return { knowledge: null };
+  }
+}
+
+export async function updateBusinessKnowledge(knowledge: Partial<BusinessKnowledgeData>): Promise<{ knowledge: BusinessKnowledgeData }> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/knowledge`, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+      "x-business-token": (await getSecureToken()) || "",
+    },
+    body: JSON.stringify(knowledge),
+  });
+  if (!res.ok) throw new Error("Failed to update business knowledge");
+  return res.json();
+}
+
+export async function scrapeWebsite(websiteUrl: string): Promise<{ knowledge: BusinessKnowledgeData; scraped: boolean }> {
+  const businessId = await api.loadBusinessId();
+  if (!businessId) throw new Error("Business ID not found");
+  const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/knowledge/scrape`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "x-business-token": (await getSecureToken()) || "",
+    },
+    body: JSON.stringify({ websiteUrl }),
+  });
+  if (!res.ok) {
+    const error = await res.json().catch(() => ({}));
+    throw new Error(error.error || "Failed to scrape website");
+  }
+  return res.json();
+}
