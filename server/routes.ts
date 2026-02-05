@@ -2069,9 +2069,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ knowledge, scraped: true });
     } catch (error: any) {
       console.error("[Knowledge] Error training from website:", error);
-      const message = error.message?.includes("Failed to fetch") 
-        ? "Could not reach the website. Please ensure the URL is correct and public."
-        : "Failed to learn from the website. You can still enter details manually.";
+      let message = "Failed to learn from the website. You can still enter details manually.";
+      if (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message?.includes("timeout") || error.code === 'ETIMEDOUT') {
+        message = "The website took too long to respond. This can happen if the site is slow or protected. Please try again or enter details manually.";
+      } else if (error.message?.includes("Failed to fetch")) {
+        const status = error.message.split(': ')[1];
+        if (status === '403') {
+          message = "Access denied by the website. This site might be blocking automated tools (like Cloudflare protection). Please enter details manually.";
+        } else if (status === '404') {
+          message = "Website not found. Please check the URL and try again.";
+        } else if (status === '500' || status === '502' || status === '503') {
+          message = "The website is currently having technical issues. Please try again later or enter details manually.";
+        } else {
+          message = `Could not reach the website (Status: ${status || 'Unknown'}). Please ensure the URL is correct and public.`;
+        }
+      } else if (error.message?.includes("fetch failed")) {
+        message = "Connection failed. Please check your internet connection or the website URL.";
+      }
       res.status(500).json({ error: message });
     }
   });

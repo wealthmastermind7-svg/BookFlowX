@@ -18,16 +18,28 @@ export async function scrapeWebsiteContent(url: string): Promise<string> {
   try {
     const response = await fetch(url, {
       headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.36',
         'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7',
         'Accept-Language': 'en-US,en;q=0.9',
         'Cache-Control': 'no-cache',
         'Pragma': 'no-cache',
       },
-      signal: AbortSignal.timeout(15000),
+      redirect: 'follow',
+      signal: AbortSignal.timeout(45000), // Increased to 45s
     });
     
     if (!response.ok) {
+      // Fallback for some sites that might block the standard fetch or return 403
+      console.warn(`[Scraper] Initial fetch returned ${response.status}, trying simple fetch`);
+      try {
+        const fallbackRes = await fetch(url, { 
+          headers: { 'User-Agent': 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' },
+          signal: AbortSignal.timeout(30000) 
+        });
+        if (fallbackRes.ok) return await fallbackRes.text();
+      } catch (e) {
+        console.error(`[Scraper] Fallback fetch failed:`, e);
+      }
       throw new Error(`Failed to fetch: ${response.status}`);
     }
     
