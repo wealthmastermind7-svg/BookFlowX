@@ -2896,6 +2896,7 @@ IMPORTANT:
           .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
           .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
           .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
+          .replace(/AI Assistant/g, "Informational Assistant")
           .replace(/\{\{INLINE_ASSISTANT\}\}/g, JSON.stringify(inlineAssistant));
 
         res.setHeader("Content-Type", "text/html");

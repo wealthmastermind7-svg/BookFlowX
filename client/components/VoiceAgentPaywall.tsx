@@ -129,7 +129,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           </View>
           <ThemedText style={styles.heroTitle}>Enable AI Voice Assistant</ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            Let AI answer questions about your services and direct customers to book.
+            Let AI answer questions about your services and direct customers to book via Text Booking.
           </ThemedText>
           <View style={{ height: 16 }} />
           <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
