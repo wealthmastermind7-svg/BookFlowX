@@ -574,10 +574,10 @@ const styles = StyleSheet.create({
     marginBottom: 32,
   },
   hugeTitle: {
-    fontSize: 56,
+    fontSize: 42,
     fontWeight: "700",
     color: "#fff",
-    letterSpacing: -2,
+    letterSpacing: -1,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
