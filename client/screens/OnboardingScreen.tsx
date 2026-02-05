@@ -522,10 +522,10 @@ function Step4VoicePreview({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: colors.text }]}>
-            Meet your AI assistant
+            Meet your Assistant
           </Text>
           <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-            Answer questions about your business 24/7
+            Answers questions about your business 24/7
           </Text>
         </View>
 
@@ -536,10 +536,10 @@ function Step4VoicePreview({
             </View>
             
             <Text style={[styles.voiceCardTitle, { color: colors.text }]}>
-              AI Voice Assistant
+              Informational Assistant
             </Text>
             <Text style={[styles.voiceCardDescription, { color: colors.textSecondary }]}>
-              Answers questions about your services and directs customers to book via Text Booking
+              Answers questions about your services, pricing, and availability, then directs customers to book via Text Booking
             </Text>
 
             <View style={styles.voiceFeatures}>
@@ -567,7 +567,7 @@ function Step4VoicePreview({
 
       <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
         <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
-          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test AI Assistant Now</Text>
+          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test Assistant Now</Text>
           <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
         </AnimatedPressable>
         

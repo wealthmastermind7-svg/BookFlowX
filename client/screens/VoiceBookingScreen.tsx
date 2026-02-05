@@ -14,6 +14,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing } from "@/constants/theme";
+import { getApiUrl } from "@/lib/query-client";
 
 type Props = NativeStackScreenProps<any, "VoiceBooking">;
 
@@ -26,7 +27,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const voiceUrl = `https://confirmbooking.online/voice/${businessSlug}`;
+  const voiceUrl = `${getApiUrl()}/voice/${businessSlug}`;
 
   const handleWebViewError = () => {
     setHasError(true);
@@ -44,10 +45,10 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.webFallback}>
           <ThemedText style={[styles.title, { color: theme.text }]}>
-            VOICE BOOKING
+            VOICE ASSISTANT
           </ThemedText>
           <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Voice booking works best on mobile devices.
+            Voice assistant works best on mobile devices.
           </ThemedText>
           <Pressable
             style={[styles.openButton, { backgroundColor: theme.text }]}
@@ -55,7 +56,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
           >
             <Feather name="external-link" size={18} color={theme.backgroundRoot} />
             <ThemedText style={[styles.openButtonText, { color: theme.backgroundRoot }]}>
-              Open Voice Booking
+              Open Voice Assistant
             </ThemedText>
           </Pressable>
         </View>
@@ -72,7 +73,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
             Connection Error
           </ThemedText>
           <ThemedText style={[styles.errorText, { color: theme.textSecondary }]}>
-            Unable to load voice booking. Please check your connection.
+            Unable to load voice assistant. Please check your connection.
           </ThemedText>
           <Pressable
             style={[styles.retryButton, { backgroundColor: theme.text }]}
@@ -94,7 +95,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
         <View style={[styles.loadingOverlay, { backgroundColor: theme.backgroundRoot }]}>
           <ActivityIndicator size="large" color={theme.text} />
           <ThemedText style={[styles.loadingText, { color: theme.textSecondary }]}>
-            Loading voice assistant...
+            Loading assistant...
           </ThemedText>
         </View>
       )}
