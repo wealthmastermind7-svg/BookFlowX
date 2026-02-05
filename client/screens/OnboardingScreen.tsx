@@ -288,7 +288,7 @@ function Step1NicheSelection({
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
         <AnimatedPressable onPress={onNext} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
           <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
           <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
@@ -328,7 +328,7 @@ function Step2BusinessName({
       style={styles.stepContainer}
     >
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 120 }]}
         showsVerticalScrollIndicator={false}
         keyboardShouldPersistTaps="handled"
       >
@@ -363,13 +363,13 @@ function Step2BusinessName({
           <Animated.View entering={FadeInDown.delay(200)} style={styles.slugPreview}>
             <Feather name="link" size={16} color={colors.textSecondary} />
             <Text style={[styles.slugText, { color: colors.textSecondary }]}>
-              confirmbooking.online/{slug}
+              confirmbooking.online/book/{slug}
             </Text>
           </Animated.View>
         </View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
         <View style={styles.bottomActionsRow}>
           <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
             <Feather name="arrow-left" size={20} color={colors.text} />
@@ -409,7 +409,9 @@ function Step3AssetPreviews({
 }) {
   const { theme: colors, isDark } = useTheme();
   const insets = useSafeAreaInsets();
-  const domain = bookingUrl.replace(/^https?:\/\//, "").split("/")[0];
+  
+  const displayUrl = bookingUrl.replace(/^https?:\/\//, "");
+  const domain = displayUrl.split("/")[0];
 
   const handleOpenLink = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
@@ -425,7 +427,7 @@ function Step3AssetPreviews({
       style={styles.stepContainer}
     >
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 100 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.stepHeader}>
@@ -455,7 +457,7 @@ function Step3AssetPreviews({
               <View style={styles.qrImageWrapper}>
                 <Image source={{ uri: qrCodeUrl }} style={styles.qrImage} contentFit="contain" />
                 <View style={styles.qrCenterOverlay}>
-                  <Text style={styles.qrCenterText}>{businessName.toUpperCase().slice(0, 12)}</Text>
+                  <Text style={styles.qrCenterText} numberOfLines={1} adjustsFontSizeToFit>{businessName.toUpperCase()}</Text>
                 </View>
               </View>
             ) : (
@@ -466,7 +468,7 @@ function Step3AssetPreviews({
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
         <View style={styles.bottomActionsRow}>
           <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
             <Feather name="arrow-left" size={20} color={colors.text} />
@@ -517,7 +519,7 @@ function Step4VoicePreview({
       style={styles.stepContainer}
     >
       <ScrollView 
-        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60, paddingBottom: 140 }]}
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.stepHeader}>
@@ -565,7 +567,7 @@ function Step4VoicePreview({
         </Animated.View>
       </ScrollView>
 
-      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + (Platform.OS === 'ios' ? 0 : insets.bottom), zIndex: 100 }]}>
         <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
           <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test Assistant Now</Text>
           <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
@@ -608,7 +610,6 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     
     try {
       const biz = await api.getOrCreateBusiness();
-      
       await api.updateBusiness({ name: businessName.trim() });
       
       try {
@@ -628,12 +629,12 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       const slug = updatedBiz.slug || biz.slug || "business";
       setBusinessSlug(slug);
       
-      const baseUrl = getApiUrl();
-      const url = `${baseUrl}/b/${slug}`;
-      setBookingUrl(url);
+      const finalBookingUrl = `https://confirmbooking.online/book/${slug}`;
+      setBookingUrl(finalBookingUrl);
       
       try {
-        const qrData = await api.getQRCode();
+        const qrResponse = await fetch(`${getApiUrl()}/api/business/${updatedBiz.id}/qr?url=${encodeURIComponent(finalBookingUrl)}`);
+        const qrData = await qrResponse.json();
         if (qrData?.qrCode) {
           setQrCodeUrl(qrData.qrCode);
         }
@@ -738,21 +739,23 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
   },
   stepTitle: {
-    fontSize: 32,
-    fontWeight: '700',
+    fontSize: 42,
+    lineHeight: 46,
     letterSpacing: -1,
     marginBottom: Spacing.sm,
-    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
+    fontFamily: 'CormorantGaramond_700Bold',
   },
   stepSubtitle: {
-    fontSize: 16,
+    fontSize: 18,
     lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
   },
   nicheGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: Spacing.md,
     justifyContent: 'space-between',
+    paddingBottom: 150,
   },
   nicheCard: {
     width: (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.md) / 2,
@@ -760,6 +763,7 @@ const styles = StyleSheet.create({
     borderRadius: BorderRadius.xl,
     alignItems: 'center',
     position: 'relative',
+    borderWidth: 1,
   },
   nicheIconContainer: {
     width: 48,
@@ -771,6 +775,7 @@ const styles = StyleSheet.create({
   },
   nicheName: {
     fontSize: 14,
+    fontFamily: 'Inter_500Medium',
     textAlign: 'center',
     lineHeight: 18,
   },
@@ -785,19 +790,22 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   bottomActions: {
-    paddingHorizontal: Spacing.xl,
-    paddingTop: Spacing.lg,
+    position: 'absolute',
+    left: Spacing.xl,
+    right: Spacing.xl,
+    backgroundColor: 'transparent',
   },
   bottomActionsRow: {
     flexDirection: 'row',
     gap: Spacing.md,
+    alignItems: 'center',
   },
   primaryButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 56,
-    borderRadius: BorderRadius.xl,
+    height: 64,
+    borderRadius: 32,
     gap: Spacing.sm,
   },
   primaryButtonFlex: {
@@ -805,41 +813,41 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 56,
-    borderRadius: BorderRadius.xl,
+    height: 64,
+    borderRadius: 32,
     gap: Spacing.sm,
   },
   primaryButtonText: {
-    fontSize: 17,
-    fontWeight: '600',
+    fontSize: 18,
+    fontFamily: 'Inter_600SemiBold',
   },
   backButton: {
-    width: 56,
-    height: 56,
-    borderRadius: BorderRadius.xl,
+    width: 64,
+    height: 64,
+    borderRadius: 32,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   skipButton: {
     flex: 1,
-    height: 56,
+    height: 64,
     alignItems: 'center',
     justifyContent: 'center',
   },
   skipButtonText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Inter_600SemiBold',
   },
   inputContainer: {
     gap: Spacing.lg,
   },
   businessInput: {
-    height: 56,
-    borderRadius: BorderRadius.xl,
+    height: 64,
+    borderRadius: 20,
     paddingHorizontal: Spacing.lg,
     fontSize: 18,
-    fontWeight: '500',
+    fontFamily: 'Inter_500Medium',
     borderWidth: 1,
   },
   slugPreview: {
@@ -850,40 +858,46 @@ const styles = StyleSheet.create({
   },
   slugText: {
     fontSize: 14,
+    fontFamily: 'Inter_400Regular',
   },
   previewSection: {
     marginBottom: Spacing["2xl"],
   },
   previewLabel: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: 'Inter_600SemiBold',
     letterSpacing: 2,
     marginBottom: Spacing.md,
   },
   linkPreviewContainer: {
-    borderRadius: 16,
+    borderRadius: 24,
     overflow: 'hidden',
   },
   tapHint: {
     fontSize: 12,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     marginTop: Spacing.sm,
   },
   qrSection: {
     marginBottom: Spacing.xl,
+    alignItems: 'center',
   },
   qrContainer: {
     borderRadius: BorderRadius.xl,
     padding: Spacing.xl,
     alignItems: 'center',
+    width: '100%',
   },
   qrImageWrapper: {
-    width: 200,
-    height: 200,
+    width: 220,
+    height: 220,
     backgroundColor: '#fff',
-    borderRadius: 16,
+    borderRadius: 24,
     padding: 12,
     position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qrImage: {
     width: '100%',
@@ -891,25 +905,27 @@ const styles = StyleSheet.create({
   },
   qrCenterOverlay: {
     position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: [{ translateX: -40 }, { translateY: -12 }],
     backgroundColor: '#fff',
     paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 4,
+    borderWidth: 1,
+    borderColor: '#000',
+    maxWidth: '80%',
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   qrCenterText: {
+    fontFamily: 'Inter_800ExtraBold',
     fontSize: 10,
-    fontWeight: '700',
     color: '#000',
-    letterSpacing: 0.5,
+    textAlign: 'center',
   },
   voicePreviewContainer: {
     flex: 1,
   },
   voiceCard: {
-    borderRadius: BorderRadius.xl,
+    borderRadius: 32,
     padding: Spacing.xl,
     alignItems: 'center',
   },
@@ -922,12 +938,13 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   voiceCardTitle: {
-    fontSize: 24,
-    fontWeight: '700',
+    fontSize: 28,
+    fontFamily: 'CormorantGaramond_700Bold',
     marginBottom: Spacing.sm,
   },
   voiceCardDescription: {
-    fontSize: 15,
+    fontSize: 16,
+    fontFamily: 'Inter_400Regular',
     textAlign: 'center',
     lineHeight: 22,
     marginBottom: Spacing.xl,
@@ -944,6 +961,7 @@ const styles = StyleSheet.create({
   },
   voiceFeatureText: {
     fontSize: 15,
+    fontFamily: 'Inter_500Medium',
   },
   trialBadge: {
     flexDirection: 'row',
@@ -955,100 +973,102 @@ const styles = StyleSheet.create({
   },
   trialBadgeText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontFamily: 'Inter_600SemiBold',
   },
   cinematicCard: {
-    aspectRatio: 4 / 5,
-    borderRadius: 16,
+    height: 340,
+    width: '100%',
+    borderRadius: 24,
     overflow: 'hidden',
     position: 'relative',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#000',
   },
   diagonalLines: {
     ...StyleSheet.absoluteFillObject,
+    overflow: 'hidden',
   },
   diagonalLine: {
     position: 'absolute',
-    left: -100,
-    right: -100,
+    width: '200%',
     height: 1,
     backgroundColor: '#fff',
-    transform: [{ rotate: '25deg' }],
+    transform: [{ rotate: '-45deg' }],
+    left: '-50%',
   },
   shadowColumn: {
     position: 'absolute',
-    right: 30,
     top: 0,
     bottom: 0,
-    width: 80,
-    backgroundColor: 'rgba(0,0,0,0.4)',
-    transform: [{ skewX: '-10deg' }],
+    left: '10%',
+    width: '25%',
+    backgroundColor: 'rgba(0,0,0,0.3)',
   },
   cinematicContent: {
+    padding: Spacing.xl,
+    paddingTop: 40,
     flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
   },
   cinematicTitle: {
-    fontSize: 36,
-    fontWeight: '800',
-    color: 'rgba(255,255,255,0.95)',
-    letterSpacing: -1.5,
-    lineHeight: 40,
+    fontFamily: 'CormorantGaramond_700Bold',
+    fontSize: 48,
+    color: '#fff',
+    lineHeight: 44,
+    letterSpacing: -1,
   },
   accentBar: {
-    width: 50,
-    height: 3,
-    backgroundColor: 'rgba(255,255,255,0.5)',
-    marginTop: 10,
+    width: 40,
+    height: 2,
+    backgroundColor: '#fff',
+    marginTop: Spacing.lg,
   },
   glassFooter: {
-    backgroundColor: 'rgba(20,20,20,0.9)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    paddingBottom: 16,
-  },
-  glassFooterTop: {
     position: 'absolute',
-    top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    height: 120,
+    padding: Spacing.lg,
+    justifyContent: 'flex-end',
+  },
+  glassFooterTop: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(255,255,255,0.05)',
   },
   footerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'flex-end',
+    marginBottom: Spacing.xs,
+    zIndex: 1,
   },
   footerLeft: {
     flex: 1,
   },
   businessNameText: {
-    fontSize: 16,
-    fontWeight: '500',
+    fontFamily: 'Inter_700Bold',
+    fontSize: 18,
     color: '#fff',
-    letterSpacing: 0.5,
+    marginBottom: 4,
   },
   subtitleText: {
-    fontSize: 9,
-    color: 'rgba(255,255,255,0.4)',
-    letterSpacing: 1.5,
-    marginTop: 3,
+    fontFamily: 'Inter_400Regular',
+    fontSize: 10,
+    color: 'rgba(255,255,255,0.5)',
+    letterSpacing: 2,
   },
   arrowCircle: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
+    width: 28,
+    height: 28,
+    borderRadius: 14,
     backgroundColor: 'rgba(255,255,255,0.1)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   domainText: {
-    fontSize: 8,
+    fontFamily: 'Inter_600SemiBold',
+    fontSize: 10,
     color: 'rgba(255,255,255,0.3)',
-    letterSpacing: 1.5,
-    marginTop: 10,
+    letterSpacing: 1,
+    zIndex: 1,
   },
 });
