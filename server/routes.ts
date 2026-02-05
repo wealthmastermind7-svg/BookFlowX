@@ -2163,7 +2163,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Multi-page crawl endpoint
+  // Multi-page crawl endpoint (inline crawl logic for reliability)
   app.post("/api/businesses/:businessId/training/crawl", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { businessId } = req.params;
@@ -2173,27 +2173,110 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ error: "URL is required" });
       }
 
-      const { crawlWebsite } = await import("./websiteScraper");
-      const results = await crawlWebsite(url, maxPages);
-      
-      // Save each crawled page to training data
-      const savedData = [];
-      for (const page of results) {
-        const data = await storage.createTrainingData({
-          businessId,
-          type: "website_crawl",
-          title: page.title,
-          content: page.content,
-          sourceUrl: page.sourceUrl,
-          status: "active",
-        });
-        savedData.push({ ...data, contentLength: page.contentLength });
+      // Helper to extract text from HTML
+      function extractTextFromHtml(html: string): string {
+        return html
+          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+          .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+          .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+          .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+          .replace(/<[^>]+>/g, ' ')
+          .replace(/&nbsp;/g, ' ')
+          .replace(/&amp;/g, '&')
+          .replace(/&lt;/g, '<')
+          .replace(/&gt;/g, '>')
+          .replace(/&quot;/g, '"')
+          .replace(/&#39;/g, "'")
+          .replace(/\s+/g, ' ')
+          .trim()
+          .substring(0, 50000);
       }
-      
+
+      // Helper to extract internal links
+      function extractInternalLinks(html: string, baseUrl: string): string[] {
+        try {
+          const urlObj = new URL(baseUrl);
+          const domain = urlObj.origin;
+          const links: string[] = [];
+          const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
+          let match;
+          while ((match = linkRegex.exec(html)) !== null) {
+            let href = match[1];
+            if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+            if (href.startsWith('/')) href = domain + href;
+            else if (!href.startsWith('http')) href = domain + '/' + href;
+            try {
+              const linkUrl = new URL(href);
+              if (linkUrl.origin === domain && !links.includes(linkUrl.href)) {
+                links.push(linkUrl.href.split('#')[0].split('?')[0]);
+              }
+            } catch {}
+          }
+          return [...new Set(links)];
+        } catch {
+          return [];
+        }
+      }
+
+      const crawledUrls = new Set<string>();
+      const urlsToCrawl = [url];
+      const results: any[] = [];
+      const pageLimit = Math.min(maxPages, 50);
+
+      console.log(`[Training] Starting multi-page crawl from: ${url} (max ${pageLimit} pages)`);
+
+      while (urlsToCrawl.length > 0 && crawledUrls.size < pageLimit) {
+        const currentUrl = urlsToCrawl.shift()!;
+        if (crawledUrls.has(currentUrl)) continue;
+        crawledUrls.add(currentUrl);
+
+        try {
+          console.log(`[Training] Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
+          const response = await fetch(currentUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MyBot/1.0)' },
+          });
+
+          if (!response.ok) continue;
+
+          const html = await response.text();
+          const textContent = extractTextFromHtml(html);
+
+          if (textContent.length < 100) continue;
+
+          const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+          const title = titleMatch ? titleMatch[1].trim() : currentUrl;
+
+          const data = await storage.createTrainingData({
+            businessId,
+            type: "website_crawl",
+            title,
+            content: textContent,
+            sourceUrl: currentUrl,
+            status: "active",
+          });
+
+          results.push({ ...data, contentLength: textContent.length });
+
+          if (crawledUrls.size < pageLimit) {
+            const newLinks = extractInternalLinks(html, currentUrl);
+            for (const link of newLinks) {
+              if (!crawledUrls.has(link) && !urlsToCrawl.includes(link)) {
+                urlsToCrawl.push(link);
+              }
+            }
+          }
+        } catch (err) {
+          console.log(`[Training] Failed to crawl ${currentUrl}:`, err);
+        }
+      }
+
+      console.log(`[Training] Crawl complete: ${results.length} pages saved`);
+
       res.status(201).json({
-        pagesCrawled: savedData.length,
-        results: savedData,
-        message: `Successfully crawled ${savedData.length} page(s) from ${url}`,
+        pagesCrawled: results.length,
+        results,
+        message: `Successfully crawled ${results.length} page(s) from ${url}`,
       });
     } catch (error: any) {
       console.error("[Training] Error crawling website:", error);
