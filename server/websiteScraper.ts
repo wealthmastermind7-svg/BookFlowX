@@ -122,7 +122,8 @@ export async function crawlWebsite(url: string, maxPages: number = 10): Promise<
       if (!html) continue;
       
       const textContent = extractTextFromHtml(html);
-      if (textContent.length < 100) continue;
+      // Relaxed content length check for better success rate
+      if (textContent.length < 50) continue;
       
       const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
       const title = titleMatch ? titleMatch[1].trim() : currentUrl;
@@ -146,6 +147,10 @@ export async function crawlWebsite(url: string, maxPages: number = 10): Promise<
     } catch (err) {
       console.log(`[Scraper] Failed to crawl ${currentUrl}:`, err);
     }
+  }
+  
+  if (results.length === 0) {
+    throw new Error(`Failed to crawl: No content found at ${url}`);
   }
   
   console.log(`[Scraper] Crawl complete: ${results.length} pages saved`);

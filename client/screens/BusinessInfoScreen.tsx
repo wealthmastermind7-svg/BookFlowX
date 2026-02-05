@@ -151,6 +151,9 @@ export default function BusinessInfoScreen() {
 
     try {
       const response = await crawlWebsite(url, 10);
+      if (response.pagesCrawled === 0) {
+        throw new Error("No pages could be crawled. Please check the URL and try again.");
+      }
       await loadTrainingData();
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       Alert.alert("Success", `Website content has been crawled and added to training data. ${response.pagesCrawled} page(s) processed.`);
