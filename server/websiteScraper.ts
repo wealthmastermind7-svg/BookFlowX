@@ -14,6 +14,40 @@ export interface ScrapedBusinessInfo {
   additionalInfo: string;
 }
 
+export function extractInternalLinks(html: string, baseUrl: string): string[] {
+  try {
+    const urlObj = new URL(baseUrl);
+    const domain = urlObj.origin;
+    const links: string[] = [];
+    const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
+    let match;
+    while ((match = linkRegex.exec(html)) !== null) {
+      let href = match[1];
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+      if (href.startsWith('/')) href = domain + href;
+      else if (!href.startsWith('http')) {
+        // Handle relative paths without leading slash
+        const pathParts = urlObj.pathname.split('/');
+        pathParts.pop();
+        const baseDir = pathParts.join('/');
+        href = domain + baseDir + '/' + href;
+      }
+      try {
+        const linkUrl = new URL(href);
+        // Only crawl same domain and common content pages
+        if (linkUrl.origin === domain && 
+            !links.includes(linkUrl.href) && 
+            !linkUrl.pathname.match(/\.(jpg|jpeg|png|gif|pdf|zip|css|js)$/i)) {
+          links.push(linkUrl.href.split('#')[0].split('?')[0]);
+        }
+      } catch {}
+    }
+    return [...new Set(links)];
+  } catch {
+    return [];
+  }
+}
+
 export async function scrapeWebsiteContent(url: string): Promise<string> {
   try {
     const response = await fetch(url, {

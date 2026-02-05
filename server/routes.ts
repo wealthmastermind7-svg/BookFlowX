@@ -2046,7 +2046,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/businesses/:businessId/knowledge/scrape", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
       const { businessId } = req.params;
-      const { websiteUrl } = req.body;
+      const { websiteUrl, maxPages = 5 } = req.body;
       
       if (!websiteUrl) {
         return res.status(400).json({ error: "Website URL is required" });
@@ -2057,16 +2057,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
-      const { scrapeAndExtract } = await import("./websiteScraper");
-      const scrapedInfo = await scrapeAndExtract(websiteUrl, business.name);
+      const { scrapeAndExtract, scrapeWebsiteContent, extractInternalLinks, extractBusinessInfo } = await import("./websiteScraper");
+      
+      // Multi-page crawl logic
+      const crawledUrls = new Set<string>();
+      const urlsToCrawl = [websiteUrl];
+      const pageLimit = Math.min(maxPages, 15);
+      let combinedContent = "";
+      const crawlResults = [];
+
+      console.log(`[Knowledge] Starting multi-page crawl from: ${websiteUrl} (max ${pageLimit} pages)`);
+
+      while (urlsToCrawl.length > 0 && crawledUrls.size < pageLimit) {
+        const currentUrl = urlsToCrawl.shift()!;
+        if (crawledUrls.has(currentUrl)) continue;
+        crawledUrls.add(currentUrl);
+
+        try {
+          console.log(`[Knowledge] Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
+          const html = await scrapeWebsiteContent(currentUrl);
+          
+          const textContent = html
+            .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+            .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+            .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+            .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+            .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+            .replace(/<[^>]+>/g, ' ')
+            .replace(/&nbsp;/g, ' ')
+            .replace(/&amp;/g, '&')
+            .replace(/&lt;/g, '<')
+            .replace(/&gt;/g, '>')
+            .replace(/&quot;/g, '"')
+            .replace(/\s+/g, ' ')
+            .trim();
+
+          if (textContent.length > 100) {
+            combinedContent += "\n\n" + textContent;
+            
+            // Save each page to training_data for future reference if needed
+            const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+            const title = titleMatch ? titleMatch[1].trim() : currentUrl;
+            
+            // Optional: Store in trainingData table
+            // await storage.createTrainingData({ ... });
+          }
+
+          if (crawledUrls.size < pageLimit) {
+            const newLinks = extractInternalLinks(html, websiteUrl);
+            for (const link of newLinks) {
+              if (!crawledUrls.has(link) && !urlsToCrawl.includes(link)) {
+                urlsToCrawl.push(link);
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`[Knowledge] Failed to crawl ${currentUrl}:`, err);
+        }
+      }
+
+      // Extract info from combined content
+      const extractedInfo = await extractBusinessInfo(combinedContent.substring(0, 30000), business.name);
       
       const knowledge = await storage.createOrUpdateBusinessKnowledge({
         businessId,
         websiteUrl,
-        ...scrapedInfo,
+        ...extractedInfo,
       });
       
-      res.json({ knowledge, scraped: true });
+      res.json({ knowledge, scraped: true, pagesCrawled: crawledUrls.size });
     } catch (error: any) {
       console.error("[Knowledge] TRAINING ERROR:", error?.message || error);
       let message = "Failed to learn from the website. You can still enter details manually.";
