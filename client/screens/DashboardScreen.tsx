@@ -850,7 +850,7 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.92)", // Increased contrast for data clarity
+    backgroundColor: "rgba(0,0,0,0.4)",
   },
   container: {
     flex: 1,

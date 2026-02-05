@@ -857,7 +857,10 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#000" },
   backgroundWrapper: { ...StyleSheet.absoluteFillObject },
   backgroundImage: { flex: 1 },
-  backgroundOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.92)" },
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
   sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12, flexWrap: 'wrap', gap: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: 'wrap', gap: 12 },
   sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2.5 },

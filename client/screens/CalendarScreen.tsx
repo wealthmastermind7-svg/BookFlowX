@@ -32,6 +32,18 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const shadowBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
+function BackgroundOverlay() {
+  return (
+    <View 
+      style={{
+        ...StyleSheet.absoluteFillObject,
+        backgroundColor: "rgba(0,0,0,0.4)",
+        zIndex: -1,
+      }} 
+    />
+  );
+}
+
 type CalendarScreenNavigationProp = NativeStackNavigationProp<CalendarStackParamList, "CalendarMain">;
 
 function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
@@ -209,6 +221,7 @@ export default function CalendarScreen() {
 
   return (
     <ImageBackground source={shadowBackground} style={styles.background} resizeMode="cover">
+      <BackgroundOverlay />
       <Animated.View style={[styles.container, containerStyle]}>
         <ScrollView
           style={styles.scrollView}
