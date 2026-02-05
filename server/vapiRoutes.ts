@@ -11,6 +11,7 @@ import {
 const router = Router();
 
 interface VapiToolCall {
+  id?: string;
   name: string;
   parameters: Record<string, any>;
 }
@@ -517,12 +518,14 @@ IMPORTANT:
           }
 
           results.push({
+            toolCallId: toolCall.id,
             name: toolCall.name,
             result: JSON.stringify(result)
           });
         } catch (error: any) {
           console.error(`[Vapi] Tool error (${toolCall.name}):`, error);
           results.push({
+            toolCallId: toolCall.id,
             name: toolCall.name,
             result: JSON.stringify({ error: error.message || "An error occurred" })
           });
