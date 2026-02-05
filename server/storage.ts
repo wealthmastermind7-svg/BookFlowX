@@ -151,6 +151,8 @@ export interface IStorage {
   createVoiceSubscription(sub: InsertVoiceSubscription): Promise<VoiceSubscription>;
   updateVoiceSubscription(businessId: string, updates: Partial<InsertVoiceSubscription>): Promise<VoiceSubscription | undefined>;
   incrementVoiceMinutes(businessId: string, minutes: number): Promise<void>;
+  checkVoiceMinutesAvailable(businessId: string): Promise<{ available: boolean; remainingMinutes: number }>;
+  getVoiceUsageStats(businessId: string): Promise<{ usedMinutes: number; totalMinutes: number }>;
 
   // Voice Call Logs
   createVoiceCallLog(log: InsertVoiceCallLog): Promise<VoiceCallLog>;
@@ -644,7 +646,7 @@ export class DatabaseStorage implements IStorage {
       const [updated] = await db
         .update(businessThemes)
         .set({ ...theme, updatedAt: new Date() })
-        .where(eq(businessThemes.id, existing.id))
+        .where(eq(businessThemes.businessId, theme.businessId))
         .returning();
       return updated;
     }
@@ -658,8 +660,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined> {
-    const [key] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
-    return key || undefined;
+    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
+    return apiKey || undefined;
   }
 
   async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
@@ -668,7 +670,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateApiKeyLastUsed(id: string): Promise<void> {
-    await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, id));
+    await db
+      .update(apiKeys)
+      .set({ lastUsedAt: new Date() })
+      .where(eq(apiKeys.id, id));
   }
 
   async deleteApiKey(id: string): Promise<void> {
@@ -686,16 +691,16 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined> {
-    const [updated] = await db.update(workflowLogs).set(updates).where(eq(workflowLogs.id, id)).returning();
+    const [updated] = await db
+      .update(workflowLogs)
+      .set(updates)
+      .where(eq(workflowLogs.id, id))
+      .returning();
     return updated || undefined;
   }
 
   async clearWorkflows(businessId: string): Promise<void> {
-    const bizWorkflows = await this.getWorkflows(businessId);
-    for (const w of bizWorkflows) {
-      await db.delete(workflowLogs).where(eq(workflowLogs.workflowId, w.id));
-      await db.delete(workflows).where(eq(workflows.id, w.id));
-    }
+    await db.delete(workflows).where(eq(workflows.businessId, businessId));
   }
 
   // Assistant Training Data
@@ -737,10 +742,39 @@ export class DatabaseStorage implements IStorage {
   }
 
   async incrementVoiceMinutes(businessId: string, minutes: number): Promise<void> {
-    await db
-      .update(voiceSubscriptions)
-      .set({ minutesUsed: sql`${voiceSubscriptions.minutesUsed} + ${minutes}` })
-      .where(eq(voiceSubscriptions.businessId, businessId));
+    const sub = await this.getVoiceSubscription(businessId);
+    if (sub) {
+      await db
+        .update(voiceSubscriptions)
+        .set({
+          usedMinutes: sub.usedMinutes + minutes,
+          updatedAt: new Date(),
+        })
+        .where(eq(voiceSubscriptions.businessId, businessId));
+    }
+  }
+
+  async checkVoiceMinutesAvailable(businessId: string): Promise<{ available: boolean; remainingMinutes: number }> {
+    const sub = await this.getVoiceSubscription(businessId);
+    if (!sub) {
+      return { available: true, remainingMinutes: 5 }; // 5 minute free trial
+    }
+    const remaining = sub.totalMinutes - sub.usedMinutes;
+    return {
+      available: remaining > 0,
+      remainingMinutes: Math.max(0, remaining),
+    };
+  }
+
+  async getVoiceUsageStats(businessId: string): Promise<{ usedMinutes: number; totalMinutes: number }> {
+    const sub = await this.getVoiceSubscription(businessId);
+    if (!sub) {
+      return { usedMinutes: 0, totalMinutes: 5 };
+    }
+    return {
+      usedMinutes: sub.usedMinutes,
+      totalMinutes: sub.totalMinutes,
+    };
   }
 
   // Voice Call Logs
