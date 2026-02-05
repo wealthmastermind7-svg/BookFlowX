@@ -337,7 +337,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // === BUSINESSES API ===
+  // Training Data Routes
+  app.get("/api/businesses/:businessId/training", async (req, res) => {
+    try {
+      const data = await storage.getTrainingData(req.params.businessId);
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to fetch training data" });
+    }
+  });
+
+  app.post("/api/businesses/:businessId/training/qa", async (req, res) => {
+    try {
+      const { question, answer } = req.body;
+      const data = await storage.createTrainingData({
+        businessId: req.params.businessId,
+        type: "qa_pair",
+        question,
+        answer,
+        status: "active"
+      });
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to create Q&A pair" });
+    }
+  });
+
+  app.post("/api/businesses/:businessId/training/text", async (req, res) => {
+    try {
+      const { content } = req.body;
+      const data = await storage.createTrainingData({
+        businessId: req.params.businessId,
+        type: "document",
+        content,
+        title: "Manual Text Input",
+        status: "active"
+      });
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to add text content" });
+    }
+  });
+
+  app.post("/api/businesses/:businessId/training/crawl", async (req, res) => {
+    try {
+      const { url } = req.body;
+      // Mock crawl for now, in production this would use a crawler
+      const data = await storage.createTrainingData({
+        businessId: req.params.businessId,
+        type: "website_crawl",
+        title: "Home Page",
+        sourceUrl: url,
+        content: `Content from ${url}`,
+        status: "active"
+      });
+      res.json(data);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to crawl website" });
+    }
+  });
+
+  app.delete("/api/training/:id", async (req, res) => {
+    try {
+      await storage.deleteTrainingData(req.params.id);
+      res.sendStatus(204);
+    } catch (error) {
+      res.status(500).json({ error: "Failed to delete training data" });
+    }
+  });
   
   // Get voice subscription status by business slug (public)
   app.get("/api/public/businesses/:slug/voice-status", async (req: Request, res: Response) => {

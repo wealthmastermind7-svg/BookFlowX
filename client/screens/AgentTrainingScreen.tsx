@@ -175,6 +175,80 @@ export default function AgentTrainingScreen() {
         </View>
 
         <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Custom Content</ThemedText>
+          <ThemedText style={styles.cardInfo}>
+            Paste information about your company (services, policies, hours) for the assistant to learn.
+          </ThemedText>
+          <GlassCard style={styles.qaInputCard}>
+            <TextInput
+              style={[styles.input, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
+              placeholder="Paste company info, pricing, or details here..."
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={answer}
+              onChangeText={setAnswer}
+              multiline
+            />
+            <View style={styles.qaButtonRow}>
+              <Button 
+                title="Add Content" 
+                onPress={async () => {
+                  if (!answer) return;
+                  try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+                  setAddingQa(true);
+                  try {
+                    await api.apiRequest('POST', `/api/businesses/${businessId}/training/text`, {
+                      content: answer
+                    });
+                    setAnswer("");
+                    loadTrainingData();
+                  } catch (error) {
+                    Alert.alert("Error", "Failed to add content.");
+                  } finally {
+                    setAddingQa(false);
+                  }
+                }} 
+                loading={addingQa}
+                variant="primary"
+                style={{ flex: 1 }}
+              />
+            </View>
+          </GlassCard>
+        </View>
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Custom Q&A</ThemedText>
+          <ThemedText style={styles.cardInfo}>
+            Enter specific questions and answers to help your assistant understand your business better.
+          </ThemedText>
+          <GlassCard style={styles.qaInputCard}>
+            <TextInput
+              style={styles.input}
+              placeholder="Question (e.g., Where are you located?)"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={question}
+              onChangeText={setQuestion}
+            />
+            <TextInput
+              style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
+              placeholder="Answer"
+              placeholderTextColor="rgba(255,255,255,0.3)"
+              value={answer}
+              onChangeText={setAnswer}
+              multiline
+            />
+            <View style={styles.qaButtonRow}>
+              <Button 
+                title="Add Q&A" 
+                onPress={handleAddQa} 
+                loading={addingQa}
+                variant="primary"
+                style={{ flex: 1 }}
+              />
+            </View>
+          </GlassCard>
+        </View>
+
+        <View style={styles.section}>
           <View style={styles.sectionHeader}>
             <ThemedText style={styles.sectionTitle}>Training Links</ThemedText>
             <View style={styles.badge}>
@@ -194,17 +268,17 @@ export default function AgentTrainingScreen() {
               <GlassCard key={item.id} style={styles.itemCard}>
                 <View style={styles.itemIconBox}>
                   <Feather 
-                    name={item.type === 'website_crawl' ? 'globe' : 'message-square'} 
+                    name={item.type === 'website_crawl' ? 'globe' : item.type === 'qa_pair' ? 'message-square' : 'file-text'} 
                     size={16} 
                     color="#fff" 
                   />
                 </View>
                 <View style={styles.itemContent}>
                   <ThemedText style={styles.itemTitle} numberOfLines={1}>
-                    {item.type === 'website_crawl' ? item.title : item.question}
+                    {item.type === 'website_crawl' ? item.title : item.type === 'qa_pair' ? item.question : 'Custom Content'}
                   </ThemedText>
                   <ThemedText style={styles.itemSubtitle} numberOfLines={1}>
-                    {item.type === 'website_crawl' ? item.sourceUrl : item.answer}
+                    {item.type === 'website_crawl' ? item.sourceUrl : item.type === 'qa_pair' ? item.answer : item.content}
                   </ThemedText>
                 </View>
                 <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
