@@ -638,7 +638,18 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
     setIsLoadingDemo(true);
     try {
       // Ensure business exists before loading demo data
-      await api.getOrCreateBusiness();
+      const biz = await api.getOrCreateBusiness();
+      
+      // Update timezone from device
+      try {
+        const Intl = (global as any).Intl;
+        const timezone = Intl?.DateTimeFormat?.().resolvedOptions()?.timeZone;
+        if (timezone) {
+          await api.updateBusiness({ timezone });
+        }
+      } catch (tzError) {
+        console.warn("Failed to detect timezone during onboarding:", tzError);
+      }
       
       const demoType = BUSINESS_TYPE_DEMO_MAP[typeId] || "salon";
       await api.initializeDemoData(demoType);

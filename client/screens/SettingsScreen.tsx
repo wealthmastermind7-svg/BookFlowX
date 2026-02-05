@@ -354,11 +354,20 @@ export default function SettingsScreen() {
     Alert.alert("Copied", "Link copied to clipboard.");
   };
 
-  const handleEditBusinessField = (field: "name" | "website" | "phone" | "slug") => {
-    setEditingField(field);
-    setEditValue(business?.[field] ? String(business[field]) : "");
+  const handleEditBusinessField = (field: "name" | "website" | "phone" | "slug" | "timezone") => {
+    setEditingField(field as any);
+    setEditValue(business?.[field as keyof Business] ? String(business[field as keyof Business]) : "");
     setEditModalVisible(true);
   };
+
+  const TIMEZONES = [
+    { label: "Auckland (NZST)", value: "Pacific/Auckland" },
+    { label: "Sydney (AEST)", value: "Australia/Sydney" },
+    { label: "London (GMT)", value: "Europe/London" },
+    { label: "New York (EST)", value: "America/New_York" },
+    { label: "Los Angeles (PST)", value: "America/Los_Angeles" },
+    { label: "Tokyo (JST)", value: "Asia/Tokyo" },
+  ];
 
   const handleVoiceSubscribe = async (tierId: string) => {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
