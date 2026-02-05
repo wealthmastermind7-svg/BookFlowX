@@ -511,16 +511,19 @@ export default function ServicesScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <View style={styles.headerTitleRow}>
-            <Text style={styles.hugeTitle}>Services</Text>
-            <Pressable 
-              style={styles.aiHeaderButton} 
-              onPress={handleAISetup}
-              hitSlop={8}
-            >
-              <BlurView intensity={30} tint="light" style={styles.aiHeaderBlur}>
-                <Feather name="zap" size={18} color="#fff" />
-              </BlurView>
-            </Pressable>
+              <Text style={styles.hugeTitle}>Services</Text>
+              <View style={styles.assistantContextContainer}>
+                <ThemedText style={styles.assistantContextText}>Assistant Setup</ThemedText>
+                <Pressable 
+                  style={styles.aiHeaderButton} 
+                  onPress={handleAISetup}
+                  hitSlop={8}
+                >
+                  <BlurView intensity={30} tint="light" style={styles.aiHeaderBlur}>
+                    <Feather name="zap" size={18} color="#fff" />
+                  </BlurView>
+                </Pressable>
+              </View>
           </View>
         </View>
 

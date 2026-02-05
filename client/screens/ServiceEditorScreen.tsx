@@ -426,15 +426,6 @@ export default function ServiceEditorScreen() {
                 Add-ons
               </Text>
             </Pressable>
-            <Pressable onPress={() => setActiveTab("links")}>
-              <Text style={[
-                styles.carouselItem,
-                activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive,
-                !isActuallyPremium && { opacity: 0.3 }
-              ]}>
-                Links
-              </Text>
-            </Pressable>
           </View>
 
           <KeyboardAwareScrollViewCompat
@@ -487,7 +478,7 @@ export default function ServiceEditorScreen() {
                     {service.name ? (
                       <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
                         <Feather name="zap" size={12} color="#fff" />
-                        <Text style={styles.aiUpsellTriggerText}>AI Upsells</Text>
+                        <Text style={styles.aiUpsellTriggerText}>Assistant Suggestions</Text>
                       </Pressable>
                     ) : null}
                   </View>
@@ -501,6 +492,9 @@ export default function ServiceEditorScreen() {
                     editable={!saving}
                     style={[styles.inputSecondary, styles.textArea]}
                   />
+                  <Text style={styles.assistantContextText}>
+                    The assistant uses this description to explain the service to customers. Use "Assistant Suggestions" to generate premium descriptions and add-ons.
+                  </Text>
                 </View>
               </View>
             )}
@@ -512,11 +506,11 @@ export default function ServiceEditorScreen() {
                     <Text style={styles.linkCardTitle}>Custom Add-ons</Text>
                     <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
                       <Feather name="zap" size={12} color="#fff" />
-                      <Text style={styles.aiUpsellTriggerText}>AI Suggest</Text>
+                      <Text style={styles.aiUpsellTriggerText}>Assistant Suggest</Text>
                     </Pressable>
                   </View>
                   <Text style={styles.linkCardDesc}>
-                    Add-ons customers can select when booking this service
+                    Add-ons customers can select when booking this service. The assistant can suggest these during voice or text conversations.
                   </Text>
                   
                   {savedUpsells.length === 0 ? (
