@@ -39,6 +39,15 @@ import { getApiUrl } from "@/lib/query-client";
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
 
+export async function checkOnboardingComplete(): Promise<boolean> {
+  try {
+    const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
+    return value === "true";
+  } catch {
+    return false;
+  }
+}
+
 const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
   salon: "salon",
   medical: "medical",
