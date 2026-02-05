@@ -571,8 +571,8 @@ export default function SettingsScreen() {
                 <Feather name="mic" size={24} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.voiceTitle}>Voice Assistant</ThemedText>
-                <ThemedText style={styles.voiceSubtitle}>AI Receptionist is active</ThemedText>
+                <ThemedText style={styles.voiceTitle}>AI Assistant</ThemedText>
+                <ThemedText style={styles.voiceSubtitle}>Answers questions about your services</ThemedText>
               </View>
               <Button 
                 onPress={handleOpenAgentTraining}
