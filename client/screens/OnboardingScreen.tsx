@@ -6,39 +6,39 @@ import {
   Dimensions,
   Pressable,
   Platform,
-  FlatList,
-  ViewToken,
+  TextInput,
   ScrollView,
-  Alert,
   ActivityIndicator,
+  Linking,
 } from "react-native";
 import { BlurView } from "expo-blur";
 import { Image } from "expo-image";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { Feather } from "@expo/vector-icons";
-import { MaterialIcons } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
 import Animated, {
   FadeIn,
   FadeInDown,
   FadeInUp,
-  useAnimatedProps,
+  FadeOut,
+  useAnimatedStyle,
   useSharedValue,
-  withTiming,
-  interpolate,
+  withSpring,
+  WithSpringConfig,
 } from "react-native-reanimated";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import Svg, { Circle } from "react-native-svg";
+import { LinearGradient } from "expo-linear-gradient";
+
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { api } from "@/lib/api";
+import { getApiUrl } from "@/lib/query-client";
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get("window");
 const ONBOARDING_COMPLETE_KEY = "@bookflow_onboarding_complete";
 
-// Map onboarding business types to demo data business types
 const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
   salon: "salon",
   medical: "medical",
@@ -60,587 +60,548 @@ interface OnboardingScreenProps {
   onComplete: () => void;
 }
 
-const PAGES = [
-  {
-    id: "1",
-    headline: "Smart Booking",
-    highlightText: "Built In",
-    description: "Beautiful scheduling with intelligent features that adapt to your business. Setup in seconds, not hours.",
-    buttonText: "Get Started",
-    showSkip: false,
-    features: [
-      { icon: "zap", text: "AI-assisted service setup" },
-      { icon: "bell", text: "Smart reminders that adapt" },
-    ],
-  },
-  {
-    id: "2",
-    headline: "AI Voice Agent",
-    highlightText: "Always On",
-    description: "Our premium voice AI answers calls and books appointments naturally, so you never miss a lead while working.",
-    buttonText: "Continue",
-    showSkip: true,
-    features: [
-      { icon: "mic", text: "Natural voice conversations" },
-      { icon: "calendar", text: "Direct calendar integration" },
-    ],
-  },
-  {
-    id: "3",
-    headline: "Reduce No-Shows",
-    highlightText: "Automatically",
-    description: "Smart reminders learn customer patterns and adjust timing to help reduce missed appointments.",
-    buttonText: "Continue",
-    showSkip: true,
-    features: [
-      { icon: "clock", text: "Timing adapts per customer" },
-      { icon: "trending-up", text: "Fewer missed bookings" },
-    ],
-  },
-  {
-    id: "4",
-    headline: "Grow Smarter",
-    highlightText: "Not Harder",
-    description: "Customer insights, smart upsell suggestions, and availability optimization—all working quietly for you.",
-    buttonText: "Get Started",
-    showSkip: true,
-    features: [
-      { icon: "users", text: "Know your top customers" },
-      { icon: "gift", text: "Contextual add-on suggestions" },
-    ],
-  },
-];
-
 interface BusinessType {
   id: string;
   name: string;
   icon: keyof typeof Feather.glyphMap;
   color: string;
-  backgroundImage: any;
 }
 
 const BUSINESS_TYPES: BusinessType[] = [
-  {
-    id: "salon",
-    name: "Salons & Beauty",
-    icon: "scissors",
-    color: "#EC4899",
-    backgroundImage: require("../assets/stock_images/professional_salon_i_ce769037.jpg"),
-  },
-  {
-    id: "medical",
-    name: "Dentists & Medical",
-    icon: "heart",
-    color: "#3B82F6",
-    backgroundImage: require("../assets/stock_images/modern_medical_clini_f45cec4c.jpg"),
-  },
-  {
-    id: "contractor",
-    name: "Home Contractors",
-    icon: "home",
-    color: "#8B5CF6",
-    backgroundImage: require("../assets/stock_images/professional_contrac_02057d6b.jpg"),
-  },
-  {
-    id: "automotive",
-    name: "Car Detailers",
-    icon: "truck",
-    color: "#F59E0B",
-    backgroundImage: require("../assets/stock_images/professional_car_det_8f245a62.jpg"),
-  },
-  {
-    id: "fitness",
-    name: "Fitness Trainers",
-    icon: "zap",
-    color: "#10B981",
-    backgroundImage: require("../assets/stock_images/modern_fitness_studi_95f0f1ca.jpg"),
-  },
-  {
-    id: "plumber",
-    name: "Plumbing Services",
-    icon: "droplet",
-    color: "#3B82F6",
-    backgroundImage: require("../assets/stock_images/professional_plumbin_7edb24e5.jpg"),
-  },
-  {
-    id: "electrician",
-    name: "Electricians",
-    icon: "battery-charging",
-    color: "#F59E0B",
-    backgroundImage: require("../assets/stock_images/professional_electri_ccc62b5b.jpg"),
-  },
-  {
-    id: "hvac",
-    name: "HVAC Experts",
-    icon: "wind",
-    color: "#06B6D4",
-    backgroundImage: require("../assets/stock_images/professional_hvac_te_f815c946.jpg"),
-  },
-  {
-    id: "cleaning",
-    name: "Cleaning Pros",
-    icon: "star",
-    color: "#10B981",
-    backgroundImage: require("../assets/stock_images/professional_cleanin_126975e0.jpg"),
-  },
-  {
-    id: "landscaping",
-    name: "Landscapers",
-    icon: "sun",
-    color: "#14B8A6",
-    backgroundImage: require("../assets/stock_images/professional_landsca_8ea97a28.jpg"),
-  },
-  {
-    id: "photography",
-    name: "Photographers",
-    icon: "camera",
-    color: "#6366F1",
-    backgroundImage: require("../assets/stock_images/professional_photogr_f8897356.jpg"),
-  },
+  { id: "salon", name: "Salons & Beauty", icon: "scissors", color: "#EC4899" },
+  { id: "medical", name: "Medical & Dental", icon: "heart", color: "#3B82F6" },
+  { id: "contractor", name: "Contractors", icon: "home", color: "#8B5CF6" },
+  { id: "automotive", name: "Auto Detailing", icon: "truck", color: "#F59E0B" },
+  { id: "fitness", name: "Fitness", icon: "zap", color: "#10B981" },
+  { id: "plumber", name: "Plumbing", icon: "droplet", color: "#3B82F6" },
+  { id: "electrician", name: "Electricians", icon: "battery-charging", color: "#F59E0B" },
+  { id: "hvac", name: "HVAC", icon: "wind", color: "#06B6D4" },
+  { id: "cleaning", name: "Cleaning", icon: "star", color: "#10B981" },
+  { id: "landscaping", name: "Landscaping", icon: "sun", color: "#14B8A6" },
+  { id: "photography", name: "Photography", icon: "camera", color: "#6366F1" },
+  { id: "consulting", name: "Consulting", icon: "briefcase", color: "#8B5CF6" },
 ];
 
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
+const springConfig: WithSpringConfig = {
+  damping: 15,
+  mass: 0.3,
+  stiffness: 150,
+  overshootClamping: true,
+};
 
-function CircularMeter() {
-  const { theme: colors, isDark } = useTheme();
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const progress = useSharedValue(0);
+function AnimatedPressable({ 
+  children, 
+  onPress, 
+  style,
+  disabled = false,
+}: { 
+  children: React.ReactNode; 
+  onPress: () => void; 
+  style?: any;
+  disabled?: boolean;
+}) {
+  const scale = useSharedValue(1);
 
-  useEffect(() => {
-    progress.value = withTiming(1, { duration: 2000 });
-  }, []);
-
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: interpolate(progress.value, [0, 1], [circumference, 0]),
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
   }));
 
   return (
-    <View style={styles.meterContainer}>
-      <Svg width={100} height={100} viewBox="0 0 100 100" style={{ transform: [{ rotate: "-90deg" }] }}>
-        <Circle
-          cx="50"
-          cy="50"
-          r={radius}
-          stroke={isDark ? "#374151" : "#E5E7EB"}
-          strokeWidth={8}
-          fill="transparent"
-          opacity={0.3}
-        />
-        <AnimatedCircle
-          cx="50"
-          cy="50"
-          r={radius}
-          stroke={colors.text}
-          strokeWidth={8}
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={circumference}
-          animatedProps={animatedProps}
-        />
-      </Svg>
-      <View style={styles.meterTextContainer}>
-        <Text style={[styles.meterValue, { color: colors.text }]}>100%</Text>
-        <Text style={[styles.meterLabel, { color: colors.textSecondary }]}>BOOKED</Text>
+    <Animated.View style={animatedStyle}>
+      <Pressable
+        onPressIn={() => { if (!disabled) scale.value = withSpring(0.97, springConfig); }}
+        onPressOut={() => { scale.value = withSpring(1, springConfig); }}
+        onPress={disabled ? undefined : onPress}
+        style={[style, disabled && { opacity: 0.5 }]}
+        disabled={disabled}
+      >
+        {children}
+      </Pressable>
+    </Animated.View>
+  );
+}
+
+function CinematicLinkPreview({ businessName, domain }: { businessName: string; domain: string }) {
+  const getIndustryPhrase = (name: string): string[] => {
+    const lowName = name.toLowerCase();
+    if (lowName.includes('dentist') || lowName.includes('dental') || lowName.includes('teeth')) return ['RESTORE', 'YOUR', 'SMILE'];
+    if (lowName.includes('consultant') || lowName.includes('coach') || lowName.includes('advisor')) return ['BOOK', 'YOUR', 'SESSION'];
+    if (lowName.includes('salon') || lowName.includes('hair') || lowName.includes('barber') || lowName.includes('beauty')) return ['ELEVATE', 'YOUR', 'STYLE'];
+    if (lowName.includes('spa') || lowName.includes('massage') || lowName.includes('relax')) return ['FIND', 'YOUR', 'CALM'];
+    if (lowName.includes('car wash') || lowName.includes('auto') || lowName.includes('detail')) return ['SHINE', 'YOUR', 'RIDE'];
+    if (lowName.includes('contractor') || lowName.includes('repair') || lowName.includes('fix')) return ['BOOK', 'YOUR', 'SERVICE'];
+    return ['RESERVE', 'YOUR', 'SPACE'];
+  };
+
+  const phrases = getIndustryPhrase(businessName);
+
+  return (
+    <View style={styles.cinematicCard}>
+      <LinearGradient
+        colors={['#1a1a1a', '#000000', '#0a0a0a']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={StyleSheet.absoluteFillObject}
+      />
+      
+      <View style={styles.diagonalLines}>
+        <View style={[styles.diagonalLine, { top: '30%', opacity: 0.08 }]} />
+        <View style={[styles.diagonalLine, { top: '40%', opacity: 0.04 }]} />
+      </View>
+      
+      <View style={styles.shadowColumn} />
+      
+      <View style={styles.cinematicContent}>
+        <Text style={styles.cinematicTitle}>{phrases[0]}</Text>
+        <Text style={styles.cinematicTitle}>{phrases[1]}</Text>
+        <Text style={styles.cinematicTitle}>{phrases[2]}</Text>
+        <View style={styles.accentBar} />
+      </View>
+      
+      <View style={styles.glassFooter}>
+        <View style={styles.glassFooterTop} />
+        <View style={styles.footerContent}>
+          <View style={styles.footerLeft}>
+            <Text style={styles.businessNameText}>{businessName}</Text>
+            <Text style={styles.subtitleText}>BOOK YOUR APPOINTMENT</Text>
+          </View>
+          <View style={styles.arrowCircle}>
+            <Feather name="arrow-up-right" size={14} color="rgba(255,255,255,0.6)" />
+          </View>
+        </View>
+        <Text style={styles.domainText}>{domain.toUpperCase()}</Text>
       </View>
     </View>
   );
 }
 
-function BusinessTypeSelector({ 
+function StepIndicator({ currentStep, totalSteps }: { currentStep: number; totalSteps: number }) {
+  const { theme: colors, isDark } = useTheme();
+  
+  return (
+    <View style={styles.stepIndicatorContainer}>
+      {Array.from({ length: totalSteps }).map((_, index) => (
+        <View
+          key={index}
+          style={[
+            styles.stepDot,
+            {
+              backgroundColor: index <= currentStep 
+                ? colors.text 
+                : isDark ? 'rgba(255,255,255,0.2)' : 'rgba(0,0,0,0.1)',
+              width: index === currentStep ? 24 : 8,
+            },
+          ]}
+        />
+      ))}
+    </View>
+  );
+}
+
+function Step1NicheSelection({ 
   selectedType, 
   onSelect,
-  onLoadDemoData,
-  isDark,
-  colors,
-  isLoading = false,
+  onNext,
 }: { 
   selectedType: string; 
   onSelect: (id: string) => void;
-  onLoadDemoData: (id: string) => Promise<void>;
-  isDark: boolean;
-  colors: any;
-  isLoading?: boolean;
+  onNext: () => void;
 }) {
-  const scrollRef = useRef<ScrollView>(null);
+  const { theme: colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
   return (
-    <View style={styles.selectorContainer}>
-      <View style={styles.selectorGradient} />
-      <ScrollView
-        ref={scrollRef}
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        scrollEventThrottle={16}
-        snapToInterval={140}
-        decelerationRate="fast"
-        style={styles.selectorScroll}
-        contentContainerStyle={styles.selectorContent}
+    <Animated.View 
+      entering={FadeIn.duration(400)} 
+      exiting={FadeOut.duration(200)}
+      style={styles.stepContainer}
+    >
+      <ScrollView 
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        showsVerticalScrollIndicator={false}
       >
-        {BUSINESS_TYPES.map((type) => (
-          <Pressable
-            key={type.id}
-            onPress={async () => {
-              await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-              onSelect(type.id);
-              await onLoadDemoData(type.id);
-            }}
-            disabled={isLoading}
-            style={[
-              styles.businessButton,
-              selectedType === type.id && styles.businessButtonActive,
-              isLoading && styles.businessButtonDisabled,
-              {
-                backgroundColor:
-                  selectedType === type.id
-                    ? isDark
-                      ? "rgba(255,255,255,0.15)"
-                      : "rgba(255,255,255,0.95)"
-                    : isDark
-                    ? "rgba(255,255,255,0.05)"
-                    : "rgba(255,255,255,0.5)",
-              },
-            ]}
-          >
-            {isLoading && selectedType === type.id ? (
-              <ActivityIndicator size="small" color={colors.text} />
-            ) : (
-              <>
-                <Feather name={type.icon} size={20} color={selectedType === type.id ? type.color : colors.textSecondary} />
-                <Text
+        <View style={styles.stepHeader}>
+          <Text style={[styles.stepTitle, { color: colors.text }]}>
+            What's your business?
+          </Text>
+          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+            Select your industry to personalize your experience
+          </Text>
+        </View>
+
+        <View style={styles.nicheGrid}>
+          {BUSINESS_TYPES.map((type, index) => (
+            <Animated.View 
+              key={type.id} 
+              entering={FadeInUp.delay(index * 50).springify()}
+            >
+              <Pressable
+                onPress={async () => {
+                  await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+                  onSelect(type.id);
+                }}
+                style={[
+                  styles.nicheCard,
+                  {
+                    backgroundColor: selectedType === type.id
+                      ? isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)'
+                      : isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)',
+                    borderColor: selectedType === type.id
+                      ? type.color
+                      : isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.08)',
+                    borderWidth: selectedType === type.id ? 2 : 1,
+                  },
+                ]}
+              >
+                <View style={[styles.nicheIconContainer, { backgroundColor: type.color + '20' }]}>
+                  <Feather name={type.icon} size={22} color={type.color} />
+                </View>
+                <Text 
                   style={[
-                    styles.businessButtonText,
-                    {
+                    styles.nicheName, 
+                    { 
                       color: selectedType === type.id ? colors.text : colors.textSecondary,
-                      fontWeight: selectedType === type.id ? "600" : "500",
-                    },
+                      fontWeight: selectedType === type.id ? '600' : '500',
+                    }
                   ]}
                   numberOfLines={2}
                 >
                   {type.name}
                 </Text>
-              </>
-            )}
-          </Pressable>
-        ))}
+                {selectedType === type.id && (
+                  <View style={[styles.checkBadge, { backgroundColor: type.color }]}>
+                    <Feather name="check" size={10} color="#fff" />
+                  </View>
+                )}
+              </Pressable>
+            </Animated.View>
+          ))}
+        </View>
       </ScrollView>
-      <View style={[styles.selectorGradientRight, { backgroundColor: isDark ? "rgba(5,5,5,0.8)" : "rgba(250,250,250,0.8)" }]} />
-    </View>
+
+      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+        <AnimatedPressable onPress={onNext} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
+          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
+          <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+        </AnimatedPressable>
+      </View>
+    </Animated.View>
   );
 }
 
-function Page1Content({ 
-  selectedBusinessType,
-  onBusinessTypeChange,
-  onLoadDemoData,
-  isLoadingDemo = false,
-}: { 
-  selectedBusinessType: string;
-  onBusinessTypeChange: (typeId: string) => void;
-  onLoadDemoData: (typeId: string) => Promise<void>;
-  isLoadingDemo?: boolean;
+function Step2BusinessName({
+  businessName,
+  onNameChange,
+  onNext,
+  onBack,
+  isCreating,
+}: {
+  businessName: string;
+  onNameChange: (name: string) => void;
+  onNext: () => void;
+  onBack: () => void;
+  isCreating: boolean;
 }) {
   const { theme: colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  
+  const generateSlug = (name: string) => {
+    return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'your-business';
+  };
+
+  const slug = generateSlug(businessName);
+  const canContinue = businessName.trim().length >= 2;
 
   return (
-    <View style={styles.page1Container}>
-      <View style={styles.page1Content}>
-        <View style={[styles.shadowCard, { backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(255,255,255,0.2)" }]} />
-
-        <Animated.View
-          entering={FadeInDown.delay(300).springify()}
-          style={[styles.glassCard, { backgroundColor: isDark ? "rgba(30,30,30,0.7)" : "rgba(255,255,255,0.7)" }]}
-        >
-          <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-          <View style={styles.glassCardContent}>
-            <View style={styles.cardHeader}>
-              <Text style={[styles.cardHeaderText, { color: colors.text }]}>DAILY GOAL</Text>
-              <Feather name="more-horizontal" size={16} color={colors.textSecondary} />
-            </View>
-
-            <CircularMeter />
-
-            <View style={styles.clientList}>
-              <View style={styles.clientRow}>
-                <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
-                  <Feather name="user" size={14} color={colors.textSecondary} />
-                </View>
-                <View style={styles.clientInfo}>
-                  <View style={[styles.skeletonLine, { width: 80, backgroundColor: colors.backgroundSecondary }]} />
-                  <View style={[styles.skeletonLineSmall, { width: 60, backgroundColor: colors.backgroundTertiary }]} />
-                </View>
-                <View style={styles.checkBadge}>
-                  <Feather name="check" size={10} color="#FFFFFF" />
-                </View>
-              </View>
-              <View style={[styles.clientRow, { opacity: 0.5 }]}>
-                <View style={[styles.avatar, { backgroundColor: colors.backgroundSecondary }]}>
-                  <Feather name="user" size={14} color={colors.textSecondary} />
-                </View>
-                <View style={styles.clientInfo}>
-                  <View style={[styles.skeletonLine, { width: 60, backgroundColor: colors.backgroundSecondary }]} />
-                  <View style={[styles.skeletonLineSmall, { width: 40, backgroundColor: colors.backgroundTertiary }]} />
-                </View>
-              </View>
-            </View>
-          </View>
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeIn.delay(600)}
-          style={[styles.notificationBadge, { backgroundColor: isDark ? "rgba(50,50,50,0.8)" : "rgba(255,255,255,0.9)" }]}
-        >
-          <Feather name="calendar" size={20} color={colors.text} />
-        </Animated.View>
-
-        <Animated.View
-          entering={FadeInUp.delay(800)}
-          style={[styles.newClientChip, { backgroundColor: isDark ? "rgba(50,50,50,0.9)" : "rgba(255,255,255,0.95)" }]}
-        >
-          <View style={styles.greenDot} />
-          <Text style={[styles.newClientText, { color: colors.text }]}>New Client</Text>
-        </Animated.View>
-      </View>
-
-      <Animated.View entering={FadeInUp.delay(400)}>
-        <BusinessTypeSelector 
-          selectedType={selectedBusinessType} 
-          onSelect={onBusinessTypeChange}
-          onLoadDemoData={onLoadDemoData}
-          isDark={isDark}
-          colors={colors}
-          isLoading={isLoadingDemo}
-        />
-      </Animated.View>
-    </View>
-  );
-}
-
-function Page4Content() {
-  const { theme: colors, isDark } = useTheme();
-
-  return (
-    <View style={styles.page3Content}>
-      <Animated.View
-        entering={FadeInDown.delay(300).springify()}
-        style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)" }]}
+    <Animated.View 
+      entering={FadeIn.duration(400)} 
+      exiting={FadeOut.duration(200)}
+      style={styles.stepContainer}
+    >
+      <ScrollView 
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        showsVerticalScrollIndicator={false}
+        keyboardShouldPersistTaps="handled"
       >
-        <BlurView intensity={isDark ? 30 : 50} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-        <View style={styles.notificationContent}>
-          <Text style={[styles.notificationLabel, { color: colors.textSecondary }]}>UPCOMING BOOKING</Text>
-          <View style={styles.notificationRow}>
-            <View style={styles.notificationCheck}>
-              <Feather name="check" size={16} color="#FFFFFF" />
-            </View>
-            <View style={styles.notificationInfo}>
-              <Text style={[styles.notificationTitle, { color: colors.text }]}>Sarah J. - Consultation</Text>
-              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary }]}>Friday, 2:00 PM</Text>
-            </View>
-            <Text style={[styles.notificationTime, { color: colors.textTertiary }]}>Today</Text>
-          </View>
+        <View style={styles.stepHeader}>
+          <Text style={[styles.stepTitle, { color: colors.text }]}>
+            Name your business
+          </Text>
+          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+            This will appear on your booking page
+          </Text>
         </View>
-      </Animated.View>
 
-      <Animated.View
-        entering={FadeIn.delay(500)}
-        style={[styles.calendarChip, { backgroundColor: "#3B82F6" }]}
-      >
-        <Feather name="calendar" size={16} color="#FFFFFF" />
-        <View style={[styles.calendarLine, { backgroundColor: "rgba(255,255,255,0.4)" }]} />
-      </Animated.View>
-    </View>
-  );
-}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[
+              styles.businessInput,
+              {
+                color: colors.text,
+                backgroundColor: isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.05)',
+                borderColor: isDark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.1)',
+              },
+            ]}
+            value={businessName}
+            onChangeText={onNameChange}
+            placeholder="Enter business name"
+            placeholderTextColor={colors.textTertiary}
+            autoFocus
+            autoCapitalize="words"
+            autoCorrect={false}
+          />
 
-function Page2Content() {
-  const { theme: colors, isDark } = useTheme();
-
-  return (
-    <View style={styles.page3Content}>
-      <Animated.View
-        entering={FadeInDown.delay(300).springify()}
-        style={[styles.notificationCard, { backgroundColor: isDark ? "rgba(30,30,30,0.85)" : "rgba(255,255,255,0.9)", width: 280 }]}
-      >
-        <BlurView intensity={isDark ? 40 : 60} tint={isDark ? "dark" : "light"} style={StyleSheet.absoluteFill} />
-        <View style={styles.notificationContent}>
-          <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 12 }}>
-            <View style={{ width: 40, height: 40, borderRadius: 20, backgroundColor: colors.text, alignItems: 'center', justifyContent: 'center' }}>
-              <Feather name="mic" size={20} color={isDark ? colors.backgroundRoot : colors.backgroundRoot} />
-            </View>
-            <View>
-              <Text style={[styles.notificationTitle, { color: colors.text, fontSize: 16 }]}>AI Assistant</Text>
-              <Text style={[styles.notificationSubtitle, { color: colors.textSecondary, fontSize: 12 }]}>Handling incoming call...</Text>
-            </View>
-          </View>
-          <View style={{ padding: 12, backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)', borderRadius: 12 }}>
-            <Text style={{ color: colors.text, fontSize: 13, fontStyle: 'italic', lineHeight: 18 }}>
-              "Hi! I'd like to book a service for tomorrow at 2 PM..."
+          <Animated.View entering={FadeInDown.delay(200)} style={styles.slugPreview}>
+            <Feather name="link" size={16} color={colors.textSecondary} />
+            <Text style={[styles.slugText, { color: colors.textSecondary }]}>
+              confirmbooking.online/{slug}
             </Text>
-          </View>
+          </Animated.View>
         </View>
-      </Animated.View>
+      </ScrollView>
 
-      <Animated.View
-        entering={FadeIn.delay(600)}
-        style={[styles.calendarChip, { backgroundColor: colors.text, width: 48, height: 48, borderRadius: 24 }]}
-      >
-        <Feather name="phone" size={20} color={isDark ? colors.backgroundRoot : colors.backgroundRoot} />
-      </Animated.View>
-    </View>
+      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+        <View style={styles.bottomActionsRow}>
+          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
+            <Feather name="arrow-left" size={20} color={colors.text} />
+          </AnimatedPressable>
+          <AnimatedPressable 
+            onPress={onNext} 
+            style={[styles.primaryButtonFlex, { backgroundColor: colors.text }]}
+            disabled={!canContinue || isCreating}
+          >
+            {isCreating ? (
+              <ActivityIndicator size="small" color={colors.backgroundRoot} />
+            ) : (
+              <>
+                <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
+                <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+              </>
+            )}
+          </AnimatedPressable>
+        </View>
+      </View>
+    </Animated.View>
   );
 }
 
-function Page3Content() {
+function Step3AssetPreviews({
+  businessName,
+  bookingUrl,
+  qrCodeUrl,
+  onNext,
+  onBack,
+}: {
+  businessName: string;
+  bookingUrl: string;
+  qrCodeUrl: string;
+  onNext: () => void;
+  onBack: () => void;
+}) {
   const { theme: colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
+  const domain = bookingUrl.replace(/^https?:\/\//, "").split("/")[0];
+
+  const handleOpenLink = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    if (bookingUrl) {
+      Linking.openURL(bookingUrl);
+    }
+  };
 
   return (
-    <View style={styles.page2Content}>
-      <Animated.View
-        entering={FadeIn.delay(300).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 40,
-            left: 20,
-          },
-        ]}
+    <Animated.View 
+      entering={FadeIn.duration(400)} 
+      exiting={FadeOut.duration(200)}
+      style={styles.stepContainer}
+    >
+      <ScrollView 
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Feather name="home" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Home Contractors</Text>
-      </Animated.View>
+        <View style={styles.stepHeader}>
+          <Text style={[styles.stepTitle, { color: colors.text }]}>
+            Your booking assets
+          </Text>
+          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+            Ready to share with customers
+          </Text>
+        </View>
 
-      <Animated.View
-        entering={FadeIn.delay(450).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 100,
-            right: 40,
-          },
-        ]}
-      >
-        <Feather name="droplet" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Plumbing & Trades</Text>
-      </Animated.View>
+        <Animated.View entering={FadeInUp.delay(100)} style={styles.previewSection}>
+          <Text style={[styles.previewLabel, { color: colors.textSecondary }]}>BOOKING LINK PREVIEW</Text>
+          <Pressable onPress={handleOpenLink} style={styles.linkPreviewContainer}>
+            <CinematicLinkPreview businessName={businessName} domain={domain} />
+          </Pressable>
+          <Text style={[styles.tapHint, { color: colors.textTertiary }]}>Tap to open your live booking page</Text>
+        </Animated.View>
 
-      <Animated.View
-        entering={FadeIn.delay(600).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 160,
-            left: 50,
-          },
-        ]}
-      >
-        <Feather name="scissors" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Salons & Beauty</Text>
-      </Animated.View>
+        <Animated.View entering={FadeInUp.delay(200)} style={styles.qrSection}>
+          <Text style={[styles.previewLabel, { color: colors.textSecondary }]}>QR CODE</Text>
+          <Pressable 
+            onPress={handleOpenLink}
+            style={[styles.qrContainer, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}
+          >
+            {qrCodeUrl ? (
+              <View style={styles.qrImageWrapper}>
+                <Image source={{ uri: qrCodeUrl }} style={styles.qrImage} contentFit="contain" />
+                <View style={styles.qrCenterOverlay}>
+                  <Text style={styles.qrCenterText}>{businessName.toUpperCase().slice(0, 12)}</Text>
+                </View>
+              </View>
+            ) : (
+              <ActivityIndicator size="large" color={colors.text} />
+            )}
+          </Pressable>
+          <Text style={[styles.tapHint, { color: colors.textTertiary }]}>Print this for your storefront</Text>
+        </Animated.View>
+      </ScrollView>
 
-      <Animated.View
-        entering={FadeIn.delay(750).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 220,
-            right: 20,
-          },
-        ]}
-      >
-        <Feather name="zap" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Fitness Trainers</Text>
-      </Animated.View>
+      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+        <View style={styles.bottomActionsRow}>
+          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
+            <Feather name="arrow-left" size={20} color={colors.text} />
+          </AnimatedPressable>
+          <AnimatedPressable onPress={onNext} style={[styles.primaryButtonFlex, { backgroundColor: colors.text }]}>
+            <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Continue</Text>
+            <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+          </AnimatedPressable>
+        </View>
+      </View>
+    </Animated.View>
+  );
+}
 
-      <Animated.View
-        entering={FadeIn.delay(900).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 280,
-            left: 30,
-          },
-        ]}
-      >
-        <Feather name="truck" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Auto Detailers</Text>
-      </Animated.View>
+function Step4VoicePreview({
+  businessSlug,
+  onComplete,
+  onBack,
+  navigation,
+}: {
+  businessSlug: string;
+  onComplete: () => void;
+  onBack: () => void;
+  navigation: any;
+}) {
+  const { theme: colors, isDark } = useTheme();
+  const insets = useSafeAreaInsets();
 
-      <Animated.View
-        entering={FadeIn.delay(1050).springify()}
-        style={[
-          styles.industryChip,
-          {
-            backgroundColor: isDark ? "rgba(50,50,50,0.85)" : "rgba(255,255,255,0.9)",
-            top: 340,
-            right: 50,
-          },
-        ]}
+  const handleTestVoiceAgent = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    onComplete();
+    setTimeout(() => {
+      navigation.navigate("VoiceBooking", { businessSlug });
+    }, 100);
+  };
+
+  const handleSkipToHome = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
+    onComplete();
+  };
+
+  return (
+    <Animated.View 
+      entering={FadeIn.duration(400)} 
+      exiting={FadeOut.duration(200)}
+      style={styles.stepContainer}
+    >
+      <ScrollView 
+        contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 60 }]}
+        showsVerticalScrollIndicator={false}
       >
-        <Feather name="sun" size={14} color={colors.text} />
-        <Text style={[styles.industryText, { color: colors.text }]}>Landscapers</Text>
-      </Animated.View>
-    </View>
+        <View style={styles.stepHeader}>
+          <Text style={[styles.stepTitle, { color: colors.text }]}>
+            Meet your AI receptionist
+          </Text>
+          <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
+            Never miss a booking call again
+          </Text>
+        </View>
+
+        <Animated.View entering={FadeInUp.delay(100)} style={styles.voicePreviewContainer}>
+          <View style={[styles.voiceCard, { backgroundColor: isDark ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.03)' }]}>
+            <View style={[styles.voiceIconCircle, { backgroundColor: colors.text }]}>
+              <Feather name="mic" size={32} color={colors.backgroundRoot} />
+            </View>
+            
+            <Text style={[styles.voiceCardTitle, { color: colors.text }]}>
+              AI Voice Agent
+            </Text>
+            <Text style={[styles.voiceCardDescription, { color: colors.textSecondary }]}>
+              Handles incoming calls, answers questions about your services, and books appointments naturally
+            </Text>
+
+            <View style={styles.voiceFeatures}>
+              <View style={styles.voiceFeatureRow}>
+                <Feather name="check-circle" size={16} color="#10B981" />
+                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>24/7 availability</Text>
+              </View>
+              <View style={styles.voiceFeatureRow}>
+                <Feather name="check-circle" size={16} color="#10B981" />
+                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Natural conversations</Text>
+              </View>
+              <View style={styles.voiceFeatureRow}>
+                <Feather name="check-circle" size={16} color="#10B981" />
+                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Direct calendar integration</Text>
+              </View>
+            </View>
+
+            <View style={[styles.trialBadge, { backgroundColor: isDark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }]}>
+              <Feather name="gift" size={14} color={colors.text} />
+              <Text style={[styles.trialBadgeText, { color: colors.text }]}>5 minutes free trial included</Text>
+            </View>
+          </View>
+        </Animated.View>
+      </ScrollView>
+
+      <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
+        <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
+          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test Voice Agent Now</Text>
+          <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
+        </AnimatedPressable>
+        
+        <View style={[styles.bottomActionsRow, { marginTop: Spacing.md }]}>
+          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: colors.border }]}>
+            <Feather name="arrow-left" size={20} color={colors.text} />
+          </AnimatedPressable>
+          <Pressable onPress={handleSkipToHome} style={styles.skipButton}>
+            <Text style={[styles.skipButtonText, { color: colors.textSecondary }]}>Skip for now</Text>
+          </Pressable>
+        </View>
+      </View>
+    </Animated.View>
   );
 }
 
 export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) {
   const { theme: colors, isDark } = useTheme();
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
-  const flatListRef = useRef<FlatList>(null);
-  const [currentIndex, setCurrentIndex] = useState(0);
+  
+  const [currentStep, setCurrentStep] = useState(0);
   const [selectedBusinessType, setSelectedBusinessType] = useState("salon");
-  const [isLoadingDemo, setIsLoadingDemo] = useState(false);
+  const [businessName, setBusinessName] = useState("");
+  const [isCreating, setIsCreating] = useState(false);
+  const [businessSlug, setBusinessSlug] = useState("");
+  const [bookingUrl, setBookingUrl] = useState("");
+  const [qrCodeUrl, setQrCodeUrl] = useState("");
 
-  const onViewableItemsChanged = useCallback(
-    ({ viewableItems }: { viewableItems: ViewToken[] }) => {
-      if (viewableItems.length > 0 && viewableItems[0].index !== null) {
-        setCurrentIndex(viewableItems[0].index);
-      }
-    },
-    []
-  );
-
-  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
-
-  const handleNext = useCallback(async () => {
+  const handleStep1Next = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCurrentStep(1);
+  };
 
-    if (currentIndex < PAGES.length - 1) {
-      flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
-    } else {
-      await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-      onComplete();
-    }
-  }, [currentIndex, onComplete]);
-
-  const handleSkip = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    onComplete();
-  }, [onComplete]);
-
-  const handleLogin = useCallback(async () => {
-    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-    await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-    onComplete();
-  }, [onComplete]);
-
-  const handleBusinessTypeChange = useCallback((typeId: string) => {
-    setSelectedBusinessType(typeId);
-  }, []);
-
-  const handleLoadDemoData = useCallback(async (typeId: string) => {
-    setIsLoadingDemo(true);
+  const handleStep2Next = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setIsCreating(true);
+    
     try {
-      // Ensure business exists before loading demo data
       const biz = await api.getOrCreateBusiness();
       
-      // Update timezone from device
+      await api.updateBusiness({ name: businessName.trim() });
+      
       try {
         const Intl = (global as any).Intl;
         const timezone = Intl?.DateTimeFormat?.().resolvedOptions()?.timeZone;
@@ -648,583 +609,437 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
           await api.updateBusiness({ timezone });
         }
       } catch (tzError) {
-        console.warn("Failed to detect timezone during onboarding:", tzError);
+        console.warn("Failed to detect timezone:", tzError);
       }
       
-      const demoType = BUSINESS_TYPE_DEMO_MAP[typeId] || "salon";
+      const demoType = BUSINESS_TYPE_DEMO_MAP[selectedBusinessType] || "salon";
       await api.initializeDemoData(demoType);
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-      const businessName = BUSINESS_TYPES.find(t => t.id === typeId)?.name || "this business";
-      Alert.alert("Success", `Demo data for ${businessName} has been loaded`, [
-        {
-          text: "Continue",
-          onPress: async () => {
-            // Continue to next page instead of completing onboarding
-            if (currentIndex < PAGES.length - 1) {
-              flatListRef.current?.scrollToIndex({ index: currentIndex + 1, animated: true });
-            } else {
-              // Only complete onboarding after viewing all pages
-              await AsyncStorage.setItem(ONBOARDING_COMPLETE_KEY, "true");
-              onComplete();
-            }
-          },
-        },
-      ]);
+      
+      const updatedBiz = await api.getOrCreateBusiness();
+      const slug = updatedBiz.slug || biz.slug || "business";
+      setBusinessSlug(slug);
+      
+      const baseUrl = getApiUrl();
+      const url = `${baseUrl}/b/${slug}`;
+      setBookingUrl(url);
+      
+      try {
+        const qrData = await api.getQRCode();
+        if (qrData?.qrCode) {
+          setQrCodeUrl(qrData.qrCode);
+        }
+      } catch (qrError) {
+        console.warn("Failed to get QR code:", qrError);
+      }
+      
+      setCurrentStep(2);
     } catch (error) {
-      console.error("Error initializing demo data:", error);
-      await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Heavy);
-      Alert.alert("Error", "Failed to load demo data. Please try again.");
+      console.error("Error creating business:", error);
     } finally {
-      setIsLoadingDemo(false);
+      setIsCreating(false);
     }
-  }, [onComplete, currentIndex]);
+  };
 
-  const renderPage = useCallback(
-    ({ item, index }: { item: (typeof PAGES)[0]; index: number }) => {
-      return (
-        <View style={[styles.page, { width: SCREEN_WIDTH }]}>
-          <View style={styles.illustrationContainer}>
-            {index === 0 && (
-              <Page1Content 
-                selectedBusinessType={selectedBusinessType} 
-                onBusinessTypeChange={handleBusinessTypeChange}
-                onLoadDemoData={handleLoadDemoData}
-                isLoadingDemo={isLoadingDemo}
-              />
-            )}
-            {index === 1 && <Page2Content />}
-            {index === 2 && <Page3Content />}
-            {index === 3 && <Page4Content />}
-          </View>
+  const handleStep3Next = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCurrentStep(3);
+  };
 
-          <View style={[styles.contentPanel, { backgroundColor: isDark ? colors.backgroundRoot : "#FAFAFA" }]}>
-            <View style={styles.paginationDots}>
-              {PAGES.map((_, i) => (
-                <View
-                  key={i}
-                  style={[
-                    styles.dot,
-                    i === currentIndex ? styles.dotActive : styles.dotInactive,
-                    { backgroundColor: i === currentIndex ? colors.text : colors.backgroundSecondary },
-                  ]}
-                />
-              ))}
-            </View>
-
-            <View style={styles.textContent}>
-              <Text style={[styles.headline, { color: colors.text }]}>
-                {item.headline}{" "}
-                <Text style={[styles.highlightText, { color: isDark ? "#6B7280" : "#4B5563" }]}>
-                  {item.highlightText}
-                </Text>
-              </Text>
-              <Text style={[styles.description, { color: colors.textSecondary }]}>
-                {item.description}
-              </Text>
-              
-              {item.features && (
-                <View style={styles.featureList}>
-                  {item.features.map((feature, idx) => (
-                    <View key={idx} style={[styles.featureBadge, { backgroundColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.04)" }]}>
-                      <Feather name={feature.icon as any} size={14} color={isDark ? "#10B981" : "#059669"} />
-                      <Text style={[styles.featureText, { color: colors.text }]}>{feature.text}</Text>
-                    </View>
-                  ))}
-                </View>
-              )}
-            </View>
-
-            <View style={[styles.buttonContainer, { paddingBottom: insets.bottom + Spacing.lg }]}>
-              <Pressable
-                style={[styles.primaryButton, { backgroundColor: colors.text }]}
-                onPress={handleNext}
-              >
-                <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>
-                  {item.buttonText}
-                </Text>
-                <Feather name="arrow-right" size={18} color={colors.backgroundRoot} />
-              </Pressable>
-            </View>
-          </View>
-        </View>
-      );
-    },
-    [colors, isDark, currentIndex, handleNext, handleLogin, insets.bottom, selectedBusinessType, handleBusinessTypeChange, handleLoadDemoData, isLoadingDemo]
-  );
-
-  const selectedBusinessTypeData = BUSINESS_TYPES.find(t => t.id === selectedBusinessType);
-  const backgroundImage = selectedBusinessTypeData?.backgroundImage || require("../assets/stock_images/professional_salon_i_c9c033e3.jpg");
+  const handleBack = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    setCurrentStep(prev => Math.max(0, prev - 1));
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.backgroundRoot }]}>
-      <Image
-        source={backgroundImage}
-        style={styles.backgroundImage}
-        contentFit="cover"
-      />
-      <View style={[styles.backgroundOverlay, { backgroundColor: isDark ? "rgba(0,0,0,0.4)" : "rgba(255,255,255,0.2)" }]} />
-
       <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <View style={styles.brandContainer}>
-          <Image
-            source={require("../assets/app-icon.png")}
-            style={styles.brandIcon}
-            contentFit="contain"
-          />
-          <Text style={[styles.brandText, { color: colors.text }]}>BookFlow</Text>
-        </View>
-
-        {PAGES[currentIndex].showSkip && (
-          <Pressable style={styles.skipButton} onPress={handleSkip}>
-            <Text style={[styles.skipButtonText, { color: colors.text }]}>Skip</Text>
-          </Pressable>
-        )}
+        <StepIndicator currentStep={currentStep} totalSteps={4} />
       </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={PAGES}
-        renderItem={renderPage}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onViewableItemsChanged={onViewableItemsChanged}
-        viewabilityConfig={viewabilityConfig}
-        bounces={false}
-        scrollEventThrottle={16}
-      />
+      {currentStep === 0 && (
+        <Step1NicheSelection
+          selectedType={selectedBusinessType}
+          onSelect={setSelectedBusinessType}
+          onNext={handleStep1Next}
+        />
+      )}
+
+      {currentStep === 1 && (
+        <Step2BusinessName
+          businessName={businessName}
+          onNameChange={setBusinessName}
+          onNext={handleStep2Next}
+          onBack={handleBack}
+          isCreating={isCreating}
+        />
+      )}
+
+      {currentStep === 2 && (
+        <Step3AssetPreviews
+          businessName={businessName || "My Business"}
+          bookingUrl={bookingUrl}
+          qrCodeUrl={qrCodeUrl}
+          onNext={handleStep3Next}
+          onBack={handleBack}
+        />
+      )}
+
+      {currentStep === 3 && (
+        <Step4VoicePreview
+          businessSlug={businessSlug}
+          onComplete={onComplete}
+          onBack={handleBack}
+          navigation={navigation}
+        />
+      )}
     </View>
   );
-}
-
-export async function checkOnboardingComplete(): Promise<boolean> {
-  try {
-    const value = await AsyncStorage.getItem(ONBOARDING_COMPLETE_KEY);
-    return value === "true";
-  } catch {
-    return false;
-  }
-}
-
-export async function resetOnboarding(): Promise<void> {
-  await AsyncStorage.removeItem(ONBOARDING_COMPLETE_KEY);
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  backgroundImage: {
-    ...StyleSheet.absoluteFillObject,
-    opacity: 0.9,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-  },
   header: {
-    position: "absolute",
+    position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: Spacing.xl,
     zIndex: 10,
-  },
-  brandContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  brandIcon: {
-    width: 32,
-    height: 32,
-  },
-  brandText: {
-    fontSize: 16,
-    fontWeight: "600",
-    letterSpacing: 0.3,
-  },
-  skipButton: {
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-  },
-  skipButtonText: {
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  page: {
-    flex: 1,
-    justifyContent: "flex-end",
-  },
-  illustrationContainer: {
-    flex: 1,
-    position: "relative",
-    paddingTop: 80,
-  },
-  contentPanel: {
-    borderTopLeftRadius: BorderRadius["2xl"],
-    borderTopRightRadius: BorderRadius["2xl"],
-    paddingTop: Spacing["2xl"],
     paddingHorizontal: Spacing.xl,
   },
-  paginationDots: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: Spacing.sm,
+  stepIndicatorContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 8,
+  },
+  stepDot: {
+    height: 8,
+    borderRadius: 4,
+  },
+  stepContainer: {
+    flex: 1,
+  },
+  stepContent: {
+    flexGrow: 1,
+    paddingHorizontal: Spacing.xl,
+  },
+  stepHeader: {
     marginBottom: Spacing["2xl"],
   },
-  dot: {
-    height: 6,
-    borderRadius: 3,
-  },
-  dotActive: {
-    width: 24,
-  },
-  dotInactive: {
-    width: 6,
-  },
-  textContent: {
-    alignItems: "center",
-    marginBottom: Spacing["3xl"],
-  },
-  headline: {
+  stepTitle: {
     fontSize: 32,
-    fontWeight: "400",
-    textAlign: "center",
-    lineHeight: 40,
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-    marginBottom: Spacing.md,
+    fontWeight: '700',
+    letterSpacing: -1,
+    marginBottom: Spacing.sm,
+    fontFamily: Platform.OS === 'ios' ? 'Georgia' : 'serif',
   },
-  highlightText: {
-    fontStyle: "italic",
-  },
-  description: {
+  stepSubtitle: {
     fontSize: 16,
-    textAlign: "center",
     lineHeight: 24,
-    paddingHorizontal: Spacing.lg,
   },
-  featureList: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "center",
-    gap: Spacing.sm,
-    marginTop: Spacing.xl,
-    paddingHorizontal: Spacing.md,
+  nicheGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: Spacing.md,
+    justifyContent: 'space-between',
   },
-  featureBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-    paddingVertical: 8,
-    paddingHorizontal: 14,
-    borderRadius: BorderRadius.full,
+  nicheCard: {
+    width: (SCREEN_WIDTH - Spacing.xl * 2 - Spacing.md) / 2,
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.xl,
+    alignItems: 'center',
+    position: 'relative',
   },
-  featureText: {
-    fontSize: 13,
-    fontWeight: "500",
+  nicheIconContainer: {
+    width: 48,
+    height: 48,
+    borderRadius: 24,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
   },
-  buttonContainer: {
-    gap: Spacing.lg,
+  nicheName: {
+    fontSize: 14,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  checkBadge: {
+    position: 'absolute',
+    top: 8,
+    right: 8,
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  bottomActions: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+  },
+  bottomActionsRow: {
+    flexDirection: 'row',
+    gap: Spacing.md,
   },
   primaryButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.sm,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
     height: 56,
-    borderRadius: BorderRadius.full,
+    borderRadius: BorderRadius.xl,
+    gap: Spacing.sm,
+  },
+  primaryButtonFlex: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 56,
+    borderRadius: BorderRadius.xl,
+    gap: Spacing.sm,
   },
   primaryButtonText: {
     fontSize: 17,
-    fontWeight: "500",
+    fontWeight: '600',
   },
-  loginButton: {
-    alignItems: "center",
-    paddingVertical: Spacing.sm,
-  },
-  loginButtonText: {
-    fontSize: 15,
-    fontWeight: "500",
-  },
-  page1Container: {
-    flex: 1,
-    justifyContent: "space-between",
-    paddingBottom: Spacing.lg,
-  },
-  page1Content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Spacing.xl,
-  },
-  shadowCard: {
-    position: "absolute",
-    width: 260,
-    height: 320,
-    borderRadius: BorderRadius["2xl"],
-    transform: [{ rotate: "-6deg" }, { translateY: 10 }],
-  },
-  glassCard: {
-    width: 280,
-    borderRadius: BorderRadius["2xl"],
-    overflow: "hidden",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
-  },
-  glassCardContent: {
-    padding: Spacing.xl,
-  },
-  cardHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Spacing.xl,
-  },
-  cardHeaderText: {
-    fontSize: 11,
-    fontWeight: "600",
-    letterSpacing: 1.5,
-  },
-  meterContainer: {
-    width: 100,
-    height: 100,
-    alignSelf: "center",
-    marginBottom: Spacing.xl,
-  },
-  meterTextContainer: {
-    ...StyleSheet.absoluteFillObject,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  meterValue: {
-    fontSize: 22,
-    fontWeight: "500",
-    fontFamily: Platform.OS === "ios" ? "Georgia" : "serif",
-  },
-  meterLabel: {
-    fontSize: 8,
-    fontWeight: "600",
-    letterSpacing: 1,
-    marginTop: 2,
-  },
-  clientList: {
-    gap: Spacing.md,
-  },
-  clientRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.md,
-  },
-  avatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  clientInfo: {
-    flex: 1,
-    gap: 4,
-  },
-  skeletonLine: {
-    height: 8,
-    borderRadius: 4,
-  },
-  skeletonLineSmall: {
-    height: 6,
-    borderRadius: 3,
-  },
-  checkBadge: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    backgroundColor: "#22C55E",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  notificationBadge: {
-    position: "absolute",
-    right: SCREEN_WIDTH * 0.12,
-    top: "30%",
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.15,
-    shadowRadius: 8,
-    elevation: 4,
-  },
-  newClientChip: {
-    position: "absolute",
-    left: SCREEN_WIDTH * 0.08,
-    bottom: "30%",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 8,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  greenDot: {
-    width: 8,
-    height: 8,
-    borderRadius: 4,
-    backgroundColor: "#22C55E",
-  },
-  newClientText: {
-    fontSize: 12,
-    fontWeight: "500",
-  },
-  page2Content: {
-    flex: 1,
-    position: "relative",
-  },
-  industryChip: {
-    position: "absolute",
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-    paddingVertical: Spacing.sm + 2,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 20,
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 2,
-  },
-  industryText: {
-    fontSize: 13,
-    fontWeight: "500",
-  },
-  page3Content: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: Spacing.xl,
-  },
-  notificationCard: {
-    width: "90%",
+  backButton: {
+    width: 56,
+    height: 56,
     borderRadius: BorderRadius.xl,
-    overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  notificationContent: {
-    padding: Spacing.lg,
+  skipButton: {
+    flex: 1,
+    height: 56,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  notificationLabel: {
+  skipButtonText: {
+    fontSize: 16,
+    fontWeight: '500',
+  },
+  inputContainer: {
+    gap: Spacing.lg,
+  },
+  businessInput: {
+    height: 56,
+    borderRadius: BorderRadius.xl,
+    paddingHorizontal: Spacing.lg,
+    fontSize: 18,
+    fontWeight: '500',
+    borderWidth: 1,
+  },
+  slugPreview: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+  },
+  slugText: {
+    fontSize: 14,
+  },
+  previewSection: {
+    marginBottom: Spacing["2xl"],
+  },
+  previewLabel: {
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 2,
+    marginBottom: Spacing.md,
+  },
+  linkPreviewContainer: {
+    borderRadius: 16,
+    overflow: 'hidden',
+  },
+  tapHint: {
+    fontSize: 12,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+  },
+  qrSection: {
+    marginBottom: Spacing.xl,
+  },
+  qrContainer: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  qrImageWrapper: {
+    width: 200,
+    height: 200,
+    backgroundColor: '#fff',
+    borderRadius: 16,
+    padding: 12,
+    position: 'relative',
+  },
+  qrImage: {
+    width: '100%',
+    height: '100%',
+  },
+  qrCenterOverlay: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    transform: [{ translateX: -40 }, { translateY: -12 }],
+    backgroundColor: '#fff',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+  },
+  qrCenterText: {
     fontSize: 10,
-    fontWeight: "600",
-    letterSpacing: 1.2,
+    fontWeight: '700',
+    color: '#000',
+    letterSpacing: 0.5,
+  },
+  voicePreviewContainer: {
+    flex: 1,
+  },
+  voiceCard: {
+    borderRadius: BorderRadius.xl,
+    padding: Spacing.xl,
+    alignItems: 'center',
+  },
+  voiceIconCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.lg,
+  },
+  voiceCardTitle: {
+    fontSize: 24,
+    fontWeight: '700',
     marginBottom: Spacing.sm,
   },
-  notificationRow: {
-    flexDirection: "row",
-    alignItems: "center",
+  voiceCardDescription: {
+    fontSize: 15,
+    textAlign: 'center',
+    lineHeight: 22,
+    marginBottom: Spacing.xl,
+  },
+  voiceFeatures: {
     gap: Spacing.md,
+    marginBottom: Spacing.xl,
+    alignSelf: 'stretch',
   },
-  notificationCheck: {
-    width: 36,
-    height: 36,
-    borderRadius: 18,
-    backgroundColor: "#22C55E",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  notificationInfo: {
-    flex: 1,
-  },
-  notificationTitle: {
-    fontSize: 16,
-    fontWeight: "600",
-    marginBottom: 2,
-  },
-  notificationSubtitle: {
-    fontSize: 13,
-  },
-  notificationTime: {
-    fontSize: 12,
-  },
-  calendarChip: {
-    position: "absolute",
-    left: "10%",
-    bottom: "35%",
-    flexDirection: "row",
-    alignItems: "center",
+  voiceFeatureRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.sm,
-    paddingVertical: Spacing.sm,
-    paddingHorizontal: Spacing.md,
-    borderRadius: 8,
   },
-  calendarLine: {
-    width: 60,
-    height: 6,
-    borderRadius: 3,
+  voiceFeatureText: {
+    fontSize: 15,
   },
-  selectorContainer: {
-    position: "relative",
-    height: 120,
-    marginHorizontal: -Spacing.xl,
-    paddingHorizontal: Spacing.xl,
-  },
-  selectorGradient: {
-    position: "absolute",
-    left: 0,
-    top: 0,
-    bottom: 0,
-    width: 20,
-    zIndex: 10,
-    backgroundColor: "rgba(250,250,250,0.8)",
-  },
-  selectorGradientRight: {
-    position: "absolute",
-    right: 0,
-    top: 0,
-    bottom: 0,
-    width: 20,
-    zIndex: 10,
-  },
-  selectorScroll: {
-    flex: 1,
-  },
-  selectorContent: {
+  trialBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
     gap: Spacing.sm,
+    paddingHorizontal: Spacing.lg,
     paddingVertical: Spacing.md,
+    borderRadius: BorderRadius.lg,
   },
-  businessButton: {
-    width: 120,
-    paddingVertical: Spacing.md,
-    paddingHorizontal: Spacing.sm,
-    borderRadius: BorderRadius.xl,
-    alignItems: "center",
-    justifyContent: "center",
-    gap: Spacing.xs,
+  trialBadgeText: {
+    fontSize: 14,
+    fontWeight: '500',
+  },
+  cinematicCard: {
+    aspectRatio: 4 / 5,
+    borderRadius: 16,
+    overflow: 'hidden',
+    position: 'relative',
     borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
+    borderColor: 'rgba(255,255,255,0.1)',
   },
-  businessButtonActive: {
-    borderWidth: 2,
-    borderColor: "rgba(0,0,0,0.2)",
+  diagonalLines: {
+    ...StyleSheet.absoluteFillObject,
   },
-  businessButtonDisabled: {
-    opacity: 0.6,
+  diagonalLine: {
+    position: 'absolute',
+    left: -100,
+    right: -100,
+    height: 1,
+    backgroundColor: '#fff',
+    transform: [{ rotate: '25deg' }],
   },
-  businessButtonText: {
-    fontSize: 12,
-    textAlign: "center",
-    lineHeight: 14,
+  shadowColumn: {
+    position: 'absolute',
+    right: 30,
+    top: 0,
+    bottom: 0,
+    width: 80,
+    backgroundColor: 'rgba(0,0,0,0.4)',
+    transform: [{ skewX: '-10deg' }],
+  },
+  cinematicContent: {
+    flex: 1,
+    justifyContent: 'center',
+    paddingHorizontal: 24,
+  },
+  cinematicTitle: {
+    fontSize: 36,
+    fontWeight: '800',
+    color: 'rgba(255,255,255,0.95)',
+    letterSpacing: -1.5,
+    lineHeight: 40,
+  },
+  accentBar: {
+    width: 50,
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.5)',
+    marginTop: 10,
+  },
+  glassFooter: {
+    backgroundColor: 'rgba(20,20,20,0.9)',
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    paddingBottom: 16,
+  },
+  glassFooterTop: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+  },
+  footerContent: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'flex-start',
+  },
+  footerLeft: {
+    flex: 1,
+  },
+  businessNameText: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: '#fff',
+    letterSpacing: 0.5,
+  },
+  subtitleText: {
+    fontSize: 9,
+    color: 'rgba(255,255,255,0.4)',
+    letterSpacing: 1.5,
+    marginTop: 3,
+  },
+  arrowCircle: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  domainText: {
+    fontSize: 8,
+    color: 'rgba(255,255,255,0.3)',
+    letterSpacing: 1.5,
+    marginTop: 10,
   },
 });
