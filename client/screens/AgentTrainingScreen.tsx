@@ -123,10 +123,34 @@ export default function AgentTrainingScreen() {
     </View>
   );
 
+  const renderTrainingItem = (item: TrainingDataType) => (
+    <GlassCard key={item.id} style={styles.itemCard}>
+      <View style={styles.itemIconBox}>
+        <Feather 
+          name={item.type === 'website_crawl' ? 'globe' : item.type === 'qa_pair' ? 'message-square' : 'file-text'} 
+          size={16} 
+          color="#fff" 
+        />
+      </View>
+      <View style={styles.itemContent}>
+        <ThemedText style={styles.itemTitle} numberOfLines={1}>
+          {item.type === 'website_crawl' ? item.title : item.type === 'qa_pair' ? item.question : 'Custom Content'}
+        </ThemedText>
+        <ThemedText style={styles.itemSubtitle} numberOfLines={1}>
+          {item.type === 'website_crawl' ? item.sourceUrl : item.type === 'qa_pair' ? item.answer : item.content}
+        </ThemedText>
+      </View>
+      <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+        <Feather name="trash-2" size={18} color="#EF4444" />
+      </Pressable>
+    </GlassCard>
+  );
+
   return (
     <KeyboardAvoidingView 
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
+      keyboardVerticalOffset={headerHeight}
     >
       <View style={styles.backgroundOverlay} />
 
@@ -136,6 +160,7 @@ export default function AgentTrainingScreen() {
           paddingBottom: 40,
           paddingHorizontal: 24 
         }}
+        keyboardShouldPersistTaps="handled"
       >
         <GlassCard style={styles.headerCard}>
           <ThemedText style={styles.headerTitle}>Train {businessName}</ThemedText>
@@ -272,28 +297,7 @@ export default function AgentTrainingScreen() {
               <ThemedText style={styles.emptyText}>No training data added yet</ThemedText>
             </GlassCard>
           ) : (
-            trainingData.map((item) => (
-              <GlassCard key={item.id} style={styles.itemCard}>
-                <View style={styles.itemIconBox}>
-                  <Feather 
-                    name={item.type === 'website_crawl' ? 'globe' : item.type === 'qa_pair' ? 'message-square' : 'file-text'} 
-                    size={16} 
-                    color="#fff" 
-                  />
-                </View>
-                <View style={styles.itemContent}>
-                  <ThemedText style={styles.itemTitle} numberOfLines={1}>
-                    {item.type === 'website_crawl' ? item.title : item.type === 'qa_pair' ? item.question : 'Custom Content'}
-                  </ThemedText>
-                  <ThemedText style={styles.itemSubtitle} numberOfLines={1}>
-                    {item.type === 'website_crawl' ? item.sourceUrl : item.type === 'qa_pair' ? item.answer : item.content}
-                  </ThemedText>
-                </View>
-                <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
-                  <Feather name="trash-2" size={18} color="#EF4444" />
-                </Pressable>
-              </GlassCard>
-            ))
+            trainingData.map(renderTrainingItem)
           )}
         </View>
       </ScrollView>
