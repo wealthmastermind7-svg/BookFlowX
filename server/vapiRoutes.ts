@@ -54,12 +54,12 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
             model: {
               provider: "openai",
               model: "gpt-4o-mini",
-      "messages": [
-      {
-        "role": "system",
-        "content": "You are a helpful AI assistant. The business could not be found. Apologize and ask them to check the booking link."
-      }
-    ]
+              messages: [
+                {
+                  role: "system",
+                  content: "You are a helpful assistant. The business could not be found. Apologize and ask them to check the booking link."
+                }
+              ]
             },
             voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
             firstMessage: "I'm sorry, but I couldn't find that business. Please check the booking link and try again."
@@ -84,12 +84,24 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       }
 
       const services = await storage.getServices(business.id);
+      const training = await storage.getTrainingData(business.id);
+      
       const industry = detectIndustry(business.name, services[0]?.name || "");
       const industryContext = INDUSTRY_CONTEXT[industry] || INDUSTRY_CONTEXT.consulting;
 
       const servicesList = services
         .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
         .join("\n");
+
+      // Build knowledge from training data
+      const knowledgeBase = training
+        .map(t => {
+          if (t.type === 'qa_pair') return `Q: ${t.question}\nA: ${t.answer}`;
+          if (t.type === 'website_crawl' || t.type === 'document') return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+          return '';
+        })
+        .filter(c => c !== '')
+        .join("\n\n");
 
       const systemPrompt = `You are a friendly, helpful assistant for ${business.name}. Your role is to answer questions about the business and its services.
 
@@ -103,10 +115,12 @@ PERSONALITY:
 AVAILABLE SERVICES:
 ${servicesList}
 
+${knowledgeBase ? `ADDITIONAL KNOWLEDGE BASE:\n${knowledgeBase}\n` : ""}
+
 YOUR GOALS:
-1. Greet callers warmly and introduce yourself as ${business.name}'s assistant
+1. Greet callers warmly and introduce yourself as ${business.name}'s Informational Assistant
 2. Answer questions about services, pricing, and what's included
-3. Provide helpful information about the business
+3. Use the provided knowledge base to answer specific questions about the business
 4. If customers want to book, politely direct them to use the Text Booking link on this page. Explain that they can see all available times and confirm their appointment there.
 
 IMPORTANT BEHAVIOR:
@@ -118,7 +132,7 @@ IMPORTANT BEHAVIOR:
 WHAT YOU CAN HELP WITH:
 - Explaining what services are offered
 - Describing pricing and what's included
-- Answering general questions about the business
+- Answering general questions about the business using the knowledge base
 - Providing information about duration and what to expect
 
 CALL-TO-ACTION:
@@ -187,7 +201,6 @@ IMPORTANT:
             provider: "11labs",
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
-          firstMessage: `Hi! I'm the AI assistant for ${business.name}. I can answer questions about our services or check availability. How can I help you?`,
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
             : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
@@ -485,6 +498,7 @@ router.get("/api/vapi/assistant-config/:slug", async (req: Request, res: Respons
     }
 
     const services = await storage.getServices(business.id);
+    const training = await storage.getTrainingData(business.id);
     const industry = detectIndustry(business.name, services[0]?.name || "");
     const industryContext = INDUSTRY_CONTEXT[industry] || INDUSTRY_CONTEXT.consulting;
 
@@ -492,51 +506,55 @@ router.get("/api/vapi/assistant-config/:slug", async (req: Request, res: Respons
       .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
       .join("\n");
 
-    const systemPrompt = `You are a friendly, professional voice booking assistant for ${business.name}.
+    const knowledgeBase = training
+      .map(t => {
+        if (t.type === 'qa_pair') return `Q: ${t.question}\nA: ${t.answer}`;
+        if (t.type === 'website_crawl' || t.type === 'document') return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+        return '';
+      })
+      .filter(c => c !== '')
+      .join("\n\n");
+
+    const systemPrompt = `You are a friendly, helpful assistant for ${business.name}. Your role is to answer questions about the business and its services.
 
 PERSONALITY:
 - Tone: ${industryContext.tone}
 - Core values: ${industryContext.values.join(", ")}
-- Be warm, helpful, and efficient
-- Speak naturally like a real receptionist
+- Be warm, helpful, and informative
+- Speak naturally and conversationally
 - Keep responses concise (2-3 sentences max)
 
 AVAILABLE SERVICES:
 ${servicesList || "No services configured yet."}
 
+${knowledgeBase ? `ADDITIONAL KNOWLEDGE BASE:\n${knowledgeBase}\n` : ""}
+
 YOUR GOALS:
-1. Greet callers warmly
-2. Help them understand available services
-3. Answer questions about pricing and duration
-4. Guide them to book an appointment
-5. Collect their name, email, and preferred time
-6. ALWAYS call get_available_slots to verify availability BEFORE mentioning specific times or confirming a booking.
+1. Greet callers warmly and introduce yourself as ${business.name}'s Informational Assistant
+2. Answer questions about services, pricing, and what's included
+3. Use the provided knowledge base to answer specific questions about the business
+4. If customers want to book, politely direct them to use the Text Booking link on this page. Explain that they can see all available times and confirm their appointment there.
 
-BOOKING PROCESS:
-When a customer wants to book:
-1. Ask which service they'd like
-2. Ask for their preferred date and time
-3. Call get_available_slots to confirm if that time works.
-4. Ask for their name
-5. Ask for their email address
-6. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
-7. If they correct you, spell it back again until confirmed
-8. Use the create_booking function to complete the booking
-9. Confirm the booking details
+IMPORTANT BEHAVIOR:
+- You are an INFORMATIONAL assistant, NOT a booking agent
+- Do NOT attempt to book appointments or collect customer information
+- When customers ask to book or make an appointment, say something like: "I'd be happy to help you book! Please use the 'Text Booking' link on this page - it's the easiest way to secure your appointment and see real-time availability."
+- You can describe services and answer questions, but always direct booking requests to Text Booking
 
-EMAIL VERIFICATION:
-- Email addresses are easy to mishear. ALWAYS spell them back.
-- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
-- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
-- Common mishearings: "dot com" vs "dot calm", numbers vs letters (5 vs S)
-- Only proceed with booking once email is confirmed
+WHAT YOU CAN HELP WITH:
+- Explaining what services are offered
+- Describing pricing and what's included
+- Answering general questions about the business using the knowledge base
+- Providing information about duration and what to expect
+
+CALL-TO-ACTION:
+When customers want to book, always say: "For booking, please tap the 'Text Booking' link on this page. You'll be able to see all available times and complete your booking right there."
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
 - If you don't understand, ask them to repeat
 - Keep responses SHORT - this is a voice call
-- Be personable and use their name when provided
-- Always confirm booking details before finalizing`;
+- Be personable and helpful`;
 
     const voiceMap: Record<string, string> = {
       salon: "EXAVITQu4vr4xnSDxMaL",
@@ -549,20 +567,52 @@ IMPORTANT:
     };
 
     const assistantConfig = {
-      name: `${business.name} Booking Assistant`,
+      name: `${business.name} Assistant`,
+      firstMessage: `Hello, thank you for calling ${business.name}. I am the Informational Assistant for ${business.name}. I can answer questions about our services or check availability. How can I help you?`,
       model: {
         provider: "openai",
         model: "gpt-4o-mini",
-        messages: [{ role: "system", content: systemPrompt }]
+        messages: [{ role: "system", content: systemPrompt }],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "list_services",
+              description: "List all available services with their prices and durations",
+              parameters: {
+                type: "object",
+                properties: {},
+                required: []
+              }
+            }
+          },
+          {
+            type: "function",
+            function: {
+              name: "get_available_slots",
+              description: "Get available time slots for a specific date and service",
+              parameters: {
+                type: "object",
+                properties: {
+                  date: {
+                    type: "string",
+                    description: "The date in YYYY-MM-DD format"
+                  },
+                  serviceName: {
+                    type: "string",
+                    description: "The name of the service"
+                  }
+                },
+                required: ["date", "serviceName"]
+              }
+            }
+          }
+        ]
       },
       voice: {
         provider: "11labs",
         voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
       },
-      firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
-      serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
-        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
-        : undefined,
       serverMessages: ["tool-calls", "end-of-call-report"],
       metadata: {
         businessSlug: slug
@@ -571,16 +621,13 @@ IMPORTANT:
 
     return res.json(assistantConfig);
   } catch (error: any) {
-    console.error("[Vapi Assistant Config] Error:", error);
+    console.error("[Assistant Config] Error:", error);
     return res.status(500).json({ error: error.message });
   }
 });
 
-router.get("/api/vapi/public-key", async (_req: Request, res: Response) => {
+router.get("/api/vapi/public-key", async (req: Request, res: Response) => {
   const publicKey = process.env.VAPI_PUBLIC_KEY || "";
-  if (!publicKey) {
-    return res.status(500).json({ error: "VAPI_PUBLIC_KEY not configured" });
-  }
   return res.json({ publicKey });
 });
 
