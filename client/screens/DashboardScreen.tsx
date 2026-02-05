@@ -489,11 +489,14 @@ export default function DashboardScreen() {
             </Pressable>
           )}
 
-          <Pressable onPress={() => {
-            if (business?.slug) {
-              navigation.navigate("VoiceAgentPaywall" as any);
-            }
-          }}>
+          <Pressable 
+            onPress={() => {
+              if (business?.slug) {
+                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                navigation.navigate("VoiceBooking", { businessSlug: business.slug });
+              }
+            }}
+          >
             <GlassPanel style={styles.voiceAspirationalBanner}>
               <View style={styles.voiceAspirationalHeader}>
                 <View style={styles.voiceIconStack}>
