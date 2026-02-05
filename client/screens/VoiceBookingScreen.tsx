@@ -27,7 +27,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
   const [isLoading, setIsLoading] = useState(true);
   const [hasError, setHasError] = useState(false);
 
-  const voiceUrl = `${getApiUrl()}/voice/${businessSlug}`;
+  const voiceUrl = `${getApiUrl().replace(/\/$/, '')}/voice/${businessSlug}`;
 
   const handleWebViewError = () => {
     setHasError(true);

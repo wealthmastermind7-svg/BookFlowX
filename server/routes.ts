@@ -2801,6 +2801,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
         .join("\n");
 
+      // Build knowledge from training data
+      const training = await storage.getTrainingData(config.businessId);
+      const knowledgeBase = training
+        .filter(t => t.type === 'website_crawl' || t.type === 'qa_pair' || t.type === 'document')
+        .map(t => {
+          if (t.type === 'qa_pair') return `Q: ${t.question}\nA: ${t.answer}`;
+          if (t.type === 'website_crawl' || t.type === 'document') {
+            return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+          }
+          return '';
+        })
+        .filter(c => c !== '')
+        .join("\n\n");
+
       const systemPrompt = `You are a friendly, helpful assistant for ${config.businessName}. Your role is to answer questions about the business and its services.
 
 PERSONALITY:
@@ -2813,10 +2827,12 @@ PERSONALITY:
 AVAILABLE SERVICES:
 ${servicesList}
 
+${knowledgeBase ? `ADDITIONAL KNOWLEDGE BASE:\n${knowledgeBase}\n` : ""}
+
 YOUR GOALS:
-1. Greet callers warmly and introduce yourself as ${config.businessName}'s assistant
+1. Greet callers warmly and introduce yourself as ${config.businessName}'s Informational Assistant
 2. Answer questions about services, pricing, and what's included
-3. Provide helpful information about the business
+3. Use the provided knowledge base to answer specific questions about the business
 4. If customers want to book, politely direct them to use the Text Booking link on this page. Explain that they can see all available times and confirm their appointment there.
 
 IMPORTANT BEHAVIOR:
@@ -2828,7 +2844,7 @@ IMPORTANT BEHAVIOR:
 WHAT YOU CAN HELP WITH:
 - Explaining what services are offered
 - Describing pricing and what's included
-- Answering general questions about the business
+- Answering general questions about the business using the knowledge base
 - Providing information about duration and what to expect
 
 CALL-TO-ACTION:
@@ -2840,145 +2856,49 @@ IMPORTANT:
 - Keep responses SHORT - this is a voice call
 - Be personable and helpful`;
 
-      // Valid ElevenLabs voice IDs for Vapi:
-      // - pNInz6obpgDQGcFmaJgB = Adam (male, professional)
-      // - EXAVITQu4vr4xnSDxMaL = Sarah (female, warm)
-      // - 21m00Tcm4TlvDq8ikWAM = Rachel (female, calm)
-      // - ErXwobaYiN019PkySvjV = Antoni (male, friendly)
       const voiceMap: Record<string, string> = {
-        // Service industries - warm, welcoming
-        salon: "EXAVITQu4vr4xnSDxMaL",         // Sarah - warm female
-        wellness: "EXAVITQu4vr4xnSDxMaL",      // Sarah - warm female
-        pet_services: "EXAVITQu4vr4xnSDxMaL",  // Sarah - warm female
-        retail: "EXAVITQu4vr4xnSDxMaL",        // Sarah - warm female
-        
-        // Professional industries - authoritative, trustworthy
-        medical: "pNInz6obpgDQGcFmaJgB",       // Adam - professional male
-        consulting: "pNInz6obpgDQGcFmaJgB",    // Adam - professional male
-        legal: "pNInz6obpgDQGcFmaJgB",         // Adam - professional male
-        real_estate: "pNInz6obpgDQGcFmaJgB",   // Adam - professional male
-        trades: "pNInz6obpgDQGcFmaJgB",        // Adam - professional male
-        auto_detailing: "pNInz6obpgDQGcFmaJgB", // Adam - professional male
-        
-        // Friendly/energetic industries
-        fitness: "ErXwobaYiN019PkySvjV",       // Antoni - friendly male
-        restaurant: "ErXwobaYiN019PkySvjV",    // Antoni - friendly, welcoming
-        
-        // Creative/calm industries
-        education: "21m00Tcm4TlvDq8ikWAM",     // Rachel - calm, patient
-        photography: "21m00Tcm4TlvDq8ikWAM",   // Rachel - calm, creative
+        salon: "EXAVITQu4vr4xnSDxMaL",
+        wellness: "EXAVITQu4vr4xnSDxMaL",
+        medical: "pNInz6obpgDQGcFmaJgB",
+        consulting: "pNInz6obpgDQGcFmaJgB",
+        fitness: "VR6AewLTigWG4xSOukaG",
+        trades: "VR6AewLTigWG4xSOukaG",
+        auto_detailing: "VR6AewLTigWG4xSOukaG",
       };
 
-      // Build serverUrl from production domain or current host
-      const serverUrl = process.env.REPLIT_DOMAINS?.split(",")[0]
-        ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
-        : `${req.protocol}://${req.get('host')}/api/vapi/server-url`;
-
       const inlineAssistant = {
-        name: `${config.businessName} Assistant`,
+        firstMessage: `Hello, thank you for calling ${config.businessName}. I am the Informational Assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
-          messages: [{ role: "system", content: systemPrompt }],
-          tools: [
-            {
-              type: "function",
-              function: {
-                name: "list_services",
-                description: "List all available services with their prices and durations",
-                parameters: {
-                  type: "object",
-                  properties: {},
-                  required: []
-                }
-              }
-            },
-            {
-              type: "function",
-              function: {
-                name: "get_available_slots",
-                description: "Get available time slots for a specific date and service",
-                parameters: {
-                  type: "object",
-                  properties: {
-                    date: {
-                      type: "string",
-                      description: "The date in YYYY-MM-DD format"
-                    },
-                    serviceName: {
-                      type: "string",
-                      description: "The name of the service"
-                    }
-                  },
-                  required: ["date", "serviceName"]
-                }
-              }
-            }
-          ]
+          messages: [{ role: "system", content: systemPrompt }]
         },
         voice: {
           provider: "11labs",
           voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
-        },
-        firstMessage: `Hello, thank you for calling ${config.businessName}. I am the Informational Assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
-        serverUrl: serverUrl,
-        serverMessages: ["tool-calls", "end-of-call-report"],
-        metadata: {
-          businessSlug: req.params.slug
         }
       };
 
-      // Use the new voice-booking.html template (Vapi official approach)
-      if (vapiPublicKey && voiceBookingHtmlContent) {
-        res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
-        res.setHeader("Pragma", "no-cache");
-        res.setHeader("Expires", "0");
-        const html = voiceBookingHtmlContent
-          .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
-          .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
-          .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
-          .replace(/\{\{INLINE_ASSISTANT\}\}/g, JSON.stringify(inlineAssistant));
-
-        res.setHeader("Content-Type", "text/html");
-        res.setHeader("Cache-Control", "no-cache, no-store, must-revalidate");
-        return res.send(html);
+      if (!voiceBookingHtmlContent) {
+        await loadVoiceAgentHtml();
       }
 
-      // Fallback to old Vapi template
-      const vapiAssistantId = process.env.VAPI_ASSISTANT_ID || "fbc1fe60-e500-4e20-9537-0fb1ade6cd56";
-      if (vapiPublicKey && voiceAgentVapiHtmlContent) {
-        const html = voiceAgentVapiHtmlContent
-          .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
-          .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
-          .replace(/\{\{VAPI_PUBLIC_KEY\}\}/g, vapiPublicKey)
-          .replace(/\{\{VAPI_ASSISTANT_ID\}\}/g, vapiAssistantId);
-
-        res.setHeader("Content-Type", "text/html");
-        return res.send(html);
-      }
-
-      // Fallback to legacy voice agent
-      if (!voiceAgentHtmlContent) {
-        return res.status(500).json({ error: "Voice agent page not available" });
-      }
-
-      const turbo = req.query.turbo === 'true';
-      const html = voiceAgentHtmlContent
+      // Inject data into template
+      const html = voiceBookingHtmlContent
         .replace(/\{\{BUSINESS_NAME\}\}/g, config.businessName)
         .replace(/\{\{BUSINESS_SLUG\}\}/g, req.params.slug)
-        .replace(/\{\{INDUSTRY\}\}/g, config.industry || "consulting")
-        .replace(/\{\{IS_TURBO\}\}/g, turbo.toString())
-        .replace(/\{\{TURBO_TEXT\}\}/g, turbo ? "Switch to Standard" : "Switch to Turbo")
-        .replace(/\{\{NEXT_TURBO\}\}/g, (!turbo).toString());
+        .replace(/\{\{PUBLIC_KEY\}\}/g, vapiPublicKey)
+        .replace(/\{\{INLINE_ASSISTANT\}\}/g, JSON.stringify(inlineAssistant));
 
       res.setHeader("Content-Type", "text/html");
-      res.send(html);
+      return res.send(html);
     } catch (error) {
-      console.error("[VoiceAgent] Error serving page:", error);
-      res.status(500).json({ error: "Failed to load voice agent" });
+      console.error("Error serving voice booking page:", error);
+      res.status(500).send("Internal server error");
     }
   });
 
+  // === NOTIFICATIONS API ===
   app.get("/api/voice/:slug/token", async (req: Request, res: Response) => {
     try {
       // Create an ephemeral token for OpenAI Realtime API (WebRTC)
