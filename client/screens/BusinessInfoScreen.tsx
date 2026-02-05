@@ -151,16 +151,21 @@ export default function BusinessInfoScreen() {
 
     try {
       const response = await crawlWebsite(url, 10);
-      if (response.pagesCrawled === 0) {
-        throw new Error("No pages could be crawled. Please check the URL and try again.");
-      }
       await loadTrainingData();
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-      Alert.alert("Success", `Website content has been crawled and added to training data. ${response.pagesCrawled} page(s) processed.`);
+      
+      // App A tolerant pattern: Handle all outcomes gracefully
+      if (response.pagesCrawled > 0) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        Alert.alert("Success", `Website content has been crawled and added to training data. ${response.pagesCrawled} page(s) processed.`);
+      } else {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Alert.alert("Manual Input Recommended", response.message || "We couldn't automatically crawl this website. You can add training data manually.");
+      }
     } catch (error: any) {
+      // This should rarely happen now since backend returns 201 always
       console.error("Error crawling website:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Crawl Failed", error.message || "Could not crawl the website. Please try again.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Manual Input Recommended", "We couldn't automatically crawl this website. You can add training data manually.");
     } finally {
       setCrawling(false);
     }
@@ -212,6 +217,8 @@ export default function BusinessInfoScreen() {
 
     try {
       const response = await scrapeWebsite(url);
+      
+      // App A tolerant pattern: Handle all outcomes gracefully
       if (response.knowledge) {
         const k = response.knowledge;
         setAboutBusiness(k.aboutBusiness || "");
@@ -227,12 +234,21 @@ export default function BusinessInfoScreen() {
         }
         setHasChanges(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert("Training Complete", "We've learned information from your website. Review and edit as needed.");
+        Alert.alert("Training Complete", `We've learned information from ${response.pagesCrawled || 1} page(s). Review and edit as needed.`);
+      } else if (response.pagesCrawled === 0) {
+        // No pages crawled but no error - show info message
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Alert.alert("Manual Input Recommended", response.message || "We couldn't automatically learn from this website. Please enter your business details manually below.");
+      } else {
+        // Some pages crawled but no knowledge extracted
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+        Alert.alert("Partial Success", "We crawled the website but couldn't extract structured info. Please enter details manually.");
       }
     } catch (error: any) {
+      // This should rarely happen now since backend returns 201 always
       console.error("Error training from website:", error);
-      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Training Failed", error.message || "Could not learn information from the website. Please try again or enter details manually.");
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Warning);
+      Alert.alert("Manual Input Recommended", "We couldn't automatically learn from this website. Please enter your business details manually below.");
     } finally {
       setTraining(false);
     }

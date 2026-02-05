@@ -689,7 +689,7 @@ export async function updateBusinessKnowledge(knowledge: Partial<BusinessKnowled
   return res.json();
 }
 
-export async function scrapeWebsite(websiteUrl: string): Promise<{ knowledge: BusinessKnowledgeData; scraped: boolean }> {
+export async function scrapeWebsite(websiteUrl: string): Promise<{ knowledge: BusinessKnowledgeData | null; scraped: boolean; pagesCrawled?: number; message?: string }> {
   const businessId = await api.loadBusinessId();
   if (!businessId) throw new Error("Business ID not found");
   const res = await fetch(`${getApiBase()}/api/businesses/${businessId}/knowledge/scrape`, {

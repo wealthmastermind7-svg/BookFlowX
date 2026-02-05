@@ -2116,36 +2116,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
 
-      // Extract info from combined content
-      const extractedInfo = await extractBusinessInfo(combinedContent.substring(0, 30000), business.name);
+      // Extract info from combined content (only if we have content)
+      let knowledge = null;
+      let extractedInfo = {};
       
-      const knowledge = await storage.createOrUpdateBusinessKnowledge({
-        businessId,
-        websiteUrl,
-        ...extractedInfo,
-      });
-      
-      res.json({ knowledge, scraped: true, pagesCrawled: crawledUrls.size });
-    } catch (error: any) {
-      console.error("[Knowledge] TRAINING ERROR:", error?.message || error);
-      let message = "Failed to learn from the website. You can still enter details manually.";
-      if (error.name === 'AbortError' || error.name === 'TimeoutError' || error.message?.includes("timeout") || error.code === 'ETIMEDOUT') {
-        message = "The website took too long to respond. This can happen if the site is slow or protected. Please try again or enter details manually.";
-      } else if (error.message?.includes("Failed to fetch")) {
-        const status = error.message.split(': ')[1];
-        if (status === '403') {
-          message = "Access denied by the website. This site might be blocking automated tools (like Cloudflare protection). Please enter details manually.";
-        } else if (status === '404') {
-          message = "Website not found. Please check the URL and try again.";
-        } else if (status === '500' || status === '502' || status === '503') {
-          message = "The website is currently having technical issues. Please try again later or enter details manually.";
-        } else {
-          message = `Could not reach the website (Status: ${status || 'Unknown'}). Please ensure the URL is correct and public.`;
+      if (combinedContent.length > 100) {
+        try {
+          extractedInfo = await extractBusinessInfo(combinedContent.substring(0, 30000), business.name);
+          knowledge = await storage.createOrUpdateBusinessKnowledge({
+            businessId,
+            websiteUrl,
+            ...extractedInfo,
+          });
+        } catch (extractError) {
+          console.log("[Knowledge] Could not extract info, continuing with partial result:", extractError);
         }
-      } else if (error.message?.includes("fetch failed")) {
-        message = "Connection failed. Please check your internet connection or the website URL.";
       }
-      res.status(500).json({ error: message, detail: error.message });
+      
+      // App A tolerant pattern: Always return 201 success
+      const pagesCrawled = crawledUrls.size;
+      const message = pagesCrawled === 0
+        ? "Website could not be auto-trained. Manual input recommended."
+        : `Successfully learned from ${pagesCrawled} page(s)`;
+      
+      console.log(`[Knowledge] Crawl complete: ${pagesCrawled} pages, knowledge extracted: ${!!knowledge}`);
+      
+      res.status(201).json({ 
+        knowledge, 
+        scraped: pagesCrawled > 0, 
+        pagesCrawled,
+        message
+      });
+    } catch (error: any) {
+      // App A tolerant pattern: Even on total failure, return 201 with helpful message
+      console.error("[Knowledge] TRAINING ERROR:", error?.message || error);
+      
+      res.status(201).json({ 
+        knowledge: null, 
+        scraped: false, 
+        pagesCrawled: 0,
+        message: "Website could not be auto-trained. You can enter details manually below."
+      });
     }
   });
 
