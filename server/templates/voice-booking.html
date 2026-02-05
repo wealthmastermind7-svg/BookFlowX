@@ -192,7 +192,7 @@
 <body>
   <div class="container">
     <h1 class="business-name">{{BUSINESS_NAME}}</h1>
-    <p class="tagline">Informational AI Assistant</p>
+    <p class="tagline">Informational Assistant</p>
     
     <div class="status-container">
       <div class="status" id="statusBadge">
@@ -217,7 +217,7 @@
       </svg>
     </button>
     
-    <p class="instruction" id="instruction">Tap to start voice conversation</p>
+    <p class="instruction" id="instruction">Tap to start conversation</p>
     <footer class="footer">
       <a href="/book/{{BUSINESS_SLUG}}" style="background: #fff; color: #000; padding: 12px 24px; border-radius: 24px; font-weight: 600; display: inline-block;">Text Booking</a>
     </footer>
@@ -298,7 +298,7 @@
         button.classList.remove('active');
         micIcon.style.display = 'block';
         endIcon.style.display = 'none';
-        instruction.textContent = 'Tap to speak with AI assistant';
+        instruction.textContent = 'Tap to start conversation';
       }
     }
     
