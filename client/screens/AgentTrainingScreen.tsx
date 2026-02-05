@@ -43,15 +43,15 @@ export default function AgentTrainingScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   
-    const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [crawlUrl, setCrawlUrl] = useState("");
-    const [crawling, setCrawling] = useState(false);
-    const [qaModalVisible, setQaModalVisible] = useState(false);
-    const [question, setQuestion] = useState("");
-    const [addingQa, setAddingQa] = useState(false);
-    const [content, setContent] = useState("");
-    const [qaAnswer, setQaAnswer] = useState("");
+  const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [crawlUrl, setCrawlUrl] = useState("");
+  const [crawling, setCrawling] = useState(false);
+  const [qaModalVisible, setQaModalVisible] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [addingQa, setAddingQa] = useState(false);
+  const [content, setContent] = useState("");
+  const [qaAnswer, setQaAnswer] = useState("");
 
   useEffect(() => {
     loadTrainingData();
