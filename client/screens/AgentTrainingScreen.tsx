@@ -43,14 +43,15 @@ export default function AgentTrainingScreen() {
   const { theme } = useTheme();
   const headerHeight = useHeaderHeight();
   
-  const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [crawlUrl, setCrawlUrl] = useState("");
-  const [crawling, setCrawling] = useState(false);
-  const [qaModalVisible, setQaModalVisible] = useState(false);
-  const [question, setQuestion] = useState("");
-  const [answer, setAnswer] = useState("");
-  const [addingQa, setAddingQa] = useState(false);
+    const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [crawlUrl, setCrawlUrl] = useState("");
+    const [crawling, setCrawling] = useState(false);
+    const [qaModalVisible, setQaModalVisible] = useState(false);
+    const [question, setQuestion] = useState("");
+    const [addingQa, setAddingQa] = useState(false);
+    const [content, setContent] = useState("");
+    const [qaAnswer, setQaAnswer] = useState("");
 
   useEffect(() => {
     loadTrainingData();
@@ -87,16 +88,16 @@ export default function AgentTrainingScreen() {
   };
 
   const handleAddQa = async () => {
-    if (!question || !answer) return;
+    if (!question || !qaAnswer) return;
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
     setAddingQa(true);
     try {
       await api.apiRequest('POST', `/api/businesses/${businessId}/training/qa`, {
         question,
-        answer
+        answer: qaAnswer
       });
       setQuestion("");
-      setAnswer("");
+      setQaAnswer("");
       setQaModalVisible(false);
       loadTrainingData();
     } catch (error) {
@@ -183,8 +184,8 @@ export default function AgentTrainingScreen() {
               style={[styles.input, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
               placeholder="Paste company info, pricing, or details here..."
               placeholderTextColor="rgba(255,255,255,0.3)"
-              value={answer}
-              onChangeText={setAnswer}
+              value={content}
+              onChangeText={setContent}
               multiline
             />
             <View style={styles.qaButtonRow}>
@@ -192,14 +193,14 @@ export default function AgentTrainingScreen() {
                 style={[styles.addButton, addingQa && { opacity: 0.7 }]}
                 disabled={addingQa}
                 onPress={async () => {
-                  if (!answer) return;
+                  if (!content) return;
                   try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
                   setAddingQa(true);
                   try {
                     await api.apiRequest('POST', `/api/businesses/${businessId}/training/text`, {
-                      content: answer
+                      content: content
                     });
-                    setAnswer("");
+                    setContent("");
                     loadTrainingData();
                   } catch (error) {
                     Alert.alert("Error", "Failed to add content.");
@@ -235,8 +236,8 @@ export default function AgentTrainingScreen() {
               style={[styles.input, { height: 80, textAlignVertical: 'top', paddingTop: 12 }]}
               placeholder="Answer"
               placeholderTextColor="rgba(255,255,255,0.3)"
-              value={answer}
-              onChangeText={setAnswer}
+              value={qaAnswer}
+              onChangeText={setQaAnswer}
               multiline
             />
             <View style={styles.qaButtonRow}>
