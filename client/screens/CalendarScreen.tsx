@@ -220,7 +220,7 @@ export default function CalendarScreen() {
   const calendarData = [...emptyDays.map(() => null), ...days];
 
   return (
-    <ImageBackground source={shadowBackground} style={styles.background} resizeMode="cover">
+    <View style={styles.background}>
       <BackgroundOverlay />
       <Animated.View style={[styles.container, containerStyle]}>
         <ScrollView
@@ -332,7 +332,7 @@ export default function CalendarScreen() {
           </View>
         </ScrollView>
       </Animated.View>
-    </ImageBackground>
+    </View>
   );
 }
 

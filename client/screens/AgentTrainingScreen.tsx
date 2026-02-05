@@ -128,11 +128,7 @@ export default function AgentTrainingScreen() {
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       style={styles.container}
     >
-      <View style={styles.backgroundWrapper}>
-        <ImageBackground source={silkBackground} style={styles.backgroundImage} resizeMode="cover">
-          <View style={styles.backgroundOverlay} />
-        </ImageBackground>
-      </View>
+      <View style={styles.backgroundOverlay} />
 
       <ScrollView 
         contentContainerStyle={{ 

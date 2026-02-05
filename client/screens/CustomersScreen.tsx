@@ -238,11 +238,7 @@ export default function CustomersScreen() {
   );
 
   return (
-    <ImageBackground 
-      source={require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg")} 
-      style={styles.background} 
-      resizeMode="cover"
-    >
+    <View style={styles.background}>
       <View style={styles.gradientOverlay} />
       <Animated.View 
         entering={FadeIn.duration(600)}
@@ -268,7 +264,7 @@ export default function CustomersScreen() {
           showsVerticalScrollIndicator={false}
         />
       </Animated.View>
-    </ImageBackground>
+    </View>
   );
 }
 

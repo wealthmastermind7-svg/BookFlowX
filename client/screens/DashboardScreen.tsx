@@ -441,9 +441,7 @@ export default function DashboardScreen() {
 
   return (
     <View style={styles.background}>
-      <ImageBackground source={smokeBackground} style={styles.backgroundImage} resizeMode="cover">
-        <View style={styles.backgroundOverlay} />
-      </ImageBackground>
+      <View style={styles.backgroundOverlay} />
       <Animated.View style={[styles.container, containerStyle]}>
         <ScrollView
           style={styles.scrollView}

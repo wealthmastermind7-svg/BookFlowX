@@ -459,11 +459,7 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.backgroundWrapper}>
-        <ImageBackground source={silkBackground} style={styles.backgroundImage} resizeMode="cover">
-          <View style={styles.backgroundOverlay} />
-        </ImageBackground>
-      </View>
+      <View style={styles.backgroundOverlay} />
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
           {isTrialActive && !isPremium && (

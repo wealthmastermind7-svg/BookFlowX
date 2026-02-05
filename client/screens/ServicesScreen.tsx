@@ -503,7 +503,7 @@ export default function ServicesScreen() {
   );
 
   return (
-    <ImageBackground source={silkBackground} style={styles.background} resizeMode="cover">
+    <View style={styles.background}>
       <View style={styles.gradientOverlay} />
       <Animated.View 
         entering={FadeIn.duration(600)}
@@ -550,7 +550,7 @@ export default function ServicesScreen() {
       </Animated.View>
       
       {renderAIModal()}
-    </ImageBackground>
+    </View>
   );
 }
 
