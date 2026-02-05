@@ -186,7 +186,7 @@ IMPORTANT:
             provider: "11labs",
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
-          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm your AI assistant and I can answer any questions you have about our services, pricing, and availability. When you're ready to book, just use the Text Booking link on this page. How can I help you today?`,
+          firstMessage: `Hi! I'm the AI assistant for ${business.name}. I can tell you about our services, pricing, and availability. When you're ready to book, just use the Text Booking link on this page. How can I help you today?`,
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
             : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
