@@ -2879,7 +2879,7 @@ IMPORTANT:
           provider: "11labs",
           voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
         },
-        firstMessage: `Hi there! Thanks for calling ${config.businessName}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
+        firstMessage: `Hi! I'm the AI assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
         serverUrl: serverUrl,
         serverMessages: ["tool-calls", "end-of-call-report"],
         metadata: {
