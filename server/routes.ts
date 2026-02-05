@@ -46,6 +46,9 @@ import {
   hasBusinessCalendar,
   disconnectGoogleCalendar,
 } from "./googleCalendar";
+import { trainingData, insertTrainingDataSchema } from "@shared/schema";
+import { eq, desc, and } from "drizzle-orm";
+import { db } from "./db";
 import multer from "multer";
 import express from "express";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
@@ -2488,6 +2491,179 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // === VOICE AGENT API ===
+  
+  // Helper function to extract text from HTML
+  function extractTextFromHtml(html: string): string {
+    return html
+      .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+      .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+      .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+      .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+      .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/g, ' ')
+      .replace(/&amp;/g, '&')
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/\s+/g, ' ')
+      .trim()
+      .substring(0, 50000);
+  }
+
+  // Helper to extract internal links from HTML
+  function extractInternalLinks(html: string, baseUrl: string): string[] {
+    try {
+      const urlObj = new URL(baseUrl);
+      const domain = urlObj.origin;
+      const links: string[] = [];
+      const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
+      let match;
+      while ((match = linkRegex.exec(html)) !== null) {
+        let href = match[1];
+        if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+        if (href.startsWith('/')) href = domain + href;
+        else if (!href.startsWith('http')) href = domain + '/' + href;
+        try {
+          const linkUrl = new URL(href);
+          if (linkUrl.origin === domain && !links.includes(linkUrl.href)) {
+            links.push(linkUrl.href.split('#')[0].split('?')[0]);
+          }
+        } catch {}
+      }
+      return [...new Set(links)];
+    } catch (e) {
+      return [];
+    }
+  }
+
+  // Get training data for specific business
+  app.get("/api/businesses/:businessId/training", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const data = await db.select().from(trainingData)
+        .where(eq(trainingData.businessId, businessId))
+        .orderBy(desc(trainingData.createdAt));
+      res.json(data);
+    } catch (error) {
+      console.error("Error fetching business training data:", error);
+      res.status(500).json({ error: "Failed to fetch training data" });
+    }
+  });
+
+  // Add Q&A pair for business training
+  app.post("/api/businesses/:businessId/training/qa", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { question, answer } = req.body;
+
+      if (!question || !answer) {
+        return res.status(400).json({ error: "Question and answer are required" });
+      }
+
+      const [data] = await db.insert(trainingData).values({
+        businessId,
+        type: "qa_pair",
+        question,
+        answer,
+      }).returning();
+
+      res.status(201).json(data);
+    } catch (error) {
+      console.error("Error adding Q&A pair:", error);
+      res.status(500).json({ error: "Failed to add Q&A pair" });
+    }
+  });
+
+  // Crawl website for business training (supports multi-page)
+  app.post("/api/businesses/:businessId/training/crawl", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { url, maxPages = 10 } = req.body;
+
+      if (!url) {
+        return res.status(400).json({ error: "URL is required" });
+      }
+
+      const crawledUrls = new Set<string>();
+      const urlsToCrawl = [url];
+      const results: any[] = [];
+      const pageLimit = Math.min(maxPages, 50);
+
+      console.log(`Starting multi-page crawl from: ${url} (max ${pageLimit} pages) for business ${businessId}`);
+
+      while (urlsToCrawl.length > 0 && crawledUrls.size < pageLimit) {
+        const currentUrl = urlsToCrawl.shift()!;
+        if (crawledUrls.has(currentUrl)) continue;
+        crawledUrls.add(currentUrl);
+
+        try {
+          console.log(`Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
+          const response = await fetch(currentUrl, {
+            headers: { 'User-Agent': 'Mozilla/5.0 (compatible; BookFlowBot/1.0)' },
+          });
+
+          if (!response.ok) continue;
+
+          const html = await response.text();
+          const textContent = extractTextFromHtml(html);
+
+          if (textContent.length < 100) continue;
+
+          const titleMatch = html.match(/<title[^>]*>([^<]+)<\/title>/i);
+          const title = titleMatch ? titleMatch[1].trim() : currentUrl;
+
+          const [data] = await db.insert(trainingData).values({
+            businessId,
+            type: "website_crawl",
+            title,
+            content: textContent,
+            sourceUrl: currentUrl,
+            status: "active",
+          }).returning();
+
+          results.push({ ...data, contentLength: textContent.length });
+
+          if (crawledUrls.size < pageLimit) {
+            const newLinks = extractInternalLinks(html, currentUrl);
+            for (const link of newLinks) {
+              if (!crawledUrls.has(link) && !urlsToCrawl.includes(link)) {
+                urlsToCrawl.push(link);
+              }
+            }
+          }
+        } catch (err) {
+          console.log(`Failed to crawl ${currentUrl}:`, err);
+        }
+      }
+
+      console.log(`Crawl complete: ${results.length} pages saved`);
+
+      res.status(201).json({
+        pagesCrawled: results.length,
+        results,
+        message: `Successfully crawled ${results.length} page(s) from ${url}`,
+      });
+    } catch (error) {
+      console.error("Error crawling website:", error);
+      res.status(500).json({ error: "Failed to crawl website" });
+    }
+  });
+
+  // Delete training data
+  app.delete("/api/training/:id", async (req: Request, res: Response) => {
+    try {
+      const { id } = req.params;
+      await db.delete(trainingData).where(eq(trainingData.id, id));
+      res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting training data:", error);
+      res.status(500).json({ error: "Failed to delete training data" });
+    }
+  });
+
+  // === VOICE AGENT CONFIG ===
 
   // Serve voice booking page (Vapi-powered streaming voice)
   app.get("/voice/:slug", async (req: Request, res: Response) => {

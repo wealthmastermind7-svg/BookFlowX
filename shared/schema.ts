@@ -277,13 +277,31 @@ export const googleCalendarTokens = pgTable("google_calendar_tokens", {
     .notNull()
     .unique()
     .references(() => businesses.id, { onDelete: "cascade" }),
-  accessToken: text("access_token").notNull(),
-  refreshToken: text("refresh_token").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  calendarId: text("calendar_id").default("primary"), // Which calendar to sync with
+  accessToken: text("accessToken").notNull(),
+  refreshToken: text("refreshToken").notNull(),
+  expiresAt: timestamp("expiresAt").notNull(),
+  calendarId: text("calendarId").default("primary"), // Which calendar to sync with
   email: text("email"), // Google account email for display
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
+  createdAt: timestamp("createdAt").defaultNow(),
+  updatedAt: timestamp("updatedAt").defaultNow(),
+});
+
+// Assistant training data table
+export const trainingData = pgTable("training_data", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'document'
+  question: text("question"),
+  answer: text("answer"),
+  content: text("content"), // For website crawl content
+  title: text("title"), // Page title for crawled content
+  sourceUrl: text("source_url"),
+  status: text("status").default("active").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // Voice call logs table (for tracking usage)
@@ -322,7 +340,23 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   voiceSubscription: one(voiceSubscriptions),
   voiceCallLogs: many(voiceCallLogs),
   googleCalendarToken: one(googleCalendarTokens),
+  trainingData: many(trainingData),
 }));
+
+export const trainingDataRelations = relations(trainingData, ({ one }) => ({
+  business: one(businesses, {
+    fields: [trainingData.businessId],
+    references: [businesses.id],
+  }),
+}));
+
+export const insertTrainingDataSchema = createInsertSchema(trainingData).omit({ 
+  id: true, 
+  createdAt: true 
+});
+
+export type TrainingData = typeof trainingData.$inferSelect;
+export type InsertTrainingData = z.infer<typeof insertTrainingDataSchema>;
 
 export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
   business: one(businesses, {

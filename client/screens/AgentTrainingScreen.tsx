@@ -1,0 +1,427 @@
+import React, { useState, useEffect } from "react";
+import { 
+  View, 
+  StyleSheet, 
+  ScrollView, 
+  TextInput, 
+  Pressable, 
+  ActivityIndicator, 
+  Alert, 
+  Platform,
+  Dimensions,
+  ImageBackground,
+  KeyboardAvoidingView
+} from "react-native";
+import { Feather } from "@expo/vector-icons";
+import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { useHeaderHeight } from "@react-navigation/elements";
+import { useTheme } from "@/hooks/useTheme";
+import { Spacing, BorderRadius } from "@/constants/theme";
+import { ThemedText } from "@/components/ThemedText";
+import { Button } from "@/components/Button";
+import { api } from "@/lib/api";
+import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import * as Haptics from "expo-haptics";
+
+type TrainingDataType = {
+  id: string;
+  type: 'qa_pair' | 'website_crawl' | 'document';
+  question?: string;
+  answer?: string;
+  content?: string;
+  title?: string;
+  sourceUrl?: string;
+  createdAt: string;
+};
+
+const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
+
+export default function AgentTrainingScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const route = useRoute<RouteProp<RootStackParamList, 'AgentTraining'>>();
+  const { businessId, businessName } = route.params;
+  const { theme } = useTheme();
+  const headerHeight = useHeaderHeight();
+  
+  const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [crawlUrl, setCrawlUrl] = useState("");
+  const [crawling, setCrawling] = useState(false);
+  const [qaModalVisible, setQaModalVisible] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [answer, setAnswer] = useState("");
+  const [addingQa, setAddingQa] = useState(false);
+
+  useEffect(() => {
+    loadTrainingData();
+  }, []);
+
+  const loadTrainingData = async () => {
+    try {
+      const data = await api.apiRequest('GET', `/api/businesses/${businessId}/training`);
+      setTrainingData(data);
+    } catch (error) {
+      console.error("Error loading training data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCrawl = async () => {
+    if (!crawlUrl) return;
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setCrawling(true);
+    try {
+      const result = await api.apiRequest('POST', `/api/businesses/${businessId}/training/crawl`, {
+        url: crawlUrl,
+        maxPages: 10
+      });
+      Alert.alert("Success", "Website content has been crawled and added to training data.");
+      loadTrainingData();
+      setCrawlUrl("");
+    } catch (error) {
+      Alert.alert("Error", "Failed to crawl website. Please ensure the URL is correct and public.");
+    } finally {
+      setCrawling(false);
+    }
+  };
+
+  const handleAddQa = async () => {
+    if (!question || !answer) return;
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    setAddingQa(true);
+    try {
+      await api.apiRequest('POST', `/api/businesses/${businessId}/training/qa`, {
+        question,
+        answer
+      });
+      setQuestion("");
+      setAnswer("");
+      setQaModalVisible(false);
+      loadTrainingData();
+    } catch (error) {
+      Alert.alert("Error", "Failed to add Q&A pair.");
+    } finally {
+      setAddingQa(false);
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
+    try {
+      await api.apiRequest('DELETE', `/api/training/${id}`);
+      setTrainingData(prev => prev.filter(item => item.id !== id));
+    } catch (error) {
+      Alert.alert("Error", "Failed to delete item.");
+    }
+  };
+
+  const GlassCard = ({ children, style }: any) => (
+    <View style={[styles.glassCard, style]}>
+      {children}
+    </View>
+  );
+
+  return (
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+      style={styles.container}
+    >
+      <View style={styles.backgroundWrapper}>
+        <ImageBackground source={silkBackground} style={styles.backgroundImage} resizeMode="cover">
+          <View style={styles.backgroundOverlay} />
+        </ImageBackground>
+      </View>
+
+      <ScrollView 
+        contentContainerStyle={{ 
+          paddingTop: headerHeight + 20, 
+          paddingBottom: 40,
+          paddingHorizontal: 24 
+        }}
+      >
+        <GlassCard style={styles.headerCard}>
+          <ThemedText style={styles.headerTitle}>Train {businessName}</ThemedText>
+          <ThemedText style={styles.headerSubtitle}>
+            Add knowledge to help your AI agent respond better
+          </ThemedText>
+        </GlassCard>
+
+        <View style={styles.section}>
+          <ThemedText style={styles.sectionTitle}>Web Crawler</ThemedText>
+          <GlassCard style={styles.crawlCard}>
+            <ThemedText style={styles.cardInfo}>
+              Enter a website URL to automatically extract content for training.
+            </ThemedText>
+            <View style={styles.inputRow}>
+              <TextInput
+                style={styles.input}
+                placeholder="https://example.com"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                value={crawlUrl}
+                onChangeText={setCrawlUrl}
+                autoCapitalize="none"
+              />
+              <Pressable 
+                style={[styles.crawlButton, crawling && { opacity: 0.7 }]} 
+                onPress={handleCrawl}
+                disabled={crawling}
+              >
+                {crawling ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <ThemedText style={styles.crawlButtonText}>Get Data</ThemedText>
+                )}
+              </Pressable>
+            </View>
+          </GlassCard>
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={styles.sectionTitle}>Custom Q&A</ThemedText>
+            <Pressable onPress={() => setQaModalVisible(true)}>
+              <ThemedText style={styles.addLink}>+ Add Q&A</ThemedText>
+            </Pressable>
+          </View>
+          
+          {qaModalVisible && (
+            <GlassCard style={styles.qaInputCard}>
+              <TextInput
+                style={styles.qaInput}
+                placeholder="Question (e.g., Do you offer gift cards?)"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                value={question}
+                onChangeText={setQuestion}
+                multiline
+              />
+              <TextInput
+                style={[styles.qaInput, { height: 100 }]}
+                placeholder="Answer (e.g., Yes, we offer digital gift cards...)"
+                placeholderTextColor="rgba(255,255,255,0.3)"
+                value={answer}
+                onChangeText={setAnswer}
+                multiline
+              />
+              <View style={styles.qaButtonRow}>
+                <Button 
+                  title="Cancel" 
+                  variant="outline" 
+                  size="small" 
+                  onPress={() => setQaModalVisible(false)} 
+                />
+                <Button 
+                  title="Save Pair" 
+                  size="small" 
+                  onPress={handleAddQa}
+                  isLoading={addingQa}
+                />
+              </View>
+            </GlassCard>
+          )}
+        </View>
+
+        <View style={styles.section}>
+          <View style={styles.sectionHeader}>
+            <ThemedText style={styles.sectionTitle}>Training Links</ThemedText>
+            <View style={styles.badge}>
+              <ThemedText style={styles.badgeText}>{trainingData.length}</ThemedText>
+            </View>
+          </View>
+
+          {loading ? (
+            <ActivityIndicator style={{ marginTop: 20 }} color="#fff" />
+          ) : trainingData.length === 0 ? (
+            <GlassCard style={styles.emptyCard}>
+              <Feather name="inbox" size={32} color="rgba(255,255,255,0.2)" />
+              <ThemedText style={styles.emptyText}>No training data added yet</ThemedText>
+            </GlassCard>
+          ) : (
+            trainingData.map((item) => (
+              <GlassCard key={item.id} style={styles.itemCard}>
+                <View style={styles.itemIconBox}>
+                  <Feather 
+                    name={item.type === 'website_crawl' ? 'globe' : 'message-square'} 
+                    size={16} 
+                    color="#fff" 
+                  />
+                </View>
+                <View style={styles.itemContent}>
+                  <ThemedText style={styles.itemTitle} numberOfLines={1}>
+                    {item.type === 'website_crawl' ? item.title : item.question}
+                  </ThemedText>
+                  <ThemedText style={styles.itemSubtitle} numberOfLines={1}>
+                    {item.type === 'website_crawl' ? item.sourceUrl : item.answer}
+                  </ThemedText>
+                </View>
+                <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
+                  <Feather name="trash-2" size={18} color="#EF4444" />
+                </Pressable>
+              </GlassCard>
+            ))
+          )}
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
+  );
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: "#000",
+  },
+  backgroundWrapper: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  backgroundImage: {
+    flex: 1,
+  },
+  backgroundOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: "rgba(0,0,0,0.85)",
+  },
+  glassCard: {
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: BorderRadius.xl,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
+  },
+  headerCard: {
+    marginBottom: 32,
+    backgroundColor: "rgba(255,255,255,0.05)",
+  },
+  headerTitle: {
+    fontSize: 24,
+    fontWeight: "700",
+    color: "#fff",
+    marginBottom: 8,
+  },
+  headerSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.6)",
+    lineHeight: 20,
+  },
+  section: {
+    marginBottom: 32,
+  },
+  sectionHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  crawlCard: {
+    gap: 16,
+  },
+  cardInfo: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.5)",
+    lineHeight: 20,
+  },
+  inputRow: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  input: {
+    flex: 1,
+    height: 48,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 16,
+    color: "#fff",
+    fontSize: 15,
+  },
+  crawlButton: {
+    backgroundColor: "#2563EB",
+    borderRadius: BorderRadius.lg,
+    paddingHorizontal: 16,
+    justifyContent: "center",
+  },
+  crawlButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  addLink: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#2563EB",
+  },
+  qaInputCard: {
+    gap: 12,
+  },
+  qaInput: {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    borderRadius: BorderRadius.lg,
+    padding: 16,
+    color: "#fff",
+    fontSize: 15,
+    minHeight: 48,
+  },
+  qaButtonRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+    marginTop: 8,
+  },
+  badge: {
+    backgroundColor: "rgba(255,255,255,0.1)",
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  badgeText: {
+    fontSize: 12,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.6)",
+  },
+  emptyCard: {
+    alignItems: "center",
+    paddingVertical: 40,
+    gap: 12,
+  },
+  emptyText: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.3)",
+  },
+  itemCard: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    padding: 12,
+  },
+  itemIconBox: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: "rgba(255,255,255,0.05)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  itemContent: {
+    flex: 1,
+    marginLeft: 16,
+    marginRight: 8,
+  },
+  itemTitle: {
+    fontSize: 14,
+    fontWeight: "600",
+    color: "#fff",
+    marginBottom: 2,
+  },
+  itemSubtitle: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+  },
+  deleteButton: {
+    padding: 8,
+  },
+});

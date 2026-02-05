@@ -296,6 +296,14 @@ export default function SettingsScreen() {
     });
   };
 
+  const handleOpenAgentTraining = () => {
+    if (!business) return;
+    navigation.navigate("AgentTraining", {
+      businessId: business.id,
+      businessName: business.name,
+    });
+  };
+
   const handleShowQRCode = async () => {
     if (!checkQrAccess()) return;
     const data = await api.getQRCode();
@@ -558,6 +566,22 @@ export default function SettingsScreen() {
           <View style={{ height: 32 }} />
 
           <GlassCard style={styles.voiceCard} onPress={() => setVoicePaywallVisible(true)} highlight>
+            <View style={styles.voiceHeader}>
+              <View style={styles.voiceIconBox}>
+                <Feather name="mic" size={24} color="#fff" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <ThemedText style={styles.voiceTitle}>Voice Assistant</ThemedText>
+                <ThemedText style={styles.voiceSubtitle}>AI Receptionist is active</ThemedText>
+              </View>
+              <Button 
+                variant="outline" 
+                size="small" 
+                title="Train Agent"
+                onPress={handleOpenAgentTraining}
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)' }}
+              />
+            </View>
             <View style={styles.voiceIconGroup}>
               <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#fff" /></View>
               <View style={styles.voiceIconBox}><Feather name="message-square" size={20} color="#fff" /></View>

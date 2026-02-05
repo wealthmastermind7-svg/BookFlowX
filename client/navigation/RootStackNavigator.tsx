@@ -5,6 +5,7 @@ import BookingFlowNavigator from "@/navigation/BookingFlowNavigator";
 import ServiceEditorScreen from "@/screens/ServiceEditorScreen";
 import QuickSaleScreen from "@/screens/QuickSaleScreen";
 import VoiceBookingScreen from "@/screens/VoiceBookingScreen";
+import AgentTrainingScreen from "@/screens/AgentTrainingScreen";
 import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
 import OnboardingScreen, { checkOnboardingComplete } from "@/screens/OnboardingScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
@@ -23,6 +24,7 @@ export type RootStackParamList = {
   ServiceEditor: { serviceId?: string };
   QuickSale: undefined;
   VoiceBooking: { businessSlug: string; businessName?: string };
+  AgentTraining: { businessId: string; businessName: string };
   VoiceAgentPaywall: undefined;
 };
 
@@ -133,6 +135,19 @@ export default function RootStackNavigator() {
           headerLeft: () => (
             <HeaderButton onPress={() => navigation.goBack()}>
               <Text>Close</Text>
+            </HeaderButton>
+          ),
+        })}
+      />
+      <Stack.Screen
+        name="AgentTraining"
+        component={AgentTrainingScreen}
+        options={({ navigation }) => ({
+          ...opaqueScreenOptions,
+          headerTitle: "Train Agent",
+          headerLeft: () => (
+            <HeaderButton onPress={() => navigation.goBack()}>
+              <Text style={{ color: theme.text }}>Back</Text>
             </HeaderButton>
           ),
         })}
