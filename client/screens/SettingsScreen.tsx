@@ -125,7 +125,7 @@ export default function SettingsScreen() {
   const [qrCode, setQrCode] = useState<string | null>(null);
   const [bookingUrl, setBookingUrl] = useState<string>("");
   const [editModalVisible, setEditModalVisible] = useState(false);
-  const [editingField, setEditingField] = useState<"name" | "website" | "phone" | "slug" | null>(null);
+  const [editingField, setEditingField] = useState<"name" | "website" | "phone" | "slug" | "timezone" | null>(null);
   const [editValue, setEditValue] = useState("");
   const [editLoading, setEditLoading] = useState(false);
   const [demoTypeModalVisible, setDemoTypeModalVisible] = useState(false);
@@ -355,7 +355,7 @@ export default function SettingsScreen() {
   };
 
   const handleEditBusinessField = (field: "name" | "website" | "phone" | "slug" | "timezone") => {
-    setEditingField(field as any);
+    setEditingField(field);
     setEditValue(business?.[field as keyof Business] ? String(business[field as keyof Business]) : "");
     setEditModalVisible(true);
   };
@@ -696,6 +696,14 @@ export default function SettingsScreen() {
 
           <View style={{ height: 32 }} />
           <SectionTitleBadge label="BUSINESS IDENTITY">Profile Settings</SectionTitleBadge>
+          <GlassCard style={{ marginBottom: 12 }}>
+            <InfoRow 
+              icon="globe" 
+              label="TIMEZONE" 
+              value={business?.timezone || "Not set"} 
+              onPress={() => handleEditBusinessField("timezone")} 
+            />
+          </GlassCard>
           <View style={styles.gridRow}>
             <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}><View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>BUSINESS NAME</ThemedText><ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText></GlassCard>
             <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}><View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>CURRENCY</ThemedText><ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText></GlassCard>
@@ -764,7 +772,48 @@ export default function SettingsScreen() {
       </Modal>
 
       <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Edit {editingField}</ThemedText><TextInput style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} value={editValue} onChangeText={setEditValue} placeholder={`Enter ${editingField}`} placeholderTextColor="#666" /><Button onPress={handleSaveBusinessField} disabled={editLoading}>{editLoading ? "Saving..." : "Save"}</Button><Pressable onPress={() => setEditModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText></Pressable></View></View>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+            <ThemedText style={styles.modalTitle}>
+              {editingField === "timezone" ? "Select Timezone" : `Edit ${editingField}`}
+            </ThemedText>
+            
+            {editingField === "timezone" ? (
+              <View style={{ width: '100%', gap: 8, marginBottom: 20 }}>
+                {TIMEZONES.map((tz) => (
+                  <Pressable
+                    key={tz.value}
+                    style={[
+                      styles.timezoneOption,
+                      editValue === tz.value && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)' }
+                    ]}
+                    onPress={() => setEditValue(tz.value)}
+                  >
+                    <ThemedText style={[styles.timezoneOptionText, editValue === tz.value && { color: '#fff' }]}>
+                      {tz.label}
+                    </ThemedText>
+                    {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <TextInput 
+                style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} 
+                value={editValue} 
+                onChangeText={setEditValue} 
+                placeholder={`Enter ${editingField}`} 
+                placeholderTextColor="#666" 
+              />
+            )}
+            
+            <Button onPress={handleSaveBusinessField} disabled={editLoading}>
+              {editLoading ? "Saving..." : "Save"}
+            </Button>
+            <Pressable onPress={() => setEditModalVisible(false)} style={styles.secondaryButton}>
+              <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
+            </Pressable>
+          </View>
+        </View>
       </Modal>
 
       <Modal visible={demoTypeModalVisible} transparent animationType="slide" onRequestClose={() => setDemoTypeModalVisible(false)}>
@@ -904,13 +953,68 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   secondaryButton: { height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginTop: 12 },
-  secondaryButtonText: { fontSize: 16, fontWeight: "600", color: "#fff" },
-  editInput: { height: 56, borderRadius: 16, paddingHorizontal: 16, fontSize: 16, borderWidth: 1, marginBottom: 24 },
-  compactRow: { flexDirection: "row", alignItems: "center", padding: 16 },
-  compactRowTitle: { fontSize: 16, fontWeight: "600", color: "#fff" },
-  compactRowSubtitle: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  demoTypeButton: { padding: 16, borderRadius: 16, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", marginBottom: 8 },
-  demoTypeLabel: { fontSize: 16, fontWeight: "700", color: "#fff" },
-  currencyRow: { padding: 16, borderRadius: 16 },
-  currencyLabel: { fontSize: 16, color: "#fff" },
+  secondaryButtonText: {
+    color: "rgba(255,255,255,0.4)",
+    fontSize: 14,
+    fontWeight: "600",
+  },
+  timezoneOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
+  },
+  timezoneOptionText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.6)',
+  },
+  editInput: {
+    height: 56,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    marginBottom: 24,
+    color: "#fff",
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  compactRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 16,
+  },
+  compactRowTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  compactRowSubtitle: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
+  demoTypeButton: {
+    padding: 16,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    marginBottom: 8,
+  },
+  demoTypeLabel: {
+    fontSize: 16,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  currencyRow: {
+    padding: 16,
+    borderRadius: 16,
+  },
+  currencyLabel: {
+    fontSize: 16,
+    color: "#fff",
+  },
 });

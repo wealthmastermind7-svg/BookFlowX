@@ -319,13 +319,15 @@ IMPORTANT:
                 // Parse date string carefully - vapi might send ISO or simple YYYY-MM-DD
                 const dateClean = date.split('T')[0];
                 const [year, month, day] = dateClean.split('-').map(Number);
-                // Create date in UTC to avoid local timezone shifts
-                const bookingDate = new Date(Date.UTC(year, month - 1, day));
-                const dayOfWeek = bookingDate.getUTCDay(); 
+                // Create date in local business timezone to avoid local timezone shifts
+                const tz = business.timezone || 'UTC';
+                const { formatInTimeZone } = await import('date-fns-tz');
+                const dayOfWeek = parseInt(formatInTimeZone(new Date(year, month - 1, day), tz, 'i')); // 1 (Mon) to 7 (Sun)
+                const adjustedDayOfWeek = dayOfWeek === 7 ? 0 : dayOfWeek; // Convert to 0-6 (Sun-Sat)
                 
-                console.log(`[Vapi] Checking availability for date=${date} (clean=${dateClean}): DayOfWeek=${dayOfWeek}`);
+                console.log(`[Vapi] Checking availability for date=${date} (clean=${dateClean}) in ${tz}: DayOfWeek=${adjustedDayOfWeek}`);
                 
-                const dayAvailability = availability.find(a => a.dayOfWeek === dayOfWeek);
+                const dayAvailability = availability.find(a => a.dayOfWeek === adjustedDayOfWeek);
                 
                 if (dayAvailability && dayAvailability.isActive) {
                   const slots: string[] = [];
