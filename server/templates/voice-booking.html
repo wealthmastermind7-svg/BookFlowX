@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-  <title>Voice Booking - {{BUSINESS_NAME}}</title>
+  <title>AI Assistant - {{BUSINESS_NAME}}</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -202,7 +202,7 @@
     </div>
     
     <div class="transcript-box">
-      <p class="transcript-text placeholder" id="transcript">Tap to ask questions about our services</p>
+      <p class="transcript-text placeholder" id="transcript">Tap to ask about our services</p>
     </div>
     
     <div id="errorContainer"></div>
@@ -217,13 +217,12 @@
       </svg>
     </button>
     
-    <p class="instruction" id="instruction">Tap to speak with AI assistant</p>
+    <p class="instruction" id="instruction">Tap to start conversation</p>
+    <footer class="footer">
+      <a href="/book/{{BUSINESS_SLUG}}" style="background: #fff; color: #000; padding: 12px 24px; border-radius: 24px; font-weight: 600; display: inline-block;">Text Booking</a>
+    </footer>
   </div>
   
-  <footer class="footer">
-    <a href="/book/{{BUSINESS_SLUG}}" style="background: #fff; color: #000; padding: 12px 24px; border-radius: 24px; font-weight: 600; display: inline-block;">Text Booking</a>
-  </footer>
-
   <script>
     var vapiInstance = null;
     var isCallActive = false;

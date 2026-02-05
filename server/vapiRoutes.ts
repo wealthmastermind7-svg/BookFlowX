@@ -107,7 +107,7 @@ YOUR GOALS:
 1. Greet callers warmly and introduce yourself as ${business.name}'s AI assistant
 2. Answer questions about services, pricing, and what's included
 3. Provide helpful information about the business
-4. If customers want to book, direct them to use the Text Booking link on this page
+4. If customers want to book, politely direct them to use the Text Booking link on this page. Explain that they can see all available times and confirm their appointment there.
 
 IMPORTANT BEHAVIOR:
 - You are an INFORMATIONAL assistant, NOT a booking agent
@@ -186,7 +186,7 @@ IMPORTANT:
             provider: "11labs",
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
-          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm your AI assistant and I can tell you about our services, pricing, and availability. When you're ready to book, just use the Text Booking link on this page. How can I help you today?`,
+          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm your AI assistant and I can answer any questions you have about our services, pricing, and availability. When you're ready to book, just use the Text Booking link on this page. How can I help you today?`,
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
             : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
