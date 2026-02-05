@@ -286,6 +286,27 @@ export const googleCalendarTokens = pgTable("google_calendar_tokens", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Business knowledge base (scraped/edited info for voice assistant)
+export const businessKnowledge = pgTable("business_knowledge", {
+  id: varchar("id")
+    .primaryKey()
+    .default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id")
+    .notNull()
+    .unique()
+    .references(() => businesses.id, { onDelete: "cascade" }),
+  websiteUrl: text("website_url"), // Source website for scraping
+  aboutBusiness: text("about_business"), // What the business does
+  servicesDescription: text("services_description"), // Detailed services info
+  hoursOfOperation: text("hours_of_operation"), // Business hours
+  locationInfo: text("location_info"), // Address and location details
+  faqJson: text("faq_json"), // JSON array of {question, answer}
+  additionalInfo: text("additional_info"), // Any other relevant info
+  lastScrapedAt: timestamp("last_scraped_at"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Voice call logs table (for tracking usage)
 export const voiceCallLogs = pgTable("voice_call_logs", {
   id: varchar("id")
@@ -307,6 +328,13 @@ export const voiceCallLogs = pgTable("voice_call_logs", {
 });
 
 // Relations
+export const businessKnowledgeRelations = relations(businessKnowledge, ({ one }) => ({
+  business: one(businesses, {
+    fields: [businessKnowledge.businessId],
+    references: [businesses.id],
+  }),
+}));
+
 export const businessesRelations = relations(businesses, ({ many, one }) => ({
   users: many(users),
   services: many(services),
@@ -322,6 +350,7 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   voiceSubscription: one(voiceSubscriptions),
   voiceCallLogs: many(voiceCallLogs),
   googleCalendarToken: one(googleCalendarTokens),
+  knowledge: one(businessKnowledge),
 }));
 
 export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
@@ -526,6 +555,16 @@ export const insertVoiceCallLogSchema = createInsertSchema(voiceCallLogs).omit({
   id: true,
   createdAt: true,
 });
+
+export const insertBusinessKnowledgeSchema = createInsertSchema(businessKnowledge).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+  lastScrapedAt: true,
+});
+
+export type BusinessKnowledge = typeof businessKnowledge.$inferSelect;
+export type InsertBusinessKnowledge = z.infer<typeof insertBusinessKnowledgeSchema>;
 
 export const insertGoogleCalendarTokenSchema = createInsertSchema(googleCalendarTokens).omit({
   id: true,

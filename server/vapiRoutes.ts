@@ -87,56 +87,73 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       const industry = detectIndustry(business.name, services[0]?.name || "");
       const industryContext = INDUSTRY_CONTEXT[industry] || INDUSTRY_CONTEXT.consulting;
 
+      const knowledge = await storage.getBusinessKnowledge(business.id);
+
       const servicesList = services
         .map(s => `- ${s.name}: $${(s.price / 100).toFixed(2)} (${s.duration} minutes)`)
         .join("\n");
 
-      const systemPrompt = `You are a friendly, professional voice booking assistant for ${business.name}.
+      const knowledgeContext = knowledge ? `
+ABOUT THE BUSINESS:
+${knowledge.aboutBusiness || "A professional service business."}
+
+ADDITIONAL SERVICES INFO:
+${knowledge.servicesDescription || ""}
+
+HOURS OF OPERATION:
+${knowledge.hoursOfOperation || "Please ask about availability."}
+
+LOCATION:
+${knowledge.locationInfo || ""}
+
+FREQUENTLY ASKED QUESTIONS:
+${knowledge.faqJson ? (() => {
+  try {
+    const faqs = JSON.parse(knowledge.faqJson);
+    return faqs.map((f: any) => `Q: ${f.question}\nA: ${f.answer}`).join("\n\n");
+  } catch { return ""; }
+})() : ""}
+
+OTHER INFO:
+${knowledge.additionalInfo || ""}
+` : "";
+
+      const systemPrompt = `You are a friendly, knowledgeable voice assistant for ${business.name}.
 
 PERSONALITY:
 - Tone: ${industryContext.tone}
 - Core values: ${industryContext.values.join(", ")}
-- Be warm, helpful, and efficient
-- Speak naturally like a real receptionist
+- Be warm, helpful, and informative
+- Speak naturally like a friendly receptionist
 - Keep responses concise (2-3 sentences max)
 
 AVAILABLE SERVICES:
 ${servicesList}
+${knowledgeContext}
 
-YOUR GOALS:
+YOUR ROLE:
+You are an INFORMATIONAL assistant. Your job is to:
 1. Greet callers warmly
-2. Help them understand available services
-3. Answer questions about pricing and duration
-4. Guide them to book an appointment
-5. Collect their name, email, and preferred time
-6. ALWAYS call get_available_slots to verify availability BEFORE mentioning specific times or confirming a booking.
-7. Once you have service, name, email, date, and time, call the create_booking tool.
+2. Answer questions about the business, services, pricing, and hours
+3. Provide helpful information about what the business offers
+4. When customers want to book, direct them to the Text Booking link
 
-BOOKING PROCESS:
-When a customer wants to book:
-1. Ask which service they'd like
-2. Ask for their preferred date and time
-3. Call get_available_slots to confirm if that time works.
-4. Ask for their name
-5. Ask for their email address
-6. CRITICAL: Spell back the email letter by letter for confirmation (e.g., "Let me confirm: J-O-H-N at G-M-A-I-L dot com, is that correct?")
-7. If they correct you, spell it back again until confirmed
-8. Use the create_booking function to complete the booking
-9. Confirm the booking details
+YOU DO NOT:
+- Take bookings directly
+- Collect customer emails or phone numbers
+- Schedule appointments
 
-EMAIL VERIFICATION:
-- Email addresses are easy to mishear. ALWAYS spell them back.
-- Use NATO phonetic alphabet if helpful (Alpha, Bravo, Charlie, etc.)
-- Ask them to spell it out if you're unsure: "Could you spell that email for me?"
-- Common mishearings: "dot com" vs "dot calm", numbers vs letters (5 vs S)
-- Only proceed with booking once email is confirmed
+WHEN CUSTOMERS WANT TO BOOK:
+Say something like: "I'd love to help you book! Just tap the 'Text Booking' link below this chat - it'll take you right to our booking page where you can pick your perfect time slot."
+
+Or: "To book an appointment, you can use the Text Booking button on this page. It's super easy and you'll be able to choose from all available times."
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
 - If you don't understand, ask them to repeat
 - Keep responses SHORT - this is a voice call
-- Be personable and use their name when provided
-- Always confirm booking details before finalizing`;
+- Be personable and helpful
+- Always guide booking requests to the Text Booking link`;
 
       const voiceMap: Record<string, string> = {
         salon: "EXAVITQu4vr4xnSDxMaL",
@@ -158,69 +175,28 @@ IMPORTANT:
               {
                 type: "function",
                 function: {
-                  name: "get_available_slots",
-                  description: "Get available time slots for a specific date and service",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      date: {
-                        type: "string",
-                        description: "The date in YYYY-MM-DD format"
-                      },
-                      serviceName: {
-                        type: "string",
-                        description: "Optional service name to calculate duration-specific availability"
-                      }
-                    },
-                    required: ["date"]
-                  }
-                }
-              },
-              {
-                type: "function",
-                function: {
-                  name: "create_booking",
-                  description: "Create a new booking for a customer",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      customerName: {
-                        type: "string",
-                        description: "The customer's full name"
-                      },
-                      customerEmail: {
-                        type: "string",
-                        description: "The customer's email address"
-                      },
-                      customerPhone: {
-                        type: "string",
-                        description: "The customer's phone number (optional)"
-                      },
-                      serviceName: {
-                        type: "string",
-                        description: "The name of the service to book"
-                      },
-                      date: {
-                        type: "string",
-                        description: "The booking date in YYYY-MM-DD format"
-                      },
-                      time: {
-                        type: "string",
-                        description: "The booking time in HH:MM format (24-hour)"
-                      }
-                    },
-                    required: ["customerName", "customerEmail", "serviceName", "date", "time"]
-                  }
-                }
-              },
-              {
-                type: "function",
-                function: {
                   name: "list_services",
                   description: "List all available services with their prices and durations",
                   parameters: {
                     type: "object",
                     properties: {},
+                    required: []
+                  }
+                }
+              },
+              {
+                type: "function",
+                function: {
+                  name: "get_business_info",
+                  description: "Get detailed information about the business including hours, location, and FAQs",
+                  parameters: {
+                    type: "object",
+                    properties: {
+                      infoType: {
+                        type: "string",
+                        description: "Type of info: 'hours', 'location', 'about', 'faq', or 'all'"
+                      }
+                    },
                     required: []
                   }
                 }
@@ -231,7 +207,7 @@ IMPORTANT:
             provider: "11labs",
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
-          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
+          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to tell you all about our services and answer any questions. What would you like to know?`,
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
             : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
@@ -270,13 +246,63 @@ IMPORTANT:
             }
           }
 
-          else if (toolCall.name === "get_available_slots") {
+          else if (toolCall.name === "get_business_info") {
+            const { infoType } = toolCall.parameters;
+            const business = await storage.getBusinessBySlug(businessSlug || "");
+            
+            if (business) {
+              const knowledge = await storage.getBusinessKnowledge(business.id);
+              
+              if (knowledge) {
+                let faqs: any[] = [];
+                try {
+                  faqs = knowledge.faqJson ? JSON.parse(knowledge.faqJson) : [];
+                } catch {}
+
+                if (infoType === 'hours') {
+                  result = { hours: knowledge.hoursOfOperation || "Please contact us for our current hours." };
+                } else if (infoType === 'location') {
+                  result = { location: knowledge.locationInfo || "Please contact us for location details." };
+                } else if (infoType === 'about') {
+                  result = { about: knowledge.aboutBusiness || "We are a professional service business." };
+                } else if (infoType === 'faq') {
+                  result = { 
+                    faqs: faqs.length > 0 ? faqs : [{ question: "How do I book?", answer: "Use the Text Booking link on this page!" }]
+                  };
+                } else {
+                  result = {
+                    about: knowledge.aboutBusiness || "",
+                    hours: knowledge.hoursOfOperation || "",
+                    location: knowledge.locationInfo || "",
+                    additionalInfo: knowledge.additionalInfo || "",
+                    faqs: faqs
+                  };
+                }
+              } else {
+                result = { 
+                  message: "Business information is being set up. Please ask about our services or use the Text Booking link to book.",
+                  bookingTip: "To book an appointment, use the Text Booking link on this page."
+                };
+              }
+            } else {
+              result = { error: "Business not found" };
+            }
+          }
+
+          else if (toolCall.name === "get_available_slots_deprecated") {
+            // This tool is deprecated - we no longer do bookings via voice
+            result = { 
+              message: "To check availability and book, please use the Text Booking link on this page. It will show you all available times!",
+              action: "direct_to_text_booking"
+            };
+          }
+
+          else if (toolCall.name === "get_available_slots_old") {
             const { date, serviceName } = toolCall.parameters;
             const business = await storage.getBusinessBySlug(businessSlug || "");
             
             if (business) {
               const services = await storage.getServices(business.id);
-              // Use first service if none specified
               const targetServiceName = serviceName || (services[0]?.name || "Service");
               const service = services.find(s => 
                 s.name.toLowerCase().includes(targetServiceName.toLowerCase()) ||
@@ -285,7 +311,6 @@ IMPORTANT:
               
               let availability = await storage.getAvailability(business.id);
               
-              // If no availability records exist, create default ones (Mon-Fri 9-5, Sat 10-2)
               if (!availability || availability.length === 0) {
                 console.log(`[Vapi] No availability found for ${business.id}, creating defaults`);
                 for (let day = 1; day <= 5; day++) {

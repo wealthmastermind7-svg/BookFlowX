@@ -2004,6 +2004,75 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // === BUSINESS KNOWLEDGE API ===
+  
+  // Get business knowledge (for voice assistant)
+  app.get("/api/businesses/:businessId/knowledge", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const knowledge = await storage.getBusinessKnowledge(businessId);
+      res.json({ knowledge: knowledge || null });
+    } catch (error) {
+      console.error("[Knowledge] Error getting business knowledge:", error);
+      res.status(500).json({ error: "Failed to get business knowledge" });
+    }
+  });
+
+  // Update business knowledge
+  app.put("/api/businesses/:businessId/knowledge", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { websiteUrl, aboutBusiness, servicesDescription, hoursOfOperation, locationInfo, faqJson, additionalInfo } = req.body;
+      
+      const knowledge = await storage.createOrUpdateBusinessKnowledge({
+        businessId,
+        websiteUrl,
+        aboutBusiness,
+        servicesDescription,
+        hoursOfOperation,
+        locationInfo,
+        faqJson: typeof faqJson === 'string' ? faqJson : JSON.stringify(faqJson || []),
+        additionalInfo,
+      });
+      
+      res.json({ knowledge });
+    } catch (error) {
+      console.error("[Knowledge] Error updating business knowledge:", error);
+      res.status(500).json({ error: "Failed to update business knowledge" });
+    }
+  });
+
+  // Scrape website and extract business info
+  app.post("/api/businesses/:businessId/knowledge/scrape", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { websiteUrl } = req.body;
+      
+      if (!websiteUrl) {
+        return res.status(400).json({ error: "Website URL is required" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const { scrapeAndExtract } = await import("./websiteScraper");
+      const scrapedInfo = await scrapeAndExtract(websiteUrl, business.name);
+      
+      const knowledge = await storage.createOrUpdateBusinessKnowledge({
+        businessId,
+        websiteUrl,
+        ...scrapedInfo,
+      });
+      
+      res.json({ knowledge, scraped: true });
+    } catch (error) {
+      console.error("[Knowledge] Error scraping website:", error);
+      res.status(500).json({ error: "Failed to scrape website. Please check the URL and try again." });
+    }
+  });
+
   // === VOICE SUBSCRIPTION API ===
 
   // Get voice subscription and usage for a business

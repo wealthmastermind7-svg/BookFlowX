@@ -14,6 +14,7 @@ import {
   workflowLogs,
   voiceSubscriptions,
   voiceCallLogs,
+  businessKnowledge,
   type User,
   type InsertUser,
   type Business,
@@ -44,6 +45,8 @@ import {
   type InsertVoiceSubscription,
   type VoiceCallLog,
   type InsertVoiceCallLog,
+  type BusinessKnowledge,
+  type InsertBusinessKnowledge,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -137,6 +140,10 @@ export interface IStorage {
   createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog>;
   updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined>;
   clearWorkflows(businessId: string): Promise<void>;
+  
+  // Business Knowledge
+  getBusinessKnowledge(businessId: string): Promise<BusinessKnowledge | undefined>;
+  createOrUpdateBusinessKnowledge(knowledge: InsertBusinessKnowledge): Promise<BusinessKnowledge>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1184,6 +1191,34 @@ export class DatabaseStorage implements IStorage {
       totalCalls: result[0]?.totalCalls || 0,
       bookingsCreated: result[0]?.bookingsCreated || 0,
     };
+  }
+
+  // Business Knowledge
+  async getBusinessKnowledge(businessId: string): Promise<BusinessKnowledge | undefined> {
+    const [knowledge] = await db
+      .select()
+      .from(businessKnowledge)
+      .where(eq(businessKnowledge.businessId, businessId));
+    return knowledge || undefined;
+  }
+
+  async createOrUpdateBusinessKnowledge(knowledge: InsertBusinessKnowledge): Promise<BusinessKnowledge> {
+    const existing = await this.getBusinessKnowledge(knowledge.businessId);
+    
+    if (existing) {
+      const [updated] = await db
+        .update(businessKnowledge)
+        .set({ ...knowledge, updatedAt: new Date() })
+        .where(eq(businessKnowledge.businessId, knowledge.businessId))
+        .returning();
+      return updated;
+    }
+    
+    const [created] = await db
+      .insert(businessKnowledge)
+      .values(knowledge)
+      .returning();
+    return created;
   }
 }
 
