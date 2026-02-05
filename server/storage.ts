@@ -1239,6 +1239,14 @@ export class DatabaseStorage implements IStorage {
       .orderBy(desc(trainingData.createdAt));
   }
 
+  async getTrainingDataByAgent(agentId: string): Promise<TrainingData[]> {
+    return db
+      .select()
+      .from(trainingData)
+      .where(eq(trainingData.agentId, agentId))
+      .orderBy(desc(trainingData.createdAt));
+  }
+
   async createTrainingData(data: InsertTrainingData): Promise<TrainingData> {
     const [created] = await db.insert(trainingData).values(data).returning();
     return created;

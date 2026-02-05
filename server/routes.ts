@@ -2162,72 +2162,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === TRAINING DATA API (Multi-page crawl, Q&A pairs) ===
 
-  // Get all training data for a business
-  app.get("/api/businesses/:businessId/training", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+// Helper function to extract text from HTML
+function extractTextFromHtml(html: string): string {
+  return html
+    .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
+    .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
+    .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, ' ')
+    .trim()
+    .substring(0, 50000);
+}
+
+// Helper to extract internal links from HTML
+function extractInternalLinks(html: string, baseUrl: string): string[] {
+  try {
+    const urlObj = new URL(baseUrl);
+    const domain = urlObj.origin;
+    const links: string[] = [];
+    const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
+    let match;
+    while ((match = linkRegex.exec(html)) !== null) {
+      let href = match[1];
+      if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
+      if (href.startsWith('/')) href = domain + href;
+      else if (!href.startsWith('http')) href = domain + '/' + href;
+      try {
+        const linkUrl = new URL(href);
+        if (linkUrl.origin === domain && !links.includes(linkUrl.href)) {
+          links.push(linkUrl.href.split('#')[0].split('?')[0]);
+        }
+      } catch {}
+    }
+    return [...new Set(links)];
+  } catch {
+    return [];
+  }
+}
+
+export function registerTrainingRoutes(app: Express) {
+  // Get training data for specific agent
+  app.get("/api/agents/:agentId/training", async (req: Request, res: Response) => {
     try {
-      const { businessId } = req.params;
-      const data = await storage.getTrainingData(businessId);
+      const { agentId } = req.params;
+      const data = await storage.getTrainingDataByAgent(agentId);
       res.json(data);
     } catch (error) {
-      console.error("[Training] Error fetching training data:", error);
+      console.error("Error fetching agent training data:", error);
       res.status(500).json({ error: "Failed to fetch training data" });
     }
   });
 
-  // Multi-page crawl endpoint (inline crawl logic for reliability)
-  app.post("/api/businesses/:businessId/training/crawl", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+  // Add Q&A pair for agent training
+  app.post("/api/agents/:agentId/training/qa", async (req: Request, res: Response) => {
     try {
-      const { businessId } = req.params;
-      const { url, maxPages = 10 } = req.body;
-      
+      const { agentId } = req.params;
+      const { question, answer, businessId } = req.body;
+
+      if (!question || !answer) {
+        return res.status(400).json({ error: "Question and answer are required" });
+      }
+
+      const data = await storage.createTrainingData({
+        businessId,
+        agentId,
+        type: "qa_pair",
+        question,
+        answer,
+        status: "active"
+      });
+
+      res.status(201).json(data);
+    } catch (error) {
+      console.error("Error adding Q&A pair:", error);
+      res.status(500).json({ error: "Failed to add Q&A pair" });
+    }
+  });
+
+  // Crawl website for agent training (supports multi-page)
+  app.post("/api/agents/:agentId/training/crawl", async (req: Request, res: Response) => {
+    try {
+      const { agentId } = req.params;
+      const { url, maxPages = 10, businessId } = req.body;
+
       if (!url) {
         return res.status(400).json({ error: "URL is required" });
-      }
-
-      // Helper to extract text from HTML
-      function extractTextFromHtml(html: string): string {
-        return html
-          .replace(/<script[^>]*>[\s\S]*?<\/script>/gi, '')
-          .replace(/<style[^>]*>[\s\S]*?<\/style>/gi, '')
-          .replace(/<nav[^>]*>[\s\S]*?<\/nav>/gi, '')
-          .replace(/<footer[^>]*>[\s\S]*?<\/footer>/gi, '')
-          .replace(/<header[^>]*>[\s\S]*?<\/header>/gi, '')
-          .replace(/<[^>]+>/g, ' ')
-          .replace(/&nbsp;/g, ' ')
-          .replace(/&amp;/g, '&')
-          .replace(/&lt;/g, '<')
-          .replace(/&gt;/g, '>')
-          .replace(/&quot;/g, '"')
-          .replace(/&#39;/g, "'")
-          .replace(/\s+/g, ' ')
-          .trim()
-          .substring(0, 50000);
-      }
-
-      // Helper to extract internal links
-      function extractInternalLinks(html: string, baseUrl: string): string[] {
-        try {
-          const urlObj = new URL(baseUrl);
-          const domain = urlObj.origin;
-          const links: string[] = [];
-          const linkRegex = /<a[^>]+href=["']([^"']+)["']/gi;
-          let match;
-          while ((match = linkRegex.exec(html)) !== null) {
-            let href = match[1];
-            if (href.startsWith('#') || href.startsWith('mailto:') || href.startsWith('tel:') || href.startsWith('javascript:')) continue;
-            if (href.startsWith('/')) href = domain + href;
-            else if (!href.startsWith('http')) href = domain + '/' + href;
-            try {
-              const linkUrl = new URL(href);
-              if (linkUrl.origin === domain && !links.includes(linkUrl.href)) {
-                links.push(linkUrl.href.split('#')[0].split('?')[0]);
-              }
-            } catch {}
-          }
-          return [...new Set(links)];
-        } catch {
-          return [];
-        }
       }
 
       const crawledUrls = new Set<string>();
@@ -2235,7 +2262,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const results: any[] = [];
       const pageLimit = Math.min(maxPages, 50);
 
-      console.log(`[Training] Starting multi-page crawl from: ${url} (max ${pageLimit} pages)`);
+      console.log(`Starting multi-page crawl from: ${url} (max ${pageLimit} pages)`);
 
       while (urlsToCrawl.length > 0 && crawledUrls.size < pageLimit) {
         const currentUrl = urlsToCrawl.shift()!;
@@ -2243,7 +2270,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         crawledUrls.add(currentUrl);
 
         try {
-          console.log(`[Training] Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
+          console.log(`Crawling page ${crawledUrls.size}/${pageLimit}: ${currentUrl}`);
           const response = await fetch(currentUrl, {
             headers: { 'User-Agent': 'Mozilla/5.0 (compatible; MyBot/1.0)' },
           });
@@ -2260,6 +2287,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           const data = await storage.createTrainingData({
             businessId,
+            agentId,
             type: "website_crawl",
             title,
             content: textContent,
@@ -2278,59 +2306,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         } catch (err) {
-          console.log(`[Training] Failed to crawl ${currentUrl}:`, err);
+          console.log(`Failed to crawl ${currentUrl}:`, err);
         }
       }
 
-      console.log(`[Training] Crawl complete: ${results.length} pages saved`);
+      console.log(`Crawl complete: ${results.length} pages saved`);
 
       res.status(201).json({
         pagesCrawled: results.length,
         results,
         message: `Successfully crawled ${results.length} page(s) from ${url}`,
       });
-    } catch (error: any) {
-      console.error("[Training] Error crawling website:", error);
-      res.status(500).json({ error: error.message || "Failed to crawl website" });
-    }
-  });
-
-  // Add Q&A pair
-  app.post("/api/businesses/:businessId/training/qa", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { businessId } = req.params;
-      const { question, answer } = req.body;
-      
-      if (!question || !answer) {
-        return res.status(400).json({ error: "Question and answer are required" });
-      }
-      
-      const data = await storage.createTrainingData({
-        businessId,
-        type: "qa_pair",
-        question,
-        answer,
-        status: "active",
-      });
-      
-      res.status(201).json(data);
     } catch (error) {
-      console.error("[Training] Error adding Q&A pair:", error);
-      res.status(500).json({ error: "Failed to add Q&A pair" });
+      console.error("Error crawling website:", error);
+      res.status(500).json({ error: "Failed to crawl website" });
     }
   });
 
   // Delete training data
-  app.delete("/api/businesses/:businessId/training/:id", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+  app.delete("/api/training/:id", async (req: Request, res: Response) => {
     try {
       const { id } = req.params;
       await storage.deleteTrainingData(id);
       res.status(204).send();
     } catch (error) {
-      console.error("[Training] Error deleting training data:", error);
+      console.error("Error deleting training data:", error);
       res.status(500).json({ error: "Failed to delete training data" });
     }
   });
+}
 
   // === VOICE SUBSCRIPTION API ===
 

@@ -288,17 +288,14 @@ export const googleCalendarTokens = pgTable("google_calendar_tokens", {
 
 // Training data table (multi-page crawl results, Q&A pairs, manual text)
 export const trainingData = pgTable("training_data", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  businessId: varchar("business_id")
-    .notNull()
-    .references(() => businesses.id, { onDelete: "cascade" }),
-  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'manual_text'
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  agentId: varchar("agent_id"),
+  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'document'
   question: text("question"),
   answer: text("answer"),
-  content: text("content"),
-  title: text("title"),
+  content: text("content"), // For website crawl content
+  title: text("title"), // Page title for crawled content
   sourceUrl: text("source_url"),
   status: text("status").default("active").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
