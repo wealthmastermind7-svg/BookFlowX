@@ -564,7 +564,7 @@ export default function SettingsScreen() {
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
                 <ThemedText style={styles.voiceCardTitle}>Voice Assistant Info</ThemedText>
-                <ThemedText style={styles.voiceCardDesc}>Manage AI knowledge base</ThemedText>
+                <ThemedText style={styles.voiceCardDesc}>Configure AI training data</ThemedText>
               </View>
               <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.5)" />
             </View>

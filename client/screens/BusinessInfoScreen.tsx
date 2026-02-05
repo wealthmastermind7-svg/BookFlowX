@@ -74,7 +74,7 @@ export default function BusinessInfoScreen() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [scraping, setScraping] = useState(false);
+  const [training, setTraining] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
 
   const [websiteUrl, setWebsiteUrl] = useState("");
@@ -115,7 +115,7 @@ export default function BusinessInfoScreen() {
     }
   };
 
-  const handleScrapeWebsite = async () => {
+  const handleTrainFromWebsite = async () => {
     if (!websiteUrl.trim()) {
       Alert.alert("Website Required", "Please enter your website URL first.");
       return;
@@ -127,7 +127,7 @@ export default function BusinessInfoScreen() {
       setWebsiteUrl(url);
     }
 
-    setScraping(true);
+    setTraining(true);
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
@@ -147,14 +147,14 @@ export default function BusinessInfoScreen() {
         }
         setHasChanges(false);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-        Alert.alert("Success", "We've extracted information from your website. Review and edit as needed.");
+        Alert.alert("Training Complete", "We've learned information from your website. Review and edit as needed.");
       }
     } catch (error: any) {
-      console.error("Error scraping website:", error);
+      console.error("Error training from website:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
-      Alert.alert("Scraping Failed", error.message || "Could not extract information from the website. Please try again or enter details manually.");
+      Alert.alert("Training Failed", error.message || "Could not learn information from the website. Please try again or enter details manually.");
     } finally {
-      setScraping(false);
+      setTraining(false);
     }
   };
 
@@ -233,10 +233,10 @@ export default function BusinessInfoScreen() {
           <GlassPanel style={styles.section}>
             <View style={styles.sectionHeader}>
               <Feather name="globe" size={18} color="#fff" />
-              <ThemedText style={styles.sectionTitle}>Website Import</ThemedText>
+              <ThemedText style={styles.sectionTitle}>Website Training</ThemedText>
             </View>
             <ThemedText style={styles.sectionDescription}>
-              Enter your website URL and we'll automatically extract business information.
+              Enter your website URL and we'll automatically train your assistant on your business.
             </ThemedText>
             <TextInput
               style={styles.textInput}
@@ -249,17 +249,17 @@ export default function BusinessInfoScreen() {
               keyboardType="url"
             />
             <Pressable
-              onPress={handleScrapeWebsite}
-              disabled={scraping || !websiteUrl.trim()}
-              style={[styles.actionButton, (scraping || !websiteUrl.trim()) && styles.actionButtonDisabled]}
+              onPress={handleTrainFromWebsite}
+              disabled={training || !websiteUrl.trim()}
+              style={[styles.actionButton, (training || !websiteUrl.trim()) && styles.actionButtonDisabled]}
             >
-              {scraping ? (
+              {training ? (
                 <ActivityIndicator size="small" color="#fff" />
               ) : (
                 <Feather name="download" size={18} color="#fff" />
               )}
               <ThemedText style={styles.actionButtonText}>
-                {scraping ? "Extracting..." : "Import from Website"}
+                {training ? "Training..." : "Train from Website"}
               </ThemedText>
             </Pressable>
           </GlassPanel>

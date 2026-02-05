@@ -2068,10 +2068,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       res.json({ knowledge, scraped: true });
     } catch (error: any) {
-      console.error("[Knowledge] Error scraping website:", error);
+      console.error("[Knowledge] Error training from website:", error);
       const message = error.message?.includes("Failed to fetch") 
         ? "Could not reach the website. Please ensure the URL is correct and public."
-        : "Failed to extract information from the website. You can still enter details manually.";
+        : "Failed to learn from the website. You can still enter details manually.";
       res.status(500).json({ error: message });
     }
   });
