@@ -44,6 +44,7 @@ function VoiceAssistantButton({ slug }: { slug: string }) {
 
   const checkVoiceStatus = async () => {
     try {
+      if (!slug || slug === "default") return;
       const res = await fetch(`${getApiUrl()}api/public/businesses/${slug}/voice-status`);
       if (res.ok) {
         const data = await res.json();
