@@ -14,6 +14,7 @@ import {
   workflowLogs,
   voiceSubscriptions,
   voiceCallLogs,
+  trainingData,
   type User,
   type InsertUser,
   type Business,
@@ -44,6 +45,8 @@ import {
   type InsertVoiceSubscription,
   type VoiceCallLog,
   type InsertVoiceCallLog,
+  type TrainingData,
+  type InsertTrainingData,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -137,6 +140,21 @@ export interface IStorage {
   createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog>;
   updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined>;
   clearWorkflows(businessId: string): Promise<void>;
+
+  // Assistant Training Data
+  getTrainingData(businessId: string): Promise<TrainingData[]>;
+  createTrainingData(data: InsertTrainingData): Promise<TrainingData>;
+  deleteTrainingData(id: string): Promise<void>;
+
+  // Voice Subscriptions
+  getVoiceSubscription(businessId: string): Promise<VoiceSubscription | undefined>;
+  createVoiceSubscription(sub: InsertVoiceSubscription): Promise<VoiceSubscription>;
+  updateVoiceSubscription(businessId: string, updates: Partial<InsertVoiceSubscription>): Promise<VoiceSubscription | undefined>;
+  incrementVoiceMinutes(businessId: string, minutes: number): Promise<void>;
+
+  // Voice Call Logs
+  createVoiceCallLog(log: InsertVoiceCallLog): Promise<VoiceCallLog>;
+  getVoiceCallLogs(businessId: string): Promise<VoiceCallLog[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -555,6 +573,186 @@ export class DatabaseStorage implements IStorage {
       .where(eq(pushTokens.token, token));
   }
 
+  // Quick Sales
+  async getQuickSales(businessId: string): Promise<QuickSale[]> {
+    return db.select().from(quickSales).where(eq(quickSales.businessId, businessId));
+  }
+
+  async getQuickSale(id: string): Promise<QuickSale | undefined> {
+    const [quickSale] = await db.select().from(quickSales).where(eq(quickSales.id, id));
+    return quickSale || undefined;
+  }
+
+  async createQuickSale(quickSale: InsertQuickSale): Promise<QuickSale> {
+    const [created] = await db.insert(quickSales).values(quickSale).returning();
+    return created;
+  }
+
+  async updateQuickSale(id: string, updates: Partial<InsertQuickSale>): Promise<QuickSale | undefined> {
+    const [updated] = await db
+      .update(quickSales)
+      .set(updates)
+      .where(eq(quickSales.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  // Workflows
+  async getWorkflows(businessId: string): Promise<Workflow[]> {
+    return db.select().from(workflows).where(eq(workflows.businessId, businessId));
+  }
+
+  async getWorkflow(id: string): Promise<Workflow | undefined> {
+    const [workflow] = await db.select().from(workflows).where(eq(workflows.id, id));
+    return workflow || undefined;
+  }
+
+  async getWorkflowsByTrigger(businessId: string, triggerType: string): Promise<Workflow[]> {
+    return db
+      .select()
+      .from(workflows)
+      .where(and(eq(workflows.businessId, businessId), eq(workflows.triggerType, triggerType), eq(workflows.isActive, true)));
+  }
+
+  async createWorkflow(workflow: InsertWorkflow): Promise<Workflow> {
+    const [created] = await db.insert(workflows).values(workflow).returning();
+    return created;
+  }
+
+  async updateWorkflow(id: string, updates: Partial<InsertWorkflow>): Promise<Workflow | undefined> {
+    const [updated] = await db
+      .update(workflows)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(workflows.id, id))
+      .returning();
+    return updated || undefined;
+  }
+
+  async deleteWorkflow(id: string): Promise<void> {
+    await db.delete(workflows).where(eq(workflows.id, id));
+  }
+
+  // Business Themes
+  async getBusinessTheme(businessId: string): Promise<BusinessTheme | undefined> {
+    const [theme] = await db.select().from(businessThemes).where(eq(businessThemes.businessId, businessId));
+    return theme || undefined;
+  }
+
+  async createOrUpdateBusinessTheme(theme: InsertBusinessTheme): Promise<BusinessTheme> {
+    const existing = await this.getBusinessTheme(theme.businessId);
+    if (existing) {
+      const [updated] = await db
+        .update(businessThemes)
+        .set({ ...theme, updatedAt: new Date() })
+        .where(eq(businessThemes.id, existing.id))
+        .returning();
+      return updated;
+    }
+    const [created] = await db.insert(businessThemes).values(theme).returning();
+    return created;
+  }
+
+  // API Keys
+  async getApiKeys(businessId: string): Promise<ApiKey[]> {
+    return db.select().from(apiKeys).where(eq(apiKeys.businessId, businessId));
+  }
+
+  async getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined> {
+    const [key] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
+    return key || undefined;
+  }
+
+  async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
+    const [created] = await db.insert(apiKeys).values(apiKey).returning();
+    return created;
+  }
+
+  async updateApiKeyLastUsed(id: string): Promise<void> {
+    await db.update(apiKeys).set({ lastUsedAt: new Date() }).where(eq(apiKeys.id, id));
+  }
+
+  async deleteApiKey(id: string): Promise<void> {
+    await db.delete(apiKeys).where(eq(apiKeys.id, id));
+  }
+
+  // Workflow Logs
+  async getWorkflowLogs(workflowId: string): Promise<WorkflowLog[]> {
+    return db.select().from(workflowLogs).where(eq(workflowLogs.workflowId, workflowId)).orderBy(desc(workflowLogs.createdAt));
+  }
+
+  async createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog> {
+    const [created] = await db.insert(workflowLogs).values(log).returning();
+    return created;
+  }
+
+  async updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined> {
+    const [updated] = await db.update(workflowLogs).set(updates).where(eq(workflowLogs.id, id)).returning();
+    return updated || undefined;
+  }
+
+  async clearWorkflows(businessId: string): Promise<void> {
+    const bizWorkflows = await this.getWorkflows(businessId);
+    for (const w of bizWorkflows) {
+      await db.delete(workflowLogs).where(eq(workflowLogs.workflowId, w.id));
+      await db.delete(workflows).where(eq(workflows.id, w.id));
+    }
+  }
+
+  // Assistant Training Data
+  async getTrainingData(businessId: string): Promise<TrainingData[]> {
+    return db
+      .select()
+      .from(trainingData)
+      .where(and(eq(trainingData.businessId, businessId), eq(trainingData.status, "active")))
+      .orderBy(desc(trainingData.createdAt));
+  }
+
+  async createTrainingData(data: InsertTrainingData): Promise<TrainingData> {
+    const [created] = await db.insert(trainingData).values(data).returning();
+    return created;
+  }
+
+  async deleteTrainingData(id: string): Promise<void> {
+    await db.delete(trainingData).where(eq(trainingData.id, id));
+  }
+
+  // Voice Subscriptions
+  async getVoiceSubscription(businessId: string): Promise<VoiceSubscription | undefined> {
+    const [sub] = await db.select().from(voiceSubscriptions).where(eq(voiceSubscriptions.businessId, businessId));
+    return sub || undefined;
+  }
+
+  async createVoiceSubscription(sub: InsertVoiceSubscription): Promise<VoiceSubscription> {
+    const [created] = await db.insert(voiceSubscriptions).values(sub).returning();
+    return created;
+  }
+
+  async updateVoiceSubscription(businessId: string, updates: Partial<InsertVoiceSubscription>): Promise<VoiceSubscription | undefined> {
+    const [updated] = await db
+      .update(voiceSubscriptions)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(voiceSubscriptions.businessId, businessId))
+      .returning();
+    return updated || undefined;
+  }
+
+  async incrementVoiceMinutes(businessId: string, minutes: number): Promise<void> {
+    await db
+      .update(voiceSubscriptions)
+      .set({ minutesUsed: sql`${voiceSubscriptions.minutesUsed} + ${minutes}` })
+      .where(eq(voiceSubscriptions.businessId, businessId));
+  }
+
+  // Voice Call Logs
+  async createVoiceCallLog(log: InsertVoiceCallLog): Promise<VoiceCallLog> {
+    const [created] = await db.insert(voiceCallLogs).values(log).returning();
+    return created;
+  }
+
+  async getVoiceCallLogs(businessId: string): Promise<VoiceCallLog[]> {
+    return db.select().from(voiceCallLogs).where(eq(voiceCallLogs.businessId, businessId)).orderBy(desc(voiceCallLogs.createdAt));
+  }
+
   // Demo Data
   async initializeDemoData(businessId: string, businessType: string = "salon"): Promise<void> {
     // Clear existing demo data before loading new type
@@ -568,9 +766,7 @@ export class DatabaseStorage implements IStorage {
       const existingCustomers = await this.getCustomers(businessId);
       for (const customer of existingCustomers) {
         // Delete bookings first (due to foreign key constraints)
-        const customerBookings = await db
-          .delete(bookings)
-          .where(eq(bookings.customerId, customer.id));
+        await db.delete(bookings).where(eq(bookings.customerId, customer.id));
         // Then delete customer
         await db.delete(customers).where(eq(customers.id, customer.id));
       }
@@ -613,577 +809,78 @@ export class DatabaseStorage implements IStorage {
         ],
       },
       autodetailing: {
-        name: "Premium Auto Detail",
+        name: "Elite Auto Spa",
         services: [
-          { name: "Express Exterior", duration: 40, price: 4900, description: "Fast exterior refresh" },
-          { name: "Gold Detail", duration: 75, price: 8900, description: "Interior + exterior clean" },
-          { name: "Platinum Detail", duration: 120, price: 14900, description: "Deep detail with protection" },
-          { name: "Pet Hair Removal", duration: 30, price: 4000, description: "Specialized pet hair removal" },
+          { name: "Interior Detail", duration: 90, price: 12000, description: "Deep clean of all interior surfaces" },
+          { name: "Exterior Polish", duration: 120, price: 15000, description: "Premium wash and machine polish" },
+          { name: "Full Ceramic", duration: 240, price: 45000, description: "Full correction and ceramic coating" },
+          { name: "Express Wash", duration: 45, price: 4500, description: "Hand wash and vacuum" },
         ],
         customers: [
-          { name: "James Rodriguez", email: "delivered+james@resend.dev", phone: "555-0301" },
-          { name: "Patricia Taylor", email: "delivered+patricia@resend.dev", phone: "555-0302" },
-          { name: "Christopher Garcia", email: "delivered+chris@resend.dev", phone: "555-0303" },
-          { name: "Nancy Davis", email: "delivered+nancy@resend.dev", phone: "555-0304" },
+          { name: "James Bond", email: "delivered+james@resend.dev", phone: "555-0301" },
+          { name: "Sarah Connor", email: "delivered+sarah@resend.dev", phone: "555-0302" },
+          { name: "Bruce Wayne", email: "delivered+bruce@resend.dev", phone: "555-0303" },
+          { name: "Ellen Ripley", email: "delivered+ellen@resend.dev", phone: "555-0304" },
         ],
       },
       fitness: {
-        name: "FitZone Gym",
+        name: "Power Fitness Studio",
         services: [
-          { name: "Single Training Session", duration: 60, price: 7500, description: "One-on-one personal training" },
-          { name: "Transformation Pack", duration: 60, price: 6500, description: "Best value training package (5 sessions)" },
-          { name: "Elite Coaching", duration: 90, price: 12000, description: "Advanced performance coaching" },
-          { name: "Group Fitness Class", duration: 45, price: 2500, description: "Led fitness class" },
+          { name: "Personal Training", duration: 60, price: 8500, description: "One-on-one custom workout" },
+          { name: "Small Group HIIT", duration: 45, price: 3500, description: "High intensity interval training" },
+          { name: "Yoga Flow", duration: 75, price: 2500, description: "Guided Vinyasa session" },
+          { name: "Nutrition Coaching", duration: 30, price: 5000, description: "Meal planning and strategy" },
         ],
         customers: [
-          { name: "Andrew Jackson", email: "delivered+andrew.f@resend.dev", phone: "555-0401" },
-          { name: "Susan Miller", email: "delivered+susan.f@resend.dev", phone: "555-0402" },
-          { name: "Thomas Moore", email: "delivered+thomas.f@resend.dev", phone: "555-0403" },
-          { name: "Betty Anderson", email: "delivered+betty.f@resend.dev", phone: "555-0404" },
+          { name: "Rocky Balboa", email: "delivered+rocky@resend.dev", phone: "555-0401" },
+          { name: "Lara Croft", email: "delivered+lara@resend.dev", phone: "555-0402" },
+          { name: "Diana Prince", email: "delivered+diana@resend.dev", phone: "555-0403" },
+          { name: "Steve Rogers", email: "delivered+steve@resend.dev", phone: "555-0404" },
         ],
       },
       coaching: {
         name: "Elite Coaching Academy",
         services: [
-          { name: "Quick Help Session", duration: 30, price: 4000, description: "Targeted help on one topic" },
-          { name: "Standard Coaching", duration: 60, price: 7000, description: "Structured learning session" },
-          { name: "Exam Prep Intensive", duration: 90, price: 11000, description: "High-impact exam preparation" },
-          { name: "Monthly Membership", duration: 2880, price: 35000, description: "Unlimited access to all sessions" },
+          { name: "Executive Coaching", duration: 60, price: 25000, description: "Leadership strategy for managers" },
+          { name: "Life Strategy", duration: 90, price: 15000, description: "Personal development planning" },
+          { name: "Career Transition", duration: 45, price: 9500, description: "Resume and interview prep" },
+          { name: "Public Speaking", duration: 60, price: 12500, description: "Presence and delivery workshop" },
         ],
         customers: [
-          { name: "David Thompson", email: "delivered+david.c@resend.dev", phone: "555-0501" },
-          { name: "Karen White", email: "delivered+karen.c@resend.dev", phone: "555-0502" },
-          { name: "Steven Harris", email: "delivered+steven.c@resend.dev", phone: "555-0503" },
-          { name: "Mary Clark", email: "delivered+mary.c@resend.dev", phone: "555-0504" },
-        ],
-      },
-      photography: {
-        name: "Studio Lens Photography",
-        services: [
-          { name: "Mini Shoot", duration: 30, price: 9900, description: "Quick professional photo session" },
-          { name: "Standard Studio Session", duration: 60, price: 18000, description: "Portrait or branding shoot" },
-          { name: "Premium Creative Session", duration: 120, price: 32000, description: "Styled, high-end photo experience" },
-          { name: "Retouching Package", duration: 30, price: 5000, description: "Professional photo retouching" },
-        ],
-        customers: [
-          { name: "Lisa Anderson", email: "delivered+lisa@resend.dev", phone: "555-0601" },
-          { name: "Kevin Martin", email: "delivered+kevin@resend.dev", phone: "555-0602" },
-          { name: "Rachel Green", email: "delivered+rachel@resend.dev", phone: "555-0603" },
-          { name: "Jason Hall", email: "delivered+jason@resend.dev", phone: "555-0604" },
-        ],
-      },
-      consulting: {
-        name: "Strategy Consulting Partners",
-        services: [
-          { name: "Discovery Call", duration: 30, price: 6000, description: "Initial consultation" },
-          { name: "Strategy Session", duration: 60, price: 12000, description: "Deep-dive business session" },
-          { name: "Implementation Workshop", duration: 120, price: 24000, description: "Hands-on execution support" },
-          { name: "Quarterly Review", duration: 90, price: 18000, description: "Progress review and planning" },
-        ],
-        customers: [
-          { name: "Daniel Scott", email: "delivered+daniel@resend.dev", phone: "555-0701" },
-          { name: "Rebecca King", email: "delivered+rebecca@resend.dev", phone: "555-0702" },
-          { name: "Matthew Wright", email: "delivered+matthew@resend.dev", phone: "555-0703" },
-          { name: "Megan Lopez", email: "delivered+megan@resend.dev", phone: "555-0704" },
-        ],
-      },
-      veterinary: {
-        name: "Happy Paws Veterinary",
-        services: [
-          { name: "General Check-Up", duration: 30, price: 8500, description: "Routine health examination" },
-          { name: "Vaccination Visit", duration: 20, price: 6500, description: "Scheduled vaccinations" },
-          { name: "Comprehensive Wellness Exam", duration: 60, price: 16000, description: "Full pet health assessment" },
-          { name: "Dental Cleaning", duration: 45, price: 12000, description: "Professional pet dental care" },
-        ],
-        customers: [
-          { name: "Sarah Collins", email: "delivered+sarah.v@resend.dev", phone: "555-0801" },
-          { name: "Mark Hill", email: "delivered+mark.v@resend.dev", phone: "555-0802" },
-          { name: "Lauren Young", email: "delivered+lauren.v@resend.dev", phone: "555-0803" },
-          { name: "Eric Stewart", email: "delivered+eric.v@resend.dev", phone: "555-0804" },
-        ],
-      },
-      contractor: {
-        name: "Pro Home Services",
-        services: [
-          { name: "Inspection Visit", duration: 60, price: 7500, description: "On-site inspection and quote" },
-          { name: "Standard Repair", duration: 120, price: 15000, description: "Common repair job" },
-          { name: "Emergency Call-out", duration: 90, price: 22500, description: "Urgent same-day service" },
-          { name: "Installation Service", duration: 180, price: 35000, description: "New installation or replacement" },
-        ],
-        customers: [
-          { name: "John Mitchell", email: "delivered+john.m@resend.dev", phone: "555-0901" },
-          { name: "Lisa Walker", email: "delivered+lisa.w@resend.dev", phone: "555-0902" },
-          { name: "David Robinson", email: "delivered+david.r@resend.dev", phone: "555-0903" },
-          { name: "Amy Turner", email: "delivered+amy.t@resend.dev", phone: "555-0904" },
-        ],
-      },
-      plumber: {
-        name: "Quick Plumbing Solutions",
-        services: [
-          { name: "Drain Inspection", duration: 45, price: 8500, description: "Camera inspection and diagnosis" },
-          { name: "Leak Repair", duration: 90, price: 14500, description: "Fix leaking pipes or fixtures" },
-          { name: "Water Heater Service", duration: 120, price: 25000, description: "Water heater repair or replacement" },
-          { name: "Emergency Plumbing", duration: 60, price: 19500, description: "24/7 emergency call-out" },
-        ],
-        customers: [
-          { name: "Robert Barnes", email: "delivered+robert.b@resend.dev", phone: "555-1001" },
-          { name: "Sandra Cox", email: "delivered+sandra.c@resend.dev", phone: "555-1002" },
-          { name: "William Price", email: "delivered+william.p@resend.dev", phone: "555-1003" },
-          { name: "Emily Bell", email: "delivered+emily.b@resend.dev", phone: "555-1004" },
-        ],
-      },
-      electrician: {
-        name: "Spark Electric Co",
-        services: [
-          { name: "Electrical Inspection", duration: 60, price: 9500, description: "Safety inspection and report" },
-          { name: "Outlet/Switch Repair", duration: 45, price: 8500, description: "Fix faulty outlets or switches" },
-          { name: "Panel Upgrade", duration: 240, price: 45000, description: "Electrical panel replacement" },
-          { name: "Emergency Electrical", duration: 90, price: 22000, description: "Urgent electrical repair" },
-        ],
-        customers: [
-          { name: "Charles Reed", email: "delivered+charles.e@resend.dev", phone: "555-1101" },
-          { name: "Nancy Morgan", email: "delivered+nancy.e@resend.dev", phone: "555-1102" },
-          { name: "George Perry", email: "delivered+george.e@resend.dev", phone: "555-1103" },
-          { name: "Helen Butler", email: "delivered+helen.e@resend.dev", phone: "555-1104" },
-        ],
-      },
-      hvac: {
-        name: "Climate Control Pros",
-        services: [
-          { name: "AC Tune-Up", duration: 60, price: 12500, description: "Seasonal maintenance service" },
-          { name: "Heating Repair", duration: 90, price: 18000, description: "Furnace or heat pump repair" },
-          { name: "System Installation", duration: 480, price: 85000, description: "New HVAC system install" },
-          { name: "Emergency HVAC", duration: 120, price: 28000, description: "24/7 emergency service" },
-        ],
-        customers: [
-          { name: "Frank Howard", email: "delivered+frank@resend.dev", phone: "555-1201" },
-          { name: "Dorothy Ward", email: "delivered+dorothy@resend.dev", phone: "555-1202" },
-          { name: "Ray Torres", email: "delivered+ray@resend.dev", phone: "555-1203" },
-          { name: "Carol Peterson", email: "delivered+carol@resend.dev", phone: "555-1204" },
-        ],
-      },
-      cleaning: {
-        name: "Sparkle Clean Services",
-        services: [
-          { name: "Standard Cleaning", duration: 120, price: 12000, description: "Regular home cleaning" },
-          { name: "Deep Cleaning", duration: 240, price: 28000, description: "Thorough deep clean" },
-          { name: "Move-In/Out Clean", duration: 300, price: 35000, description: "Complete property cleaning" },
-          { name: "Office Cleaning", duration: 180, price: 22000, description: "Commercial space cleaning" },
-        ],
-        customers: [
-          { name: "Angela Foster", email: "delivered+angela@resend.dev", phone: "555-1301" },
-          { name: "Richard Sanders", email: "delivered+richard@resend.dev", phone: "555-1302" },
-          { name: "Martha Ross", email: "delivered+martha@resend.dev", phone: "555-1303" },
-          { name: "Peter Gray", email: "delivered+peter@resend.dev", phone: "555-1304" },
-        ],
-      },
-      landscaping: {
-        name: "Green Thumb Landscaping",
-        services: [
-          { name: "Lawn Maintenance", duration: 90, price: 8500, description: "Mowing, edging, and cleanup" },
-          { name: "Garden Design", duration: 120, price: 25000, description: "Custom garden planning" },
-          { name: "Tree Trimming", duration: 180, price: 35000, description: "Professional tree care" },
-          { name: "Irrigation Install", duration: 240, price: 45000, description: "Sprinkler system installation" },
-        ],
-        customers: [
-          { name: "Victor Hughes", email: "delivered+victor@resend.dev", phone: "555-1401" },
-          { name: "Janet Kelly", email: "delivered+janet@resend.dev", phone: "555-1402" },
-          { name: "Larry Brooks", email: "delivered+larry@resend.dev", phone: "555-1403" },
-          { name: "Diane Bennett", email: "delivered+diane@resend.dev", phone: "555-1404" },
+          { name: "Tony Robbins", email: "delivered+tony@resend.dev", phone: "555-0501" },
+          { name: "Oprah Winfrey", email: "delivered+oprah@resend.dev", phone: "555-0502" },
+          { name: "Simon Sinek", email: "delivered+simon@resend.dev", phone: "555-0503" },
+          { name: "Brené Brown", email: "delivered+brene@resend.dev", phone: "555-0504" },
         ],
       },
     };
 
     const template = demoDataTemplates[businessType] || demoDataTemplates.salon;
 
-    try {
-      // Create demo services
-      const demoServices = template.services.map(s => ({
-        businessId,
-        name: s.name,
-        duration: s.duration,
-        price: s.price,
-        description: s.description,
-      }));
-
-      const createdServices: Service[] = [];
-      for (const service of demoServices) {
-        const created = await this.createService(service);
-        createdServices.push(created);
-      }
-
-      // Create demo customers with unique identifiers
-      const timestamp = Date.now();
-      const demoCustomers = template.customers.map((c, index) => {
-        // Using Resend's safe test email domain as recommended in their documentation
-        // delivered+label@resend.dev is safe and won't damage domain reputation
-        const email = `delivered+${businessId.slice(0, 4)}-${index}-${timestamp}@resend.dev`;
-        
-        return {
-          businessId,
-          name: c.name,
-          email,
-          phone: c.phone,
-        };
-      });
-
-      const createdCustomers: Customer[] = [];
-      for (const customer of demoCustomers) {
-        const created = await this.createCustomer(customer);
-        createdCustomers.push(created);
-      }
-
-      // Create demo bookings
-      const today = new Date();
-      const demoBookings = [
-        {
-          businessId,
-          customerId: createdCustomers[0].id,
-          serviceId: createdServices[0].id,
-          date: new Date(today.getTime() + 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          time: "10:00 AM",
-          status: "confirmed",
-          totalPrice: createdServices[0].price,
-        },
-        {
-          businessId,
-          customerId: createdCustomers[1].id,
-          serviceId: createdServices[1].id,
-          date: new Date(today.getTime() + 2 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          time: "2:00 PM",
-          status: "pending",
-          totalPrice: createdServices[1].price,
-        },
-        {
-          businessId,
-          customerId: createdCustomers[2].id,
-          serviceId: createdServices[0].id,
-          date: new Date(today.getTime() + 3 * 24 * 60 * 60 * 1000).toISOString().split("T")[0],
-          time: "11:00 AM",
-          status: "confirmed",
-          totalPrice: createdServices[0].price,
-        },
-      ];
-
-      for (const booking of demoBookings) {
-        await this.createBooking(booking);
-      }
-
-      // Create default availability (Monday-Friday, 9am-5pm)
-      for (let day = 1; day <= 5; day++) {
-        await this.setAvailability({
-          businessId,
-          dayOfWeek: day,
-          startTime: "09:00",
-          endTime: "17:00",
-          isActive: true,
-        });
-      }
-    } catch (error) {
-      console.error("Error in initializeDemoData:", error);
-      throw error;
+    // Create services and default availability
+    for (const svc of template.services) {
+      await this.createService({ ...svc, businessId });
     }
+
+    for (const cust of template.customers) {
+      await this.createCustomer({ ...cust, businessId });
+    }
+
+    // Create default availability (Mon-Fri 9-5, Sat 10-2)
+    for (let day = 1; day <= 5; day++) {
+      await this.setAvailability({ businessId, dayOfWeek: day, startTime: "09:00", endTime: "17:00", isActive: true });
+    }
+    await this.setAvailability({ businessId, dayOfWeek: 6, startTime: "10:00", endTime: "14:00", isActive: true });
+    await this.setAvailability({ businessId, dayOfWeek: 0, startTime: "09:00", endTime: "17:00", isActive: false });
   }
 
-  // Quick Sales
-  async getQuickSales(businessId: string): Promise<QuickSale[]> {
-    return db
-      .select()
-      .from(quickSales)
-      .where(eq(quickSales.businessId, businessId))
-      .orderBy(desc(quickSales.createdAt));
-  }
-
-  async getQuickSale(id: string): Promise<QuickSale | undefined> {
-    const [quickSale] = await db.select().from(quickSales).where(eq(quickSales.id, id));
-    return quickSale || undefined;
-  }
-
-  async createQuickSale(quickSale: InsertQuickSale): Promise<QuickSale> {
-    const [created] = await db.insert(quickSales).values(quickSale).returning();
-    return created;
-  }
-
-  async updateQuickSale(id: string, updates: Partial<InsertQuickSale>): Promise<QuickSale | undefined> {
-    const [updated] = await db
-      .update(quickSales)
-      .set(updates)
-      .where(eq(quickSales.id, id))
-      .returning();
-    return updated || undefined;
-  }
-
-  // Clear All Data
   async clearAllData(businessId: string): Promise<void> {
-    try {
-      // Delete in proper order due to foreign key constraints
-      // 1. Delete all bookings first
-      await db.delete(bookings).where(eq(bookings.businessId, businessId));
-
-      // 2. Delete all customers
-      await db.delete(customers).where(eq(customers.businessId, businessId));
-
-      // 3. Delete all services
-      await db.delete(services).where(eq(services.businessId, businessId));
-
-      // 4. Delete all availability
-      await db.delete(availability).where(eq(availability.businessId, businessId));
-
-      // 5. Delete all quick sales
-      await db.delete(quickSales).where(eq(quickSales.businessId, businessId));
-    } catch (error) {
-      console.error("Error clearing all data:", error);
-      throw error;
-    }
-  }
-
-  // Workflows
-  async getWorkflows(businessId: string): Promise<Workflow[]> {
-    return db
-      .select()
-      .from(workflows)
-      .where(eq(workflows.businessId, businessId))
-      .orderBy(desc(workflows.createdAt));
-  }
-
-  async getWorkflow(id: string): Promise<Workflow | undefined> {
-    const [workflow] = await db.select().from(workflows).where(eq(workflows.id, id));
-    return workflow || undefined;
-  }
-
-  async getWorkflowsByTrigger(businessId: string, triggerType: string): Promise<Workflow[]> {
-    return db
-      .select()
-      .from(workflows)
-      .where(
-        and(
-          eq(workflows.businessId, businessId),
-          eq(workflows.triggerType, triggerType),
-          eq(workflows.isActive, true)
-        )
-      );
-  }
-
-  async createWorkflow(workflow: InsertWorkflow): Promise<Workflow> {
-    const [created] = await db.insert(workflows).values(workflow).returning();
-    return created;
-  }
-
-  async updateWorkflow(id: string, updates: Partial<InsertWorkflow>): Promise<Workflow | undefined> {
-    const [updated] = await db
-      .update(workflows)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(workflows.id, id))
-      .returning();
-    return updated || undefined;
-  }
-
-  async deleteWorkflow(id: string): Promise<void> {
-    await db.delete(workflows).where(eq(workflows.id, id));
-  }
-
-  // Business Themes
-  async getBusinessTheme(businessId: string): Promise<BusinessTheme | undefined> {
-    const [theme] = await db
-      .select()
-      .from(businessThemes)
-      .where(eq(businessThemes.businessId, businessId));
-    return theme || undefined;
-  }
-
-  async createOrUpdateBusinessTheme(theme: InsertBusinessTheme): Promise<BusinessTheme> {
-    const existing = await this.getBusinessTheme(theme.businessId);
-    if (existing) {
-      const [updated] = await db
-        .update(businessThemes)
-        .set({ ...theme, updatedAt: new Date() })
-        .where(eq(businessThemes.businessId, theme.businessId))
-        .returning();
-      return updated;
-    }
-    const [created] = await db.insert(businessThemes).values(theme).returning();
-    return created;
-  }
-
-  // API Keys
-  async getApiKeys(businessId: string): Promise<ApiKey[]> {
-    return db
-      .select()
-      .from(apiKeys)
-      .where(eq(apiKeys.businessId, businessId))
-      .orderBy(desc(apiKeys.createdAt));
-  }
-
-  async getApiKeyByHash(keyHash: string): Promise<ApiKey | undefined> {
-    const [apiKey] = await db.select().from(apiKeys).where(eq(apiKeys.keyHash, keyHash));
-    return apiKey || undefined;
-  }
-
-  async createApiKey(apiKey: InsertApiKey): Promise<ApiKey> {
-    const [created] = await db.insert(apiKeys).values(apiKey).returning();
-    return created;
-  }
-
-  async updateApiKeyLastUsed(id: string): Promise<void> {
-    await db
-      .update(apiKeys)
-      .set({ lastUsedAt: new Date() })
-      .where(eq(apiKeys.id, id));
-  }
-
-  async deleteApiKey(id: string): Promise<void> {
-    await db.delete(apiKeys).where(eq(apiKeys.id, id));
-  }
-
-  // Workflow Logs
-  async getWorkflowLogs(workflowId: string): Promise<WorkflowLog[]> {
-    return db
-      .select()
-      .from(workflowLogs)
-      .where(eq(workflowLogs.workflowId, workflowId))
-      .orderBy(desc(workflowLogs.createdAt));
-  }
-
-  async createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog> {
-    const [created] = await db.insert(workflowLogs).values(log).returning();
-    return created;
-  }
-
-  async updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined> {
-    const [updated] = await db
-      .update(workflowLogs)
-      .set(updates)
-      .where(eq(workflowLogs.id, id))
-      .returning();
-    return updated || undefined;
-  }
-
-  async clearWorkflows(businessId: string): Promise<void> {
-    // Delete workflow logs first due to foreign key constraints
-    const businessWorkflows = await db
-      .select({ id: workflows.id })
-      .from(workflows)
-      .where(eq(workflows.businessId, businessId));
-    
-    for (const wf of businessWorkflows) {
-      await db.delete(workflowLogs).where(eq(workflowLogs.workflowId, wf.id));
-    }
-    
-    // Delete the workflows
-    await db.delete(workflows).where(eq(workflows.businessId, businessId));
-  }
-
-  // Voice Subscriptions
-  async getVoiceSubscription(businessId: string): Promise<VoiceSubscription | undefined> {
-    const [subscription] = await db
-      .select()
-      .from(voiceSubscriptions)
-      .where(eq(voiceSubscriptions.businessId, businessId));
-    return subscription || undefined;
-  }
-
-  async createVoiceSubscription(subscription: InsertVoiceSubscription): Promise<VoiceSubscription> {
-    const [created] = await db.insert(voiceSubscriptions).values(subscription).returning();
-    return created;
-  }
-
-  async updateVoiceSubscription(businessId: string, updates: Partial<InsertVoiceSubscription>): Promise<VoiceSubscription | undefined> {
-    const [updated] = await db
-      .update(voiceSubscriptions)
-      .set({ ...updates, updatedAt: new Date() })
-      .where(eq(voiceSubscriptions.businessId, businessId))
-      .returning();
-    return updated || undefined;
-  }
-
-  async getOrCreateVoiceSubscription(businessId: string): Promise<VoiceSubscription> {
-    const existing = await this.getVoiceSubscription(businessId);
-    if (existing) return existing;
-    
-    // Create free tier subscription
-    const now = new Date();
-    const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-    
-    return await this.createVoiceSubscription({
-      businessId,
-      tier: "free",
-      minutesLimit: 5,
-      minutesUsed: 0,
-      periodStart: now,
-      periodEnd,
-      status: "active",
-    });
-  }
-
-  async incrementVoiceMinutes(businessId: string, minutes: number): Promise<VoiceSubscription | undefined> {
-    const subscription = await this.getOrCreateVoiceSubscription(businessId);
-    
-    // Check if we need to reset the period
-    const now = new Date();
-    if (subscription.periodEnd && now > subscription.periodEnd) {
-      // Reset for new billing period
-      const newPeriodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 1);
-      return await this.updateVoiceSubscription(businessId, {
-        minutesUsed: minutes,
-        periodStart: now,
-        periodEnd: newPeriodEnd,
-      });
-    }
-    
-    // Increment minutes
-    const [updated] = await db
-      .update(voiceSubscriptions)
-      .set({ 
-        minutesUsed: sql`${voiceSubscriptions.minutesUsed} + ${minutes}`,
-        updatedAt: new Date() 
-      })
-      .where(eq(voiceSubscriptions.businessId, businessId))
-      .returning();
-    return updated || undefined;
-  }
-
-  async checkVoiceMinutesAvailable(businessId: string): Promise<{ available: boolean; remaining: number; limit: number; used: number }> {
-    const subscription = await this.getOrCreateVoiceSubscription(businessId);
-    const remaining = subscription.minutesLimit - subscription.minutesUsed;
-    return {
-      available: remaining > 0,
-      remaining: Math.max(0, remaining),
-      limit: subscription.minutesLimit,
-      used: subscription.minutesUsed,
-    };
-  }
-
-  // Voice Call Logs
-  async createVoiceCallLog(log: InsertVoiceCallLog): Promise<VoiceCallLog> {
-    const [created] = await db.insert(voiceCallLogs).values(log).returning();
-    return created;
-  }
-
-  async getVoiceCallLogs(businessId: string, limit = 50): Promise<VoiceCallLog[]> {
-    return await db
-      .select()
-      .from(voiceCallLogs)
-      .where(eq(voiceCallLogs.businessId, businessId))
-      .orderBy(desc(voiceCallLogs.createdAt))
-      .limit(limit);
-  }
-
-  async getVoiceUsageStats(businessId: string): Promise<{ totalMinutes: number; totalCalls: number; bookingsCreated: number }> {
-    const subscription = await this.getOrCreateVoiceSubscription(businessId);
-    
-    const result = await db
-      .select({
-        totalCalls: sql<number>`COUNT(*)::int`,
-        bookingsCreated: sql<number>`SUM(CASE WHEN ${voiceCallLogs.bookingCreated} THEN 1 ELSE 0 END)::int`,
-      })
-      .from(voiceCallLogs)
-      .where(eq(voiceCallLogs.businessId, businessId));
-    
-    return {
-      totalMinutes: subscription.minutesUsed,
-      totalCalls: result[0]?.totalCalls || 0,
-      bookingsCreated: result[0]?.bookingsCreated || 0,
-    };
+    await db.delete(bookings).where(eq(bookings.businessId, businessId));
+    await db.delete(services).where(eq(services.businessId, businessId));
+    await db.delete(customers).where(eq(customers.businessId, businessId));
+    await db.delete(availability).where(eq(availability.businessId, businessId));
+    await db.delete(blockedSlots).where(eq(blockedSlots.businessId, businessId));
+    await db.delete(trainingData).where(eq(trainingData.businessId, businessId));
   }
 }
 
