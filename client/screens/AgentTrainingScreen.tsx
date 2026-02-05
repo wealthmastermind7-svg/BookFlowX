@@ -59,7 +59,7 @@ export default function AgentTrainingScreen() {
 
   const loadTrainingData = async () => {
     try {
-      const data = await api.apiRequest('GET', `/api/businesses/${businessId}/training`);
+      const data = await api.apiRequest<TrainingDataType[]>('GET', `/api/businesses/${businessId}/training`);
       setTrainingData(data);
     } catch (error) {
       console.error("Error loading training data:", error);
@@ -206,17 +206,17 @@ export default function AgentTrainingScreen() {
               />
               <View style={styles.qaButtonRow}>
                 <Button 
-                  title="Cancel" 
-                  variant="outline" 
-                  size="small" 
                   onPress={() => setQaModalVisible(false)} 
-                />
+                  style={{ backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }}
+                >
+                  <ThemedText style={{ color: '#fff' }}>Cancel</ThemedText>
+                </Button>
                 <Button 
-                  title="Save Pair" 
-                  size="small" 
                   onPress={handleAddQa}
-                  isLoading={addingQa}
-                />
+                  disabled={addingQa}
+                >
+                  <ThemedText style={{ color: '#fff' }}>{addingQa ? "Saving..." : "Save Pair"}</ThemedText>
+                </Button>
               </View>
             </GlassCard>
           )}

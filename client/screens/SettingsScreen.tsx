@@ -575,12 +575,11 @@ export default function SettingsScreen() {
                 <ThemedText style={styles.voiceSubtitle}>AI Receptionist is active</ThemedText>
               </View>
               <Button 
-                variant="outline" 
-                size="small" 
-                title="Train Agent"
                 onPress={handleOpenAgentTraining}
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)' }}
-              />
+                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 36, paddingHorizontal: 12 }}
+              >
+                <ThemedText style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>Train Agent</ThemedText>
+              </Button>
             </View>
             <View style={styles.voiceIconGroup}>
               <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#fff" /></View>
@@ -924,6 +923,22 @@ const styles = StyleSheet.create({
   securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
   securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
   securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
+  voiceHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 24,
+  },
+  voiceTitle: {
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#fff",
+  },
+  voiceSubtitle: {
+    fontSize: 14,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
   footer: { marginTop: 56, alignItems: "center" },
   footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.15)" },
   footerVersion: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.1)", marginTop: 4 },

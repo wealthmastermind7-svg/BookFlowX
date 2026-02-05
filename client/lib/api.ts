@@ -537,6 +537,10 @@ class ApiClient {
     return makeRequest<Partial<WidgetTheme>>("POST", `${this.getBusinessPath()}/theme/extract`, { url });
   }
 
+  async apiRequest<T>(method: string, path: string, data?: unknown, authenticated: boolean = true): Promise<T> {
+    return makeRequest<T>(method, path, data, authenticated);
+  }
+
   async getCurrentBusiness(): Promise<Business | null> {
     return this.getBusiness();
   }
