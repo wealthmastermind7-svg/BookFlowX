@@ -560,104 +560,103 @@ export default function SettingsScreen() {
           <GlassCard style={styles.restoreRow} onPress={handleRestorePurchases}>
             <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
             <ThemedText style={styles.restoreText}>Restore Previous Purchases</ThemedText>
+            {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
           </GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitleBadge label="VOICE AGENT">AI Assistant</SectionTitleBadge>
-          <GlassCard style={styles.voiceAgentCard}>
-            <View style={styles.voiceAgentHeader}>
-              <View style={styles.voiceAgentIconBox}>
+
+          <GlassCard style={styles.voiceCard} onPress={() => setVoicePaywallVisible(true)} highlight>
+            <View style={styles.voiceHeader}>
+              <View style={styles.voiceIconBox}>
                 <Feather name="mic" size={24} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.voiceAgentTitle}>AI Assistant</ThemedText>
-                <ThemedText style={styles.voiceAgentSubtitle}>Answers questions about your services</ThemedText>
+                <ThemedText style={styles.voiceTitle}>AI Assistant</ThemedText>
+                <ThemedText style={styles.voiceSubtitle}>Answers questions about your services</ThemedText>
               </View>
               <Button 
-                title="Train Agent" 
                 onPress={handleOpenAgentTraining}
                 style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 36, paddingHorizontal: 12 }}
-              />
-            </View>
-
-            <View style={styles.voiceAgentDisplay}>
-              <ThemedText style={styles.voiceAgentDisplayText}>AI Voice Assistant</ThemedText>
-              <ThemedText style={styles.voiceAgentDisplaySub}>Let customers ask questions about your services and get directed to book via Text Booking.</ThemedText>
-            </View>
-
-            <View style={styles.voiceAgentControls}>
-              <Pressable 
-                onPress={() => setVoicePaywallVisible(true)}
-                style={styles.voiceControlBtn}
               >
-                <Feather name="mic" size={24} color="#fff" />
-              </Pressable>
-              <Pressable 
-                onPress={() => setVoicePaywallVisible(true)}
-                style={styles.voiceControlBtn}
-              >
-                <Feather name="message-square" size={24} color="#fff" />
-              </Pressable>
-              <Pressable 
-                onPress={() => setVoicePaywallVisible(true)}
-                style={styles.voiceControlBtn}
-              >
-                <Feather name="volume-2" size={24} color="#fff" />
-              </Pressable>
+                <ThemedText style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>Train Agent</ThemedText>
+              </Button>
             </View>
-
-            <Pressable 
-              onPress={() => setVoicePaywallVisible(true)}
-              style={styles.quickPreviewBtn}
-            >
-              <Feather name="play-circle" size={16} color="rgba(255,255,255,0.6)" />
-              <ThemedText style={styles.quickPreviewText}>QUICK PREVIEW</ThemedText>
-            </Pressable>
-            
-            <ThemedText style={styles.voiceAgentFootnote}>
-              Booking links and automation plans are separate.
-            </ThemedText>
+            <View style={styles.voiceIconGroup}>
+              <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#fff" /></View>
+              <View style={styles.voiceIconBox}><Feather name="message-square" size={20} color="#fff" /></View>
+              <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#fff" /></View>
+            </View>
+            <View style={{ marginTop: 24 }}>
+              <ThemedText style={styles.voiceCardTitle}>AI Voice Assistant</ThemedText>
+              <ThemedText style={styles.voiceCardDesc}>Let customers ask questions about your services and get directed to book via Text Booking.</ThemedText>
+            </View>
+            <View style={styles.previewContainer}>
+              <Pressable style={styles.previewLink} onPress={() => navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" })}>
+                <Feather name="play-circle" size={18} color="rgba(255,255,255,0.4)" />
+                <ThemedText style={styles.previewText}>QUICK PREVIEW</ThemedText>
+              </Pressable>
+              <ThemedText style={[styles.featureText, { fontSize: 11, marginTop: 12, fontStyle: 'italic', opacity: 0.6 }]}>
+                Booking links and automation plans are separate.
+              </ThemedText>
+            </View>
+            {voiceSubscription && voiceSubscription.subscription.tier !== 'free' && (
+              <View style={styles.usageContainer}>
+                <View style={styles.usageHeader}>
+                  <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
+                  <ThemedText style={styles.usageValue}>{voiceSubscription.subscription.minutesUsed} / {voiceSubscription.subscription.minutesLimit}</ThemedText>
+                </View>
+                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSubscription.usage.percentUsed, 100)}%` }]} /></View>
+              </View>
+            )}
           </GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitle label="STATS">Presence & Reach</SectionTitle>
-          <View style={styles.gridRow}>
-            <GlassCard style={styles.statsCard} onPress={handleOpenSharePreview}>
+          <SectionTitle>Activity</SectionTitle>
+          <GlassCard style={styles.metersCard}>
+            <View style={styles.metersRow}>
               <CircularMeter value={bookingsCount} max={100} label="BOOKINGS" />
-            </GlassCard>
-            <GlassCard style={styles.statsCard} onPress={() => navigation.navigate("Services")}>
               <CircularMeter value={servicesCount} max={20} label="SERVICES" />
-            </GlassCard>
-            <GlassCard style={styles.statsCard} onPress={() => navigation.navigate("Customers")}>
-              <CircularMeter value={customersCount} max={500} label="CUSTOMERS" />
-            </GlassCard>
-          </View>
+              <CircularMeter value={customersCount} max={100} label="CLIENTS" />
+            </View>
+          </GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitleBadge label="PUBLIC VISIBILITY">Growth Tools</SectionTitleBadge>
-          <View style={styles.gridRow}>
-            <GlassCard style={styles.gridCard} onPress={handleOpenSharePreview}>
-              <View style={styles.gridIconCircle}><Feather name="share-2" size={16} color="#fff" /></View>
-              <ThemedText style={styles.gridLabel}>SHARE</ThemedText>
-              <ThemedText style={styles.gridValue}>Booking Link</ThemedText>
+          <SectionTitleBadge label="REVENUE & SHARING">Booking Links</SectionTitleBadge>
+          <GlassCard style={styles.bookingCard}>
+            <View style={styles.bookingHeader}>
+              <View style={{ flex: 1 }}>
+                <ThemedText style={styles.bookingTitle}>Share Booking Page</ThemedText>
+                <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{business?.bookingUrl || `https://${getBookingDomain()}/book/${business?.slug}`}</ThemedText>
+              </View>
+              <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={18} color="rgba(255,255,255,0.6)" /></Pressable>
+            </View>
+            <ThemedText style={styles.qrPlacementHint}>Place QR codes at checkout or in windows</ThemedText>
+            <View style={styles.bookingActions}>
+              <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
+              <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="maximize" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Show QR</ThemedText></Pressable>
+            </View>
+          </GlassCard>
+
+          <View style={{ height: 32 }} />
+          <SectionTitleBadge label="PLAN OVERVIEW">Your Plans</SectionTitleBadge>
+          <View style={{ gap: 12 }}>
+            <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => showPaywall("soft_upsell")}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="link" size={14} color="#fff" /></View>
+                <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Booking Links</ThemedText>
+              </View>
+              <View style={{ backgroundColor: isPremium ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isPremium ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
+              </View>
             </GlassCard>
-            <GlassCard style={styles.gridCard} onPress={handleShowQRCode}>
-              <View style={styles.gridIconCircle}><Feather name="maximize" size={16} color="#fff" /></View>
-              <ThemedText style={styles.gridLabel}>QR CODE</ThemedText>
-              <ThemedText style={styles.gridValue}>Scan to Book</ThemedText>
-            </GlassCard>
-          </View>
-          
-          <View style={styles.gridRow}>
-            <GlassCard style={styles.gridCard} onPress={handleShowEmbedModal}>
-              <View style={styles.gridIconCircle}><Feather name="code" size={16} color="#fff" /></View>
-              <ThemedText style={styles.gridLabel}>WIDGET</ThemedText>
-              <ThemedText style={styles.gridValue}>Website Embed</ThemedText>
-            </GlassCard>
-            <GlassCard style={styles.gridCard} onPress={handleCopyBookingLink}>
-              <View style={styles.gridIconCircle}><Feather name="copy" size={16} color="#fff" /></View>
-              <ThemedText style={styles.gridLabel}>COPY URL</ThemedText>
-              <ThemedText style={styles.gridValue}>{business?.slug || "link"}</ThemedText>
+            <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]}>
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="mic" size={14} color="#fff" /></View>
+                <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Agent</ThemedText>
+              </View>
+              <View style={{ backgroundColor: voiceSubscription?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: voiceSubscription?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{voiceSubscription?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
+              </View>
             </GlassCard>
           </View>
 
@@ -758,846 +757,303 @@ export default function SettingsScreen() {
         </ScrollView>
       </View>
 
-      {/* Voice Agent Paywall Modal */}
-      <Modal
-        visible={voicePaywallVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setVoicePaywallVisible(false)}
-      >
-        <VoiceAgentPaywall 
-          businessId={business?.id || ""}
-          onClose={() => setVoicePaywallVisible(false)}
-          onSubscribe={handleVoiceSubscribe}
-        />
+      <Modal visible={voicePaywallVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setVoicePaywallVisible(false)}>
+        <VoiceAgentPaywall businessId={business?.id || ""} onClose={() => { setVoicePaywallVisible(false); if ((voiceSubscription?.subscription.minutesUsed || 0) < (voiceSubscription?.subscription.minutesLimit || 5)) navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" }); }} onSubscribe={handleVoiceSubscribe} isLoading={voiceCheckoutLoading} />
       </Modal>
 
-      {/* QR Code Modal */}
-      <Modal
-        visible={qrModalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setQrModalVisible(false)}
-      >
+      <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Your Booking QR</ThemedText>
-              <Pressable onPress={() => setQrModalVisible(false)} style={styles.closeBtn}>
-                <Feather name="x" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-            
-            <ViewShot ref={qrViewShotRef} options={{ format: "png", quality: 1.0 }}>
-              <View style={styles.qrCaptureContainer}>
-                <ThemedText style={styles.qrBusinessName}>{business?.name}</ThemedText>
-                <ThemedText style={styles.qrSubtitle}>Scan to book an appointment</ThemedText>
-                <View style={styles.qrWrapper}>
-                  {qrCode && (
-                    <Image
-                      source={{ uri: qrCode }}
-                      style={styles.qrImage}
-                      contentFit="contain"
-                    />
-                  )}
-                </View>
-                <ThemedText style={styles.qrBookingUrl}>{bookingUrl}</ThemedText>
-              </View>
-            </ViewShot>
-
-            <View style={styles.qrActions}>
-              <Button
-                title="Download & Share"
-                onPress={handleDownloadQRCode}
-                icon="download"
-                style={styles.qrActionBtn}
-              />
-              <Button
-                title="Copy URL"
-                onPress={handleCopyBookingLink}
-                type="outline"
-                icon="copy"
-                style={styles.qrActionBtn}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Edit Business Field Modal */}
-      <Modal
-        visible={editModalVisible}
-        animationType="fade"
-        transparent={true}
-        onRequestClose={() => setEditModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Update {editingField?.toUpperCase()}</ThemedText>
-              <Pressable onPress={() => setEditModalVisible(false)} style={styles.closeBtn}>
-                <Feather name="x" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-
-            <View style={styles.editContainer}>
-              {editingField === "timezone" ? (
-                <View style={styles.timezoneList}>
-                  {TIMEZONES.map((tz) => (
-                    <Pressable
-                      key={tz.value}
-                      onPress={() => setEditValue(tz.value)}
-                      style={[
-                        styles.timezoneItem,
-                        editValue === tz.value && styles.timezoneItemSelected
-                      ]}
-                    >
-                      <ThemedText style={[
-                        styles.timezoneLabel,
-                        editValue === tz.value && { color: "#fff" }
-                      ]}>{tz.label}</ThemedText>
-                      {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
-                    </Pressable>
-                  ))}
-                </View>
-              ) : (
-                <TextInput
-                  style={[styles.input, { color: theme.text, borderColor: theme.border }]}
-                  value={editValue}
-                  onChangeText={setEditValue}
-                  placeholder={`Enter ${editingField}...`}
-                  placeholderTextColor="rgba(255,255,255,0.3)"
-                  autoFocus
-                  autoCapitalize={editingField === "name" ? "words" : "none"}
-                />
-              )}
-              
-              <Button
-                title={editLoading ? "Saving..." : "Save Changes"}
-                onPress={handleSaveBusinessField}
-                disabled={editLoading}
-                style={styles.saveBtn}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Demo Type Selection Modal */}
-      <Modal
-        visible={demoTypeModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setDemoTypeModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background, maxHeight: '80%' }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Choose Demo Niche</ThemedText>
-              <Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.closeBtn}>
-                <Feather name="x" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-            <ScrollView style={styles.demoList}>
-              {DEMO_TYPES.map((type) => (
-                <Pressable
-                  key={type.id}
-                  onPress={() => handleInitializeDemoData(type.id)}
-                  style={({ pressed }) => [
-                    styles.demoItem,
-                    pressed && { backgroundColor: 'rgba(255,255,255,0.05)' }
-                  ]}
-                >
-                  <View style={styles.demoIconBox}>
-                    <Feather name="briefcase" size={18} color="#fff" />
-                  </View>
-                  <View style={{ flex: 1, marginLeft: 16 }}>
-                    <ThemedText style={styles.demoLabel}>{type.label}</ThemedText>
-                    <ThemedText style={styles.demoDesc}>{type.description}</ThemedText>
-                  </View>
-                  <Feather name="chevron-right" size={16} color="rgba(255,255,255,0.3)" />
-                </Pressable>
-              ))}
-            </ScrollView>
-          </View>
-        </View>
-      </Modal>
-
-      {/* Embed Code Modal */}
-      <Modal
-        visible={embedModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setEmbedModalVisible(false)}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background, width: '90%' }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Embed Widget</ThemedText>
-              <Pressable onPress={() => setEmbedModalVisible(false)} style={styles.closeBtn}>
-                <Feather name="x" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-            
-            {embedLoading ? (
-              <ActivityIndicator size="large" color="#fff" style={{ marginVertical: 40 }} />
-            ) : (
-              <ScrollView>
-                <ThemedText style={styles.embedLabel}>CHOOSE STYLE</ThemedText>
-                <View style={styles.embedTypeTabs}>
-                  {(["inline", "popup-button", "popup-text"] as EmbedType[]).map((type) => (
-                    <Pressable
-                      key={type}
-                      onPress={() => setSelectedEmbedType(type)}
-                      style={[
-                        styles.embedTypeTab,
-                        selectedEmbedType === type && styles.embedTypeTabActive
-                      ]}
-                    >
-                      <ThemedText style={[
-                        styles.embedTypeTabText,
-                        selectedEmbedType === type && { color: "#000" }
-                      ]}>
-                        {type === "inline" ? "Inline" : type === "popup-button" ? "Button" : "Text"}
+          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+            <ThemedText style={styles.modalTitle}>Booking QR Code</ThemedText>
+            {qrCode && (
+              <Pressable 
+                onPress={() => bookingUrl && Linking.openURL(bookingUrl)} 
+                style={({ pressed }) => [styles.qrPressable, pressed && { opacity: 0.8 }]}
+              >
+                <ViewShot ref={qrViewShotRef} options={{ format: "png", quality: 1, result: "tmpfile" }}>
+                  <View style={styles.qrImageContainer}>
+                    <Image source={{ uri: qrCode }} style={styles.qrImage} contentFit="contain" />
+                    <View style={styles.qrCenterOverlay}>
+                      <ThemedText style={styles.qrCenterText}>
+                        {business?.name?.toUpperCase() || "BOOK"}
                       </ThemedText>
-                    </Pressable>
-                  ))}
+                    </View>
+                  </View>
+                </ViewShot>
+                <View style={styles.qrHintContainer}>
+                  <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
+                  <ThemedText style={styles.qrHint}>Tap to open link</ThemedText>
                 </View>
-
-                <ThemedText style={styles.embedDescription}>
-                  {selectedEmbedType === "inline" 
-                    ? "A fixed booking calendar that loads directly on your page."
-                    : "A floating element that opens the booking flow in a popup."}
-                </ThemedText>
-
-                <View style={styles.codeContainer}>
-                  <ThemedText style={styles.codeText}>
-                    {selectedEmbedType === "inline" 
-                      ? embedCode?.inline 
-                      : selectedEmbedType === "popup-button"
-                        ? embedCode?.popupButton
-                        : embedCode?.popupText}
-                  </ThemedText>
-                </View>
-
-                <Button
-                  title="Copy Code"
-                  onPress={async () => {
-                    const code = selectedEmbedType === "inline" 
-                      ? embedCode?.inline 
-                      : selectedEmbedType === "popup-button"
-                        ? embedCode?.popupButton
-                        : embedCode?.popupText;
-                    if (code) {
-                      await Clipboard.setStringAsync(code);
-                      Alert.alert("Copied", "Embed code copied to clipboard.");
-                    }
-                  }}
-                  icon="copy"
-                  style={{ marginTop: 20 }}
-                />
-              </ScrollView>
+              </Pressable>
             )}
+            <Button onPress={handleDownloadQRCode}>Share QR Code Image</Button>
+            <Pressable onPress={() => setQrModalVisible(false)} style={styles.secondaryButton}>
+              <ThemedText style={styles.secondaryButtonText}>Close</ThemedText>
+            </Pressable>
           </View>
         </View>
       </Modal>
 
-      {/* Currency Modal */}
-      <Modal
-        visible={currencyModalVisible}
-        animationType="slide"
-        transparent={true}
-        onRequestClose={() => setCurrencyModalVisible(false)}
-      >
+      <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: theme.background, maxHeight: '70%' }]}>
-            <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Choose Currency</ThemedText>
-              <Pressable onPress={() => setCurrencyModalVisible(false)} style={styles.closeBtn}>
-                <Feather name="x" size={20} color={theme.text} />
-              </Pressable>
-            </View>
-            <ScrollView>
-              {CURRENCY_OPTIONS.map((c) => (
-                <Pressable
-                  key={c.id}
-                  onPress={() => handleSelectCurrency(c.id)}
-                  style={[
-                    styles.currencyItem,
-                    business?.currency === c.id && { backgroundColor: 'rgba(255,255,255,0.1)' }
-                  ]}
-                >
-                  <View>
-                    <ThemedText style={styles.currencyCode}>{c.id}</ThemedText>
-                    <ThemedText style={styles.currencyName}>{c.name}</ThemedText>
-                  </View>
-                  <ThemedText style={styles.currencySymbol}>{c.symbol}</ThemedText>
-                </Pressable>
-              ))}
-            </ScrollView>
+          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+            <ThemedText style={styles.modalTitle}>
+              {editingField === "timezone" ? "Select Timezone" : `Edit ${editingField}`}
+            </ThemedText>
+            
+            {editingField === "timezone" ? (
+              <View style={{ width: '100%', gap: 8, marginBottom: 20 }}>
+                {TIMEZONES.map((tz) => (
+                  <Pressable
+                    key={tz.value}
+                    style={[
+                      styles.timezoneOption,
+                      editValue === tz.value && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)' }
+                    ]}
+                    onPress={() => setEditValue(tz.value)}
+                  >
+                    <ThemedText style={[styles.timezoneOptionText, editValue === tz.value && { color: '#fff' }]}>
+                      {tz.label}
+                    </ThemedText>
+                    {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
+                  </Pressable>
+                ))}
+              </View>
+            ) : (
+              <TextInput 
+                style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} 
+                value={editValue} 
+                onChangeText={setEditValue} 
+                placeholder={`Enter ${editingField}`} 
+                placeholderTextColor="#666" 
+              />
+            )}
+            
+            <Button onPress={handleSaveBusinessField} disabled={editLoading}>
+              {editLoading ? "Saving..." : "Save"}
+            </Button>
+            <Pressable onPress={() => setEditModalVisible(false)} style={styles.secondaryButton}>
+              <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
+            </Pressable>
           </View>
         </View>
+      </Modal>
+
+      <Modal visible={demoTypeModalVisible} transparent animationType="slide" onRequestClose={() => setDemoTypeModalVisible(false)}>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Choose Business Type</ThemedText><ScrollView style={{ maxHeight: 300 }}>{DEMO_TYPES.map(t => (<Pressable key={t.id} onPress={() => handleInitializeDemoData(t.id)} style={styles.demoTypeButton}><ThemedText style={styles.demoTypeLabel}>{t.label}</ThemedText></Pressable>))}</ScrollView><Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText></Pressable></View></View>
+      </Modal>
+
+      <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Select Currency</ThemedText><ScrollView style={{ maxHeight: 300 }}>{CURRENCY_OPTIONS.map(c => (<Pressable key={c.id} onPress={() => handleSelectCurrency(c.id)} style={styles.currencyRow}><ThemedText style={styles.currencyLabel}>{c.label} ({c.symbol})</ThemedText></Pressable>))}</ScrollView></View></View>
       </Modal>
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-  },
-  backgroundWrapper: {
-    ...StyleSheet.absoluteFillObject,
-    zIndex: -1,
-  },
-  backgroundImage: {
-    flex: 1,
-    width: "100%",
-    height: "100%",
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.85)",
-  },
-  sectionHeader: {
+  container: { flex: 1, backgroundColor: "#000" },
+  backgroundWrapper: { ...StyleSheet.absoluteFillObject },
+  backgroundImage: { flex: 1 },
+  backgroundOverlay: { ...StyleSheet.absoluteFillObject, backgroundColor: "rgba(0,0,0,0.92)" },
+  sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12, flexWrap: 'wrap', gap: 12 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: 'wrap', gap: 12 },
+  sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2.5 },
+  badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
+  badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
+  glassCard: { borderRadius: 32, borderWidth: 1, overflow: "hidden" },
+  premiumBanner: { padding: 28, marginBottom: 12 },
+  premiumBannerHeader: { flexDirection: "row", alignItems: "center" },
+  premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  premiumBannerTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 4 },
+  premiumBannerSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+  premiumFeatures: { marginTop: 24, marginBottom: 20 },
+  featureRow: { flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 12 },
+  featureText: { fontSize: 15, color: "rgba(255,255,255,0.7)" },
+  pricingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingTop: 20, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
+  priceOption: { alignItems: "center" },
+  priceAmount: { fontSize: 22, fontWeight: "800", color: "#fff" },
+  pricePeriod: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
+  priceDivider: { width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.1)" },
+  restoreRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 18, gap: 10 },
+  restoreText: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+  metersCard: { padding: 32 },
+  metersRow: { flexDirection: "row", justifyContent: "space-around", alignItems: "center" },
+  gridRow: { flexDirection: "row", gap: 12 },
+  gridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
+  gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
+  gridLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5, marginBottom: 4 },
+  gridValue: { fontSize: 18, fontWeight: "700", color: "#fff" },
+  multiRowCard: { paddingVertical: 8 },
+  infoRow: { flexDirection: "row", alignItems: "center", padding: 24 },
+  rowDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginHorizontal: 24 },
+  infoLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5 },
+  infoValue: { fontSize: 15, fontWeight: "600", color: "#fff", marginTop: 2 },
+  parallaxIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  automationCard: { padding: 32 },
+  automationHeader: { flexDirection: "row", gap: 16, marginBottom: 28 },
+  automationTitle: { fontSize: 28, fontWeight: "700", color: "#fff", marginBottom: 12 },
+  automationDesc: { fontSize: 16, color: "rgba(255,255,255,0.4)", lineHeight: 24, marginBottom: 24 },
+  automationActionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
+  automationAction: { fontSize: 11, fontWeight: "800", letterSpacing: 3, color: "rgba(255,255,255,0.4)" },
+  bookingCard: { padding: 24 },
+  bookingHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+  bookingTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginBottom: 4 },
+  bookingLinkText: { fontSize: 12, color: "rgba(255,255,255,0.3)" },
+  qrPlacementHint: { fontSize: 12, color: "rgba(255,255,255,0.3)", marginBottom: 20, fontStyle: "italic" },
+  copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
+  bookingActions: { flexDirection: "row", gap: 12 },
+  shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#000", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
+  shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
+  voiceCard: { padding: 32, marginTop: 12, borderRadius: 32 },
+  voiceIconGroup: { flexDirection: "row", gap: 12 },
+  voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  voiceCardTitle: { fontSize: 42, fontWeight: "500", color: "#fff", letterSpacing: -1, marginBottom: 16 },
+  voiceCardDesc: { fontSize: 18, color: "rgba(255,255,255,0.4)", lineHeight: 28, fontWeight: "400" },
+  previewContainer: { marginTop: 32 },
+  previewLink: { flexDirection: "row", alignItems: "center", gap: 12 },
+  previewText: { fontSize: 13, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 3 },
+  usageContainer: { marginTop: 32, paddingTop: 24, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
+  usageHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
+  usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
+  usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },
+  progressBarBg: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" },
+  progressBarFill: { height: "100%", backgroundColor: "#fff", borderRadius: 3 },
+  securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
+  securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
+  securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
+  voiceHeader: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 24,
   },
-  sectionTitleRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  sectionTitle: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 2,
-    textTransform: "uppercase",
-  },
-  glassCard: {
-    borderRadius: 24,
-    borderWidth: 1,
-    padding: 24,
-    overflow: "hidden",
-  },
-  premiumBanner: {
-    marginBottom: 12,
-  },
-  premiumBannerHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  premiumIconGlow: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    backgroundColor: "rgba(255,255,255,0.15)",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#fff",
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-  },
-  premiumBannerTitle: {
+  voiceTitle: {
     fontSize: 20,
     fontWeight: "700",
     color: "#fff",
-    letterSpacing: -0.5,
   },
-  premiumBannerSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 2,
-  },
-  premiumFeatures: {
-    marginTop: 24,
-    gap: 12,
-  },
-  featureRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  featureText: {
+  voiceSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.7)",
-  },
-  pricingRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginTop: 24,
-    paddingTop: 20,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  priceOption: {
-    flex: 1,
-    alignItems: "center",
-  },
-  priceAmount: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  pricePeriod: {
-    fontSize: 11,
     color: "rgba(255,255,255,0.4)",
     marginTop: 2,
-    fontWeight: "600",
   },
-  priceDivider: {
-    width: 1,
-    height: 30,
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  restoreRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    paddingVertical: 12,
-    gap: 10,
-    borderColor: "transparent",
-  },
-  restoreText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.4)",
-    textDecorationLine: "underline",
-  },
-  voiceAgentCard: {
-    marginBottom: 24,
-  },
-  voiceAgentHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  voiceAgentIconBox: {
-    width: 48,
-    height: 48,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  voiceAgentTitle: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  voiceAgentSubtitle: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 2,
-  },
-  voiceAgentDisplay: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: 20,
-    padding: 24,
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  voiceAgentDisplayText: {
-    fontSize: 32,
-    fontWeight: "700",
-    color: "#fff",
-    textAlign: "center",
-    marginBottom: 12,
-  },
-  voiceAgentDisplaySub: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-    textAlign: "center",
-    lineHeight: 20,
-  },
-  voiceAgentControls: {
-    flexDirection: "row",
-    justifyContent: "center",
-    gap: 16,
-    marginBottom: 24,
-  },
-  voiceControlBtn: {
-    width: 56,
-    height: 56,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  quickPreviewBtn: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    gap: 8,
-    paddingVertical: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  quickPreviewText: {
-    fontSize: 12,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.6)",
-    letterSpacing: 2,
-  },
-  voiceAgentFootnote: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.3)",
-    textAlign: "center",
-    marginTop: 12,
-    fontStyle: 'italic'
-  },
-  gridRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 12,
-  },
-  gridCard: {
-    flex: 1,
-    padding: 20,
-  },
-  gridIconCircle: {
-    width: 36,
-    height: 36,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-    marginBottom: 12,
-  },
-  gridLabel: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1.5,
-  },
-  gridValue: {
-    fontSize: 15,
-    fontWeight: "700",
-    color: "#fff",
-    marginTop: 4,
-  },
-  statsCard: {
-    flex: 1,
+  footer: { marginTop: 56, alignItems: "center" },
+  footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.15)" },
+  footerVersion: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.1)", marginTop: 4 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
+  modalContent: { width: "100%", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 24 },
+  qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center" },
+  qrPressable: {
     padding: 16,
-    alignItems: "center",
-  },
-  multiRowCard: {
-    padding: 0,
-  },
-  infoRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-  },
-  infoLabel: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1.5,
-  },
-  infoValue: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: "#fff",
-    marginTop: 2,
-  },
-  rowDivider: {
-    height: 1,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    marginHorizontal: 20,
-  },
-  automationCard: {
-    padding: 24,
-  },
-  automationHeader: {
-    flexDirection: "row",
-    gap: 12,
-    marginBottom: 20,
-  },
-  parallaxIconBox: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  automationTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    color: "#fff",
-    letterSpacing: -0.5,
-  },
-  automationDesc: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 6,
-    lineHeight: 20,
-  },
-  automationActionRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginTop: 20,
-  },
-  automationAction: {
-    fontSize: 11,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1.5,
-  },
-  securityGridCard: {
-    flex: 1,
-    padding: 24,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  securityTitle: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: "#fff",
-    marginTop: 12,
-  },
-  securityAction: {
-    fontSize: 9,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1,
-    marginTop: 4,
-  },
-  badge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  badgeText: {
-    fontSize: 9,
-    fontWeight: "900",
-    color: "#fff",
-    letterSpacing: 1,
-  },
-  footer: {
-    marginTop: 40,
-    alignItems: "center",
-    gap: 8,
-  },
-  footerText: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.2)",
-    letterSpacing: 3,
-  },
-  footerVersion: {
-    fontSize: 9,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.15)",
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.8)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    width: "100%",
-    maxWidth: 400,
-    borderRadius: 32,
-    padding: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.03)",
+    borderRadius: 24,
     marginBottom: 24,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.08)",
   },
-  modalTitle: {
-    fontSize: 20,
-    fontWeight: "700",
-    letterSpacing: -0.5,
-  },
-  closeBtn: {
-    padding: 8,
-  },
-  qrCaptureContainer: {
-    backgroundColor: "#fff",
+  qrImageContainer: {
+    position: 'relative',
+    alignItems: 'center',
+    justifyContent: 'center',
     padding: 32,
+    backgroundColor: '#fff',
     borderRadius: 24,
-    alignItems: "center",
   },
-  qrBusinessName: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#000",
-    textAlign: "center",
+  qrCenterOverlay: {
+    position: 'absolute',
+    backgroundColor: '#fff',
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#000',
+    maxWidth: 80,
   },
-  qrSubtitle: {
+  qrCenterText: {
+    fontSize: 10,
+    fontWeight: '900',
+    color: '#000',
+    textAlign: 'center',
+  },
+  qrHintContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    marginTop: 12,
+  },
+  qrHint: {
+    fontSize: 11,
+    color: "rgba(255,255,255,0.4)",
+    fontWeight: "600",
+    letterSpacing: 0.5,
+  },
+  secondaryButton: { height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginTop: 12 },
+  secondaryButtonText: {
+    color: "rgba(255,255,255,0.4)",
     fontSize: 14,
-    color: "#666",
-    marginTop: 4,
-    marginBottom: 24,
+    fontWeight: "600",
   },
-  qrWrapper: {
+  timezoneOption: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     padding: 16,
-    backgroundColor: "#fff",
-    borderRadius: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    backgroundColor: 'rgba(255,255,255,0.02)',
   },
-  qrImage: {
-    width: SCREEN_WIDTH * 0.5,
-    height: SCREEN_WIDTH * 0.5,
+  timezoneOptionText: {
+    fontSize: 16,
+    color: 'rgba(255,255,255,0.6)',
   },
-  qrBookingUrl: {
-    fontSize: 12,
-    color: "#999",
-    marginTop: 24,
-    textAlign: "center",
-  },
-  qrActions: {
-    marginTop: 24,
-    gap: 12,
-  },
-  qrActionBtn: {
-    width: "100%",
-  },
-  editContainer: {
-    gap: 20,
-  },
-  input: {
+  editInput: {
     height: 56,
     borderRadius: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
     borderWidth: 1,
-    paddingHorizontal: 20,
-    fontSize: 16,
-    backgroundColor: "rgba(255,255,255,0.05)",
-  },
-  saveBtn: {
-    width: "100%",
-  },
-  demoList: {
-    marginVertical: 10,
-  },
-  demoItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 16,
-    borderRadius: 16,
-    marginBottom: 8,
-  },
-  demoIconBox: {
-    width: 40,
-    height: 40,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  demoLabel: {
-    fontSize: 16,
-    fontWeight: "600",
+    marginBottom: 24,
     color: "#fff",
-  },
-  demoDesc: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 2,
-  },
-  embedLabel: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1.5,
-    marginBottom: 12,
-  },
-  embedTypeTabs: {
-    flexDirection: "row",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: 12,
-    padding: 4,
-    marginBottom: 16,
-  },
-  embedTypeTab: {
-    flex: 1,
-    paddingVertical: 8,
-    alignItems: "center",
-    borderRadius: 8,
-  },
-  embedTypeTabActive: {
-    backgroundColor: "#fff",
-  },
-  embedTypeTabText: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.5)",
-  },
-  embedDescription: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
-    marginBottom: 16,
-    lineHeight: 18,
-  },
-  codeContainer: {
-    backgroundColor: "#000",
-    padding: 16,
-    borderRadius: 12,
-    borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
-  codeText: {
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-    fontSize: 11,
-    color: "rgba(255,255,255,0.7)",
-  },
-  currencyItem: {
+  compactRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
     padding: 16,
+  },
+  compactRowTitle: {
+    fontSize: 16,
+    fontWeight: "600",
+    color: "#fff",
+  },
+  compactRowSubtitle: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
+  },
+  demoTypeButton: {
+    padding: 16,
     borderRadius: 16,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
     marginBottom: 8,
   },
-  currencyCode: {
+  demoTypeLabel: {
     fontSize: 16,
     fontWeight: "700",
     color: "#fff",
   },
-  currencyName: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
-    marginTop: 2,
-  },
-  currencySymbol: {
-    fontSize: 20,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  timezoneList: {
-    gap: 8,
-  },
-  timezoneItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
+  currencyRow: {
     padding: 16,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.05)",
   },
-  timezoneItemSelected: {
-    backgroundColor: "rgba(255,255,255,0.15)",
-    borderColor: "rgba(255,255,255,0.3)",
-    borderWidth: 1,
+  currencyLabel: {
+    fontSize: 16,
+    color: "#fff",
   },
-  timezoneLabel: {
-    fontSize: 14,
-    fontWeight: "500",
-    color: "rgba(255,255,255,0.7)",
-  }
 });
