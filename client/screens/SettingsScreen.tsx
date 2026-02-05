@@ -557,6 +557,31 @@ export default function SettingsScreen() {
 
           <View style={{ height: 32 }} />
 
+          <GlassCard style={styles.voiceCard} onPress={() => navigation.navigate("BusinessInfo")} highlight>
+            <View style={styles.voiceCardHeader}>
+              <View style={[styles.premiumIconGlow, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
+                <Feather name="mic" size={28} color="#fff" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 20 }}>
+                <ThemedText style={styles.voiceCardTitle}>Voice Assistant Info</ThemedText>
+                <ThemedText style={styles.voiceCardSubtitle}>Manage AI knowledge base</ThemedText>
+              </View>
+              <Feather name="chevron-right" size={24} color="rgba(255,255,255,0.5)" />
+            </View>
+            
+            <View style={styles.usageContainer}>
+              <View style={styles.usageHeader}>
+                <ThemedText style={styles.usageLabel}>Configuration</ThemedText>
+                <ThemedText style={styles.usageValue}>Knowledge Base</ThemedText>
+              </View>
+              <ThemedText style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>
+                Edit business details, services, and FAQs for the AI assistant.
+              </ThemedText>
+            </View>
+          </GlassCard>
+
+          <View style={{ height: 32 }} />
+
           <GlassCard style={styles.voiceCard} onPress={() => setVoicePaywallVisible(true)} highlight>
             <View style={styles.voiceIconGroup}>
               <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#fff" /></View>
