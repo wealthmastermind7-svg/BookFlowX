@@ -661,6 +661,8 @@ export default function SettingsScreen() {
           </View>
 
           <View style={{ height: 32 }} />
+          {/* Google Calendar hidden per user request */}
+          {/* 
           <SectionTitleBadge label="CALENDAR SYNC">Integrations</SectionTitleBadge>
           <GlassCard 
             style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]}
@@ -716,6 +718,7 @@ export default function SettingsScreen() {
           <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8, paddingHorizontal: 4 }}>
             Sync bookings to your calendar and prevent double-booking
           </ThemedText>
+          */}
 
           <View style={{ height: 32 }} />
           <SectionTitleBadge label="BUSINESS IDENTITY">Profile Settings</SectionTitleBadge>
