@@ -1211,4 +1211,11 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     color: "#000",
   },
+  assistantContextText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 8,
+    lineHeight: 16,
+    fontStyle: "italic",
+  },
 });

@@ -370,11 +370,11 @@ export default function ServicesScreen() {
       <Feather name="layers" size={48} color="rgba(255,255,255,0.2)" />
       <Text style={styles.emptyTitle}>No Services Yet</Text>
       <Text style={styles.emptyMessage}>
-        Describe your services and let AI set them up for you
+        Describe your services and set them up automatically
       </Text>
       <Pressable style={styles.aiSetupButton} onPress={handleAISetup}>
         <Feather name="zap" size={18} color="#000" />
-        <Text style={styles.aiSetupText}>AI Setup</Text>
+        <Text style={styles.aiSetupText}>Quick Setup</Text>
       </Pressable>
       <Text style={styles.orText}>or tap + to add manually</Text>
     </View>
@@ -391,7 +391,7 @@ export default function ServicesScreen() {
         <View style={[styles.modalContent, { paddingBottom: insets.bottom + 20 }]}>
           <View style={styles.modalHeader}>
             <Text style={styles.modalTitle}>
-              {aiStep === "input" ? "AI Service Setup" : "Review Services"}
+              {aiStep === "input" ? "Service Setup" : "Review Services"}
             </Text>
             <Pressable onPress={() => setAiModalVisible(false)} hitSlop={12}>
               <Feather name="x" size={24} color="#fff" />
@@ -513,7 +513,7 @@ export default function ServicesScreen() {
           <View style={styles.headerTitleRow}>
               <Text style={styles.hugeTitle}>Services</Text>
               <View style={styles.assistantContextContainer}>
-                <ThemedText style={styles.assistantContextText}>Assistant Setup</ThemedText>
+                <Text style={styles.assistantContextText}>Assistant Setup</Text>
                 <Pressable 
                   style={styles.aiHeaderButton} 
                   onPress={handleAISetup}
@@ -755,6 +755,22 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: "700",
     color: "#fff",
+  },
+  assistantContextContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    backgroundColor: "rgba(255,255,255,0.05)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+  },
+  assistantContextText: {
+    fontSize: 12,
+    color: "rgba(255,255,255,0.6)",
+    marginRight: 8,
+    fontWeight: "600",
   },
   modalSubtitle: {
     fontSize: 16,

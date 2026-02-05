@@ -19,7 +19,6 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
-import { Button } from "@/components/Button";
 import { api } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import * as Haptics from "expo-haptics";
@@ -189,8 +188,9 @@ export default function AgentTrainingScreen() {
               multiline
             />
             <View style={styles.qaButtonRow}>
-              <Button 
-                title="Add Content" 
+              <Pressable 
+                style={[styles.addButton, addingQa && { opacity: 0.7 }]}
+                disabled={addingQa}
                 onPress={async () => {
                   if (!answer) return;
                   try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
@@ -206,11 +206,14 @@ export default function AgentTrainingScreen() {
                   } finally {
                     setAddingQa(false);
                   }
-                }} 
-                loading={addingQa}
-                variant="primary"
-                style={{ flex: 1 }}
-              />
+                }}
+              >
+                {addingQa ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <ThemedText style={styles.addButtonText}>Add Content</ThemedText>
+                )}
+              </Pressable>
             </View>
           </GlassCard>
         </View>
@@ -237,13 +240,17 @@ export default function AgentTrainingScreen() {
               multiline
             />
             <View style={styles.qaButtonRow}>
-              <Button 
-                title="Add Q&A" 
-                onPress={handleAddQa} 
-                loading={addingQa}
-                variant="primary"
-                style={{ flex: 1 }}
-              />
+              <Pressable 
+                style={[styles.addButton, addingQa && { opacity: 0.7 }]}
+                disabled={addingQa}
+                onPress={handleAddQa}
+              >
+                {addingQa ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <ThemedText style={styles.addButtonText}>Add Q&A</ThemedText>
+                )}
+              </Pressable>
             </View>
           </GlassCard>
         </View>
@@ -449,5 +456,18 @@ const styles = StyleSheet.create({
   },
   deleteButton: {
     padding: 8,
+  },
+  addButton: {
+    flex: 1,
+    backgroundColor: "#fff",
+    borderRadius: BorderRadius.lg,
+    paddingVertical: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  addButtonText: {
+    fontSize: 15,
+    fontWeight: "600",
+    color: "#000",
   },
 });
