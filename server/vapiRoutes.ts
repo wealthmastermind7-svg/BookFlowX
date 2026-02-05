@@ -57,7 +57,7 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       "messages": [
       {
         "role": "system",
-        "content": "You are a professional voice booking receptionist for {{BUSINESS_NAME}}.\n\nABSOLUTE RULES:\n- You are NOT allowed to guess availability or times.\n- You MUST call get_available_slots before mentioning ANY time.\n- If you do not have availability data, ask for a date.\n- When a tool is running, wait silently for the result.\n- You MUST call create_booking to finalize a booking. Verbal confirmation alone is not allowed.\n\nVOICE STYLE:\n- Speak naturally, friendly, and concisely."
+        "content": "You are a helpful AI assistant. The business could not be found. Apologize and ask them to check the booking link."
       }
     ]
             },
@@ -151,7 +151,7 @@ IMPORTANT:
                 type: "function",
                 function: {
                   name: "get_available_slots",
-                  description: "Get available time slots for a specific date and service",
+                  description: "Check availability for a specific date to inform customers about open times. After showing availability, remind them to use Text Booking to complete their appointment.",
                   parameters: {
                     type: "object",
                     properties: {
@@ -165,43 +165,6 @@ IMPORTANT:
                       }
                     },
                     required: ["date"]
-                  }
-                }
-              },
-              {
-                type: "function",
-                function: {
-                  name: "create_booking",
-                  description: "Create a new booking for a customer",
-                  parameters: {
-                    type: "object",
-                    properties: {
-                      customerName: {
-                        type: "string",
-                        description: "The customer's full name"
-                      },
-                      customerEmail: {
-                        type: "string",
-                        description: "The customer's email address"
-                      },
-                      customerPhone: {
-                        type: "string",
-                        description: "The customer's phone number (optional)"
-                      },
-                      serviceName: {
-                        type: "string",
-                        description: "The name of the service to book"
-                      },
-                      date: {
-                        type: "string",
-                        description: "The booking date in YYYY-MM-DD format"
-                      },
-                      time: {
-                        type: "string",
-                        description: "The booking time in HH:MM format (24-hour)"
-                      }
-                    },
-                    required: ["customerName", "customerEmail", "serviceName", "date", "time"]
                   }
                 }
               },
@@ -223,7 +186,7 @@ IMPORTANT:
             provider: "11labs",
             voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
           },
-          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm here to help you book an appointment or answer any questions. What can I help you with today?`,
+          firstMessage: `Hi there! Thanks for calling ${business.name}. I'm your AI assistant and I can tell you about our services, pricing, and availability. When you're ready to book, just use the Text Booking link on this page. How can I help you today?`,
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
             : `${req.protocol}://${req.get('host')}/api/vapi/server-url`,
@@ -409,100 +372,12 @@ IMPORTANT:
           }
 
           else if (toolCall.name === "create_booking") {
-            const { customerName, customerEmail, customerPhone, serviceName, date, time } = toolCall.parameters;
-            
-            // Email validation
-            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            if (!customerEmail || !emailRegex.test(customerEmail)) {
-              result = { 
-                error: "Invalid email address format. Please ask the customer to spell out their email address again.",
-                invalidEmail: customerEmail
-              };
-              console.log(`[Vapi] Invalid email rejected: ${customerEmail}`);
-            } else {
-            
-            const business = await storage.getBusinessBySlug(businessSlug || "");
-            
-            if (business) {
-              const services = await storage.getServices(business.id);
-              const service = services.find(s => 
-                s.name.toLowerCase().includes(serviceName.toLowerCase()) ||
-                serviceName.toLowerCase().includes(s.name.toLowerCase())
-              );
-              
-              if (service) {
-                let customer = await storage.getCustomerByEmail(business.id, customerEmail);
-                if (!customer) {
-                  customer = await storage.createCustomer({
-                    businessId: business.id,
-                    name: customerName,
-                    email: customerEmail,
-                    phone: customerPhone || null
-                  });
-                }
-
-                const booking = await storage.createBooking({
-                  businessId: business.id,
-                  customerId: customer.id,
-                  serviceId: service.id,
-                  date,
-                  time,
-                  status: "confirmed",
-                  totalPrice: service.price,
-                  notes: "Booked via Voice Agent"
-                });
-
-                // Trigger workflow automations (like Postmark email)
-                try {
-                  const { triggerWorkflows } = await import("./workflowEngine");
-                  console.log(`[Vapi] Triggering workflows for voice booking ${booking.id}`);
-                  triggerWorkflows("booking_created", business.id, {
-                    booking,
-                    service: service || undefined,
-                    customer: customer || undefined,
-                  }).catch(err => console.error("[Vapi] Workflow trigger failed:", err));
-                } catch (triggerError) {
-                  console.error("[Vapi] Could not trigger workflows:", triggerError);
-                }
-
-                // Sync to Google Calendar if connected
-                try {
-                  const gcalConnected = await isGoogleCalendarConnected(business.id);
-                  if (gcalConnected) {
-                    const eventId = await pushBookingToGoogleCalendar({
-                      id: booking.id,
-                      businessId: business.id,
-                      businessName: business.name,
-                      serviceName: service.name,
-                      customerName,
-                      customerEmail,
-                      date,
-                      time,
-                      duration: service.duration,
-                      totalPrice: service.price
-                    });
-                    if (eventId) {
-                      console.log(`[Vapi] Booking synced to Google Calendar: ${eventId}`);
-                    }
-                  }
-                } catch (gcalError) {
-                  console.log(`[Vapi] Google Calendar sync skipped`);
-                }
-
-                result = {
-                  success: true,
-                  bookingId: booking.id.substring(0, 8).toUpperCase(),
-                  message: `Great! I've booked your ${service.name} appointment for ${date} at ${time}. Your confirmation number is ${booking.id.substring(0, 8).toUpperCase()}. You'll receive a confirmation email at ${customerEmail}.`
-                };
-
-                console.log(`[Vapi] Booking created: ${booking.id} for ${customerName}`);
-              } else {
-                result = { error: `Service "${serviceName}" not found.` };
-              }
-            } else {
-              result = { error: "Business not found" };
-            }
-            }
+            // Voice assistant is now informational only - direct to Text Booking
+            result = {
+              message: "I can't book appointments directly, but you can easily complete your booking using the Text Booking link on this page. It will show you all available times and let you confirm your appointment right there.",
+              action: "direct_to_text_booking"
+            };
+            console.log(`[Vapi] create_booking called but assistant is informational only - directing to Text Booking`);
           }
 
           else {

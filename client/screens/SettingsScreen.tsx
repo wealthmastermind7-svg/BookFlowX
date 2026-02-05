@@ -587,8 +587,8 @@ export default function SettingsScreen() {
               <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#fff" /></View>
             </View>
             <View style={{ marginTop: 24 }}>
-              <ThemedText style={styles.voiceCardTitle}>Voice Booking</ThemedText>
-              <ThemedText style={styles.voiceCardDesc}>Let customers book appointments using natural voice conversation with AI.</ThemedText>
+              <ThemedText style={styles.voiceCardTitle}>AI Voice Assistant</ThemedText>
+              <ThemedText style={styles.voiceCardDesc}>Let customers ask questions about your services and get directed to book via Text Booking.</ThemedText>
             </View>
             <View style={styles.previewContainer}>
               <Pressable style={styles.previewLink} onPress={() => navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" })}>

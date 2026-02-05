@@ -108,9 +108,9 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
   
   // Voice tiers for display (fallback if RevenueCat offerings aren't loaded)
   const displayTiers = [
-    { id: "voice_starter", name: "Starter", price: "$49", minutes: 60, features: ["60 minutes/month", "Voice booking", "Email confirmations", "Basic analytics"] },
-    { id: "voice_pro", name: "Pro", price: "$149", minutes: 200, popular: true, features: ["200 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics"] },
-    { id: "voice_business", name: "Business", price: "$349", minutes: 500, features: ["500 minutes/month", "Voice booking", "Email confirmations", "Advanced analytics", "Custom voice"] },
+    { id: "voice_starter", name: "Starter", price: "$49", minutes: 60, features: ["60 minutes/month", "AI service info", "Train with your data", "Basic analytics"] },
+    { id: "voice_pro", name: "Pro", price: "$149", minutes: 200, popular: true, features: ["200 minutes/month", "AI service info", "Train with your data", "Advanced analytics"] },
+    { id: "voice_business", name: "Business", price: "$349", minutes: 500, features: ["500 minutes/month", "AI service info", "Train with your data", "Advanced analytics", "Custom voice"] },
   ];
 
   return (
@@ -119,7 +119,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
         <Pressable onPress={onClose} style={styles.closeButton}>
           <Feather name="x" size={24} color="#fff" />
         </Pressable>
-        <ThemedText style={styles.headerTitle}>Voice Booking Plan</ThemedText>
+        <ThemedText style={styles.headerTitle}>AI Voice Assistant</ThemedText>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -127,9 +127,9 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <View style={styles.iconCircle}>
             <Feather name="mic" size={40} color="#fff" />
           </View>
-          <ThemedText style={styles.heroTitle}>Enable Voice Booking</ThemedText>
+          <ThemedText style={styles.heroTitle}>Enable AI Voice Assistant</ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            Automated call confirmations and booking assistance for your business.
+            Let AI answer questions about your services and direct customers to book.
           </ThemedText>
           <View style={{ height: 16 }} />
           <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
@@ -162,7 +162,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <Pressable 
             onPress={() => {
               if (isExhausted) {
-                Alert.alert("Trial Ended", "You've used all 5 trial minutes. Please upgrade to a paid plan to continue using Voice Booking.");
+                Alert.alert("Trial Ended", "You've used all 5 trial minutes. Please upgrade to a paid plan to continue using the AI Voice Assistant.");
               } else {
                 onClose(); // Proceed to preview
               }

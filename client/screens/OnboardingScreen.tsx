@@ -522,10 +522,10 @@ function Step4VoicePreview({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: colors.text }]}>
-            Meet your AI receptionist
+            Meet your AI assistant
           </Text>
           <Text style={[styles.stepSubtitle, { color: colors.textSecondary }]}>
-            Never miss a booking call again
+            Answer questions about your business 24/7
           </Text>
         </View>
 
@@ -536,10 +536,10 @@ function Step4VoicePreview({
             </View>
             
             <Text style={[styles.voiceCardTitle, { color: colors.text }]}>
-              AI Voice Agent
+              AI Voice Assistant
             </Text>
             <Text style={[styles.voiceCardDescription, { color: colors.textSecondary }]}>
-              Handles incoming calls, answers questions about your services, and books appointments naturally
+              Answers questions about your services and directs customers to book via Text Booking
             </Text>
 
             <View style={styles.voiceFeatures}>
@@ -553,7 +553,7 @@ function Step4VoicePreview({
               </View>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Direct calendar integration</Text>
+                <Text style={[styles.voiceFeatureText, { color: colors.textSecondary }]}>Trained on your services</Text>
               </View>
             </View>
 
@@ -567,7 +567,7 @@ function Step4VoicePreview({
 
       <View style={[styles.bottomActions, { paddingBottom: insets.bottom + Spacing.lg }]}>
         <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: colors.text }]}>
-          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test Voice Agent Now</Text>
+          <Text style={[styles.primaryButtonText, { color: colors.backgroundRoot }]}>Test AI Assistant Now</Text>
           <Feather name="arrow-right" size={20} color={colors.backgroundRoot} />
         </AnimatedPressable>
         
