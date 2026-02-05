@@ -339,6 +339,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === BUSINESSES API ===
   
+  // Get voice subscription status by business slug (public)
+  app.get("/api/public/businesses/:slug/voice-status", async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+      const business = await storage.getBusinessBySlug(slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+      const subscription = await storage.getVoiceSubscription(business.id);
+      res.json({
+        isSubscribed: !!subscription && subscription.status === "active" && subscription.tier !== "free",
+        tier: subscription?.tier || "free"
+      });
+    } catch (error) {
+      console.error("Error getting public voice status:", error);
+      res.status(500).json({ error: "Failed to get voice status" });
+    }
+  });
+
   // Get business by ID (for admin dashboard)
   app.get("/api/businesses/:id", async (req: Request, res: Response) => {
     try {

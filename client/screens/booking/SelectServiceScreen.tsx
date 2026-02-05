@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Dimensions } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, Dimensions, Platform, Linking } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
@@ -20,6 +20,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { formatPrice } from "@/lib/currency";
+import { getApiUrl } from "@/lib/query-client";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -31,6 +32,75 @@ const SPRING_CONFIG = {
   stiffness: 150,
   overshootClamping: true,
 };
+
+function VoiceAssistantButton({ slug }: { slug: string }) {
+  const { isDark } = useTheme();
+  const scale = useSharedValue(1);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+
+  useEffect(() => {
+    checkVoiceStatus();
+  }, [slug]);
+
+  const checkVoiceStatus = async () => {
+    try {
+      const res = await fetch(`${getApiUrl()}api/public/businesses/${slug}/voice-status`);
+      if (res.ok) {
+        const data = await res.json();
+        setIsSubscribed(data.isSubscribed);
+      }
+    } catch (error) {
+      console.error("[VoiceStatus] Error:", error);
+    }
+  };
+
+  const animatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: scale.value }],
+  }));
+
+  const handlePressIn = () => {
+    scale.value = withSpring(0.9, SPRING_CONFIG);
+  };
+
+  const handlePressOut = () => {
+    scale.value = withSpring(1, SPRING_CONFIG);
+  };
+
+  const handlePress = () => {
+    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
+    const voiceUrl = `${getApiUrl()}voice/${slug}`;
+    if (Platform.OS === "web") {
+      window.open(voiceUrl, "_blank");
+    } else {
+      Linking.openURL(voiceUrl);
+    }
+  };
+
+  if (!isSubscribed) return null;
+
+  return (
+    <Animated.View style={[styles.voiceFab, animatedStyle]}>
+      <Pressable
+        onPress={handlePress}
+        onPressIn={handlePressIn}
+        onPressOut={handlePressOut}
+        style={({ pressed }) => [
+          styles.voiceFabPressable,
+          { backgroundColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)" },
+          pressed && { opacity: 0.8 }
+        ]}
+      >
+        <BlurView
+          intensity={60}
+          tint={isDark ? "dark" : "light"}
+          style={styles.voiceFabBlur}
+        >
+          <Feather name="mic" size={24} color={isDark ? "#fff" : "#000"} />
+        </BlurView>
+      </Pressable>
+    </Animated.View>
+  );
+}
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
   const { theme, isDark } = useTheme();
@@ -192,6 +262,8 @@ export default function SelectServiceScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
   const navigation = useNavigation<Navigation>();
+  const route = useRoute();
+  const slug = (route.params as any)?.slug || "default";
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -263,6 +335,8 @@ export default function SelectServiceScreen() {
           )}
         </View>
       </ScrollView>
+
+      <VoiceAssistantButton slug={slug} />
 
       <View 
         style={[
@@ -458,5 +532,27 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     opacity: 0.5,
+  },
+  voiceFab: {
+    position: "absolute",
+    right: 24,
+    bottom: 120,
+    zIndex: 100,
+  },
+  voiceFabPressable: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    overflow: "hidden",
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+  },
+  voiceFabBlur: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
   },
 });
