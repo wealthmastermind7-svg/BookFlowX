@@ -140,7 +140,7 @@ export default function AgentTrainingScreen() {
         <GlassCard style={styles.headerCard}>
           <ThemedText style={styles.headerTitle}>Train {businessName}</ThemedText>
           <ThemedText style={styles.headerSubtitle}>
-            Add knowledge to help your AI agent respond better
+            Add knowledge to help your assistant respond better
           </ThemedText>
         </GlassCard>
 
@@ -172,50 +172,6 @@ export default function AgentTrainingScreen() {
               </Pressable>
             </View>
           </GlassCard>
-        </View>
-
-        <View style={styles.section}>
-          <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Custom Q&A</ThemedText>
-            <Pressable onPress={() => setQaModalVisible(true)}>
-              <ThemedText style={styles.addLink}>+ Add Q&A</ThemedText>
-            </Pressable>
-          </View>
-          
-          {qaModalVisible && (
-            <GlassCard style={styles.qaInputCard}>
-              <TextInput
-                style={styles.qaInput}
-                placeholder="Question (e.g., Do you offer gift cards?)"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                value={question}
-                onChangeText={setQuestion}
-                multiline
-              />
-              <TextInput
-                style={[styles.qaInput, { height: 100 }]}
-                placeholder="Answer (e.g., Yes, we offer digital gift cards...)"
-                placeholderTextColor="rgba(255,255,255,0.3)"
-                value={answer}
-                onChangeText={setAnswer}
-                multiline
-              />
-              <View style={styles.qaButtonRow}>
-                <Button 
-                  onPress={() => setQaModalVisible(false)} 
-                  style={{ backgroundColor: 'transparent', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }}
-                >
-                  <ThemedText style={{ color: '#fff' }}>Cancel</ThemedText>
-                </Button>
-                <Button 
-                  onPress={handleAddQa}
-                  disabled={addingQa}
-                >
-                  <ThemedText style={{ color: '#fff' }}>{addingQa ? "Saving..." : "Save Pair"}</ThemedText>
-                </Button>
-              </View>
-            </GlassCard>
-          )}
         </View>
 
         <View style={styles.section}>

@@ -504,7 +504,7 @@ export default function DashboardScreen() {
                 <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Booking</Animated.Text>
               </View>
               <Animated.Text style={styles.voiceAspirationalDesc}>
-                Let your business breathe with AI that handles calls and bookings naturally.
+                Let your business breathe with an Informational Assistant that handles calls naturally.
               </Animated.Text>
               <View style={styles.voiceAspirationalAction}>
                 <Animated.Text style={styles.voiceAspirationalLink}>PREVIEW EXPERIENCE</Animated.Text>
@@ -576,7 +576,7 @@ export default function DashboardScreen() {
 
           {insights && (insights.topCustomers.length > 0 || insights.atRiskCustomers.length > 0 || insights.mostFrequentServices.length > 0) && (
             <View style={styles.insightsSection}>
-              <Animated.Text style={styles.sectionTitle}>AI Insights</Animated.Text>
+              <Animated.Text style={styles.sectionTitle}>Insights</Animated.Text>
               
               {insights.topCustomers.length > 0 && (
                 <GlassPanel style={styles.insightCard}>

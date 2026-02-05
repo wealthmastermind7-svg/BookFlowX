@@ -95,9 +95,12 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
 
       // Build knowledge from training data
       const knowledgeBase = training
+        .filter(t => t.type === 'website_crawl' || t.type === 'qa_pair' || t.type === 'document')
         .map(t => {
           if (t.type === 'qa_pair') return `Q: ${t.question}\nA: ${t.answer}`;
-          if (t.type === 'website_crawl' || t.type === 'document') return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+          if (t.type === 'website_crawl' || t.type === 'document') {
+            return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+          }
           return '';
         })
         .filter(c => c !== '')
@@ -507,9 +510,12 @@ router.get("/api/vapi/assistant-config/:slug", async (req: Request, res: Respons
       .join("\n");
 
     const knowledgeBase = training
+      .filter(t => t.type === 'website_crawl' || t.type === 'qa_pair' || t.type === 'document')
       .map(t => {
         if (t.type === 'qa_pair') return `Q: ${t.question}\nA: ${t.answer}`;
-        if (t.type === 'website_crawl' || t.type === 'document') return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+        if (t.type === 'website_crawl' || t.type === 'document') {
+          return `Source: ${t.title || t.sourceUrl}\nContent: ${t.content}`;
+        }
         return '';
       })
       .filter(c => c !== '')
