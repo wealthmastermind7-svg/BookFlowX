@@ -14,8 +14,6 @@ import {
   workflowLogs,
   voiceSubscriptions,
   voiceCallLogs,
-  businessKnowledge,
-  trainingData,
   type User,
   type InsertUser,
   type Business,
@@ -46,10 +44,6 @@ import {
   type InsertVoiceSubscription,
   type VoiceCallLog,
   type InsertVoiceCallLog,
-  type BusinessKnowledge,
-  type InsertBusinessKnowledge,
-  type TrainingData,
-  type InsertTrainingData,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
@@ -143,16 +137,6 @@ export interface IStorage {
   createWorkflowLog(log: InsertWorkflowLog): Promise<WorkflowLog>;
   updateWorkflowLog(id: string, updates: Partial<InsertWorkflowLog>): Promise<WorkflowLog | undefined>;
   clearWorkflows(businessId: string): Promise<void>;
-  
-  // Business Knowledge
-  getBusinessKnowledge(businessId: string): Promise<BusinessKnowledge | undefined>;
-  createOrUpdateBusinessKnowledge(knowledge: InsertBusinessKnowledge): Promise<BusinessKnowledge>;
-  
-  // Training Data
-  getTrainingData(businessId: string): Promise<TrainingData[]>;
-  createTrainingData(data: InsertTrainingData): Promise<TrainingData>;
-  deleteTrainingData(id: string): Promise<void>;
-  deleteAllTrainingData(businessId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1200,64 +1184,6 @@ export class DatabaseStorage implements IStorage {
       totalCalls: result[0]?.totalCalls || 0,
       bookingsCreated: result[0]?.bookingsCreated || 0,
     };
-  }
-
-  // Business Knowledge
-  async getBusinessKnowledge(businessId: string): Promise<BusinessKnowledge | undefined> {
-    const [knowledge] = await db
-      .select()
-      .from(businessKnowledge)
-      .where(eq(businessKnowledge.businessId, businessId));
-    return knowledge || undefined;
-  }
-
-  async createOrUpdateBusinessKnowledge(knowledge: InsertBusinessKnowledge): Promise<BusinessKnowledge> {
-    const existing = await this.getBusinessKnowledge(knowledge.businessId);
-    
-    if (existing) {
-      const [updated] = await db
-        .update(businessKnowledge)
-        .set({ ...knowledge, updatedAt: new Date() })
-        .where(eq(businessKnowledge.businessId, knowledge.businessId))
-        .returning();
-      return updated;
-    }
-    
-    const [created] = await db
-      .insert(businessKnowledge)
-      .values(knowledge)
-      .returning();
-    return created;
-  }
-
-  // Training Data
-  async getTrainingData(businessId: string): Promise<TrainingData[]> {
-    return db
-      .select()
-      .from(trainingData)
-      .where(eq(trainingData.businessId, businessId))
-      .orderBy(desc(trainingData.createdAt));
-  }
-
-  async getTrainingDataByAgent(agentId: string): Promise<TrainingData[]> {
-    return db
-      .select()
-      .from(trainingData)
-      .where(eq(trainingData.agentId, agentId))
-      .orderBy(desc(trainingData.createdAt));
-  }
-
-  async createTrainingData(data: InsertTrainingData): Promise<TrainingData> {
-    const [created] = await db.insert(trainingData).values(data).returning();
-    return created;
-  }
-
-  async deleteTrainingData(id: string): Promise<void> {
-    await db.delete(trainingData).where(eq(trainingData.id, id));
-  }
-
-  async deleteAllTrainingData(businessId: string): Promise<void> {
-    await db.delete(trainingData).where(eq(trainingData.businessId, businessId));
   }
 }
 

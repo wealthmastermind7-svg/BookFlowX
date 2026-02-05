@@ -143,7 +143,7 @@ export default function SettingsScreen() {
   const [customersCount, setCustomersCount] = useState(0);
   const [ownerToken, setOwnerToken] = useState<string | null>(null);
 
-  const { data: voiceSubscription, refetch: refetchVoiceSub } = useVoiceSubscription(
+  const { data: voiceSubscription } = useVoiceSubscription(
     business?.id || "",
     ownerToken || ""
   );
@@ -553,31 +553,6 @@ export default function SettingsScreen() {
             <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
             <ThemedText style={styles.restoreText}>Restore Previous Purchases</ThemedText>
             {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
-          </GlassCard>
-
-          <View style={{ height: 32 }} />
-
-          <GlassCard style={styles.voiceCard} onPress={() => navigation.navigate("BusinessInfo")} highlight>
-            <View style={styles.voiceIconGroup}>
-              <View style={[styles.voiceIconBox, { backgroundColor: "rgba(255,255,255,0.1)" }]}>
-                <Feather name="mic" size={20} color="#fff" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.voiceCardTitle}>Voice Assistant Info</ThemedText>
-                <ThemedText style={styles.voiceCardDesc}>Configure AI training data</ThemedText>
-              </View>
-              <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.5)" />
-            </View>
-            
-            <View style={styles.usageContainer}>
-              <View style={styles.usageHeader}>
-                <ThemedText style={styles.usageLabel}>Configuration</ThemedText>
-                <ThemedText style={styles.usageValue}>Knowledge Base</ThemedText>
-              </View>
-              <ThemedText style={{ fontSize: 13, color: "rgba(255,255,255,0.5)", marginTop: 4 }}>
-                Edit business details, services, and FAQs for the AI assistant.
-              </ThemedText>
-            </View>
           </GlassCard>
 
           <View style={{ height: 32 }} />

@@ -286,42 +286,6 @@ export const googleCalendarTokens = pgTable("google_calendar_tokens", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
-// Training data table (multi-page crawl results, Q&A pairs, manual text)
-export const trainingData = pgTable("training_data", {
-  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
-  businessId: varchar("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
-  agentId: varchar("agent_id"),
-  type: text("type").notNull(), // 'qa_pair', 'website_crawl', 'document'
-  question: text("question"),
-  answer: text("answer"),
-  content: text("content"), // For website crawl content
-  title: text("title"), // Page title for crawled content
-  sourceUrl: text("source_url"),
-  status: text("status").default("active").notNull(),
-  createdAt: timestamp("created_at").defaultNow().notNull(),
-});
-
-// Business knowledge base (scraped/edited info for voice assistant)
-export const businessKnowledge = pgTable("business_knowledge", {
-  id: varchar("id")
-    .primaryKey()
-    .default(sql`gen_random_uuid()`),
-  businessId: varchar("business_id")
-    .notNull()
-    .unique()
-    .references(() => businesses.id, { onDelete: "cascade" }),
-  websiteUrl: text("website_url"), // Source website for scraping
-  aboutBusiness: text("about_business"), // What the business does
-  servicesDescription: text("services_description"), // Detailed services info
-  hoursOfOperation: text("hours_of_operation"), // Business hours
-  locationInfo: text("location_info"), // Address and location details
-  faqJson: text("faq_json"), // JSON array of {question, answer}
-  additionalInfo: text("additional_info"), // Any other relevant info
-  lastScrapedAt: timestamp("last_scraped_at"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-});
-
 // Voice call logs table (for tracking usage)
 export const voiceCallLogs = pgTable("voice_call_logs", {
   id: varchar("id")
@@ -343,20 +307,6 @@ export const voiceCallLogs = pgTable("voice_call_logs", {
 });
 
 // Relations
-export const trainingDataRelations = relations(trainingData, ({ one }) => ({
-  business: one(businesses, {
-    fields: [trainingData.businessId],
-    references: [businesses.id],
-  }),
-}));
-
-export const businessKnowledgeRelations = relations(businessKnowledge, ({ one }) => ({
-  business: one(businesses, {
-    fields: [businessKnowledge.businessId],
-    references: [businesses.id],
-  }),
-}));
-
 export const businessesRelations = relations(businesses, ({ many, one }) => ({
   users: many(users),
   services: many(services),
@@ -372,8 +322,6 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   voiceSubscription: one(voiceSubscriptions),
   voiceCallLogs: many(voiceCallLogs),
   googleCalendarToken: one(googleCalendarTokens),
-  knowledge: one(businessKnowledge),
-  trainingData: many(trainingData),
 }));
 
 export const voiceSubscriptionsRelations = relations(voiceSubscriptions, ({ one }) => ({
@@ -578,24 +526,6 @@ export const insertVoiceCallLogSchema = createInsertSchema(voiceCallLogs).omit({
   id: true,
   createdAt: true,
 });
-
-export const insertBusinessKnowledgeSchema = createInsertSchema(businessKnowledge).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-  lastScrapedAt: true,
-});
-
-export const insertTrainingDataSchema = createInsertSchema(trainingData).omit({
-  id: true,
-  createdAt: true,
-});
-
-export type BusinessKnowledge = typeof businessKnowledge.$inferSelect;
-export type InsertBusinessKnowledge = z.infer<typeof insertBusinessKnowledgeSchema>;
-
-export type TrainingData = typeof trainingData.$inferSelect;
-export type InsertTrainingData = z.infer<typeof insertTrainingDataSchema>;
 
 export const insertGoogleCalendarTokenSchema = createInsertSchema(googleCalendarTokens).omit({
   id: true,
