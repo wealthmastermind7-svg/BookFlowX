@@ -231,23 +231,14 @@ export default function AvailabilityEditorScreen() {
                 <Switch
                   value={schedule.isActive}
                   onValueChange={() => handleToggleDay(schedule.dayOfWeek)}
-                  trackColor={{ false: "rgba(0,0,0,0.1)", true: "rgba(0,0,0,0.4)" }}
+                  trackColor={{ false: "rgba(255,255,255,0.1)", true: "rgba(255,255,255,0.4)" }}
                   thumbColor={schedule.isActive ? "#fff" : "#eee"}
-                  ios_backgroundColor="rgba(0,0,0,0.1)"
+                  ios_backgroundColor="rgba(255,255,255,0.1)"
                 />
               </View>
 
               {schedule.isActive && (
                 <View style={styles.timeSection}>
-                  <View style={styles.statsRow}>
-                    <View style={styles.statusBadge}>
-                      <View style={styles.toggleIcon}>
-                        <View style={styles.toggleKnob} />
-                      </View>
-                      <Animated.Text style={styles.statusText}>Open</Animated.Text>
-                    </View>
-                  </View>
-
                   <View style={styles.timeRow}>
                     <Animated.Text style={styles.timeLabel}>OPENS</Animated.Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.timeButtons}>
@@ -366,24 +357,24 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   hugeTitle: {
-    fontSize: 48,
+    fontSize: 56,
     fontWeight: "700",
     color: "#fff",
-    letterSpacing: 2,
-    lineHeight: 56,
-    textShadowColor: "rgba(0, 0, 0, 0.8)",
+    letterSpacing: -2,
+    lineHeight: 60,
+    textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
     textAlign: "center",
   },
   glassPanel: {
-    borderRadius: 32,
-    borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.3)",
+    borderRadius: 24,
+    borderWidth: 1.5,
+    borderColor: "rgba(255, 255, 255, 0.4)",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(255, 255, 255, 0.7)",
+    backgroundColor: "rgba(0, 0, 0, 0.4)",
   },
   dayCard: {
     marginBottom: 20,
@@ -395,46 +386,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dayName: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "700",
-    color: "#000",
+    color: "#fff",
     letterSpacing: -1,
   },
   timeSection: {
-    marginTop: 20,
-  },
-  statsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  statusBadge: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-  },
-  toggleIcon: {
-    width: 50,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: "#fff",
-    borderWidth: 1,
-    borderColor: "rgba(0,0,0,0.1)",
-    justifyContent: "center",
-    paddingHorizontal: 4,
-  },
-  toggleKnob: {
-    width: 22,
-    height: 22,
-    borderRadius: 11,
-    backgroundColor: "#ccc",
-    marginLeft: "auto",
-  },
-  statusText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#333",
+    marginTop: 24,
   },
   timeRow: {
     marginBottom: 20,
@@ -442,9 +400,9 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "#555",
+    color: "rgba(255, 255, 255, 0.6)",
     letterSpacing: 1,
-    marginBottom: 10,
+    marginBottom: 12,
   },
   timeButtons: {
     flexDirection: "row",
@@ -452,28 +410,24 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   timeButton: {
-    height: 40,
-    minWidth: 70,
-    paddingHorizontal: 12,
-    borderRadius: 20,
+    height: 48,
+    minWidth: 80,
+    paddingHorizontal: 16,
+    borderRadius: 24,
     borderWidth: 1,
-    borderColor: "#999",
+    borderColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "rgba(255, 255, 255, 0.05)",
   },
   timeButtonActive: {
     backgroundColor: "#fff",
     borderColor: "#fff",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.2,
-    shadowRadius: 4,
-    elevation: 4,
   },
   timeButtonText: {
-    fontSize: 10,
-    fontWeight: "400",
-    color: "#555",
+    fontSize: 13,
+    fontWeight: "500",
+    color: "rgba(255, 255, 255, 0.8)",
   },
   timeButtonTextActive: {
     color: "#000",
@@ -484,29 +438,26 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     right: 0,
-    paddingHorizontal: 0,
   },
   footerInner: {
     borderRadius: 0,
     borderTopWidth: 1,
-    borderBottomWidth: 0,
-    borderLeftWidth: 0,
-    borderRightWidth: 0,
-    backgroundColor: "rgba(255, 255, 255, 0.6)",
+    borderColor: "rgba(255, 255, 255, 0.1)",
+    backgroundColor: "rgba(0, 0, 0, 0.8)",
   },
   saveButton: {
-    height: 60,
+    height: 64,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: "#fff",
   },
   saveButtonDisabled: {
-    opacity: 0.5,
+    opacity: 0.3,
   },
   saveButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#fff",
+    color: "#000",
     letterSpacing: 2,
   },
 });
