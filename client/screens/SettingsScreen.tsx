@@ -618,7 +618,7 @@ export default function SettingsScreen() {
             <View style={styles.usageContainer}>
               <View style={styles.usageHeader}>
                 <ThemedText style={styles.usageLabel}>
-                  {voiceSub?.subscription.tier === 'free' ? 'Free Trial Allowance' : 'Monthly Allowance'}
+                  {voiceSub?.subscription.tier === 'free' ? 'Trial Allowance' : 'Monthly Allowance'}
                 </ThemedText>
                 <ThemedText style={[styles.usageValue, isVoiceExhausted && { color: '#EF4444' }, !isVoiceExhausted && percentUsed > 80 && { color: '#F59E0B' }]}>
                   {voiceSub ? `${voiceSub.usage.remaining} / ${voiceSub.subscription.minutesLimit} min` : '5 / 5 min'}
@@ -636,7 +636,7 @@ export default function SettingsScreen() {
                 </ThemedText>
               ) : voiceSub?.subscription.tier === 'free' ? (
                 <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
-                  {voiceSub.usage.remaining} minutes remaining in your free trial
+                  {voiceSub.usage.remaining} minutes remaining — one-time trial
                 </ThemedText>
               ) : percentUsed > 80 ? (
                 <ThemedText style={{ fontSize: 11, color: '#F59E0B', marginTop: 8 }}>
