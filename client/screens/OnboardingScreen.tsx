@@ -459,15 +459,22 @@ function Step3AssetPreviews({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: '#fff' }]}>
-            Your booking assets
+            Share Preview
           </Text>
           <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
-            Ready to share with customers
+            This is how your booking link appears when shared on iMessage, WhatsApp, LinkedIn, and social media.
           </Text>
         </View>
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.previewSection}>
-          <Text style={[styles.previewLabel]}>BOOKING LINK PREVIEW</Text>
+          <Text style={[styles.previewLabel]}>LINK PREVIEW</Text>
+          
+          <View style={styles.messageBubbleContainer}>
+            <View style={styles.messageBubble}>
+              <Text style={styles.messageText}>Hey! Here's my booking link 👇</Text>
+            </View>
+          </View>
+
           <Pressable onPress={handleOpenLink} style={styles.linkPreviewContainer}>
             <CinematicLinkPreview businessName={businessName} domain={domain} />
           </Pressable>
@@ -962,6 +969,24 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     letterSpacing: -0.5,
     fontWeight: '900',
+  },
+  messageBubbleContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 12,
+    marginRight: 4,
+  },
+  messageBubble: {
+    backgroundColor: '#007AFF',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 20,
+    borderBottomRightRadius: 4,
+    maxWidth: '85%',
+  },
+  messageText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
   },
   voicePreviewContainer: {
     flex: 1,
