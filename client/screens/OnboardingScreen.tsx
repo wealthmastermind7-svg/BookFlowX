@@ -902,6 +902,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
     color: "rgba(255,255,255,0.4)",
     marginBottom: Spacing.md,
+    fontFamily: 'Inter_600SemiBold',
   },
   linkPreviewContainer: {
     width: "100%",
