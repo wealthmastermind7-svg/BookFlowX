@@ -296,7 +296,15 @@ function Step1NicheSelection({
       </ScrollView>
 
       <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
-        <AnimatedPressable onPress={onNext} style={[styles.primaryButton, { backgroundColor: '#fff' }]}>
+        <AnimatedPressable 
+          onPress={onNext} 
+          style={[
+            styles.primaryButton, 
+            { 
+              backgroundColor: '#fff',
+            }
+          ]}
+        >
           <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
           <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
@@ -389,12 +397,26 @@ function Step2BusinessName({
 
           <View style={[styles.bottomActionsInline, { marginTop: Spacing.xl }]}>
             <View style={styles.bottomActionsRow}>
-              <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+              <AnimatedPressable 
+                onPress={onBack} 
+                style={[
+                  styles.backButton, 
+                  { 
+                    borderColor: 'rgba(255,255,255,0.2)', 
+                    backgroundColor: 'rgba(255,255,255,0.05)',
+                  }
+                ]}
+              >
                 <Feather name="arrow-left" size={20} color="#fff" />
               </AnimatedPressable>
               <AnimatedPressable 
                 onPress={onNext} 
-                style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}
+                style={[
+                  styles.primaryButtonFlex, 
+                  { 
+                    backgroundColor: '#fff',
+                  }
+                ]}
                 disabled={!canContinue || isCreating}
               >
                 {isCreating ? (
@@ -509,12 +531,12 @@ function Step3AssetPreviews({
             </Pressable>
 
             <View style={styles.qrActionContainer}>
-              <View style={styles.qrShareButton}>
+              <AnimatedPressable style={[styles.qrShareButton]} onPress={() => {}}>
                 <Text style={styles.qrShareButtonText}>Share QR Code Image</Text>
-              </View>
-              <View style={styles.qrCloseButton}>
+              </AnimatedPressable>
+              <AnimatedPressable style={[styles.qrCloseButton]} onPress={() => {}}>
                 <Text style={styles.qrCloseButtonText}>Close</Text>
-              </View>
+              </AnimatedPressable>
             </View>
           </View>
           <Text style={[styles.tapHint]}>Print this for your storefront</Text>
@@ -523,10 +545,27 @@ function Step3AssetPreviews({
 
       <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
         <View style={styles.bottomActionsRow}>
-          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+          <AnimatedPressable 
+            onPress={onBack} 
+            style={[
+              styles.backButton, 
+              { 
+                borderColor: 'rgba(255,255,255,0.2)', 
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              }
+            ]}
+          >
             <Feather name="arrow-left" size={20} color="#fff" />
           </AnimatedPressable>
-          <AnimatedPressable onPress={onNext} style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}>
+          <AnimatedPressable 
+            onPress={onNext} 
+            style={[
+              styles.primaryButtonFlex, 
+              { 
+                backgroundColor: '#fff',
+              }
+            ]}
+          >
             <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
             <Feather name="arrow-right" size={20} color="#000" />
           </AnimatedPressable>
@@ -628,16 +667,39 @@ function Step4VoicePreview({
       </ScrollView>
 
       <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
-        <AnimatedPressable onPress={handleTestVoiceAgent} style={[styles.primaryButton, { backgroundColor: '#fff' }]}>
+        <AnimatedPressable 
+          onPress={handleTestVoiceAgent} 
+          style={[
+            styles.primaryButton, 
+            { 
+              backgroundColor: '#fff',
+            }
+          ]}
+        >
           <Text style={[styles.primaryButtonText, { color: '#000' }]}>Test Assistant Now</Text>
           <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
         
         <View style={[styles.bottomActionsRow, { marginTop: Spacing.md }]}>
-          <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+          <AnimatedPressable 
+            onPress={onBack} 
+            style={[
+              styles.backButton, 
+              { 
+                borderColor: 'rgba(255,255,255,0.2)', 
+                backgroundColor: 'rgba(255,255,255,0.05)',
+              }
+            ]}
+          >
             <Feather name="arrow-left" size={20} color="#fff" />
           </AnimatedPressable>
-          <Pressable onPress={handleSkipToHome} style={styles.skipButton}>
+          <Pressable 
+            onPress={handleSkipToHome} 
+            style={({ pressed }) => [
+              styles.skipButton,
+              { opacity: pressed ? 0.6 : 1 }
+            ]}
+          >
             <Text style={[styles.skipButtonText, { color: 'rgba(255,255,255,0.5)' }]}>Skip for now</Text>
           </Pressable>
         </View>
