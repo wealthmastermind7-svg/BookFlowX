@@ -414,9 +414,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
-      const subscription = await storage.getVoiceSubscription(business.id);
-      const hasActiveSubscription = !!subscription && subscription.status === "active" && subscription.tier !== "free";
-      const hasFreeTrial = !!subscription && subscription.status === "active" && subscription.tier === "free" && subscription.minutesUsed < subscription.minutesLimit;
+      const subscription = await storage.getOrCreateVoiceSubscription(business.id);
+      const hasActiveSubscription = subscription.status === "active" && subscription.tier !== "free";
+      const hasFreeTrial = subscription.status === "active" && subscription.tier === "free" && subscription.minutesUsed < subscription.minutesLimit;
       res.json({
         isSubscribed: hasActiveSubscription || hasFreeTrial,
         tier: subscription?.tier || "free"

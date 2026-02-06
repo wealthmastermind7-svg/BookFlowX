@@ -126,7 +126,7 @@
     }
 
     .header-voice-btn {
-      display: none; /* Controlled by JS */
+      display: flex; /* Visible by default, JS will hide if needed */
       background: white;
       border: 1px solid white;
       border-radius: 100px;
@@ -165,7 +165,7 @@
     }
     
     .voice-link {
-      display: none; /* Controlled by JS */
+      display: flex; /* Visible by default, JS will hide if needed */
       align-items: center;
       justify-content: space-between;
       gap: 16px;
@@ -793,21 +793,13 @@
             // Show voice booking for active trials or paid tiers
             const isActive = subData.isSubscribed;
             
-            if (isActive) {
-              document.getElementById('voice-link').style.display = 'flex';
-              document.getElementById('header-voice-link').style.display = 'flex';
-            } else {
+            if (!isActive) {
               document.getElementById('voice-link').style.display = 'none';
               document.getElementById('header-voice-link').style.display = 'none';
             }
-          } else {
-            document.getElementById('voice-link').style.display = 'none';
-            document.getElementById('header-voice-link').style.display = 'none';
           }
         } catch (e) {
           console.error('Failed to fetch voice status:', e);
-          document.getElementById('voice-link').style.display = 'none';
-          document.getElementById('header-voice-link').style.display = 'none';
         }
         
         const servicesRes = await fetch(`/api/businesses/${business.id}/services`);
