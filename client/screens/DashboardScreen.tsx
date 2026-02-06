@@ -34,6 +34,8 @@ import { Text } from "react-native";
 import { usePremium } from "@/contexts/PremiumContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { useVoiceSubscription } from "@/hooks/useVoiceSubscription";
+import { ThemedText } from "@/components/ThemedText";
 
 type DashboardNavigation = NativeStackNavigationProp<RootStackParamList>;
 
@@ -350,11 +352,19 @@ export default function DashboardScreen() {
   const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  const { data: voiceSubResult } = useVoiceSubscription(business?.id || "", api.getOwnerTokenSync() || "");
+  const fadeIn = useSharedValue(0);
+
+  const [ownerToken, setOwnerToken] = useState<string | null>(null);
+  const { data: voiceSubResult } = useVoiceSubscription(business?.id || "", ownerToken || "");
   const voiceSub = voiceSubResult;
   const remainingMinutes = voiceSub?.usage.remaining ?? 5;
   const isExhausted = voiceSub?.usage.available === false;
   const percentUsed = voiceSub?.usage.percentUsed || 0;
+
+  useEffect(() => {
+    fadeIn.value = withTiming(1, { duration: 800 });
+    initializeBusiness();
+  }, []);
 
   useFocusEffect(
     React.useCallback(() => {
@@ -399,6 +409,8 @@ export default function DashboardScreen() {
       setBookings(bookingsData);
       if (businessData) {
         setBusiness(businessData);
+        const token = await api.getOwnerToken();
+        if (token) setOwnerToken(token);
         const insightsData = await getCustomerInsights(businessData.id);
         if (insightsData) setInsights(insightsData);
       }

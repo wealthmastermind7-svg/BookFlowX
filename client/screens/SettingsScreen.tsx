@@ -48,11 +48,13 @@ type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & Roo
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
-const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { value: number; max: number; size?: number; strokeWidth?: number; label: string }) => {
+const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label, warningColor }: { value: number; max: number; size?: number; strokeWidth?: number; label: string; warningColor?: string }) => {
   const radius = (size - strokeWidth) / 2;
   const circumference = radius * 2 * Math.PI;
   const progress = Math.min(value / max, 1);
   const strokeDashoffset = circumference - progress * circumference;
+  const strokeColor = warningColor || (progress >= 1 ? "#EF4444" : progress > 0.95 ? "#EF4444" : progress > 0.8 ? "#F59E0B" : "#fff");
+  const labelColor = warningColor || "rgba(255,255,255,0.4)";
 
   return (
     <View style={{ alignItems: "center" }}>
@@ -69,7 +71,7 @@ const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { valu
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke={progress >= 1 ? "#EF4444" : progress > 0.95 ? "#EF4444" : progress > 0.8 ? "#F59E0B" : "#fff"}
+          stroke={strokeColor}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={circumference}
@@ -80,7 +82,7 @@ const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { valu
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
         <ThemedText style={{ fontSize: 18, fontWeight: "700", color: "#fff" }}>{value}</ThemedText>
       </View>
-      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: isExhausted ? "#EF4444" : percentUsed > 0.95 ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
+      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: labelColor, letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
     </View>
   );
 };
@@ -613,13 +615,13 @@ export default function SettingsScreen() {
                 Booking links and automation plans are separate.
               </ThemedText>
             </View>
-            {voiceSubscription && voiceSubscription.subscription.tier !== 'free' && (
+            {voiceSub && voiceSub.subscription.tier !== 'free' && (
               <View style={styles.usageContainer}>
                 <View style={styles.usageHeader}>
                   <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
-                  <ThemedText style={styles.usageValue}>{voiceSubscription.subscription.minutesUsed} / {voiceSubscription.subscription.minutesLimit}</ThemedText>
+                  <ThemedText style={styles.usageValue}>{voiceSub.subscription.minutesUsed} / {voiceSub.subscription.minutesLimit}</ThemedText>
                 </View>
-                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSubscription.usage.percentUsed, 100)}%`, backgroundColor: isVoiceExhausted ? '#EF4444' : '#fff' }]} /></View>
+                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSub.usage.percentUsed, 100)}%`, backgroundColor: isVoiceExhausted ? '#EF4444' : '#fff' }]} /></View>
               </View>
             )}
           </GlassCard>
@@ -668,8 +670,8 @@ export default function SettingsScreen() {
                 <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="mic" size={14} color="#fff" /></View>
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Agent</ThemedText>
               </View>
-              <View style={{ backgroundColor: isVoiceExhausted ? 'rgba(239, 68, 68, 0.2)' : voiceSubscription?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSubscription?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSubscription?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
+              <View style={{ backgroundColor: isVoiceExhausted ? 'rgba(239, 68, 68, 0.2)' : voiceSub?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSub?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSub?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
           </View>
@@ -775,7 +777,7 @@ export default function SettingsScreen() {
       </View>
 
       <Modal visible={voicePaywallVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setVoicePaywallVisible(false)}>
-        <VoiceAgentPaywall businessId={business?.id || ""} onClose={() => { setVoicePaywallVisible(false); if ((voiceSubscription?.subscription.minutesUsed || 0) < (voiceSubscription?.subscription.minutesLimit || 5)) navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" }); }} onSubscribe={handleVoiceSubscribe} isLoading={voiceCheckoutLoading} />
+        <VoiceAgentPaywall businessId={business?.id || ""} onClose={() => { setVoicePaywallVisible(false); if ((voiceSub?.subscription.minutesUsed || 0) < (voiceSub?.subscription.minutesLimit || 5)) navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" }); }} onSubscribe={handleVoiceSubscribe} isLoading={voiceCheckoutLoading} />
       </Modal>
 
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
