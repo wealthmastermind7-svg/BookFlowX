@@ -109,10 +109,10 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
     }
   };
 
-  const { data: voiceSub, refetch: refetchSub } = useVoiceSubscription(businessId, ownerToken || "");
+  const { data: voiceSub, refetch: refetchSub, isExhausted, upgradeTo } = useVoiceSubscription(businessId, ownerToken || "");
   const minutesUsed = voiceSub?.subscription.minutesUsed || 0;
   const minutesLimit = voiceSub?.subscription.minutesLimit || 5;
-  const isExhausted = minutesUsed >= minutesLimit;
+  const currentTier = voiceSub?.subscription.tier || "free";
   
   const isLoading = externalLoading || purchaseLoading;
   
@@ -149,11 +149,12 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           </View>
         </View>
 
-        {/* Trial Status Card */}
         <View style={styles.trialStatusCard}>
           <View style={styles.trialInfo}>
             <View>
-              <ThemedText style={styles.trialLabel}>TRIAL STATUS</ThemedText>
+              <ThemedText style={styles.trialLabel}>
+                {currentTier === "free" ? "TRIAL STATUS" : `${currentTier.toUpperCase()} PLAN`}
+              </ThemedText>
               <ThemedText style={styles.trialMinutes}>
                 {minutesUsed} / {minutesLimit} minutes used
               </ThemedText>
@@ -169,21 +170,33 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
             <View style={[styles.progressFill, { width: `${Math.min((minutesUsed/minutesLimit) * 100, 100)}%`, backgroundColor: isExhausted ? "#EF4444" : "#fff" }]} />
           </View>
 
-          <Pressable 
-            onPress={() => {
-              if (isExhausted) {
-                Alert.alert("Trial Ended", "You've used all 5 trial minutes. Please upgrade to a paid plan to continue using the Voice Assistant.");
-              } else {
-                onClose(); // Proceed to preview
-              }
-            }}
-            style={[styles.previewBtn, isExhausted && styles.disabledBtn]}
-          >
-            <ThemedText style={styles.previewBtnText}>
-              {isExhausted ? "Trial Minutes Exhausted" : "Test Voice Agent Now"}
-            </ThemedText>
-            {!isExhausted && <Feather name="arrow-right" size={16} color="#000" />}
-          </Pressable>
+          {isExhausted ? (
+            <View>
+              <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 20, marginBottom: 16 }}>
+                {currentTier === "free"
+                  ? "You've used all 5 trial minutes. Upgrade to continue using the Voice Assistant."
+                  : `You've used all ${minutesLimit} minutes this month.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : " Your minutes will reset at the start of your next billing period."}`
+                }
+              </ThemedText>
+              {upgradeTo ? (
+                <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                  <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
+                    <ThemedText style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>{upgradeTo.name}</ThemedText>
+                    <ThemedText style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>{upgradeTo.price}</ThemedText>
+                  </View>
+                  <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>{upgradeTo.minutes} minutes/month</ThemedText>
+                </View>
+              ) : null}
+            </View>
+          ) : (
+            <Pressable 
+              onPress={() => onClose()}
+              style={styles.previewBtn}
+            >
+              <ThemedText style={styles.previewBtnText}>Test Voice Agent Now</ThemedText>
+              <Feather name="arrow-right" size={16} color="#000" />
+            </Pressable>
+          )}
         </View>
 
         <View style={{ height: 40 }} />

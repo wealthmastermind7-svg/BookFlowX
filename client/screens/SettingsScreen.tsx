@@ -143,7 +143,7 @@ export default function SettingsScreen() {
   const [customersCount, setCustomersCount] = useState(0);
   const [ownerToken, setOwnerToken] = useState<string | null>(null);
 
-  const { data: voiceSubscription } = useVoiceSubscription(
+  const { data: voiceSubscription, isExhausted: isVoiceExhausted } = useVoiceSubscription(
     business?.id || "",
     ownerToken || ""
   );
@@ -616,7 +616,7 @@ export default function SettingsScreen() {
                   <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
                   <ThemedText style={styles.usageValue}>{voiceSubscription.subscription.minutesUsed} / {voiceSubscription.subscription.minutesLimit}</ThemedText>
                 </View>
-                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSubscription.usage.percentUsed, 100)}%` }]} /></View>
+                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSubscription.usage.percentUsed, 100)}%`, backgroundColor: isVoiceExhausted ? '#EF4444' : '#fff' }]} /></View>
               </View>
             )}
           </GlassCard>
@@ -665,8 +665,8 @@ export default function SettingsScreen() {
                 <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="mic" size={14} color="#fff" /></View>
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Agent</ThemedText>
               </View>
-              <View style={{ backgroundColor: voiceSubscription?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: voiceSubscription?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{voiceSubscription?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
+              <View style={{ backgroundColor: isVoiceExhausted ? 'rgba(239, 68, 68, 0.2)' : voiceSubscription?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSubscription?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSubscription?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
           </View>

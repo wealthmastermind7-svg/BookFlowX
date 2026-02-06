@@ -54,8 +54,22 @@ interface VoiceCallLog {
   createdAt: string;
 }
 
+interface UpgradeTier {
+  tier: string;
+  name: string;
+  price: string;
+  minutes: number;
+}
+
+const UPGRADE_MAP: Record<string, UpgradeTier | null> = {
+  free: { tier: "starter", name: "Starter", price: "$49/mo", minutes: 60 },
+  starter: { tier: "pro", name: "Pro", price: "$149/mo", minutes: 200 },
+  pro: { tier: "business", name: "Business", price: "$349/mo", minutes: 500 },
+  business: null,
+};
+
 export function useVoiceSubscription(businessId: string, ownerToken: string) {
-  return useQuery<VoiceSubscriptionResponse>({
+  const query = useQuery<VoiceSubscriptionResponse>({
     queryKey: ["/api/businesses", businessId, "voice-subscription"],
     queryFn: async () => {
       const url = new URL(`/api/businesses/${businessId}/voice-subscription`, getApiUrl());
@@ -72,6 +86,18 @@ export function useVoiceSubscription(businessId: string, ownerToken: string) {
     enabled: !!businessId && !!ownerToken,
     staleTime: 60000,
   });
+
+  const subscription = query.data?.subscription;
+  const usage = query.data?.usage;
+
+  const isExhausted = usage ? !usage.available : false;
+  const upgradeTo = subscription ? UPGRADE_MAP[subscription.tier] || null : null;
+
+  return {
+    ...query,
+    isExhausted,
+    upgradeTo,
+  };
 }
 
 export function useVoiceTiers() {

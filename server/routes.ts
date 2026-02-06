@@ -406,6 +406,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  app.get("/api/voice/:slug/check-minutes", async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+      const business = await storage.getBusinessBySlug(slug);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const subscription = await storage.getVoiceSubscription(business.id);
+      if (!subscription) {
+        return res.json({
+          available: true,
+          isExhausted: false,
+          currentTier: "free",
+          minutesUsed: 0,
+          minutesLimit: 5,
+          minutesRemaining: 5,
+          percentUsed: 0,
+          upgradeTo: { tier: "starter", name: "Starter", price: "$49/mo", minutes: 60 },
+          periodEnd: null,
+        });
+      }
+
+      const remainingMinutes = Math.max(0, subscription.totalMinutes - subscription.usedMinutes);
+      const isExhausted = remainingMinutes <= 0;
+
+      const upgradeMap: Record<string, { tier: string; name: string; price: string; minutes: number } | null> = {
+        free: { tier: "starter", name: "Starter", price: "$49/mo", minutes: 60 },
+        starter: { tier: "pro", name: "Pro", price: "$149/mo", minutes: 200 },
+        pro: { tier: "business", name: "Business", price: "$349/mo", minutes: 500 },
+        business: null,
+      };
+
+      res.json({
+        available: !isExhausted,
+        isExhausted,
+        currentTier: subscription.tier,
+        minutesUsed: subscription.usedMinutes,
+        minutesLimit: subscription.totalMinutes,
+        minutesRemaining: remainingMinutes,
+        percentUsed: subscription.totalMinutes > 0 ? Math.round((subscription.usedMinutes / subscription.totalMinutes) * 100) : 0,
+        upgradeTo: isExhausted ? upgradeMap[subscription.tier] || null : null,
+        periodEnd: subscription.periodEnd,
+      });
+    } catch (error) {
+      console.error("Error checking voice minutes:", error);
+      res.status(500).json({ error: "Failed to check voice minutes" });
+    }
+  });
+
   // Get voice subscription status by business slug (public)
   app.get("/api/public/businesses/:slug/voice-status", async (req: Request, res: Response) => {
     try {
@@ -2822,30 +2872,84 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usage = await storage.checkVoiceMinutesAvailable(config.businessId);
       
       if (!usage.available) {
-        // Return a user-friendly page when voice minutes are exhausted
+        const subscription = await storage.getOrCreateVoiceSubscription(config.businessId);
+        const upgradeMap: Record<string, { name: string; price: string; minutes: number } | null> = {
+          free: { name: "Starter", price: "$49", minutes: 60 },
+          starter: { name: "Pro", price: "$149", minutes: 200 },
+          pro: { name: "Business", price: "$349", minutes: 500 },
+          business: null,
+        };
+        const upgradeTo = upgradeMap[subscription.tier] || null;
+        const usedMin = subscription.usedMinutes;
+        const totalMin = subscription.totalMinutes;
+        const tierLabel = subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1);
+
         const html = `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Voice Booking Unavailable - ${config.businessName}</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Voice Assistant - ${config.businessName}</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(180deg, #000 0%, #111 100%); color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-    .container { text-align: center; max-width: 400px; }
-    .icon { font-size: 64px; margin-bottom: 24px; opacity: 0.5; }
-    h1 { font-size: 28px; font-weight: 700; margin-bottom: 12px; }
-    p { color: rgba(255,255,255,0.6); font-size: 16px; line-height: 1.6; margin-bottom: 24px; }
-    .btn { display: inline-block; padding: 16px 32px; background: #fff; color: #000; text-decoration: none; border-radius: 12px; font-weight: 600; font-size: 16px; }
-    .btn:hover { opacity: 0.9; }
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; }
+    body { font-family: 'Inter', -apple-system, sans-serif; background: #000; color: #fff; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px; padding-top: calc(env(safe-area-inset-top, 0px) + 24px); padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 24px); }
+    .container { width: 100%; max-width: 420px; text-align: center; animation: fadeIn 0.8s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    .biz-name { font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 500; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+    .page-title { font-family: 'Cormorant Garamond', serif; font-size: 56px; font-weight: 700; letter-spacing: -2px; line-height: 0.95; margin-bottom: 40px; }
+    .usage-card { background: rgba(255,255,255,0.04); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 28px 24px; margin-bottom: 24px; animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.2s both; }
+    .tier-badge { display: inline-block; padding: 4px 14px; border-radius: 20px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 16px; background: rgba(239,68,68,0.2); color: #EF4444; }
+    .usage-title { font-size: 18px; font-weight: 600; margin-bottom: 6px; }
+    .usage-subtitle { font-size: 13px; color: rgba(255,255,255,0.4); margin-bottom: 20px; }
+    .usage-bar-bg { height: 6px; background: rgba(255,255,255,0.08); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+    .usage-bar-fill { height: 100%; background: #EF4444; border-radius: 3px; width: 100%; }
+    .usage-stats { display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.4); }
+    .exhausted-msg { font-size: 14px; color: rgba(255,255,255,0.5); line-height: 1.6; margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,255,255,0.06); }
+    ${upgradeTo ? `.upgrade-card { background: rgba(255,255,255,0.04); backdrop-filter: blur(40px); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 28px 24px; margin-bottom: 24px; animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.3s both; }
+    .upgrade-label { font-size: 10px; font-weight: 700; letter-spacing: 2px; color: rgba(255,255,255,0.3); text-transform: uppercase; margin-bottom: 12px; }
+    .upgrade-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+    .upgrade-name { font-size: 22px; font-weight: 700; }
+    .upgrade-price { font-size: 22px; font-weight: 700; }
+    .upgrade-price span { font-size: 13px; color: rgba(255,255,255,0.4); font-weight: 400; }
+    .upgrade-minutes { font-size: 13px; color: rgba(255,255,255,0.5); margin-bottom: 20px; }` : ''}
+    .btn-primary { display: block; width: 100%; padding: 18px; background: #fff; color: #000; text-decoration: none; border-radius: 20px; font-size: 16px; font-weight: 600; letter-spacing: 0.5px; border: none; cursor: pointer; transition: all 0.3s cubic-bezier(0.16,1,0.3,1); margin-bottom: 12px; animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
+    .btn-primary:hover { transform: scale(1.02); box-shadow: 0 8px 32px rgba(255,255,255,0.1); }
+    .btn-ghost { display: block; width: 100%; padding: 18px; background: transparent; color: #fff; text-decoration: none; border-radius: 20px; font-size: 16px; font-weight: 500; border: 1px solid rgba(255,255,255,0.12); transition: all 0.3s; animation: slideUp 0.8s cubic-bezier(0.16,1,0.3,1) 0.5s both; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.04); }
+    .powered { margin-top: 40px; font-size: 11px; color: rgba(255,255,255,0.2); letter-spacing: 1px; }
+    .powered a { color: rgba(255,255,255,0.3); text-decoration: none; }
   </style>
 </head>
 <body>
   <div class="container">
-    <div class="icon">🔇</div>
-    <h1>Voice Booking Unavailable</h1>
-    <p>${config.businessName}'s voice booking is temporarily unavailable. Please try again later or use the regular booking page.</p>
-    <a href="/book/${req.params.slug}" class="btn">Book Online Instead</a>
+    <div class="biz-name">${config.businessName}</div>
+    <div class="page-title">MINUTES<br>EXHAUSTED</div>
+
+    <div class="usage-card">
+      <span class="tier-badge">${tierLabel} Plan</span>
+      <div class="usage-title">All minutes used</div>
+      <div class="usage-subtitle">${usedMin} of ${totalMin} minutes used this month</div>
+      <div class="usage-bar-bg"><div class="usage-bar-fill"></div></div>
+      <div class="usage-stats"><span>${usedMin} min used</span><span>0 min remaining</span></div>
+      <div class="exhausted-msg">Your Voice Assistant minutes have been fully used for this billing period. You can still accept bookings through your booking link below.</div>
+    </div>
+
+    ${upgradeTo ? `<div class="upgrade-card">
+      <div class="upgrade-label">Upgrade for more minutes</div>
+      <div class="upgrade-row">
+        <div class="upgrade-name">${upgradeTo.name}</div>
+        <div class="upgrade-price">${upgradeTo.price}<span>/mo</span></div>
+      </div>
+      <div class="upgrade-minutes">${upgradeTo.minutes} minutes included per month</div>
+      <a href="/billing/${config.businessId}" class="btn-primary" style="margin-bottom: 0;">Upgrade Now</a>
+    </div>` : ''}
+
+    <a href="/book/${req.params.slug}" class="btn-primary">Book Online</a>
+    <a href="https://apps.apple.com/app/bookflowx/id6756943439" class="btn-ghost">Get the App</a>
+    <div class="powered">Powered by <a href="https://confirmbooking.online">BookFlow</a></div>
   </div>
 </body>
 </html>`;
