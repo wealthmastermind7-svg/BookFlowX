@@ -371,10 +371,25 @@ export default function SettingsScreen() {
   const TIMEZONES = [
     { label: "Auckland (NZST)", value: "Pacific/Auckland" },
     { label: "Sydney (AEST)", value: "Australia/Sydney" },
+    { label: "Adelaide (ACST)", value: "Australia/Adelaide" },
+    { label: "Perth (AWST)", value: "Australia/Perth" },
+    { label: "Tokyo (JST)", value: "Asia/Tokyo" },
+    { label: "Singapore (SGT)", value: "Asia/Singapore" },
+    { label: "Mumbai (IST)", value: "Asia/Kolkata" },
+    { label: "Dubai (GST)", value: "Asia/Dubai" },
+    { label: "Riyadh (AST)", value: "Asia/Riyadh" },
+    { label: "Istanbul (TRT)", value: "Europe/Istanbul" },
+    { label: "Athens (EET)", value: "Europe/Athens" },
+    { label: "Paris (CET)", value: "Europe/Paris" },
     { label: "London (GMT)", value: "Europe/London" },
     { label: "New York (EST)", value: "America/New_York" },
+    { label: "Chicago (CST)", value: "America/Chicago" },
+    { label: "Denver (MST)", value: "America/Denver" },
     { label: "Los Angeles (PST)", value: "America/Los_Angeles" },
-    { label: "Tokyo (JST)", value: "Asia/Tokyo" },
+    { label: "Anchorage (AKST)", value: "America/Anchorage" },
+    { label: "Honolulu (HST)", value: "Pacific/Honolulu" },
+    { label: "São Paulo (BRT)", value: "America/Sao_Paulo" },
+    { label: "UTC", value: "UTC" },
   ];
 
   const handleVoiceSubscribe = async (tierId: string) => {
@@ -801,23 +816,25 @@ export default function SettingsScreen() {
             </ThemedText>
             
             {editingField === "timezone" ? (
-              <View style={{ width: '100%', gap: 8, marginBottom: 20 }}>
-                {TIMEZONES.map((tz) => (
-                  <Pressable
-                    key={tz.value}
-                    style={[
-                      styles.timezoneOption,
-                      editValue === tz.value && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)' }
-                    ]}
-                    onPress={() => setEditValue(tz.value)}
-                  >
-                    <ThemedText style={[styles.timezoneOptionText, editValue === tz.value && { color: '#fff' }]}>
-                      {tz.label}
-                    </ThemedText>
-                    {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
-                  </Pressable>
-                ))}
-              </View>
+              <ScrollView style={{ maxHeight: 400, width: '100%', marginBottom: 20 }} showsVerticalScrollIndicator={false}>
+                <View style={{ gap: 8 }}>
+                  {TIMEZONES.map((tz) => (
+                    <Pressable
+                      key={tz.value}
+                      style={[
+                        styles.timezoneOption,
+                        editValue === tz.value && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)' }
+                      ]}
+                      onPress={() => setEditValue(tz.value)}
+                    >
+                      <ThemedText style={[styles.timezoneOptionText, editValue === tz.value && { color: '#fff' }]}>
+                        {tz.label}
+                      </ThemedText>
+                      {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
+                    </Pressable>
+                  ))}
+                </View>
+              </ScrollView>
             ) : (
               <TextInput 
                 style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} 
