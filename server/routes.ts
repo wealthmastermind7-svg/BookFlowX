@@ -2173,6 +2173,46 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Sync voice subscription tier from RevenueCat purchase
+  app.post("/api/businesses/:businessId/voice-subscription/sync", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { tier } = req.body;
+
+      const validTiers = ["free", "starter", "pro", "business"];
+      if (!tier || !validTiers.includes(tier)) {
+        return res.status(400).json({ error: "Invalid tier" });
+      }
+
+      const minutesMap: Record<string, number> = {
+        free: 5,
+        starter: 60,
+        pro: 200,
+        business: 500,
+      };
+
+      const isPaidTier = tier !== "free";
+
+      await storage.updateVoiceSubscription(businessId, {
+        tier,
+        status: isPaidTier ? "active" : "trialing",
+        minutesLimit: minutesMap[tier] || 5,
+        periodStart: new Date(),
+        periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+      });
+
+      if (isPaidTier) {
+        await storage.updateBusiness(businessId, { isPremium: true });
+      }
+
+      console.log(`[Voice Sync] Synced ${tier} subscription for ${businessId}${isPaidTier ? ", granted premium access" : ""}`);
+      res.json({ success: true, tier, isPremium: isPaidTier });
+    } catch (error) {
+      console.error("[Voice Sync] Error syncing subscription:", error);
+      res.status(500).json({ error: "Failed to sync voice subscription" });
+    }
+  });
+
   // Get voice call logs for a business
   app.get("/api/businesses/:businessId/voice-calls", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
     try {
@@ -2564,9 +2604,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
 
-          await storage.updateBusiness(businessId, { isPremium: true });
-          
-          console.log(`[Stripe Webhook] Activated ${tier} voice subscription for ${businessId}, granted premium access`);
+          console.log(`[Stripe Webhook] Activated ${tier} voice subscription for ${businessId}`);
         }
       }
       

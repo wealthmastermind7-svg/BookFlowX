@@ -66,6 +66,11 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
       const result = await purchaseVoicePackage(pkg);
       if (result.success) {
         setVoiceTier(result.tier);
+        try {
+          await api.syncVoiceSubscription(businessId, result.tier);
+        } catch (e) {
+          console.warn("[VoicePaywall] Failed to sync subscription to backend:", e);
+        }
         Alert.alert("Success!", "Your voice subscription is now active.", [
           { text: "OK", onPress: onClose }
         ]);
@@ -90,6 +95,11 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
       setVoiceTier(tier);
       
       if (tier !== "free") {
+        try {
+          await api.syncVoiceSubscription(businessId, tier);
+        } catch (e) {
+          console.warn("[VoicePaywall] Failed to sync restored subscription to backend:", e);
+        }
         Alert.alert("Restored!", `Your ${VOICE_TIER_CONFIG[tier]?.name || tier} plan has been restored.`);
       } else {
         Alert.alert("No Purchases Found", "We couldn't find any previous purchases to restore.");

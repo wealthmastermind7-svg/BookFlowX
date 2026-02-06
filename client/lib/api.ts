@@ -560,6 +560,10 @@ class ApiClient {
   async createVoiceCheckout(businessId: string, tierId: string): Promise<{ url: string }> {
     return makeRequest<{ url: string }>("POST", "/api/voice-checkout", { businessId, tierId });
   }
+
+  async syncVoiceSubscription(businessId: string, tier: string): Promise<{ success: boolean; tier: string; isPremium: boolean }> {
+    return makeRequest<{ success: boolean; tier: string; isPremium: boolean }>("POST", `/api/businesses/${businessId}/voice-subscription/sync`, { tier });
+  }
 }
 
 export interface EmbedCode {
