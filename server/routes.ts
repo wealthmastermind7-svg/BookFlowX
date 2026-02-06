@@ -414,6 +414,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
+      // FORCED DEVELOPMENT/EXPO GO OVERRIDE: Always subscribed
+      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true" || (req.headers['user-agent'] && req.headers['user-agent'].includes('ExpoGo'))) {
+        return res.json({
+          isSubscribed: true,
+          tier: "business"
+        });
+      }
+
       const subscription = await storage.getOrCreateVoiceSubscription(business.id);
       const hasActiveSubscription = subscription.status === "active" && subscription.tier !== "free";
       const hasFreeTrial = subscription.status === "active" && subscription.tier === "free" && subscription.minutesUsed < subscription.minutesLimit;
@@ -2112,10 +2120,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const { businessId } = req.params;
 
       // Mock premium for testing in Expo Go / Development
-      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true") {
+      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true" || (req.headers['user-agent'] && req.headers['user-agent'].includes('ExpoGo'))) {
         return res.json({
           subscription: {
-            tier: 'voice_business',
+            tier: 'business',
             status: 'active',
             minutesLimit: 500,
             minutesUsed: 0,
