@@ -313,10 +313,10 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
         <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.brandTextSection}>
           <Text style={styles.brandHeading}>
             Smart Booking{' '}
-            <Text style={styles.brandHeadingItalic}>For Everyone</Text>
+            <Text style={styles.brandHeadingItalic}>For Modern Businesses</Text>
           </Text>
           <Text style={styles.brandDescription}>
-            Professional tools for every business. Get your booking link and Voice Assistant setup in seconds.
+            Professional booking links, QR codes, and an informational Voice Assistant — ready in seconds.
           </Text>
         </Animated.View>
 
@@ -327,7 +327,7 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
           </View>
           <View style={styles.brandPill}>
             <Feather name="mic" size={14} color="#8B5CF6" />
-            <Text style={styles.brandPillText}>Voice Assistant included</Text>
+            <Text style={styles.brandPillText}>Voice Assistant Ready</Text>
           </View>
         </Animated.View>
       </ScrollView>
