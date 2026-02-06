@@ -313,10 +313,10 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
         <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.brandTextSection}>
           <Text style={styles.brandHeading}>
             Smart Booking{' '}
-            <Text style={styles.brandHeadingItalic}>Built In</Text>
+            <Text style={styles.brandHeadingItalic}>For Everyone</Text>
           </Text>
           <Text style={styles.brandDescription}>
-            Beautiful scheduling with intelligent features that adapt to your business. Setup in seconds, not hours.
+            Professional tools for every business. Get your booking link and Voice Assistant setup in seconds.
           </Text>
         </Animated.View>
 
