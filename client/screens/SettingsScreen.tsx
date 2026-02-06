@@ -582,7 +582,7 @@ export default function SettingsScreen() {
                 <Feather name="mic" size={24} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.voiceTitle}>Informational Assistant</ThemedText>
+                <ThemedText style={[styles.voiceTitle, { fontSize: 16 }]} numberOfLines={1} adjustsFontSizeToFit>Informational Assistant</ThemedText>
                 <ThemedText style={styles.voiceSubtitle}>Answers questions about your services</ThemedText>
               </View>
               <Button 
