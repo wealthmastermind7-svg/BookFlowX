@@ -26,6 +26,39 @@ interface FloatingMascotProps {
   customTip?: MascotTip;
 }
 
+const SETTINGS_TIPS: MascotTip[] = [
+  {
+    title: "Customize Everything",
+    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Wipe Cloud' to start fresh.",
+    icon: "settings",
+  },
+  {
+    title: "Voice Assistant",
+    message: "Share your Voice Assistant link so customers can ask about services, pricing, and availability anytime — no app download needed.",
+    icon: "mic",
+  },
+  {
+    title: "Google Calendar Sync",
+    message: "Connect Google Calendar to automatically sync your bookings both ways. Never double-book again.",
+    icon: "calendar",
+  },
+  {
+    title: "Smart Suggestions",
+    message: "Smart suggestions help you upsell services and send the right message to the right customer at the right time.",
+    icon: "zap",
+  },
+  {
+    title: "Booking Widget",
+    message: "Embed a booking widget on your website so customers can book directly without leaving your page.",
+    icon: "code",
+  },
+  {
+    title: "Voice Assistant Tiers",
+    message: "Start with 5 free Voice Assistant minutes. Upgrade to Starter, Pro, or Business for more minutes as your business grows.",
+    icon: "trending-up",
+  },
+];
+
 const SCREEN_TIPS: Record<string, MascotTip> = {
   Dashboard: {
     title: "Welcome to BookFlow",
@@ -68,12 +101,16 @@ export function FloatingMascot({ screenName, customTip }: FloatingMascotProps) {
   const insets = useSafeAreaInsets();
   const [showTip, setShowTip] = useState(false);
   const [hasShownWelcome, setHasShownWelcome] = useState(false);
+  const [settingsTipIndex, setSettingsTipIndex] = useState(0);
   
   const floatAnim = useRef(new Animated.Value(0)).current;
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const waveAnim = useRef(new Animated.Value(0)).current;
 
-  const currentTip = customTip || SCREEN_TIPS[screenName || ""] || SCREEN_TIPS.default;
+  const isSettings = screenName === "Settings" && !customTip;
+  const currentTip = isSettings
+    ? SETTINGS_TIPS[settingsTipIndex]
+    : customTip || SCREEN_TIPS[screenName || ""] || SCREEN_TIPS.default;
 
   useEffect(() => {
     // Floating animation
@@ -131,13 +168,19 @@ export function FloatingMascot({ screenName, customTip }: FloatingMascotProps) {
 
   const handlePress = () => {
     try { 
-      // Multi-stage haptic for a "living" feel
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
       setTimeout(() => {
         Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       }, 50);
     } catch {}
     setShowTip(true);
+  };
+
+  const handleDismiss = () => {
+    setShowTip(false);
+    if (isSettings) {
+      setSettingsTipIndex((prev) => (prev + 1) % SETTINGS_TIPS.length);
+    }
   };
 
   const floatTranslateY = floatAnim.interpolate({
@@ -196,9 +239,9 @@ export function FloatingMascot({ screenName, customTip }: FloatingMascotProps) {
         visible={showTip}
         transparent
         animationType="fade"
-        onRequestClose={() => setShowTip(false)}
+        onRequestClose={handleDismiss}
       >
-        <Pressable style={styles.tipOverlay} onPress={() => setShowTip(false)}>
+        <Pressable style={styles.tipOverlay} onPress={handleDismiss}>
           <View style={styles.tipContainer}>
             <View style={styles.tipHeader}>
               <View style={styles.tipIconCircle}>
@@ -207,9 +250,30 @@ export function FloatingMascot({ screenName, customTip }: FloatingMascotProps) {
               <ThemedText style={styles.tipTitle}>{currentTip.title}</ThemedText>
             </View>
             <ThemedText style={styles.tipMessage}>{currentTip.message}</ThemedText>
-            <Pressable style={styles.gotItButton} onPress={() => setShowTip(false)}>
-              <ThemedText style={styles.gotItText}>Got it!</ThemedText>
-            </Pressable>
+            {isSettings ? (
+              <View style={styles.tipsFooter}>
+                <View style={styles.paginationDots}>
+                  {SETTINGS_TIPS.map((_, i) => (
+                    <View
+                      key={i}
+                      style={[
+                        styles.dot,
+                        i === settingsTipIndex && styles.dotActive,
+                      ]}
+                    />
+                  ))}
+                </View>
+                <Pressable style={styles.gotItButton} onPress={handleDismiss}>
+                  <ThemedText style={styles.gotItText}>
+                    {settingsTipIndex < SETTINGS_TIPS.length - 1 ? "Next Tip" : "Got it!"}
+                  </ThemedText>
+                </Pressable>
+              </View>
+            ) : (
+              <Pressable style={styles.gotItButton} onPress={handleDismiss}>
+                <ThemedText style={styles.gotItText}>Got it!</ThemedText>
+              </Pressable>
+            )}
           </View>
         </Pressable>
       </Modal>
@@ -363,5 +427,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "700",
     color: "#000",
+  },
+  tipsFooter: {
+    gap: 16,
+  },
+  paginationDots: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 6,
+  },
+  dot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: "rgba(255,255,255,0.2)",
+  },
+  dotActive: {
+    width: 20,
+    backgroundColor: "#fff",
+    borderRadius: 3,
   },
 });
