@@ -483,16 +483,39 @@ function Step3AssetPreviews({
 
         <Animated.View entering={FadeInUp.delay(200)} style={styles.qrSection}>
           <Text style={[styles.previewLabel]}>QR CODE</Text>
-          <View 
-            style={[styles.qrContainer]}
-          >
-            {qrCodeUrl ? (
-              <View style={styles.qrImageWrapper}>
-                <Image source={{ uri: qrCodeUrl }} style={styles.qrImage} contentFit="contain" />
+          <View style={styles.qrCardContainer}>
+            <Text style={styles.qrCardTitle}>Booking QR Code</Text>
+            <Pressable 
+              onPress={handleOpenLink}
+              style={({ pressed }) => [
+                styles.qrContainer,
+                pressed && { opacity: 0.8 }
+              ]}
+            >
+              {qrCodeUrl ? (
+                <View style={styles.qrImageWrapper}>
+                  <Image source={{ uri: qrCodeUrl }} style={styles.qrImage} contentFit="contain" />
+                  <View style={styles.qrCenterOverlay}>
+                    <Text style={styles.qrCenterText} numberOfLines={2} adjustsFontSizeToFit>{businessName.toUpperCase()}</Text>
+                  </View>
+                </View>
+              ) : (
+                <ActivityIndicator size="large" color="#fff" />
+              )}
+              <View style={styles.qrTapHintRow}>
+                <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
+                <Text style={styles.qrTapHintText}>Tap to open link</Text>
               </View>
-            ) : (
-              <ActivityIndicator size="large" color="#fff" />
-            )}
+            </Pressable>
+
+            <View style={styles.qrActionContainer}>
+              <View style={styles.qrShareButton}>
+                <Text style={styles.qrShareButtonText}>Share QR Code Image</Text>
+              </View>
+              <View style={styles.qrCloseButton}>
+                <Text style={styles.qrCloseButtonText}>Close</Text>
+              </View>
+            </View>
           </View>
           <Text style={[styles.tapHint]}>Print this for your storefront</Text>
         </Animated.View>
@@ -922,6 +945,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
+  qrCardContainer: {
+    width: '100%',
+    backgroundColor: '#1a1a1a',
+    borderRadius: 32,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  qrCardTitle: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#fff',
+    marginBottom: 20,
+    fontFamily: 'Inter_900Black',
+  },
   qrContainer: {
     borderRadius: 24,
     padding: Spacing.xl,
@@ -932,19 +970,14 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,255,255,0.08)',
   },
   qrImageWrapper: {
-    width: 240,
-    height: 240,
+    width: 220,
+    height: 220,
     backgroundColor: '#fff',
-    borderRadius: 28,
-    padding: 16,
+    borderRadius: 24,
+    padding: 12,
     position: 'relative',
     alignItems: 'center',
     justifyContent: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.3,
-    shadowRadius: 20,
-    elevation: 10,
   },
   qrImage: {
     width: '100%',
@@ -953,23 +986,64 @@ const styles = StyleSheet.create({
   qrCenterOverlay: {
     position: 'absolute',
     backgroundColor: '#fff',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 6,
-    borderWidth: 1.5,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 4,
+    borderWidth: 1,
     borderColor: '#000',
-    maxWidth: '85%',
+    maxWidth: '75%',
     alignItems: 'center',
     justifyContent: 'center',
     zIndex: 10,
   },
   qrCenterText: {
     fontFamily: 'Inter_900Black',
-    fontSize: 11,
+    fontSize: 14,
     color: '#000',
     textAlign: 'center',
     letterSpacing: -0.5,
     fontWeight: '900',
+  },
+  qrTapHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 16,
+  },
+  qrTapHintText: {
+    fontSize: 13,
+    color: 'rgba(255,255,255,0.4)',
+    fontFamily: 'Inter_500Medium',
+  },
+  qrActionContainer: {
+    marginTop: 24,
+    gap: 12,
+    alignItems: 'center',
+  },
+  qrShareButton: {
+    backgroundColor: '#000',
+    width: '100%',
+    height: 56,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  qrShareButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '700',
+    fontFamily: 'Inter_700Bold',
+  },
+  qrCloseButton: {
+    paddingVertical: 12,
+  },
+  qrCloseButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
   },
   messageBubbleContainer: {
     alignItems: 'flex-end',
