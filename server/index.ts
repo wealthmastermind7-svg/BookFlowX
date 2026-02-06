@@ -3,6 +3,7 @@ import type { Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import vapiRoutes from "./vapiRoutes";
+import { registerSeoRoutes } from "./seo-routes";
 import { WebhookHandlers } from "./webhookHandlers";
 import { runMigrations } from "stripe-replit-sync";
 import { getStripeSync } from "./stripeClient";
@@ -763,6 +764,8 @@ import { processReminders } from "./workflowEngine";
   app.get("/favicon.png", (_req: Request, res: Response) => {
     res.sendFile(path.resolve(process.cwd(), "server/static/favicon.png"));
   });
+
+  registerSeoRoutes(app);
 
   configureExpoAndLanding(app);
 
