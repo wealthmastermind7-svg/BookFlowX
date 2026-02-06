@@ -1685,47 +1685,52 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
-      // Monetization Gate: Check if business is premium
+      // Monetization Gate: Check if business is premium or has active voice subscription
       if (!business.isPremium) {
-        const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
-        const now = new Date();
-        const createdAt = business.createdAt ? new Date(business.createdAt) : now;
-        
-        // FORCED DEVELOPMENT OVERRIDE: Always active in dev
-        if (process.env.NODE_ENV === 'development') {
-          // Skip expiration check
-        } else {
-          const trialDays = 7;
-          const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
-          const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
+        const voiceSub = await storage.getVoiceSubscription(business.id);
+        const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
 
-          if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
-            if (expiredHtmlContent) {
-              return res.type("text/html").send(expiredHtmlContent.replace(/{{businessName}}/g, business.name));
+        if (!hasActiveVoiceSub) {
+          const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+          const now = new Date();
+          const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+          
+          // FORCED DEVELOPMENT OVERRIDE: Always active in dev
+          if (process.env.NODE_ENV === 'development') {
+            // Skip expiration check
+          } else {
+            const trialDays = 7;
+            const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
+            const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
+
+            if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
+              if (expiredHtmlContent) {
+                return res.type("text/html").send(expiredHtmlContent.replace(/{{businessName}}/g, business.name));
+              }
+              return res.status(403).send(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                  <title>Booking Link Expired | BookFlow</title>
+                  <meta name="viewport" content="width=device-width, initial-scale=1">
+                  <style>
+                    body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
+                    .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 48px 32px; border-radius: 32px; max-width: 400px; width: 100%; }
+                    h1 { font-size: 24px; margin-bottom: 16px; font-weight: 700; }
+                    p { color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 0; font-size: 16px; }
+                    .logo { font-weight: 800; font-size: 28px; margin-bottom: 40px; display: block; letter-spacing: -0.5px; }
+                  </style>
+                </head>
+                <body>
+                  <div class="card">
+                    <span class="logo">BookFlow</span>
+                    <h1>Booking link expired</h1>
+                    <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
+                  </div>
+                </body>
+                </html>
+              `);
             }
-            return res.status(403).send(`
-              <!DOCTYPE html>
-              <html>
-              <head>
-                <title>Booking Link Expired | BookFlow</title>
-                <meta name="viewport" content="width=device-width, initial-scale=1">
-                <style>
-                  body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
-                  .card { background: rgba(255,255,255,0.05); backdrop-filter: blur(20px); border: 1px solid rgba(255,255,255,0.1); padding: 48px 32px; border-radius: 32px; max-width: 400px; width: 100%; }
-                  h1 { font-size: 24px; margin-bottom: 16px; font-weight: 700; }
-                  p { color: rgba(255,255,255,0.6); line-height: 1.6; margin-bottom: 0; font-size: 16px; }
-                  .logo { font-weight: 800; font-size: 28px; margin-bottom: 40px; display: block; letter-spacing: -0.5px; }
-                </style>
-              </head>
-              <body>
-                <div class="card">
-                  <span class="logo">BookFlow</span>
-                  <h1>Booking link expired</h1>
-                  <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
-                </div>
-              </body>
-              </html>
-            `);
           }
         }
       }
@@ -1780,22 +1785,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ error: "Business not found" });
       }
 
-      // Monetization Gate: Check if business is premium
+      // Monetization Gate: Check if business is premium or has active voice subscription
       if (!business.isPremium) {
-        const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
-        const now = new Date();
-        const createdAt = business.createdAt ? new Date(business.createdAt) : now;
-        // Increase trial to 30 days in development to avoid immediate expiration
-        const trialDays = process.env.NODE_ENV === 'development' ? 30 : 7;
-        const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
-        const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
+        const voiceSub = await storage.getVoiceSubscription(business.id);
+        const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
 
-        if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
-          return res.status(402).send(`
-            <!DOCTYPE html>
-            <html>
-            <head>
-              <title>Booking Locked | BookFlow</title>
+        if (!hasActiveVoiceSub) {
+          const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+          const now = new Date();
+          const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+          const trialDays = process.env.NODE_ENV === 'development' ? 30 : 7;
+          const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
+          const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
+
+          if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
+            return res.status(402).send(`
+              <!DOCTYPE html>
+              <html>
+              <head>
+                <title>Booking Locked | BookFlow</title>
               <meta name="viewport" content="width=device-width, initial-scale=1">
               <style>
                 body { font-family: -apple-system, sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #000; color: #fff; text-align: center; padding: 20px; }
@@ -1814,6 +1822,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
             </body>
             </html>
           `);
+          }
         }
       }
       
@@ -2554,8 +2563,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
             periodStart: new Date(),
             periodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
           });
+
+          await storage.updateBusiness(businessId, { isPremium: true });
           
-          console.log(`[Stripe Webhook] Activated ${tier} subscription for ${businessId}`);
+          console.log(`[Stripe Webhook] Activated ${tier} voice subscription for ${businessId}, granted premium access`);
         }
       }
       

@@ -134,7 +134,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <View style={{ height: 16 }} />
           <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
             <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', textAlign: 'center' }}>
-              Requires active Booking Links plan.
+              Booking Links included free with any voice plan.
             </ThemedText>
           </View>
         </View>
