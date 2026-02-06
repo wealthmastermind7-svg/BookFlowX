@@ -344,9 +344,10 @@ function Step2BusinessName({
       <KeyboardAvoidingView 
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         style={{ flex: 1 }}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 0 : 20}
       >
         <ScrollView 
-          contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 200 }]}
+          contentContainerStyle={[styles.stepContent, { paddingTop: insets.top + 80, paddingBottom: 140 }]}
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
@@ -385,29 +386,29 @@ function Step2BusinessName({
               </Text>
             </Animated.View>
           </View>
-        </ScrollView>
 
-        <View style={[styles.bottomActions, { bottom: Spacing.xl + 40, zIndex: 100 }]}>
-          <View style={styles.bottomActionsRow}>
-            <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
-              <Feather name="arrow-left" size={20} color="#fff" />
-            </AnimatedPressable>
-            <AnimatedPressable 
-              onPress={onNext} 
-              style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}
-              disabled={!canContinue || isCreating}
-            >
-              {isCreating ? (
-                <ActivityIndicator size="small" color="#000" />
-              ) : (
-                <>
-                  <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
-                  <Feather name="arrow-right" size={20} color="#000" />
-                </>
-              )}
-            </AnimatedPressable>
+          <View style={[styles.bottomActionsInline, { marginTop: Spacing.xl }]}>
+            <View style={styles.bottomActionsRow}>
+              <AnimatedPressable onPress={onBack} style={[styles.backButton, { borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }]}>
+                <Feather name="arrow-left" size={20} color="#fff" />
+              </AnimatedPressable>
+              <AnimatedPressable 
+                onPress={onNext} 
+                style={[styles.primaryButtonFlex, { backgroundColor: '#fff' }]}
+                disabled={!canContinue || isCreating}
+              >
+                {isCreating ? (
+                  <ActivityIndicator size="small" color="#000" />
+                ) : (
+                  <>
+                    <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+                    <Feather name="arrow-right" size={20} color="#000" />
+                  </>
+                )}
+              </AnimatedPressable>
+            </View>
           </View>
-        </View>
+        </ScrollView>
       </KeyboardAvoidingView>
     </Animated.View>
   );
@@ -466,30 +467,27 @@ function Step3AssetPreviews({
         </View>
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.previewSection}>
-          <Text style={[styles.previewLabel, { color: 'rgba(255,255,255,0.5)' }]}>BOOKING LINK PREVIEW</Text>
+          <Text style={[styles.previewLabel]}>BOOKING LINK PREVIEW</Text>
           <Pressable onPress={handleOpenLink} style={styles.linkPreviewContainer}>
             <CinematicLinkPreview businessName={businessName} domain={domain} />
           </Pressable>
-          <Text style={[styles.tapHint, { color: 'rgba(255,255,255,0.4)' }]}>Tap to open your live booking page</Text>
+          <Text style={[styles.tapHint]}>Tap to open your live booking page</Text>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200)} style={styles.qrSection}>
-          <Text style={[styles.previewLabel, { color: 'rgba(255,255,255,0.5)' }]}>QR CODE</Text>
+          <Text style={[styles.previewLabel]}>QR CODE</Text>
           <View 
-            style={[styles.qrContainer, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 }]}
+            style={[styles.qrContainer]}
           >
             {qrCodeUrl ? (
               <View style={styles.qrImageWrapper}>
                 <Image source={{ uri: qrCodeUrl }} style={styles.qrImage} contentFit="contain" />
-                <View style={styles.qrCenterOverlay}>
-                  <Text style={styles.qrCenterText} numberOfLines={1} adjustsFontSizeToFit>{businessName.toUpperCase()}</Text>
-                </View>
               </View>
             ) : (
               <ActivityIndicator size="large" color="#fff" />
             )}
           </View>
-          <Text style={[styles.tapHint, { color: 'rgba(255,255,255,0.4)' }]}>Print this for your storefront</Text>
+          <Text style={[styles.tapHint]}>Print this for your storefront</Text>
         </Animated.View>
       </ScrollView>
 
@@ -664,7 +662,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       setBookingUrl(finalBookingUrl);
       
       // Instantly generate QR code URL locally to avoid delay
-      const qrUrl = `${getApiUrl()}/api/business/${updatedBiz.id}/qr?url=${encodeURIComponent(finalBookingUrl)}`;
+      const qrUrl = `${getApiUrl()}/api/businesses/${updatedBiz.id}/qrcode?format=image`;
       setQrCodeUrl(qrUrl);
       
       setCurrentStep(2);
@@ -818,6 +816,9 @@ const styles = StyleSheet.create({
     position: 'absolute',
     left: Spacing.xl,
     right: Spacing.xl,
+    backgroundColor: 'transparent',
+  },
+  bottomActionsInline: {
     backgroundColor: 'transparent',
   },
   bottomActionsRow: {
