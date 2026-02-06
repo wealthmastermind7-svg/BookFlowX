@@ -137,9 +137,9 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <View style={styles.iconCircle}>
             <Feather name="mic" size={40} color="#fff" />
           </View>
-          <ThemedText style={styles.heroTitle}>Enable Voice Assistant</ThemedText>
+          <ThemedText style={styles.heroTitle}>Voice Assistant</ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            Let your Assistant answer questions about your services and direct customers to book.
+            Continue assisting customers with a Voice Assistant that answers questions and helps them book.
           </ThemedText>
           <View style={{ height: 16 }} />
           <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
@@ -156,7 +156,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
                 {currentTier === "free" ? "TRIAL STATUS" : `${currentTier.toUpperCase()} PLAN`}
               </ThemedText>
               <ThemedText style={styles.trialMinutes}>
-                {minutesUsed} / {minutesLimit} minutes used
+                {minutesUsed} / {minutesLimit} minutes allowance
               </ThemedText>
             </View>
             <View style={[styles.statusBadge, { backgroundColor: isExhausted ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)" }]}>
@@ -174,8 +174,8 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
             <View>
               <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 20, marginBottom: 16 }}>
                 {currentTier === "free"
-                  ? "You've used all 5 trial minutes. Upgrade to continue using the Voice Assistant."
-                  : `You've used all ${minutesLimit} minutes this month.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : " Your minutes will reset at the start of your next billing period."}`
+                  ? "You've reached your monthly voice allowance. Upgrade to continue assisting customers."
+                  : `You've reached your monthly voice allowance of ${minutesLimit} minutes.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : " Your allowance will reset at the start of your next billing period."}`
                 }
               </ThemedText>
               {upgradeTo ? (

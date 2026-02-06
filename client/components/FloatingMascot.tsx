@@ -44,7 +44,7 @@ const SETTINGS_TIPS: MascotTip[] = [
   },
   {
     title: "Voice Assistant Tiers",
-    message: "Start with 5 free Voice Assistant minutes. Upgrade to Starter, Pro, or Business for more minutes as your business grows.",
+    message: "Start with a 5-minute free allowance. Upgrade to Starter, Pro, or Business to continue assisting customers as your business grows.",
     icon: "trending-up",
   },
 ];

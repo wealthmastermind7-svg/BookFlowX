@@ -350,12 +350,11 @@ export default function DashboardScreen() {
   const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
-  const fadeIn = useSharedValue(0);
-
-  useEffect(() => {
-    fadeIn.value = withTiming(1, { duration: 800 });
-    initializeBusiness();
-  }, []);
+  const { data: voiceSubResult } = useVoiceSubscription(business?.id || "", api.getOwnerTokenSync() || "");
+  const voiceSub = voiceSubResult;
+  const remainingMinutes = voiceSub?.usage.remaining ?? 5;
+  const isExhausted = voiceSub?.usage.available === false;
+  const percentUsed = voiceSub?.usage.percentUsed || 0;
 
   useFocusEffect(
     React.useCallback(() => {
@@ -498,16 +497,22 @@ export default function DashboardScreen() {
             <GlassPanel style={styles.voiceAspirationalBanner}>
               <View style={styles.voiceAspirationalHeader}>
                 <View style={styles.voiceIconStack}>
-                  <Feather name="mic" size={16} color="rgba(255,255,255,0.5)" />
-                  <Feather name="volume-2" size={16} color="rgba(255,255,255,0.5)" style={{ marginLeft: -8 }} />
+                  <Feather name="mic" size={16} color={isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.5)"} />
+                  <ThemedText style={{ fontSize: 10, fontWeight: "800", color: isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", marginLeft: 8 }}>
+                    {isExhausted ? "ALLOWANCE REACHED" : `${remainingMinutes} MIN LEFT`}
+                  </ThemedText>
                 </View>
                 <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Booking</Animated.Text>
               </View>
               <Animated.Text style={styles.voiceAspirationalDesc}>
-                Let your business breathe with an Informational Assistant that handles calls naturally.
+                {isExhausted 
+                  ? "Your monthly allowance has been reached. Upgrade to continue assisting customers."
+                  : "Let your business breathe with an Informational Assistant that handles calls naturally."}
               </Animated.Text>
               <View style={styles.voiceAspirationalAction}>
-                <Animated.Text style={styles.voiceAspirationalLink}>PREVIEW EXPERIENCE</Animated.Text>
+                <Animated.Text style={styles.voiceAspirationalLink}>
+                  {isExhausted ? "UPGRADE NOW" : "PREVIEW EXPERIENCE"}
+                </Animated.Text>
                 <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
               </View>
             </GlassPanel>

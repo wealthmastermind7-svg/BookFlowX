@@ -69,7 +69,7 @@ const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { valu
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="#fff"
+          stroke={progress >= 1 ? "#EF4444" : progress > 0.95 ? "#EF4444" : progress > 0.8 ? "#F59E0B" : "#fff"}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={circumference}
@@ -80,7 +80,7 @@ const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label }: { valu
       <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
         <ThemedText style={{ fontSize: 18, fontWeight: "700", color: "#fff" }}>{value}</ThemedText>
       </View>
-      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
+      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: isExhausted ? "#EF4444" : percentUsed > 0.95 ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
     </View>
   );
 };
@@ -143,10 +143,13 @@ export default function SettingsScreen() {
   const [customersCount, setCustomersCount] = useState(0);
   const [ownerToken, setOwnerToken] = useState<string | null>(null);
 
-  const { data: voiceSubscription, isExhausted: isVoiceExhausted } = useVoiceSubscription(
+  const { data: voiceSubResult } = useVoiceSubscription(
     business?.id || "",
     ownerToken || ""
   );
+  const voiceSub = voiceSubResult;
+  const isVoiceExhausted = voiceSub?.usage.available === false;
+  const percentUsed = voiceSub?.usage.percentUsed || 0;
 
   const { 
     isConnected: isCalendarConnected, 
