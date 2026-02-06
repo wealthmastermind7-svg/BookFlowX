@@ -108,9 +108,9 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
   
   // Voice tiers for display (fallback if RevenueCat offerings aren't loaded)
   const displayTiers = [
-    { id: "voice_starter", name: "Starter", price: "$49", minutes: 60, features: ["60 minutes/month", "AI service info", "Train with your data", "Basic analytics"] },
-    { id: "voice_pro", name: "Pro", price: "$149", minutes: 200, popular: true, features: ["200 minutes/month", "AI service info", "Train with your data", "Advanced analytics"] },
-    { id: "voice_business", name: "Business", price: "$349", minutes: 500, features: ["500 minutes/month", "AI service info", "Train with your data", "Advanced analytics", "Custom voice"] },
+    { id: "voice_starter", name: "Starter", price: "$49", minutes: 60, features: ["60 minutes/month", "Service info assistant", "Train with your data", "Basic analytics"] },
+    { id: "voice_pro", name: "Pro", price: "$149", minutes: 200, popular: true, features: ["200 minutes/month", "Service info assistant", "Train with your data", "Advanced analytics"] },
+    { id: "voice_business", name: "Business", price: "$349", minutes: 500, features: ["500 minutes/month", "Service info assistant", "Train with your data", "Advanced analytics", "Custom voice"] },
   ];
 
   return (
@@ -119,7 +119,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
         <Pressable onPress={onClose} style={styles.closeButton}>
           <Feather name="x" size={24} color="#fff" />
         </Pressable>
-        <ThemedText style={styles.headerTitle}>AI Voice Assistant</ThemedText>
+        <ThemedText style={styles.headerTitle}>Voice Assistant</ThemedText>
       </View>
 
       <ScrollView contentContainerStyle={styles.scrollContent}>
@@ -127,9 +127,9 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <View style={styles.iconCircle}>
             <Feather name="mic" size={40} color="#fff" />
           </View>
-          <ThemedText style={styles.heroTitle}>Enable AI Voice Assistant</ThemedText>
+          <ThemedText style={styles.heroTitle}>Enable Voice Assistant</ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            Let AI answer questions about your services and direct customers to book.
+            Let your Assistant answer questions about your services and direct customers to book.
           </ThemedText>
           <View style={{ height: 16 }} />
           <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
@@ -162,7 +162,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           <Pressable 
             onPress={() => {
               if (isExhausted) {
-                Alert.alert("Trial Ended", "You've used all 5 trial minutes. Please upgrade to a paid plan to continue using the AI Voice Assistant.");
+                Alert.alert("Trial Ended", "You've used all 5 trial minutes. Please upgrade to a paid plan to continue using the Voice Assistant.");
               } else {
                 onClose(); // Proceed to preview
               }
@@ -181,10 +181,16 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
 
         <View style={styles.tiersContainer}>
           {displayTiers.map((tier) => {
+            const tierKey = tier.id.replace("voice_", "");
             const rcPackage = offerings?.availablePackages?.find(
-              (pkg: PurchasesPackage) => pkg.identifier.toLowerCase().includes(tier.id.replace("voice_", ""))
+              (pkg: PurchasesPackage) => {
+                const id = pkg.identifier.toLowerCase();
+                return id === tierKey || id === tier.id || id.includes(`_${tierKey}`) || id.endsWith(tierKey);
+              }
             );
-            const priceDisplay = rcPackage?.product?.priceString || `${tier.price}/mo`;
+            const priceDisplay = rcPackage?.product?.priceString 
+              ? `${rcPackage.product.priceString}/mo` 
+              : `${tier.price}/mo`;
             const isCurrent = voiceTier === tier.id;
             
             return (

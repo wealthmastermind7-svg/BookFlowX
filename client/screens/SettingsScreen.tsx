@@ -567,7 +567,7 @@ export default function SettingsScreen() {
                 <Feather name="mic" size={24} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={styles.voiceTitle}>AI Assistant</ThemedText>
+                <ThemedText style={styles.voiceTitle}>Informational Assistant</ThemedText>
                 <ThemedText style={styles.voiceSubtitle}>Answers questions about your services</ThemedText>
               </View>
               <Button 
@@ -583,7 +583,7 @@ export default function SettingsScreen() {
               <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#fff" /></View>
             </View>
             <View style={{ marginTop: 24 }}>
-              <ThemedText style={styles.voiceCardTitle}>AI Voice Assistant</ThemedText>
+              <ThemedText style={styles.voiceCardTitle}>Voice Assistant</ThemedText>
               <ThemedText style={styles.voiceCardDesc}>Let customers ask questions about your services and get directed to book via Text Booking.</ThemedText>
             </View>
             <View style={styles.previewContainer}>
