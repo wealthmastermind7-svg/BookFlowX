@@ -207,6 +207,144 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
   );
 }
 
+function Step0BrandIntro({ onNext }: { onNext: () => void }) {
+  const insets = useSafeAreaInsets();
+
+  return (
+    <Animated.View
+      entering={FadeIn.duration(400)}
+      exiting={FadeOut.duration(200)}
+      style={styles.stepContainer}
+    >
+      <LinearGradient
+        colors={['#f2f2f2', '#e8e8e8']}
+        style={StyleSheet.absoluteFillObject}
+      />
+
+      <ScrollView
+        contentContainerStyle={[
+          styles.stepContent,
+          {
+            paddingTop: insets.top + 60,
+            paddingBottom: 120,
+            alignItems: 'center',
+          },
+        ]}
+        showsVerticalScrollIndicator={false}
+      >
+        <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.brandMockupContainer}>
+          <View style={styles.brandMockupCard}>
+            <View style={styles.mockupHeader}>
+              <View style={styles.mockupLogoRow}>
+                <View style={styles.mockupLogoIcon}>
+                  <Feather name="calendar" size={14} color="#000" />
+                </View>
+                <Text style={styles.mockupLogoText}>BookFlow</Text>
+              </View>
+              <Text style={styles.mockupHeaderLabel}>DAILY GOAL</Text>
+              <View style={styles.mockupDotsButton}>
+                <Feather name="more-horizontal" size={16} color="#999" />
+              </View>
+            </View>
+
+            <View style={styles.mockupBody}>
+              <View style={styles.mockupCircleContainer}>
+                <View style={styles.mockupCircle}>
+                  <Text style={styles.mockupCirclePercent}>100%</Text>
+                  <Text style={styles.mockupCircleLabel}>BOOKED</Text>
+                </View>
+                <View style={styles.mockupCalIcon}>
+                  <Feather name="calendar" size={16} color="#666" />
+                </View>
+              </View>
+
+              <View style={styles.mockupClientRow}>
+                <View style={styles.mockupGreenDot} />
+                <Text style={styles.mockupClientText}>New Client</Text>
+              </View>
+
+              <View style={styles.mockupListItem}>
+                <View style={styles.mockupAvatar}>
+                  <Feather name="user" size={14} color="#bbb" />
+                </View>
+                <View style={styles.mockupLines}>
+                  <View style={[styles.mockupLine, { width: 80 }]} />
+                  <View style={[styles.mockupLine, { width: 50, marginTop: 6 }]} />
+                </View>
+                <View style={styles.mockupCheckCircle}>
+                  <Feather name="check" size={12} color="#fff" />
+                </View>
+              </View>
+
+              <View style={styles.mockupListItem}>
+                <View style={styles.mockupAvatar}>
+                  <Feather name="user" size={14} color="#bbb" />
+                </View>
+                <View style={styles.mockupLines}>
+                  <View style={[styles.mockupLine, { width: 70 }]} />
+                  <View style={[styles.mockupLine, { width: 40, marginTop: 6 }]} />
+                </View>
+              </View>
+            </View>
+
+            <View style={styles.mockupIndustryRow}>
+              <View style={[styles.mockupIndustryChip, styles.mockupIndustryChipActive]}>
+                <Feather name="scissors" size={14} color="#EC4899" />
+                <Text style={styles.mockupIndustryChipTextActive}>Salons & Beauty</Text>
+              </View>
+              <View style={styles.mockupIndustryChip}>
+                <Feather name="heart" size={14} color="#999" />
+                <Text style={styles.mockupIndustryChipText}>Dentists & Medical</Text>
+              </View>
+              <View style={styles.mockupIndustryChip}>
+                <Feather name="home" size={14} color="#999" />
+                <Text style={styles.mockupIndustryChipText}>Home Contractors</Text>
+              </View>
+            </View>
+          </View>
+        </Animated.View>
+
+        <View style={styles.brandPaginationDots}>
+          <View style={[styles.brandDot, styles.brandDotActive]} />
+          <View style={styles.brandDot} />
+          <View style={styles.brandDot} />
+        </View>
+
+        <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.brandTextSection}>
+          <Text style={styles.brandHeading}>
+            Smart Booking{' '}
+            <Text style={styles.brandHeadingItalic}>Built In</Text>
+          </Text>
+          <Text style={styles.brandDescription}>
+            Beautiful scheduling with intelligent features that adapt to your business. Setup in seconds, not hours.
+          </Text>
+        </Animated.View>
+
+        <Animated.View entering={FadeInUp.delay(300).springify()} style={styles.brandPillsContainer}>
+          <View style={styles.brandPill}>
+            <Feather name="zap" size={14} color="#F59E0B" />
+            <Text style={styles.brandPillText}>QR codes & smart links</Text>
+          </View>
+          <View style={styles.brandPill}>
+            <Feather name="mic" size={14} color="#8B5CF6" />
+            <Text style={styles.brandPillText}>Voice Assistant included</Text>
+          </View>
+        </Animated.View>
+      </ScrollView>
+
+      <View style={[styles.bottomActions, { bottom: Spacing.xl + insets.bottom, zIndex: 100 }]}>
+        <AnimatedPressable
+          onPress={onNext}
+          style={styles.brandGetStartedButton}
+        >
+          <Text style={styles.brandGetStartedText}>Get Started</Text>
+          <Feather name="arrow-right" size={20} color="#fff" />
+        </AnimatedPressable>
+      </View>
+    </Animated.View>
+  );
+}
+
 function Step1NicheSelection({ 
   selectedType, 
   onSelect,
@@ -720,9 +858,14 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const [bookingUrl, setBookingUrl] = useState("");
   const [qrCodeUrl, setQrCodeUrl] = useState("");
 
-  const handleStep1Next = async () => {
+  const handleStep0Next = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     setCurrentStep(1);
+  };
+
+  const handleStep1Next = async () => {
+    await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+    setCurrentStep(2);
   };
 
   const handleStep2Next = async () => {
@@ -753,11 +896,10 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
       const finalBookingUrl = `https://confirmbooking.online/book/${slug}`;
       setBookingUrl(finalBookingUrl);
       
-      // Instantly generate QR code URL locally to avoid delay
       const qrUrl = `${getApiUrl()}/api/businesses/${updatedBiz.id}/qrcode?format=image`;
       setQrCodeUrl(qrUrl);
       
-      setCurrentStep(2);
+      setCurrentStep(3);
     } catch (error) {
       console.error("Error creating business:", error);
     } finally {
@@ -767,7 +909,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 
   const handleStep3Next = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    setCurrentStep(3);
+    setCurrentStep(4);
   };
 
   const handleBack = async () => {
@@ -778,10 +920,14 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   return (
     <View style={styles.container}>
       <View style={[styles.header, { paddingTop: insets.top + Spacing.md }]}>
-        <StepIndicator currentStep={currentStep} totalSteps={4} />
+        <StepIndicator currentStep={currentStep} totalSteps={5} />
       </View>
 
       {currentStep === 0 && (
+        <Step0BrandIntro onNext={handleStep0Next} />
+      )}
+
+      {currentStep === 1 && (
         <Step1NicheSelection
           selectedType={selectedBusinessType}
           onSelect={setSelectedBusinessType}
@@ -789,7 +935,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         />
       )}
 
-      {currentStep === 1 && (
+      {currentStep === 2 && (
         <Step2BusinessName
           businessName={businessName}
           onNameChange={setBusinessName}
@@ -799,7 +945,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         />
       )}
 
-      {currentStep === 2 && (
+      {currentStep === 3 && (
         <Step3AssetPreviews
           businessName={businessName || "My Business"}
           bookingUrl={bookingUrl}
@@ -809,7 +955,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         />
       )}
 
-      {currentStep === 3 && (
+      {currentStep === 4 && (
         <Step4VoicePreview
           businessSlug={businessSlug}
           onComplete={onComplete}
@@ -1282,5 +1428,261 @@ const styles = StyleSheet.create({
   },
   backgroundSmoke: {
     ...StyleSheet.absoluteFillObject,
+  },
+  brandMockupContainer: {
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  brandMockupCard: {
+    width: '92%',
+    backgroundColor: 'rgba(255,255,255,0.85)',
+    borderRadius: 28,
+    padding: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 24,
+    elevation: 4,
+  },
+  mockupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 16,
+  },
+  mockupLogoRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    flex: 1,
+  },
+  mockupLogoIcon: {
+    width: 28,
+    height: 28,
+    borderRadius: 8,
+    backgroundColor: 'rgba(0,0,0,0.06)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockupLogoText: {
+    fontSize: 14,
+    fontWeight: '700',
+    color: '#000',
+    fontFamily: 'Inter_700Bold',
+  },
+  mockupHeaderLabel: {
+    fontSize: 9,
+    letterSpacing: 1.5,
+    color: '#999',
+    fontWeight: '600',
+  },
+  mockupDotsButton: {
+    marginLeft: 'auto',
+    paddingLeft: 12,
+  },
+  mockupBody: {
+    marginBottom: 16,
+  },
+  mockupCircleContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 16,
+    gap: 16,
+  },
+  mockupCircle: {
+    width: 90,
+    height: 90,
+    borderRadius: 45,
+    borderWidth: 4,
+    borderColor: '#000',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockupCirclePercent: {
+    fontSize: 22,
+    fontWeight: '800',
+    color: '#000',
+    fontFamily: 'Inter_900Black',
+  },
+  mockupCircleLabel: {
+    fontSize: 8,
+    letterSpacing: 1.5,
+    color: '#666',
+    fontWeight: '600',
+    marginTop: -2,
+  },
+  mockupCalIcon: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    backgroundColor: 'rgba(0,0,0,0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockupClientRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.9)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    alignSelf: 'flex-start',
+    marginBottom: 12,
+  },
+  mockupGreenDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#22C55E',
+  },
+  mockupClientText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#000',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  mockupListItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 10,
+    paddingHorizontal: 4,
+  },
+  mockupAvatar: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: 'rgba(0,0,0,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockupLines: {
+    flex: 1,
+  },
+  mockupLine: {
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: 'rgba(0,0,0,0.08)',
+  },
+  mockupCheckCircle: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
+    backgroundColor: '#22C55E',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockupIndustryRow: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  mockupIndustryChip: {
+    flex: 1,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderRadius: 14,
+    backgroundColor: 'rgba(0,0,0,0.03)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+  },
+  mockupIndustryChipActive: {
+    backgroundColor: '#fff',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  mockupIndustryChipText: {
+    fontSize: 9,
+    color: '#999',
+    textAlign: 'center',
+    fontFamily: 'Inter_500Medium',
+  },
+  mockupIndustryChipTextActive: {
+    fontSize: 9,
+    color: '#000',
+    textAlign: 'center',
+    fontWeight: '600',
+    fontFamily: 'Inter_600SemiBold',
+  },
+  brandPaginationDots: {
+    flexDirection: 'row',
+    gap: 6,
+    marginBottom: 28,
+  },
+  brandDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: 'rgba(0,0,0,0.15)',
+  },
+  brandDotActive: {
+    width: 20,
+    backgroundColor: 'rgba(0,0,0,0.5)',
+  },
+  brandTextSection: {
+    alignItems: 'center',
+    paddingHorizontal: 12,
+    marginBottom: 24,
+  },
+  brandHeading: {
+    fontSize: 36,
+    fontWeight: '700',
+    color: '#000',
+    textAlign: 'center',
+    fontFamily: 'CormorantGaramond_700Bold',
+    lineHeight: 42,
+    marginBottom: 12,
+  },
+  brandHeadingItalic: {
+    fontStyle: 'italic',
+    fontFamily: 'CormorantGaramond_500Medium',
+  },
+  brandDescription: {
+    fontSize: 16,
+    color: 'rgba(0,0,0,0.5)',
+    textAlign: 'center',
+    lineHeight: 24,
+    fontFamily: 'Inter_400Regular',
+  },
+  brandPillsContainer: {
+    gap: 10,
+    alignItems: 'center',
+  },
+  brandPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 12,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(0,0,0,0.1)',
+    backgroundColor: '#fff',
+  },
+  brandPillText: {
+    fontSize: 14,
+    fontWeight: '500',
+    color: '#000',
+    fontFamily: 'Inter_500Medium',
+  },
+  brandGetStartedButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#000',
+    gap: Spacing.sm,
+  },
+  brandGetStartedText: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    fontFamily: 'Inter_600SemiBold',
   },
 });
