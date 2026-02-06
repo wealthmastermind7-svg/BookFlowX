@@ -38,19 +38,9 @@ const SETTINGS_TIPS: MascotTip[] = [
     icon: "mic",
   },
   {
-    title: "Google Calendar Sync",
-    message: "Connect Google Calendar to automatically sync your bookings both ways. Never double-book again.",
-    icon: "calendar",
-  },
-  {
     title: "Smart Suggestions",
     message: "Smart suggestions help you upsell services and send the right message to the right customer at the right time.",
     icon: "zap",
-  },
-  {
-    title: "Booking Widget",
-    message: "Embed a booking widget on your website so customers can book directly without leaving your page.",
-    icon: "code",
   },
   {
     title: "Voice Assistant Tiers",
