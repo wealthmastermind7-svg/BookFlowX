@@ -226,7 +226,7 @@ export default function SettingsScreen() {
 
   const handleClearAllData = () => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
-    Alert.alert("Clear All Data", "This will delete all services, bookings, and customers. This action cannot be undone.", [
+    Alert.alert("Reset Data", "This will delete all services, bookings, and customers. This action cannot be undone.", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Clear",
@@ -760,7 +760,7 @@ export default function SettingsScreen() {
           <SectionTitle>Data</SectionTitle>
           <View style={styles.gridRow}>
             <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#fff" /><ThemedText style={styles.securityTitle}>Demo Data</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
-            <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}><Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} /><ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Wipe Cloud</ThemedText><ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText></GlassCard>
+            <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}><Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} /><ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Reset Data</ThemedText><ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText></GlassCard>
           </View>
 
           <View style={{ height: 32 }} />

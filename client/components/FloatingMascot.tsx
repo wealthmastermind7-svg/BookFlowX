@@ -28,8 +28,8 @@ interface FloatingMascotProps {
 
 const SETTINGS_TIPS: MascotTip[] = [
   {
-    title: "Customize Everything",
-    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Wipe Cloud' to start fresh.",
+    title: "Reset Data",
+    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Reset Data' to start fresh.",
     icon: "settings",
   },
   {
@@ -81,8 +81,8 @@ const SCREEN_TIPS: Record<string, MascotTip> = {
     icon: "users",
   },
   Settings: {
-    title: "Customize Everything",
-    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Wipe Cloud' to start fresh.",
+    title: "Reset Data",
+    message: "Set up your booking link, share your QR code, and configure reminders. Use 'Demo Data' to load sample bookings, or 'Reset Data' to start fresh.",
     icon: "settings",
   },
   Checkout: {
