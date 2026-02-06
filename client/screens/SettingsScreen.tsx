@@ -615,15 +615,35 @@ export default function SettingsScreen() {
                 Booking links and automation plans are separate.
               </ThemedText>
             </View>
-            {voiceSub && voiceSub.subscription.tier !== 'free' && (
-              <View style={styles.usageContainer}>
-                <View style={styles.usageHeader}>
-                  <ThemedText style={styles.usageLabel}>Monthly Minutes</ThemedText>
-                  <ThemedText style={styles.usageValue}>{voiceSub.subscription.minutesUsed} / {voiceSub.subscription.minutesLimit}</ThemedText>
-                </View>
-                <View style={styles.progressBarBg}><View style={[styles.progressBarFill, { width: `${Math.min(voiceSub.usage.percentUsed, 100)}%`, backgroundColor: isVoiceExhausted ? '#EF4444' : '#fff' }]} /></View>
+            <View style={styles.usageContainer}>
+              <View style={styles.usageHeader}>
+                <ThemedText style={styles.usageLabel}>
+                  {voiceSub?.subscription.tier === 'free' ? 'Free Trial Allowance' : 'Monthly Allowance'}
+                </ThemedText>
+                <ThemedText style={[styles.usageValue, isVoiceExhausted && { color: '#EF4444' }, !isVoiceExhausted && percentUsed > 80 && { color: '#F59E0B' }]}>
+                  {voiceSub ? `${voiceSub.usage.remaining} / ${voiceSub.subscription.minutesLimit} min` : '5 / 5 min'}
+                </ThemedText>
               </View>
-            )}
+              <View style={styles.progressBarBg}>
+                <View style={[styles.progressBarFill, { 
+                  width: `${voiceSub ? Math.min(voiceSub.usage.percentUsed, 100) : 0}%`, 
+                  backgroundColor: isVoiceExhausted ? '#EF4444' : percentUsed > 80 ? '#F59E0B' : '#fff' 
+                }]} />
+              </View>
+              {isVoiceExhausted ? (
+                <ThemedText style={{ fontSize: 11, color: '#EF4444', marginTop: 8, fontWeight: '600' }}>
+                  Allowance reached — upgrade to continue assisting customers
+                </ThemedText>
+              ) : voiceSub?.subscription.tier === 'free' ? (
+                <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+                  {voiceSub.usage.remaining} minutes remaining in your free trial
+                </ThemedText>
+              ) : percentUsed > 80 ? (
+                <ThemedText style={{ fontSize: 11, color: '#F59E0B', marginTop: 8 }}>
+                  Running low — consider upgrading for more minutes
+                </ThemedText>
+              ) : null}
+            </View>
           </GlassCard>
 
           <View style={{ height: 32 }} />
