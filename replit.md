@@ -39,6 +39,24 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
 - **Error Handling**: Client-side retry logic and server-side validation.
 - **Security**: Token-based ownership verification (`ownerToken`) for admin routes to ensure data isolation.
 
+### Programmatic SEO System
+- **File**: `server/seo-routes.ts` - All SEO routes registered via `registerSeoRoutes(app)` in `server/index.ts`
+- **Domain**: confirmbooking.online (brand: "ConfirmBooking")
+- **Routes**:
+  - `/seo` - SEO homepage with hero, features, social proof
+  - `/booking-software` - Industry directory (20 industries)
+  - `/booking-software/:industry` - Industry page with 51 city links
+  - `/booking-software/:industry/:location` - 1,020 programmatic pages (20 × 51)
+  - `/compare` - Competitor comparisons directory
+  - `/compare/:competitor` - 10 comparison pages (Calendly, Acuity, Vagaro, Mindbody, etc.)
+  - `/tools` - Free tools directory
+  - `/tools/no-show-calculator` - Interactive No-Show Cost Calculator
+  - `/sitemap.xml` - Full sitemap (1,055 URLs)
+  - `/robots.txt` - Crawler instructions
+- **SEO Features**: Meta tags, Open Graph, JSON-LD structured data, breadcrumbs, UTM tracking on all CTAs
+- **Design**: Dark theme matching app aesthetic (Cormorant Garamond + Inter, Tailwind CDN)
+- **Branding Rule**: Use "Voice Assistant" or "Informational Assistant" only — NO "AI" or "Voice Booking"
+
 ## External Dependencies
 - **React Native (Expo)**: Frontend development framework.
 - **Express.js**: Backend web application framework.
