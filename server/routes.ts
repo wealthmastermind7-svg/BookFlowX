@@ -3020,13 +3020,13 @@ IMPORTANT:
 - Be personable and helpful`;
 
       const voiceMap: Record<string, string> = {
-        salon: "EXAVITQu4vr4xnSDxMaL",
-        wellness: "EXAVITQu4vr4xnSDxMaL",
+        salon: "21m00Tcm4TlvDq8ikWAM",
+        wellness: "21m00Tcm4TlvDq8ikWAM",
         medical: "pNInz6obpgDQGcFmaJgB",
         consulting: "pNInz6obpgDQGcFmaJgB",
-        fitness: "VR6AewLTigWG4xSOukaG",
-        trades: "VR6AewLTigWG4xSOukaG",
-        auto_detailing: "VR6AewLTigWG4xSOukaG",
+        fitness: "pNInz6obpgDQGcFmaJgB",
+        trades: "pNInz6obpgDQGcFmaJgB",
+        auto_detailing: "pNInz6obpgDQGcFmaJgB",
       };
 
       const inlineAssistant = {
