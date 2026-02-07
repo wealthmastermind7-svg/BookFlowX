@@ -174,7 +174,7 @@ function getIndustryBenefits(slug: string): string[] {
   const defaults = [
     "Online booking available 24/7 for your clients",
     "Automated appointment reminders to reduce no-shows",
-    "Client management and booking history tracking",
+    "Client profile tracking and booking history",
     "Customizable booking pages that match your brand",
     "Revenue analytics and business insights dashboard",
     "Multi-staff calendar management",
@@ -449,10 +449,10 @@ function seoHomepage(): string {
     <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
       ${[
         { title: "24/7 Online Booking", desc: "Let your clients book appointments anytime, from any device. Your booking page is always open." },
-        { title: "Smart Reminders", desc: "Automated SMS and email reminders reduce no-shows by up to 40%. Never lose revenue to missed appointments." },
+        { title: "Smart Reminders", desc: "Automated email reminders reduce no-shows. Never lose revenue to missed appointments." },
         { title: "Revenue Dashboard", desc: "Track bookings, revenue trends, and client insights with a beautiful analytics dashboard built for clarity." },
         { title: "Multi-Staff Scheduling", desc: "Manage multiple team members, their availability, and service assignments from one centralized calendar." },
-        { title: "Client Management", desc: "Build detailed client profiles with booking history, preferences, and notes for a personalized experience." },
+        { title: "Client Profiles", desc: "Keep track of client booking history and preferences for a personalized experience." },
         { title: "Brand-Matched Pages", desc: "Your online booking page matches your brand identity. Premium, professional, and conversion-optimized." },
       ].map(f => `
         <div class="glass-card rounded-2xl p-8">
@@ -695,10 +695,10 @@ function comparisonPage(competitor: string): string {
 
   const features = [
     { feature: "Free Plan Available", cb: "Yes", comp: "Limited" },
-    { feature: "Automated Reminders", cb: "SMS + Email", comp: "Email only" },
+    { feature: "Automated Reminders", cb: "Email", comp: "Email only" },
     { feature: "No-Show Protection", cb: "Built-in", comp: "Limited" },
     { feature: "Multi-Staff Scheduling", cb: "Included", comp: "Premium tier" },
-    { feature: "Client Management", cb: "Full CRM", comp: "Basic" },
+    { feature: "Client Profiles", cb: "Basic", comp: "Basic" },
     { feature: "Revenue Analytics", cb: "Advanced Dashboard", comp: "Basic reports" },
     { feature: "Branded Booking Pages", cb: "Fully customizable", comp: "Limited branding" },
     { feature: "Mobile App", cb: "iOS + Android", comp: "Varies" },
