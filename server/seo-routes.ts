@@ -3,7 +3,7 @@ import type { Application, Request, Response } from "express";
 const DOMAIN = "https://confirmbooking.online";
 const BRAND = "ConfirmBooking";
 const TAGLINE = "Smart Booking For Modern Businesses";
-const DOWNLOAD_LINK = "#download";
+const DOWNLOAD_LINK = "https://confirmbooking.online";
 
 const INDUSTRIES = [
   "salon", "barbershop", "spa", "auto-detailing", "fitness", "yoga",
