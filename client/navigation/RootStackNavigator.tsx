@@ -131,7 +131,7 @@ export default function RootStackNavigator() {
         options={({ navigation }) => ({
           ...opaqueScreenOptions,
           presentation: "modal",
-          headerTitle: "Voice Booking",
+          headerTitle: "Voice Assistant",
           headerLeft: () => (
             <HeaderButton onPress={() => navigation.goBack()}>
               <Text>Close</Text>
