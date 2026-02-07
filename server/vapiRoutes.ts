@@ -574,7 +574,7 @@ IMPORTANT:
 
     const assistantConfig = {
       name: `${business.name} Assistant`,
-      firstMessage: `Hello, thank you for calling ${business.name}. I am the Informational Assistant for ${business.name}. I can answer questions about our services or check availability. How can I help you?`,
+      firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. How can I help you today?`,
       model: {
         provider: "openai",
         model: "gpt-4o-mini",

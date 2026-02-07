@@ -3030,7 +3030,7 @@ IMPORTANT:
       };
 
       const inlineAssistant = {
-        firstMessage: `Hello, thank you for calling ${config.businessName}. I am the Informational Assistant for ${config.businessName}. I can answer questions about our services or check availability. How can I help you?`,
+        firstMessage: `Hi there! I'm the assistant for ${config.businessName}. I can tell you all about our services, pricing, or what to expect. How can I help you today?`,
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
