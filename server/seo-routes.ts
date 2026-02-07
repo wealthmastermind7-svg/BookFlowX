@@ -176,8 +176,8 @@ function getIndustryBenefits(slug: string): string[] {
     "Automated appointment reminders to reduce no-shows",
     "Client profile tracking and booking history",
     "Customizable booking pages that match your brand",
-    "Revenue analytics and business insights dashboard",
-    "Multi-staff calendar management",
+    "Revenue analytics and business insights",
+    "Multi-staff scheduling support",
   ];
   const specific: Record<string, string[]> = {
     "salon": ["Track stylist schedules and chair availability", "Service add-ons and package deals", "Client preference notes for personalized visits"],
@@ -450,8 +450,8 @@ function seoHomepage(): string {
       ${[
         { title: "24/7 Online Booking", desc: "Let your clients book appointments anytime, from any device. Your booking page is always open." },
         { title: "Smart Reminders", desc: "Automated email reminders reduce no-shows. Never lose revenue to missed appointments." },
-        { title: "Revenue Dashboard", desc: "Track bookings, revenue trends, and client insights with a beautiful analytics dashboard built for clarity." },
-        { title: "Multi-Staff Scheduling", desc: "Manage multiple team members, their availability, and service assignments from one centralized calendar." },
+        { title: "Booking Analytics", desc: "Track bookings and business insights with a beautiful dashboard built for clarity." },
+        { title: "Multi-Staff Support", desc: "Manage availability and service assignments for your team from one centralized calendar." },
         { title: "Client Profiles", desc: "Keep track of client booking history and preferences for a personalized experience." },
         { title: "Brand-Matched Pages", desc: "Your online booking page matches your brand identity. Premium, professional, and conversion-optimized." },
       ].map(f => `
@@ -697,9 +697,9 @@ function comparisonPage(competitor: string): string {
     { feature: "Free Plan Available", cb: "Yes", comp: "Limited" },
     { feature: "Automated Reminders", cb: "Email", comp: "Email only" },
     { feature: "No-Show Protection", cb: "Built-in", comp: "Limited" },
-    { feature: "Multi-Staff Scheduling", cb: "Included", comp: "Premium tier" },
+    { feature: "Multi-Staff Support", cb: "Included", comp: "Premium tier" },
     { feature: "Client Profiles", cb: "Basic", comp: "Basic" },
-    { feature: "Revenue Analytics", cb: "Advanced Dashboard", comp: "Basic reports" },
+    { feature: "Business Analytics", cb: "Dashboard", comp: "Basic reports" },
     { feature: "Branded Booking Pages", cb: "Fully customizable", comp: "Limited branding" },
     { feature: "Mobile App", cb: "iOS + Android", comp: "Varies" },
     { feature: "QR Code Booking", cb: "Built-in", comp: "Not available" },
