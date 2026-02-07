@@ -1,7 +1,7 @@
 import type { Application, Request, Response } from "express";
 
 const DOMAIN = "https://confirmbooking.online";
-const BRAND = "ConfirmBooking";
+const BRAND = "BookFlow";
 const TAGLINE = "Smart Booking For Modern Businesses";
 const DOWNLOAD_LINK = "https://confirmbooking.online";
 
