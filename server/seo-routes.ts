@@ -205,14 +205,17 @@ function headTags(title: string, description: string, canonical: string, keyword
     <meta name="description" content="${description}">
     <meta name="keywords" content="${keywords}">
     <link rel="canonical" href="${canonical}">
+    <link rel="icon" type="image/png" href="/favicon.png">
     <meta property="og:title" content="${title}">
     <meta property="og:description" content="${description}">
+    <meta property="og:image" content="${DOMAIN}/favicon.png">
     <meta property="og:url" content="${canonical}">
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="${BRAND}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${title}">
     <meta name="twitter:description" content="${description}">
+    <meta name="twitter:image" content="${DOMAIN}/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -299,8 +302,9 @@ function navBar(): string {
   <nav class="fixed top-0 left-0 right-0 z-50 bg-black/80 backdrop-blur-xl border-b border-white/5">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between h-16">
-        <a href="/seo" class="flex items-center space-x-1">
-          <span class="font-heading text-2xl font-semibold text-pearl tracking-tight">Confirm</span><span class="font-body text-2xl font-light text-silver">Booking</span>
+        <a href="/seo" class="flex items-center space-x-3">
+          <img src="/assets/images/logo.png" alt="${BRAND}" class="w-8 h-8 rounded-lg shadow-2xl">
+          <span class="font-heading text-2xl font-semibold text-pearl tracking-tight">${BRAND}</span>
         </a>
         <div class="hidden md:flex items-center space-x-8">
           <a href="/booking-software" class="text-silver hover:text-pearl transition-colors text-sm font-medium">Industries</a>
@@ -322,8 +326,9 @@ function footer(): string {
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       <div class="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
         <div>
-          <div class="flex items-center space-x-1 mb-4">
-            <span class="font-heading text-xl font-semibold text-pearl">Confirm</span><span class="font-body text-xl font-light text-silver">Booking</span>
+          <div class="flex items-center space-x-3 mb-4">
+            <img src="/assets/images/logo.png" alt="${BRAND}" class="w-6 h-6 rounded-md opacity-80">
+            <span class="font-heading text-xl font-semibold text-pearl">${BRAND}</span>
           </div>
           <p class="text-silver text-sm leading-relaxed">${TAGLINE}. Trusted by thousands of service professionals to manage their bookings efficiently.</p>
         </div>

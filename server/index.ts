@@ -762,10 +762,12 @@ import { processReminders } from "./workflowEngine";
   });
 
   app.get("/favicon.png", (_req: Request, res: Response) => {
-    res.sendFile(path.resolve(process.cwd(), "server/static/favicon.png"));
+    res.sendFile(path.resolve(process.cwd(), "public/favicon.png"));
   });
 
   registerSeoRoutes(app);
+
+  app.use(express.static(path.join(__dirname, "../public")));
 
   configureExpoAndLanding(app);
 
