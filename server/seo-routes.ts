@@ -177,7 +177,7 @@ function getIndustryBenefits(slug: string): string[] {
     "Client profile tracking and booking history",
     "Customizable booking pages that match your brand",
     "Revenue analytics and business insights",
-    "Multi-staff scheduling support",
+    "QR code generation for easy client access",
   ];
   const specific: Record<string, string[]> = {
     "salon": ["Track stylist schedules and chair availability", "Service add-ons and package deals", "Client preference notes for personalized visits"],
@@ -451,8 +451,8 @@ function seoHomepage(): string {
         { title: "24/7 Online Booking", desc: "Let your clients book appointments anytime, from any device. Your booking page is always open." },
         { title: "Smart Reminders", desc: "Automated email reminders reduce no-shows. Never lose revenue to missed appointments." },
         { title: "Booking Analytics", desc: "Track bookings and business insights with a beautiful dashboard built for clarity." },
-        { title: "Multi-Staff Support", desc: "Manage availability and service assignments for your team from one centralized calendar." },
         { title: "Client Profiles", desc: "Keep track of client booking history and preferences for a personalized experience." },
+        { title: "QR Code Booking", desc: "Provide a touchless booking experience with custom QR codes for your storefront or marketing." },
         { title: "Brand-Matched Pages", desc: "Your online booking page matches your brand identity. Premium, professional, and conversion-optimized." },
       ].map(f => `
         <div class="glass-card rounded-2xl p-8">
@@ -697,7 +697,6 @@ function comparisonPage(competitor: string): string {
     { feature: "Free Plan Available", cb: "Yes", comp: "Limited" },
     { feature: "Automated Reminders", cb: "Email", comp: "Email only" },
     { feature: "No-Show Protection", cb: "Built-in", comp: "Limited" },
-    { feature: "Multi-Staff Support", cb: "Included", comp: "Premium tier" },
     { feature: "Client Profiles", cb: "Basic", comp: "Basic" },
     { feature: "Business Analytics", cb: "Dashboard", comp: "Basic reports" },
     { feature: "Branded Booking Pages", cb: "Fully customizable", comp: "Limited branding" },
