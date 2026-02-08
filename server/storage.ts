@@ -887,6 +887,231 @@ export class DatabaseStorage implements IStorage {
           { name: "Brené Brown", email: "delivered+brene@resend.dev", phone: "555-0504" },
         ],
       },
+      barbershop: {
+        name: "Classic Cuts Barbershop",
+        services: [
+          { name: "Classic Haircut", duration: 30, price: 3500, description: "Traditional scissor or clipper cut" },
+          { name: "Beard Trim & Shape", duration: 20, price: 2000, description: "Precision beard grooming and lineup" },
+          { name: "Hot Towel Shave", duration: 45, price: 4500, description: "Straight razor shave with hot towels" },
+          { name: "Haircut & Beard Combo", duration: 45, price: 5000, description: "Full haircut plus beard trim" },
+        ],
+        customers: [
+          { name: "Marcus Johnson", email: "delivered+marcus@resend.dev", phone: "555-0601" },
+          { name: "Derek Thompson", email: "delivered+derek@resend.dev", phone: "555-0602" },
+          { name: "Carlos Rivera", email: "delivered+carlos@resend.dev", phone: "555-0603" },
+          { name: "Andre Mitchell", email: "delivered+andre@resend.dev", phone: "555-0604" },
+        ],
+      },
+      spa: {
+        name: "Serenity Day Spa",
+        services: [
+          { name: "Swedish Massage", duration: 60, price: 9500, description: "Full-body relaxation massage" },
+          { name: "Deep Tissue Massage", duration: 90, price: 13000, description: "Targeted pressure for tension relief" },
+          { name: "Hydrating Facial", duration: 60, price: 8500, description: "Cleanse, exfoliate, and moisturize" },
+          { name: "Couples Package", duration: 120, price: 22000, description: "Side-by-side massage and facial for two" },
+        ],
+        customers: [
+          { name: "Lauren Mitchell", email: "delivered+lauren@resend.dev", phone: "555-0701" },
+          { name: "Nicole Davis", email: "delivered+nicole@resend.dev", phone: "555-0702" },
+          { name: "Rachel Kim", email: "delivered+rachel@resend.dev", phone: "555-0703" },
+          { name: "Amanda Foster", email: "delivered+amanda@resend.dev", phone: "555-0704" },
+        ],
+      },
+      yoga: {
+        name: "Inner Flow Yoga Studio",
+        services: [
+          { name: "Vinyasa Flow", duration: 60, price: 2500, description: "Dynamic movement-breath class" },
+          { name: "Hot Yoga", duration: 75, price: 3000, description: "Heated room power yoga session" },
+          { name: "Private Session", duration: 60, price: 9500, description: "One-on-one personalized instruction" },
+          { name: "Restorative Yoga", duration: 90, price: 2500, description: "Gentle stretching and deep relaxation" },
+        ],
+        customers: [
+          { name: "Maya Patel", email: "delivered+maya@resend.dev", phone: "555-0801" },
+          { name: "Claire Bennett", email: "delivered+claire@resend.dev", phone: "555-0802" },
+          { name: "Zoe Nakamura", email: "delivered+zoe@resend.dev", phone: "555-0803" },
+          { name: "Priya Sharma", email: "delivered+priya@resend.dev", phone: "555-0804" },
+        ],
+      },
+      dental: {
+        name: "Bright Smile Dental",
+        services: [
+          { name: "Dental Cleaning", duration: 45, price: 12000, description: "Professional teeth cleaning and polish" },
+          { name: "Teeth Whitening", duration: 60, price: 35000, description: "In-office professional whitening" },
+          { name: "Dental Exam & X-Rays", duration: 30, price: 8500, description: "Comprehensive oral examination" },
+          { name: "Filling", duration: 45, price: 18000, description: "Composite tooth-colored filling" },
+        ],
+        customers: [
+          { name: "David Park", email: "delivered+david@resend.dev", phone: "555-0901" },
+          { name: "Lisa Nguyen", email: "delivered+lisa@resend.dev", phone: "555-0902" },
+          { name: "Kevin O'Brien", email: "delivered+kevin@resend.dev", phone: "555-0903" },
+          { name: "Susan Clark", email: "delivered+susan@resend.dev", phone: "555-0904" },
+        ],
+      },
+      veterinary: {
+        name: "Happy Paws Vet Clinic",
+        services: [
+          { name: "Wellness Exam", duration: 30, price: 6500, description: "Routine health checkup for your pet" },
+          { name: "Vaccination Package", duration: 20, price: 8500, description: "Core vaccines and booster shots" },
+          { name: "Dental Cleaning", duration: 60, price: 25000, description: "Professional pet dental cleaning" },
+          { name: "Sick Visit", duration: 30, price: 7500, description: "Illness diagnosis and treatment plan" },
+        ],
+        customers: [
+          { name: "Tom Henderson", email: "delivered+tom@resend.dev", phone: "555-1001" },
+          { name: "Maria Garcia", email: "delivered+maria@resend.dev", phone: "555-1002" },
+          { name: "Beth Cooper", email: "delivered+beth@resend.dev", phone: "555-1003" },
+          { name: "Ryan Kelly", email: "delivered+ryan@resend.dev", phone: "555-1004" },
+        ],
+      },
+      tattoo: {
+        name: "Iron Canvas Tattoo",
+        services: [
+          { name: "Small Tattoo", duration: 60, price: 10000, description: "Simple design under 3 inches" },
+          { name: "Medium Tattoo", duration: 120, price: 25000, description: "Detailed design 3-6 inches" },
+          { name: "Large Tattoo Session", duration: 240, price: 50000, description: "Full session for large-scale work" },
+          { name: "Consultation & Design", duration: 30, price: 5000, description: "Custom design planning session" },
+        ],
+        customers: [
+          { name: "Jake Morrison", email: "delivered+jake@resend.dev", phone: "555-1101" },
+          { name: "Mia Santos", email: "delivered+mia@resend.dev", phone: "555-1102" },
+          { name: "Tyler Brooks", email: "delivered+tyler@resend.dev", phone: "555-1103" },
+          { name: "Amber Reed", email: "delivered+amber@resend.dev", phone: "555-1104" },
+        ],
+      },
+      massage: {
+        name: "Healing Hands Massage",
+        services: [
+          { name: "Relaxation Massage", duration: 60, price: 8000, description: "Full-body stress relief massage" },
+          { name: "Sports Massage", duration: 60, price: 9500, description: "Targeted recovery for athletes" },
+          { name: "Prenatal Massage", duration: 60, price: 8500, description: "Gentle massage for expectant mothers" },
+          { name: "Hot Stone Massage", duration: 90, price: 12000, description: "Heated stones for deep relaxation" },
+        ],
+        customers: [
+          { name: "Karen White", email: "delivered+karen@resend.dev", phone: "555-1201" },
+          { name: "Brian Hall", email: "delivered+brian@resend.dev", phone: "555-1202" },
+          { name: "Jessica Moore", email: "delivered+jessica@resend.dev", phone: "555-1203" },
+          { name: "Daniel Lee", email: "delivered+daniell@resend.dev", phone: "555-1204" },
+        ],
+      },
+      photography: {
+        name: "Lens & Light Studio",
+        services: [
+          { name: "Portrait Session", duration: 60, price: 15000, description: "Professional headshots or portraits" },
+          { name: "Event Coverage", duration: 240, price: 75000, description: "Full event photography package" },
+          { name: "Product Photography", duration: 120, price: 35000, description: "High-quality product shots" },
+          { name: "Mini Session", duration: 30, price: 7500, description: "Quick session with 5 edited photos" },
+        ],
+        customers: [
+          { name: "Ashley Turner", email: "delivered+ashley@resend.dev", phone: "555-1301" },
+          { name: "Chris Evans", email: "delivered+chrise@resend.dev", phone: "555-1302" },
+          { name: "Natalie Wood", email: "delivered+natalie@resend.dev", phone: "555-1303" },
+          { name: "Sam Richardson", email: "delivered+samr@resend.dev", phone: "555-1304" },
+        ],
+      },
+      tutoring: {
+        name: "Bright Minds Tutoring",
+        services: [
+          { name: "Math Tutoring", duration: 60, price: 6500, description: "Algebra, geometry, or calculus help" },
+          { name: "SAT/ACT Prep", duration: 90, price: 9500, description: "Test strategy and practice" },
+          { name: "Essay Writing Help", duration: 60, price: 5500, description: "College essay or academic writing" },
+          { name: "Science Tutoring", duration: 60, price: 6500, description: "Biology, chemistry, or physics" },
+        ],
+        customers: [
+          { name: "Emily Zhang", email: "delivered+emily@resend.dev", phone: "555-1401" },
+          { name: "Noah Adams", email: "delivered+noah@resend.dev", phone: "555-1402" },
+          { name: "Chloe Bennett", email: "delivered+chloe@resend.dev", phone: "555-1403" },
+          { name: "Ethan Ramirez", email: "delivered+ethan@resend.dev", phone: "555-1404" },
+        ],
+      },
+      consulting: {
+        name: "Apex Business Consulting",
+        services: [
+          { name: "Strategy Session", duration: 60, price: 20000, description: "Business strategy and growth planning" },
+          { name: "Financial Review", duration: 90, price: 30000, description: "Financial health assessment" },
+          { name: "Marketing Audit", duration: 60, price: 15000, description: "Digital marketing performance review" },
+          { name: "Discovery Call", duration: 30, price: 0, description: "Free introductory consultation" },
+        ],
+        customers: [
+          { name: "Richard Chang", email: "delivered+richard@resend.dev", phone: "555-1501" },
+          { name: "Patricia Moore", email: "delivered+patricia@resend.dev", phone: "555-1502" },
+          { name: "Andrew Kim", email: "delivered+andrew@resend.dev", phone: "555-1503" },
+          { name: "Victoria Patel", email: "delivered+victoria@resend.dev", phone: "555-1504" },
+        ],
+      },
+      cleaning: {
+        name: "Sparkle Clean Services",
+        services: [
+          { name: "Standard Cleaning", duration: 120, price: 12000, description: "Regular home cleaning service" },
+          { name: "Deep Clean", duration: 240, price: 25000, description: "Thorough top-to-bottom cleaning" },
+          { name: "Move-In/Move-Out", duration: 300, price: 35000, description: "Complete property cleaning for moves" },
+          { name: "Office Cleaning", duration: 120, price: 15000, description: "Professional workspace cleaning" },
+        ],
+        customers: [
+          { name: "Sandra Phillips", email: "delivered+sandra@resend.dev", phone: "555-1601" },
+          { name: "Mark Thompson", email: "delivered+markt@resend.dev", phone: "555-1602" },
+          { name: "Linda Garcia", email: "delivered+linda@resend.dev", phone: "555-1603" },
+          { name: "Paul Anderson", email: "delivered+paul@resend.dev", phone: "555-1604" },
+        ],
+      },
+      plumbing: {
+        name: "FlowRight Plumbing",
+        services: [
+          { name: "Drain Cleaning", duration: 60, price: 15000, description: "Clear clogged drains and pipes" },
+          { name: "Leak Repair", duration: 90, price: 20000, description: "Fix pipe or faucet leaks" },
+          { name: "Water Heater Service", duration: 120, price: 30000, description: "Repair or replace water heater" },
+          { name: "Inspection & Estimate", duration: 30, price: 5000, description: "Plumbing system assessment" },
+        ],
+        customers: [
+          { name: "George Miller", email: "delivered+george@resend.dev", phone: "555-1701" },
+          { name: "Nancy Wilson", email: "delivered+nancy@resend.dev", phone: "555-1702" },
+          { name: "Frank Lopez", email: "delivered+frank@resend.dev", phone: "555-1703" },
+          { name: "Dorothy Harris", email: "delivered+dorothy@resend.dev", phone: "555-1704" },
+        ],
+      },
+      electrical: {
+        name: "Volt Electric Services",
+        services: [
+          { name: "Outlet & Switch Repair", duration: 60, price: 12000, description: "Fix or replace outlets and switches" },
+          { name: "Panel Upgrade", duration: 240, price: 80000, description: "Electrical panel replacement" },
+          { name: "Lighting Installation", duration: 90, price: 18000, description: "Install new light fixtures" },
+          { name: "Safety Inspection", duration: 60, price: 10000, description: "Full home electrical inspection" },
+        ],
+        customers: [
+          { name: "Walter Scott", email: "delivered+walter@resend.dev", phone: "555-1801" },
+          { name: "Helen Baker", email: "delivered+helen@resend.dev", phone: "555-1802" },
+          { name: "Roy Martinez", email: "delivered+roy@resend.dev", phone: "555-1803" },
+          { name: "Carol Young", email: "delivered+carol@resend.dev", phone: "555-1804" },
+        ],
+      },
+      hvac: {
+        name: "ComfortZone HVAC",
+        services: [
+          { name: "AC Tune-Up", duration: 60, price: 12000, description: "Seasonal air conditioning maintenance" },
+          { name: "Furnace Repair", duration: 120, price: 25000, description: "Diagnose and fix heating issues" },
+          { name: "Duct Cleaning", duration: 180, price: 35000, description: "Full air duct cleaning service" },
+          { name: "System Installation", duration: 480, price: 150000, description: "New HVAC system installation" },
+        ],
+        customers: [
+          { name: "Bill Robinson", email: "delivered+bill@resend.dev", phone: "555-1901" },
+          { name: "Janet Lewis", email: "delivered+janet@resend.dev", phone: "555-1902" },
+          { name: "Harold Wright", email: "delivered+harold@resend.dev", phone: "555-1903" },
+          { name: "Ruth Adams", email: "delivered+ruth@resend.dev", phone: "555-1904" },
+        ],
+      },
+      landscaping: {
+        name: "GreenScape Landscaping",
+        services: [
+          { name: "Lawn Mowing", duration: 60, price: 5000, description: "Weekly lawn mowing and edging" },
+          { name: "Garden Design", duration: 120, price: 25000, description: "Custom garden planning and planting" },
+          { name: "Tree Trimming", duration: 120, price: 20000, description: "Professional tree and shrub pruning" },
+          { name: "Spring Cleanup", duration: 180, price: 30000, description: "Full yard cleanup and mulching" },
+        ],
+        customers: [
+          { name: "Greg Palmer", email: "delivered+greg@resend.dev", phone: "555-2001" },
+          { name: "Diane Foster", email: "delivered+diane@resend.dev", phone: "555-2002" },
+          { name: "Steve Morgan", email: "delivered+stevem@resend.dev", phone: "555-2003" },
+          { name: "Betty Hughes", email: "delivered+betty@resend.dev", phone: "555-2004" },
+        ],
+      },
     };
 
     const template = demoDataTemplates[businessType] || demoDataTemplates.salon;
