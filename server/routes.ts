@@ -2980,6 +2980,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       const systemPrompt = `You are a friendly, helpful assistant for ${config.businessName}. Your role is to answer questions about the business and its services.
 
+MULTILINGUAL SUPPORT:
+- You MUST detect the language the caller is speaking and respond ENTIRELY in that same language.
+- If the caller switches languages mid-conversation, switch with them seamlessly.
+- Supported languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Swedish, Norwegian, Danish, Finnish, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Mandarin), Russian, Czech, Greek, Romanian, Hungarian, Indonesian, Malay, Thai, Vietnamese, Filipino, Ukrainian.
+- Default to English if the language cannot be determined.
+- Translate service names, prices, and descriptions naturally into the caller's language.
+
 PERSONALITY:
 - Tone: ${industryContext.tone}
 - Core values: ${industryContext.values.join(", ")}
@@ -3015,9 +3022,10 @@ When customers want to book, always say: "For booking, please tap the 'Text Book
 
 IMPORTANT:
 - This is a ${config.industry.replace('_', ' ')} business.
-- If you don't understand, ask them to repeat
+- If you don't understand, ask them to repeat in any language they prefer
 - Keep responses SHORT - this is a voice call
-- Be personable and helpful`;
+- Be personable and helpful
+- ALWAYS respond in the same language the caller is using`;
 
       const voiceMap: Record<string, string> = {
         salon: "21m00Tcm4TlvDq8ikWAM",
@@ -3030,7 +3038,12 @@ IMPORTANT:
       };
 
       const inlineAssistant = {
-        firstMessage: `Hi there! I'm the assistant for ${config.businessName}. I can tell you all about our services, pricing, or what to expect. How can I help you today?`,
+        transcriber: {
+          provider: "deepgram",
+          model: "nova-2",
+          language: "multi"
+        },
+        firstMessage: `Hi there! I'm the assistant for ${config.businessName}. I can tell you all about our services, pricing, or what to expect. Feel free to speak in any language. How can I help you today?`,
         model: {
           provider: "openai",
           model: "gpt-4o-mini",
@@ -3038,7 +3051,8 @@ IMPORTANT:
         },
         voice: {
           provider: "11labs",
-          voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB"
+          voiceId: voiceMap[config.industry] || "pNInz6obpgDQGcFmaJgB",
+          model: "eleven_multilingual_v2"
         }
       };
 
