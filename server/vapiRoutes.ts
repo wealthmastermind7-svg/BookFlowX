@@ -51,17 +51,18 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       if (!business) {
         return res.json({
           assistant: {
+            transcriber: { provider: "deepgram", model: "nova-2", language: "multi" },
             model: {
               provider: "openai",
               model: "gpt-4o-mini",
               messages: [
                 {
                   role: "system",
-                  content: "You are a helpful assistant. The business could not be found. Apologize and ask them to check the booking link."
+                  content: "You are a helpful assistant. The business could not be found. Apologize and ask them to check the booking link. Respond in the same language the caller is speaking."
                 }
               ]
             },
-            voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
+            voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB", model: "eleven_multilingual_v2" },
             firstMessage: "I'm sorry, but I couldn't find that business. Please check the booking link and try again."
           }
         });
@@ -72,13 +73,14 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
       if (sub && sub.minutesUsed >= sub.minutesLimit) {
         return res.json({
           assistant: {
+            transcriber: { provider: "deepgram", model: "nova-2", language: "multi" },
             model: {
               provider: "openai",
               model: "gpt-4o-mini",
-              messages: [{ role: "system", content: "Trial minutes exhausted." }]
+              messages: [{ role: "system", content: "Trial minutes exhausted. Respond in the same language the caller is speaking." }]
             },
-            voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB" },
-            firstMessage: `I'm sorry, but ${business.name} has reached their voice booking limit for this month. Please use our online booking link instead.`
+            voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB", model: "eleven_multilingual_v2" },
+            firstMessage: `I'm sorry, but ${business.name} has reached their voice assistant limit for this month. Please use our online booking link instead.`
           }
         });
       }
@@ -107,6 +109,13 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
         .join("\n\n");
 
       const systemPrompt = `You are a friendly, helpful assistant for ${business.name}. Your role is to answer questions about the business and its services.
+
+MULTILINGUAL SUPPORT:
+- You MUST detect the language the caller is speaking and respond ENTIRELY in that same language.
+- If the caller switches languages mid-conversation, switch with them seamlessly.
+- Supported languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Swedish, Norwegian, Danish, Finnish, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Mandarin), Russian, Czech, Greek, Romanian, Hungarian, Indonesian, Malay, Thai, Vietnamese, Filipino, Ukrainian.
+- Default to English if the language cannot be determined.
+- Translate service names, prices, and descriptions naturally into the caller's language.
 
 PERSONALITY:
 - Tone: ${industryContext.tone}
@@ -143,9 +152,10 @@ When customers want to book, always say: "For booking, please tap the 'Text Book
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
-- If you don't understand, ask them to repeat
+- If you don't understand, ask them to repeat in any language they prefer
 - Keep responses SHORT - this is a voice call
-- Be personable and helpful`;
+- Be personable and helpful
+- ALWAYS respond in the same language the caller is using`;
 
       const voiceMap: Record<string, string> = {
         salon: "21m00Tcm4TlvDq8ikWAM",
@@ -159,7 +169,12 @@ IMPORTANT:
 
       return res.json({
         assistant: {
-          firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. How can I help you today?`,
+          transcriber: {
+            provider: "deepgram",
+            model: "nova-2",
+            language: "multi"
+          },
+          firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. Feel free to speak in any language. How can I help you today?`,
           model: {
             provider: "openai",
             model: "gpt-4o-mini",
@@ -202,7 +217,8 @@ IMPORTANT:
           },
           voice: {
             provider: "11labs",
-            voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
+            voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB",
+            model: "eleven_multilingual_v2"
           },
           serverUrl: process.env.REPLIT_DOMAINS?.split(",")[0] 
             ? `https://${process.env.REPLIT_DOMAINS.split(",")[0]}/api/vapi/server-url`
@@ -523,6 +539,13 @@ router.get("/api/vapi/assistant-config/:slug", async (req: Request, res: Respons
 
     const systemPrompt = `You are a friendly, helpful assistant for ${business.name}. Your role is to answer questions about the business and its services.
 
+MULTILINGUAL SUPPORT:
+- You MUST detect the language the caller is speaking and respond ENTIRELY in that same language.
+- If the caller switches languages mid-conversation, switch with them seamlessly.
+- Supported languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Swedish, Norwegian, Danish, Finnish, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Mandarin), Russian, Czech, Greek, Romanian, Hungarian, Indonesian, Malay, Thai, Vietnamese, Filipino, Ukrainian.
+- Default to English if the language cannot be determined.
+- Translate service names, prices, and descriptions naturally into the caller's language.
+
 PERSONALITY:
 - Tone: ${industryContext.tone}
 - Core values: ${industryContext.values.join(", ")}
@@ -558,9 +581,10 @@ When customers want to book, always say: "For booking, please tap the 'Text Book
 
 IMPORTANT:
 - This is a ${industry.replace('_', ' ')} business.
-- If you don't understand, ask them to repeat
+- If you don't understand, ask them to repeat in any language they prefer
 - Keep responses SHORT - this is a voice call
-- Be personable and helpful`;
+- Be personable and helpful
+- ALWAYS respond in the same language the caller is using`;
 
     const voiceMap: Record<string, string> = {
       salon: "21m00Tcm4TlvDq8ikWAM",
@@ -574,7 +598,12 @@ IMPORTANT:
 
     const assistantConfig = {
       name: `${business.name} Assistant`,
-      firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. How can I help you today?`,
+      transcriber: {
+        provider: "deepgram",
+        model: "nova-2",
+        language: "multi"
+      },
+      firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. Feel free to speak in any language. How can I help you today?`,
       model: {
         provider: "openai",
         model: "gpt-4o-mini",
@@ -617,7 +646,8 @@ IMPORTANT:
       },
       voice: {
         provider: "11labs",
-        voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB"
+        voiceId: voiceMap[industry] || "pNInz6obpgDQGcFmaJgB",
+        model: "eleven_multilingual_v2"
       },
       serverMessages: ["tool-calls", "end-of-call-report"],
       metadata: {
