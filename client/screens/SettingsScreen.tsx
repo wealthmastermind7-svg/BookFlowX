@@ -41,6 +41,7 @@ import { useVoiceSubscription, getTierColor, getTierName, formatMinutes } from "
 import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
 
 import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
+import { useI18n } from "@/contexts/I18nContext";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
@@ -118,6 +119,7 @@ export default function SettingsScreen() {
   const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
   const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings, isTrialActive, trialDaysLeft } = usePremium();
+  const { t, lang, changeLanguage, languages } = useI18n();
 
   const [business, setBusiness] = useState<Business | null>(null);
   const [loading, setLoading] = useState(false);
@@ -136,6 +138,7 @@ export default function SettingsScreen() {
   const [embedLoading, setEmbedLoading] = useState(false);
   const [selectedEmbedType, setSelectedEmbedType] = useState<EmbedType>("inline");
   const [currencyModalVisible, setCurrencyModalVisible] = useState(false);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const [restoreLoading, setRestoreLoading] = useState(false);
   const [voicePaywallVisible, setVoicePaywallVisible] = useState(false);
   const [voiceCheckoutLoading, setVoiceCheckoutLoading] = useState(false);
@@ -492,7 +495,7 @@ export default function SettingsScreen() {
             <GlassCard style={{ marginBottom: 24, paddingHorizontal: 20, paddingVertical: 20, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
               <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: 16 }}>
                 <View style={{ flex: 1 }}>
-                  <ThemedText style={{ fontSize: 18, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5, color: '#fff' }}>Free Trial Active</ThemedText>
+                  <ThemedText style={{ fontSize: 18, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5, color: '#fff' }}>{t('settings.freeTrialActive')}</ThemedText>
                   <ThemedText style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 20, fontWeight: '400' }}>
                     {trialDaysLeft} days left to use booking links & QR codes for free.
                   </ThemedText>
@@ -581,7 +584,7 @@ export default function SettingsScreen() {
           
           <GlassCard style={styles.restoreRow} onPress={handleRestorePurchases}>
             <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
-            <ThemedText style={styles.restoreText}>Restore Previous Purchases</ThemedText>
+            <ThemedText style={styles.restoreText}>{t('settings.restorePurchases')}</ThemedText>
             {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
           </GlassCard>
 
@@ -600,7 +603,7 @@ export default function SettingsScreen() {
                 onPress={handleOpenAgentTraining}
                 style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 36, paddingHorizontal: 12 }}
               >
-                <ThemedText style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>Train Agent</ThemedText>
+                <ThemedText style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>{t('settings.trainAgent')}</ThemedText>
               </Button>
             </View>
             <View style={styles.voiceIconGroup}>
@@ -609,7 +612,7 @@ export default function SettingsScreen() {
               <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#fff" /></View>
             </View>
             <View style={{ marginTop: 24 }}>
-              <ThemedText style={styles.voiceCardTitle}>Voice Assistant</ThemedText>
+              <ThemedText style={styles.voiceCardTitle}>{t('settings.voiceAssistant')}</ThemedText>
               <ThemedText style={styles.voiceCardDesc}>Let customers ask questions about your services and get directed to book via Text Booking.</ThemedText>
             </View>
             <View style={styles.previewContainer}>
@@ -680,7 +683,7 @@ export default function SettingsScreen() {
           </GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitleBadge label="PLAN OVERVIEW">Your Plans</SectionTitleBadge>
+          <SectionTitleBadge label="PLAN OVERVIEW">{t('settings.yourPlans')}</SectionTitleBadge>
           <View style={{ gap: 12 }}>
             <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => showPaywall("soft_upsell")}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -763,23 +766,33 @@ export default function SettingsScreen() {
           */}
 
           <View style={{ height: 32 }} />
-          <SectionTitleBadge label="BUSINESS IDENTITY">Profile Settings</SectionTitleBadge>
+          <SectionTitleBadge label="BUSINESS IDENTITY">{t('settings.businessIdentity')}</SectionTitleBadge>
           <GlassCard style={{ marginBottom: 12 }}>
             <InfoRow 
               icon="globe" 
-              label="TIMEZONE" 
+              label={t('settings.timezone')} 
               value={business?.timezone || "Not set"} 
               onPress={() => handleEditBusinessField("timezone")} 
             />
           </GlassCard>
           <View style={styles.gridRow}>
             <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}><View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>BUSINESS NAME</ThemedText><ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText></GlassCard>
-            <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}><View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>CURRENCY</ThemedText><ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText></GlassCard>
+            <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}><View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>{t('settings.currency').toUpperCase()}</ThemedText><ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText></GlassCard>
           </View>
-          <GlassCard style={[styles.multiRowCard, { marginTop: 12 }]}><InfoRow icon="globe" label="PUBLIC WEBSITE" value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} /><View style={styles.rowDivider} /><InfoRow icon="phone" label="PUBLIC SUPPORT LINE" value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} /></GlassCard>
+          <GlassCard style={{ marginTop: 12, marginBottom: 12 }}>
+            <Pressable onPress={() => setLanguageModalVisible(true)} style={styles.infoRow}>
+              <Feather name="globe" size={18} color="rgba(255,255,255,0.6)" />
+              <View style={{ flex: 1, marginLeft: 16 }}>
+                <ThemedText style={styles.infoLabel}>{t('settings.language').toUpperCase()}</ThemedText>
+                <ThemedText style={styles.infoValue}>{languages.find(l => l.code === lang)?.nativeName || 'English'}</ThemedText>
+              </View>
+              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
+            </Pressable>
+          </GlassCard>
+          <GlassCard style={[styles.multiRowCard, { marginTop: 0 }]}><InfoRow icon="globe" label={t('settings.publicWebsite')} value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} /><View style={styles.rowDivider} /><InfoRow icon="phone" label={t('settings.publicSupportLine')} value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} /></GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitle>Automation</SectionTitle>
+          <SectionTitle>{t('settings.automationWorkflows')}</SectionTitle>
           <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
             <View style={styles.automationHeader}><ParallaxIcon name="cpu" delay={0} /><ParallaxIcon name="zap" delay={300} /><ParallaxIcon name="bell" delay={600} /></View>
             <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
@@ -788,17 +801,17 @@ export default function SettingsScreen() {
           </GlassCard>
 
           <View style={{ height: 32 }} />
-          <SectionTitle>Data</SectionTitle>
+          <SectionTitle>{t('settings.data')}</SectionTitle>
           <View style={styles.gridRow}>
-            <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#fff" /><ThemedText style={styles.securityTitle}>Demo Data</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
+            <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#fff" /><ThemedText style={styles.securityTitle}>{t('settings.demoData')}</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
             <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}><Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} /><ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Reset Data</ThemedText><ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText></GlassCard>
           </View>
 
           <View style={{ height: 32 }} />
-          <SectionTitle>Legal</SectionTitle>
-          <GlassCard><CompactRow icon="shield" title="Privacy Protocol" onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} /><View style={styles.rowDivider} /><CompactRow icon="file-text" title="Terms of Use" onPress={() => Linking.openURL("https://confirmbooking.online/terms")} /></GlassCard>
+          <SectionTitle>{t('settings.legal')}</SectionTitle>
+          <GlassCard><CompactRow icon="shield" title={t('settings.privacyProtocol')} onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} /><View style={styles.rowDivider} /><CompactRow icon="file-text" title={t('settings.termsOfUse')} onPress={() => Linking.openURL("https://confirmbooking.online/terms")} /></GlassCard>
 
-          <View style={styles.footer}><ThemedText style={styles.footerText}>DESIGNED FOR EXCELLENCE</ThemedText><ThemedText style={styles.footerVersion}>V4.2.0</ThemedText></View>
+          <View style={styles.footer}><ThemedText style={styles.footerText}>{t('settings.designedForExcellence')}</ThemedText><ThemedText style={styles.footerVersion}>V4.2.0</ThemedText></View>
         </ScrollView>
       </View>
 
@@ -887,11 +900,39 @@ export default function SettingsScreen() {
       </Modal>
 
       <Modal visible={demoTypeModalVisible} transparent animationType="slide" onRequestClose={() => setDemoTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Choose Business Type</ThemedText><ScrollView style={{ maxHeight: 300 }}>{DEMO_TYPES.map(t => (<Pressable key={t.id} onPress={() => handleInitializeDemoData(t.id)} style={styles.demoTypeButton}><ThemedText style={styles.demoTypeLabel}>{t.label}</ThemedText></Pressable>))}</ScrollView><Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText></Pressable></View></View>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>{t('settings.chooseDemoType')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{DEMO_TYPES.map(dt => (<Pressable key={dt.id} onPress={() => handleInitializeDemoData(dt.id)} style={styles.demoTypeButton}><ThemedText style={styles.demoTypeLabel}>{t('businessTypes.' + dt.id) || dt.label}</ThemedText></Pressable>))}</ScrollView><Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>{t('common.cancel')}</ThemedText></Pressable></View></View>
       </Modal>
 
       <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>Select Currency</ThemedText><ScrollView style={{ maxHeight: 300 }}>{CURRENCY_OPTIONS.map(c => (<Pressable key={c.id} onPress={() => handleSelectCurrency(c.id)} style={styles.currencyRow}><ThemedText style={styles.currencyLabel}>{c.label} ({c.symbol})</ThemedText></Pressable>))}</ScrollView></View></View>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>{t('settings.selectCurrency')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{CURRENCY_OPTIONS.map(c => (<Pressable key={c.id} onPress={() => handleSelectCurrency(c.id)} style={styles.currencyRow}><ThemedText style={styles.currencyLabel}>{c.label} ({c.symbol})</ThemedText></Pressable>))}</ScrollView></View></View>
+      </Modal>
+
+      <Modal visible={languageModalVisible} transparent animationType="slide" onRequestClose={() => setLanguageModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+            <ThemedText style={styles.modalTitle}>{t('settings.selectLanguage')}</ThemedText>
+            <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
+              {languages.map(l => (
+                <Pressable
+                  key={l.code}
+                  onPress={() => { changeLanguage(l.code); setLanguageModalVisible(false); }}
+                  style={[styles.currencyRow, lang === l.code && { backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                >
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <View>
+                      <ThemedText style={[styles.currencyLabel, { fontWeight: lang === l.code ? '700' : '400' }]}>{l.nativeName}</ThemedText>
+                      <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{l.name}</ThemedText>
+                    </View>
+                    {lang === l.code && <Feather name="check" size={18} color="#fff" />}
+                  </View>
+                </Pressable>
+              ))}
+            </ScrollView>
+            <Pressable onPress={() => setLanguageModalVisible(false)} style={styles.secondaryButton}>
+              <ThemedText style={styles.secondaryButtonText}>{t('common.close')}</ThemedText>
+            </Pressable>
+          </View>
+        </View>
       </Modal>
     </View>
   );

@@ -35,6 +35,7 @@ import { api, Service, Business } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { formatPriceSimple } from "@/lib/currency";
 import { getApiUrl } from "@/lib/query-client";
+import { useI18n } from "@/contexts/I18nContext";
 
 interface AIGeneratedService {
   name: string;
@@ -189,6 +190,7 @@ export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<Navigation>();
+  const { t } = useI18n();
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
@@ -368,9 +370,9 @@ export default function ServicesScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Feather name="layers" size={48} color="rgba(255,255,255,0.2)" />
-      <Text style={styles.emptyTitle}>No Services Yet</Text>
+      <Text style={styles.emptyTitle}>{t('services.noServices')}</Text>
       <Text style={styles.emptyMessage}>
-        Describe your services and set them up automatically
+        {t('services.noServicesSubtitle')}
       </Text>
       <Pressable style={styles.aiSetupButton} onPress={handleAISetup}>
         <Feather name="zap" size={18} color="#000" />
@@ -511,7 +513,7 @@ export default function ServicesScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <View style={styles.headerTitleRow}>
-              <Text style={styles.hugeTitle} numberOfLines={1} adjustsFontSizeToFit>Services</Text>
+              <Text style={styles.hugeTitle} numberOfLines={1} adjustsFontSizeToFit>{t('services.title')}</Text>
               <View style={styles.assistantContextContainer}>
                 <Text style={styles.assistantContextText}>Assistant Setup</Text>
                 <Pressable 

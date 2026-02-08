@@ -25,6 +25,7 @@ import Animated, {
 import { api, TimeSlot, BlockedSlot } from "@/lib/api";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { useI18n } from "@/contexts/I18nContext";
 
 const shadowBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
@@ -83,6 +84,7 @@ export default function BlockedSlotsScreen() {
   const navigation = useNavigation<BlockedSlotsNavigationProp>();
   const route = useRoute<BlockedSlotsRouteProp>();
   const { date } = route.params;
+  const { t } = useI18n();
 
   const [slots, setSlots] = useState<TimeSlot[]>([]);
   const [blockedSlots, setBlockedSlots] = useState<BlockedSlot[]>([]);
@@ -190,7 +192,7 @@ export default function BlockedSlotsScreen() {
             >
               <Feather name="arrow-left" size={24} color="#fff" />
             </Pressable>
-            <Animated.Text style={styles.hugeTitle}>BLOCK SLOTS</Animated.Text>
+            <Animated.Text style={styles.hugeTitle}>{t('blockedSlots.title')}</Animated.Text>
             <Animated.Text style={styles.dateSubtitle}>
               {new Date(date).toLocaleDateString("en-US", { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' })}
             </Animated.Text>
@@ -232,17 +234,17 @@ export default function BlockedSlotsScreen() {
                           {blocked ? (
                             <>
                               <Feather name="x-circle" size={14} color="rgba(255,255,255,0.6)" />
-                              <Animated.Text style={styles.statusTextBlocked}>Blocked</Animated.Text>
+                              <Animated.Text style={styles.statusTextBlocked}>{t('blockedSlots.blocked')}</Animated.Text>
                             </>
                           ) : booked ? (
                             <>
                               <Feather name="user" size={14} color="rgba(255,255,255,0.4)" />
-                              <Animated.Text style={styles.statusTextBooked}>Booked</Animated.Text>
+                              <Animated.Text style={styles.statusTextBooked}>{t('blockedSlots.booked')}</Animated.Text>
                             </>
                           ) : (
                             <>
                               <Feather name="check-circle" size={14} color="#fff" />
-                              <Animated.Text style={styles.statusTextAvailable}>Available</Animated.Text>
+                              <Animated.Text style={styles.statusTextAvailable}>{t('blockedSlots.available')}</Animated.Text>
                             </>
                           )}
                         </View>
@@ -257,8 +259,8 @@ export default function BlockedSlotsScreen() {
           {slots.length === 0 && (
             <GlassPanel style={styles.emptyCard}>
               <Feather name="calendar" size={48} color="rgba(255,255,255,0.2)" />
-              <Animated.Text style={styles.emptyText}>No time slots available for this day.</Animated.Text>
-              <Animated.Text style={styles.emptySubtext}>Check your business hours settings.</Animated.Text>
+              <Animated.Text style={styles.emptyText}>{t('blockedSlots.noSlots')}</Animated.Text>
+              <Animated.Text style={styles.emptySubtext}>{t('blockedSlots.checkHours')}</Animated.Text>
             </GlassPanel>
           )}
         </ScrollView>

@@ -20,6 +20,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { usePremium } from "@/contexts/PremiumContext";
+import { useI18n } from "@/contexts/I18nContext";
 
 const backgroundImage = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
@@ -148,6 +149,7 @@ export default function SharePreviewScreen() {
   const route = useRoute<RouteProp<SharePreviewRouteParams, "SharePreview">>();
   const { theme } = useTheme();
   const { checkShareAccess } = usePremium();
+  const { t } = useI18n();
   
   const { businessName, bookingUrl, slug } = route.params;
   const [copied, setCopied] = useState(false);
@@ -191,16 +193,16 @@ export default function SharePreviewScreen() {
       >
         <Animated.View entering={FadeIn.duration(600)} style={styles.heroSection}>
           <ThemedText style={styles.heroTitle}>
-            Share Preview
+            {t('sharePreview.title')}
           </ThemedText>
           <ThemedText style={styles.heroSubtitle}>
-            This is how your booking link appears when shared on iMessage, WhatsApp, LinkedIn, and social media.
+            {t('sharePreview.subtitle')}
           </ThemedText>
         </Animated.View>
 
         <Animated.View entering={FadeIn.duration(600).delay(200)} style={styles.previewSection}>
           <ThemedText style={styles.previewLabel}>
-            LINK PREVIEW
+            {t('sharePreview.linkPreview')}
           </ThemedText>
           
           <View style={styles.messageContainer}>
@@ -225,7 +227,7 @@ export default function SharePreviewScreen() {
             <View style={styles.infoRow}>
               <Feather name="link" size={18} color="rgba(255,255,255,0.6)" />
               <View style={styles.infoContent}>
-                <ThemedText style={styles.infoLabel}>Your Booking URL</ThemedText>
+                <ThemedText style={styles.infoLabel}>{t('sharePreview.yourBookingUrl')}</ThemedText>
                 <ThemedText style={styles.infoValue} numberOfLines={1}>{bookingUrl}</ThemedText>
               </View>
             </View>
@@ -236,18 +238,18 @@ export default function SharePreviewScreen() {
           <AnimatedPressable onPress={handleCopyLink} style={styles.primaryButton}>
             <Feather name={copied ? "check" : "copy"} size={20} color="#000" />
             <ThemedText style={styles.primaryButtonText}>
-              {copied ? "Copied!" : "Copy Link"}
+              {copied ? t('common.copied') : t('sharePreview.copyLink')}
             </ThemedText>
           </AnimatedPressable>
 
           <AnimatedPressable onPress={handleShare} style={styles.secondaryButton}>
             <Feather name="share-2" size={20} color="#fff" />
-            <ThemedText style={styles.secondaryButtonText}>Share Now</ThemedText>
+            <ThemedText style={styles.secondaryButtonText}>{t('sharePreview.shareNow')}</ThemedText>
           </AnimatedPressable>
         </Animated.View>
 
         <Animated.View entering={FadeIn.duration(600).delay(600)} style={styles.platformsSection}>
-          <ThemedText style={styles.platformsTitle}>WORKS ON</ThemedText>
+          <ThemedText style={styles.platformsTitle}>{t('sharePreview.worksOn')}</ThemedText>
           <View style={styles.platformsRow}>
             <View style={styles.platformBadge}>
               <Feather name="message-circle" size={16} color="rgba(255,255,255,0.8)" />

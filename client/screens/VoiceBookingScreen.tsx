@@ -13,6 +13,7 @@ import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/contexts/I18nContext";
 import { Spacing } from "@/constants/theme";
 import { getApiUrl } from "@/lib/query-client";
 
@@ -20,6 +21,7 @@ type Props = NativeStackScreenProps<any, "VoiceBooking">;
 
 export default function VoiceBookingScreen({ route, navigation }: Props) {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const { businessSlug, businessName } = route.params || {};
   const webViewRef = useRef<WebView>(null);
@@ -45,10 +47,10 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
       <ThemedView style={[styles.container, { paddingTop: insets.top }]}>
         <View style={styles.webFallback}>
           <ThemedText style={[styles.title, { color: theme.text }]}>
-            VOICE ASSISTANT
+            {t('voiceAssistant.title')}
           </ThemedText>
           <ThemedText style={[styles.subtitle, { color: theme.textSecondary }]}>
-            Voice assistant works best on mobile devices.
+            {t('voiceAssistant.webNotice')}
           </ThemedText>
           <Pressable
             style={[styles.openButton, { backgroundColor: theme.text }]}
@@ -56,7 +58,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
           >
             <Feather name="external-link" size={18} color={theme.backgroundRoot} />
             <ThemedText style={[styles.openButtonText, { color: theme.backgroundRoot }]}>
-              Open Voice Assistant
+              {t('voiceAssistant.openAssistant')}
             </ThemedText>
           </Pressable>
         </View>
@@ -81,7 +83,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
           >
             <Feather name="refresh-cw" size={18} color={theme.backgroundRoot} />
             <ThemedText style={[styles.retryButtonText, { color: theme.backgroundRoot }]}>
-              Try Again
+              {t('common.retry')}
             </ThemedText>
           </Pressable>
         </View>
@@ -95,7 +97,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
         <View style={[styles.loadingOverlay, { backgroundColor: theme.backgroundRoot }]}>
           <ActivityIndicator size="large" color={theme.text} />
           <ThemedText style={[styles.loadingText, { color: theme.textSecondary }]}>
-            Loading assistant...
+            {t('voiceAssistant.loadingAssistant')}
           </ThemedText>
         </View>
       )}

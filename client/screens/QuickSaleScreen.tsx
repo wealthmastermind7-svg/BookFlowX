@@ -24,6 +24,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { api, Business } from "@/lib/api";
 import { getCurrencySymbol, formatPrice } from "@/lib/currency";
+import { useI18n } from "@/contexts/I18nContext";
 
 type StripeStatus = {
   connected: boolean;
@@ -35,6 +36,7 @@ type StripeStatus = {
 export default function QuickSaleScreen() {
   const insets = useSafeAreaInsets();
   const { theme } = useTheme();
+  const { t } = useI18n();
 
   const [amount, setAmount] = useState("");
   const [description, setDescription] = useState("");
@@ -327,7 +329,7 @@ export default function QuickSaleScreen() {
           </Animated.View>
           
           <ThemedText style={styles.setupTitle}>
-            Set Up Payments
+            {t('quickSale.setupPayments')}
           </ThemedText>
           
           <ThemedText style={[styles.setupDescription, { color: theme.textSecondary }]}>
@@ -351,7 +353,7 @@ export default function QuickSaleScreen() {
               <>
                 <Feather name="link" size={20} color={theme.buttonText} style={{ marginRight: Spacing.sm }} />
                 <ThemedText style={[styles.connectButtonText, { color: theme.buttonText }]}>
-                  Connect Stripe
+                  {t('quickSale.connectStripe')}
                 </ThemedText>
               </>
             )}
@@ -424,7 +426,7 @@ export default function QuickSaleScreen() {
             >
               <Feather name="copy" size={20} color={theme.text} style={{ marginRight: Spacing.sm }} />
               <ThemedText style={[styles.actionButtonText, { color: theme.text }]}>
-                Copy Link
+                {t('quickSale.copyLink')}
               </ThemedText>
             </Pressable>
             
@@ -434,7 +436,7 @@ export default function QuickSaleScreen() {
             >
               <Feather name="share-2" size={20} color={theme.buttonText} style={{ marginRight: Spacing.sm }} />
               <ThemedText style={[styles.actionButtonText, { color: theme.buttonText }]}>
-                Share
+                {t('common.share')}
               </ThemedText>
             </Pressable>
           </View>
@@ -444,7 +446,7 @@ export default function QuickSaleScreen() {
             onPress={handleClear}
           >
             <ThemedText style={[styles.newSaleButtonText, { color: theme.text }]}>
-              New Sale
+              {t('quickSale.newSale')}
             </ThemedText>
           </Pressable>
         </ScrollView>
@@ -455,7 +457,7 @@ export default function QuickSaleScreen() {
   return (
     <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.lg }]}>
       <View style={styles.header}>
-        <ThemedText style={styles.headerTitle}>Quick Sale</ThemedText>
+        <ThemedText style={styles.headerTitle}>{t('quickSale.title')}</ThemedText>
         <ThemedText style={[styles.headerSubtitle, { color: theme.textSecondary }]}>
           Tap to accept payments
         </ThemedText>
@@ -478,7 +480,7 @@ export default function QuickSaleScreen() {
               borderColor: theme.borderLight,
             }
           ]}
-          placeholder="Add description (optional)"
+          placeholder={t('quickSale.addDescription')}
           placeholderTextColor={theme.textTertiary}
           value={description}
           onChangeText={setDescription}

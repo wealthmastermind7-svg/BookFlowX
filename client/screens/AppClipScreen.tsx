@@ -17,6 +17,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
+import { useI18n } from "@/contexts/I18nContext";
 
 type AppClipMode = "customer" | "owner" | "loading";
 
@@ -32,6 +33,7 @@ export default function AppClipScreen({
   onInstallFullApp,
 }: AppClipScreenProps) {
   const { theme } = useTheme();
+  const { t } = useI18n();
   const insets = useSafeAreaInsets();
   const [mode, setMode] = useState<AppClipMode>("loading");
   const [businessName, setBusinessName] = useState<string>("");
@@ -101,7 +103,7 @@ export default function AppClipScreen({
       <ThemedView style={[styles.container, { paddingTop: insets.top + Spacing.xl }]}>
         <View style={styles.header}>
           <ThemedText type="h2" style={styles.title}>
-            Quick Actions
+            {t('appClip.quickActions')}
           </ThemedText>
           <ThemedText type="small" style={styles.subtitle}>
             {businessName}
@@ -112,7 +114,7 @@ export default function AppClipScreen({
           <ThemedText type="display" style={styles.statNumber}>
             {todayBookings}
           </ThemedText>
-          <ThemedText type="caption">BOOKINGS TODAY</ThemedText>
+          <ThemedText type="caption">{t('appClip.bookingsToday')}</ThemedText>
         </View>
 
         <View style={styles.actionsContainer}>
@@ -122,7 +124,7 @@ export default function AppClipScreen({
           >
             <Feather name="share" size={20} color={theme.backgroundRoot} />
             <Text style={[styles.actionButtonText, { color: theme.backgroundRoot }]}>
-              Share Booking Link
+              {t('appClip.shareBookingLink')}
             </Text>
           </Pressable>
 
@@ -132,7 +134,7 @@ export default function AppClipScreen({
           >
             <Feather name="calendar" size={20} color={theme.text} />
             <Text style={[styles.actionButtonText, { color: theme.text }]}>
-              View Today's Bookings
+              {t('appClip.viewTodaysBookings')}
             </Text>
           </Pressable>
         </View>

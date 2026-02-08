@@ -31,6 +31,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { Spacing, BorderRadius } from "@/constants/theme";
+import { useI18n } from "@/contexts/I18nContext";
 import { api, Service, Business } from "@/lib/api";
 import { getBookingDomain, getApiUrl } from "@/lib/query-client";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
@@ -67,6 +68,7 @@ export default function ServiceEditorScreen() {
   const route = useRoute();
   const navigation = useNavigation<EditScreenNavigationProp>();
   const { isPremium, checkShareAccess, checkQrAccess, showPaywall } = usePremium();
+  const { t } = useI18n();
 
   const isActuallyPremium = isPremium;
 
@@ -158,9 +160,9 @@ export default function ServiceEditorScreen() {
       "Remove Add-on",
       `Remove "${savedUpsells[index].name}" from your add-ons?`,
       [
-        { text: "Cancel", style: "cancel" },
+        { text: t('common.cancel'), style: "cancel" },
         { 
-          text: "Remove", 
+          text: t('common.remove'), 
           style: "destructive",
           onPress: () => setSavedUpsells(prev => prev.filter((_, i) => i !== index))
         }
@@ -405,7 +407,7 @@ export default function ServiceEditorScreen() {
             >
               <Feather name="arrow-left" size={24} color="#fff" />
             </Pressable>
-            <Text style={styles.headerTitle}>Edit Service</Text>
+            <Text style={styles.headerTitle}>{t('services.editService')}</Text>
             <View style={styles.headerSpacer} />
           </View>
 
@@ -415,7 +417,7 @@ export default function ServiceEditorScreen() {
                 styles.carouselItem,
                 activeTab === "details" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
-                Details
+                {t('services.details')}
               </Text>
             </Pressable>
             <Pressable onPress={() => setActiveTab("upsells")}>
@@ -423,7 +425,7 @@ export default function ServiceEditorScreen() {
                 styles.carouselItem,
                 activeTab === "upsells" ? styles.carouselItemActive : styles.carouselItemInactive
               ]}>
-                Add-ons
+                {t('services.addonsTab')}
               </Text>
             </Pressable>
           </View>
@@ -435,11 +437,11 @@ export default function ServiceEditorScreen() {
             {activeTab === "details" && (
               <View style={styles.formContainer}>
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Service Name</Text>
+                  <Text style={styles.inputLabel}>{t('services.serviceName')}</Text>
                   <TextInput
                     value={service.name}
                     onChangeText={(text) => setService((prev) => ({ ...prev, name: text }))}
-                    placeholder="Enter service name"
+                    placeholder={t('services.enterServiceName')}
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     editable={!saving}
                     style={styles.inputPrimary}
@@ -447,7 +449,7 @@ export default function ServiceEditorScreen() {
                 </View>
 
                 <View style={styles.inputGroup}>
-                  <Text style={styles.inputLabel}>Duration (minutes)</Text>
+                  <Text style={styles.inputLabel}>{t('services.duration')}</Text>
                   <TextInput
                     value={String(service.duration)}
                     onChangeText={(text) => setService((prev) => ({ ...prev, duration: parseInt(text) || 0 }))}
@@ -474,7 +476,7 @@ export default function ServiceEditorScreen() {
 
                 <View style={styles.inputGroup}>
                   <View style={styles.labelRow}>
-                    <Text style={styles.inputLabel}>Description</Text>
+                    <Text style={styles.inputLabel}>{t('services.description')}</Text>
                     {service.name ? (
                       <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
                         <Feather name="zap" size={12} color="#fff" />
@@ -485,7 +487,7 @@ export default function ServiceEditorScreen() {
                   <TextInput
                     value={service.description || ""}
                     onChangeText={(text) => setService((prev) => ({ ...prev, description: text }))}
-                    placeholder="Enter service description"
+                    placeholder={t('services.enterDescription')}
                     placeholderTextColor="rgba(255,255,255,0.4)"
                     multiline
                     numberOfLines={4}
@@ -506,7 +508,7 @@ export default function ServiceEditorScreen() {
                     <Text style={styles.linkCardTitle}>Custom Add-ons</Text>
                     <Pressable onPress={handleGetUpsells} style={styles.aiUpsellTrigger}>
                       <Feather name="zap" size={12} color="#fff" />
-                      <Text style={styles.aiUpsellTriggerText}>Assistant Suggest</Text>
+                      <Text style={styles.aiUpsellTriggerText}>{t('services.aiSuggest')}</Text>
                     </Pressable>
                   </View>
                   <Text style={styles.linkCardDesc}>
@@ -554,7 +556,7 @@ export default function ServiceEditorScreen() {
                                 onPress={() => setEditingUpsellIndex(null)} 
                                 style={styles.doneEditButton}
                               >
-                                <Text style={styles.doneEditButtonText}>Done</Text>
+                                <Text style={styles.doneEditButtonText}>{t('common.done')}</Text>
                               </Pressable>
                             </View>
                           ) : (
@@ -600,7 +602,7 @@ export default function ServiceEditorScreen() {
                 ) : (
                   <>
                     <GlassPanel style={styles.linkCard}>
-                      <Text style={styles.linkCardTitle}>Direct Booking Link</Text>
+                      <Text style={styles.linkCardTitle}>{t('services.directBookingLink')}</Text>
                       <Text style={styles.linkCardDesc}>
                         Share this link to let customers book directly
                       </Text>
@@ -662,7 +664,7 @@ export default function ServiceEditorScreen() {
               disabled={saving}
               style={({ pressed }) => [styles.cancelButton, { opacity: pressed ? 0.7 : saving ? 0.5 : 1 }]}
             >
-              <Text style={styles.cancelButtonText}>Cancel</Text>
+              <Text style={styles.cancelButtonText}>{t('common.cancel')}</Text>
             </Pressable>
 
             <Pressable
@@ -671,7 +673,7 @@ export default function ServiceEditorScreen() {
               style={({ pressed }) => [styles.saveButton, { opacity: pressed ? 0.9 : saving ? 0.5 : 1 }]}
             >
               <Text style={styles.saveButtonText}>
-                {saving ? "Saving..." : "Save Service"}
+                {saving ? "Saving..." : t('services.saveService')}
               </Text>
             </Pressable>
           </View>

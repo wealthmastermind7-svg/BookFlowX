@@ -21,6 +21,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Service } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
+import { useI18n } from "@/contexts/I18nContext";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -279,6 +280,7 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
 export default function SelectTimeScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -359,12 +361,12 @@ export default function SelectTimeScreen() {
 
         <View style={styles.heroSection}>
           <ThemedText style={styles.heroTitle}>{businessName.toUpperCase()}</ThemedText>
-          <ThemedText style={styles.heroSubtitle}>PREMIUM BOOKING</ThemedText>
+          <ThemedText style={styles.heroSubtitle}>{t('booking.premiumBooking')}</ThemedText>
         </View>
 
         <View style={styles.datePickerSection}>
           <Pressable style={styles.dateSelectorButton}>
-            <ThemedText style={styles.dateSelectorLabel}>SELECT DATE</ThemedText>
+            <ThemedText style={styles.dateSelectorLabel}>{t('booking.selectDate')}</ThemedText>
             <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
           </Pressable>
           <DateScrollPicker
@@ -409,11 +411,11 @@ export default function SelectTimeScreen() {
           ]}
         >
           <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
-          <ThemedText style={styles.mainButtonText}>CONTINUE</ThemedText>
+          <ThemedText style={styles.mainButtonText}>{t('common.continue').toUpperCase()}</ThemedText>
         </Pressable>
 
         <Pressable onPress={handleBack} style={styles.backButtonLarge}>
-          <ThemedText style={styles.backButtonText}>BACK</ThemedText>
+          <ThemedText style={styles.backButtonText}>{t('common.back').toUpperCase()}</ThemedText>
         </Pressable>
       </View>
     </View>

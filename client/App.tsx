@@ -15,6 +15,8 @@ import { api } from "@/lib/api";
 import RootStackNavigator from "@/navigation/RootStackNavigator";
 import { ErrorBoundary } from "@/components/ErrorBoundary";
 import { PremiumProvider } from "@/contexts/PremiumContext";
+import { I18nProvider } from "@/contexts/I18nContext";
+import { initI18n } from "@/lib/i18n";
 
 // Keep the splash screen visible while we fetch resources
 SplashScreen.preventAutoHideAsync();
@@ -36,7 +38,8 @@ export default function App() {
           "JetBrainsMono-Regular": "https://fonts.gstatic.com/s/jetbrainsmono/v18/t64v84mS_S4oY6F9YI3PZ_W_V-3N9S0-9Lw.ttf",
         });
 
-        // Load persisted business ID and business object
+        await initI18n();
+
         const businessId = await api.loadBusinessId();
         if (businessId) {
           await api.getBusiness();
@@ -62,11 +65,13 @@ export default function App() {
         <SafeAreaProvider>
           <GestureHandlerRootView style={styles.root}>
             <KeyboardProvider>
-              <PremiumProvider>
-                <NavigationContainer>
-                  <RootStackNavigator />
-                </NavigationContainer>
-              </PremiumProvider>
+              <I18nProvider>
+                <PremiumProvider>
+                  <NavigationContainer>
+                    <RootStackNavigator />
+                  </NavigationContainer>
+                </PremiumProvider>
+              </I18nProvider>
               <StatusBar style="auto" />
             </KeyboardProvider>
           </GestureHandlerRootView>

@@ -329,6 +329,7 @@
     "dental": "Dental",
     "veterinary": "Veterinary",
     "automotive": "Auto Detailing",
+    "autodetailing": "Auto Detailing",
     "fitness": "Fitness",
     "yoga": "Yoga Studios",
     "tattoo": "Tattoo Studios",
@@ -339,7 +340,9 @@
     "coaching": "Coaching",
     "cleaning": "Cleaning",
     "plumber": "Plumbing",
+    "plumbing": "Plumbing",
     "electrician": "Electrical",
+    "electrical": "Electrical",
     "hvac": "HVAC",
     "landscaping": "Landscaping"
   },

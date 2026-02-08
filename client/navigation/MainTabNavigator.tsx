@@ -10,6 +10,7 @@ import CustomersStackNavigator from "@/navigation/CustomersStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 import { FloatingMascot } from "@/components/FloatingMascot";
+import { useI18n } from "@/contexts/I18nContext";
 
 export type MainTabParamList = {
   DashboardTab: undefined;
@@ -31,6 +32,7 @@ const TAB_TO_SCREEN_NAME: Record<string, string> = {
 
 export default function MainTabNavigator() {
   const { theme, isDark } = useTheme();
+  const { t } = useI18n();
   const [currentTabName, setCurrentTabName] = useState("Dashboard");
 
   return (
@@ -74,7 +76,7 @@ export default function MainTabNavigator() {
         name="DashboardTab"
         component={DashboardStackNavigator}
         options={{
-          title: "Home",
+          title: t('tabs.dashboard'),
           tabBarIcon: ({ color, size }) => (
             <Feather name="home" size={size} color={color} />
           ),
@@ -84,7 +86,7 @@ export default function MainTabNavigator() {
         name="CalendarTab"
         component={CalendarStackNavigator}
         options={{
-          title: "Calendar",
+          title: t('tabs.calendar'),
           tabBarIcon: ({ color, size }) => (
             <Feather name="calendar" size={size} color={color} />
           ),
@@ -94,7 +96,7 @@ export default function MainTabNavigator() {
         name="ServicesTab"
         component={ServicesStackNavigator}
         options={{
-          title: "Services",
+          title: t('tabs.services'),
           tabBarIcon: ({ color, size }) => (
             <Feather name="grid" size={size} color={color} />
           ),
@@ -104,7 +106,7 @@ export default function MainTabNavigator() {
         name="CustomersTab"
         component={CustomersStackNavigator}
         options={{
-          title: "Customers",
+          title: t('tabs.customers'),
           tabBarIcon: ({ color, size }) => (
             <Feather name="users" size={size} color={color} />
           ),
@@ -114,7 +116,7 @@ export default function MainTabNavigator() {
         name="SettingsTab"
         component={SettingsStackNavigator}
         options={{
-          title: "Settings",
+          title: t('tabs.settings'),
           tabBarIcon: ({ color, size }) => (
             <Feather name="settings" size={size} color={color} />
           ),

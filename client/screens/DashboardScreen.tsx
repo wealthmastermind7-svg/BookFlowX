@@ -36,6 +36,7 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { useVoiceSubscription } from "@/hooks/useVoiceSubscription";
 import { ThemedText } from "@/components/ThemedText";
+import { useI18n } from "@/contexts/I18nContext";
 
 type DashboardNavigation = NativeStackNavigationProp<RootStackParamList>;
 
@@ -343,6 +344,7 @@ export default function DashboardScreen() {
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<DashboardNavigation>();
   const { isPremium, showPaywall } = usePremium();
+  const { t } = useI18n();
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
@@ -470,7 +472,7 @@ export default function DashboardScreen() {
           </View>
 
           <GlassPanel style={styles.revenueCard}>
-            <Animated.Text style={styles.revenueLabel}>Total Revenue</Animated.Text>
+            <Animated.Text style={styles.revenueLabel}>{t('dashboard.totalRevenue')}</Animated.Text>
             <Animated.Text style={styles.revenueValue}>
               {formatPrice(Math.round(totalRevenue * 100), business?.currency || "USD")}
             </Animated.Text>
@@ -488,9 +490,9 @@ export default function DashboardScreen() {
                     Grow faster with smart reminders & automated upsells
                   </Animated.Text>
                   <View style={styles.premiumPricing}>
-                    <Animated.Text style={styles.premiumPrice}>Explore Features</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>{t('dashboard.exploreFeatures')}</Animated.Text>
                     <View style={styles.premiumPriceDot} />
-                    <Animated.Text style={styles.premiumPrice}>See Plans</Animated.Text>
+                    <Animated.Text style={styles.premiumPrice}>{t('dashboard.seePlans')}</Animated.Text>
                   </View>
                 </View>
                 <Feather name="arrow-right" size={20} color="rgba(255,255,255,0.4)" />
@@ -523,7 +525,7 @@ export default function DashboardScreen() {
               </Animated.Text>
               <View style={styles.voiceAspirationalAction}>
                 <Animated.Text style={styles.voiceAspirationalLink}>
-                  {isExhausted ? "UPGRADE NOW" : "PREVIEW EXPERIENCE"}
+                  {isExhausted ? t('dashboard.upgradeNow') : t('dashboard.previewExperience')}
                 </Animated.Text>
                 <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
               </View>
@@ -532,27 +534,27 @@ export default function DashboardScreen() {
 
           <View style={styles.metersRow}>
             <GlassPanel style={styles.meterCard}>
-              <CircularMeterGlass percentage={paidPercentage} label="Paid" />
+              <CircularMeterGlass percentage={paidPercentage} label={t('dashboard.paid')} />
             </GlassPanel>
             <GlassPanel style={styles.meterCard}>
-              <CircularMeterGlass percentage={unpaidPercentage} label="Unpaid" />
+              <CircularMeterGlass percentage={unpaidPercentage} label={t('dashboard.unpaid')} />
             </GlassPanel>
           </View>
 
           <GlassPanel style={styles.chartCard}>
-            <Animated.Text style={styles.chartTitle}>Revenue This Week</Animated.Text>
+            <Animated.Text style={styles.chartTitle}>{t('dashboard.revenueThisWeek')}</Animated.Text>
             <RevenueChart data={graphData} />
           </GlassPanel>
 
           <View style={styles.bookingsSection}>
             <View style={styles.bookingsHeader}>
-              <Animated.Text style={styles.bookingsTitle}>Bookings & Reminders</Animated.Text>
+              <Animated.Text style={styles.bookingsTitle}>{t('dashboard.bookingsAndReminders')}</Animated.Text>
               <Pressable
                 onPress={() => setShowAllBookings(!showAllBookings)}
                 style={styles.toggleButton}
               >
                 <Animated.Text style={styles.toggleText}>
-                  {showAllBookings ? "All" : "This Week"}
+                  {showAllBookings ? t('common.all') : t('dashboard.thisWeek')}
                 </Animated.Text>
               </Pressable>
             </View>
@@ -568,8 +570,8 @@ export default function DashboardScreen() {
                 upcomingBookings.map((booking) => (
                   <BookingCardGlass
                     key={booking.id}
-                    customerName={booking.customerName || "Customer"}
-                    serviceName={booking.serviceName || "Service"}
+                    customerName={booking.customerName || t('dashboard.customer')}
+                    serviceName={booking.serviceName || t('dashboard.service')}
                     date={booking.date}
                     time={booking.time}
                     status={booking.status}
@@ -593,7 +595,7 @@ export default function DashboardScreen() {
 
           {insights && (insights.topCustomers.length > 0 || insights.atRiskCustomers.length > 0 || insights.mostFrequentServices.length > 0) && (
             <View style={styles.insightsSection}>
-              <Animated.Text style={styles.sectionTitle}>Insights</Animated.Text>
+              <Animated.Text style={styles.sectionTitle}>{t('dashboard.insights')}</Animated.Text>
               
               {insights.topCustomers.length > 0 && (
                 <GlassPanel style={styles.insightCard}>
@@ -601,7 +603,7 @@ export default function DashboardScreen() {
                     <View style={[styles.insightIcon, { backgroundColor: "#10B981" }]}>
                       <Feather name="star" size={14} color="#fff" />
                     </View>
-                    <Text style={styles.insightTitle}>Top Customers</Text>
+                    <Text style={styles.insightTitle}>{t('dashboard.topCustomers')}</Text>
                   </View>
                   {insights.topCustomers.slice(0, 3).map((customer, idx) => (
                     <View key={customer.id} style={styles.insightRow}>
@@ -620,7 +622,7 @@ export default function DashboardScreen() {
                     <View style={[styles.insightIcon, { backgroundColor: "#EF4444" }]}>
                       <Feather name="alert-circle" size={14} color="#fff" />
                     </View>
-                    <Text style={styles.insightTitle}>At-Risk Customers</Text>
+                    <Text style={styles.insightTitle}>{t('dashboard.atRiskCustomers')}</Text>
                   </View>
                   {insights.atRiskCustomers.slice(0, 3).map((customer) => (
                     <View key={customer.id} style={styles.insightRow}>
@@ -637,7 +639,7 @@ export default function DashboardScreen() {
                     <View style={[styles.insightIcon, { backgroundColor: "#8B5CF6" }]}>
                       <Feather name="trending-up" size={14} color="#fff" />
                     </View>
-                    <Text style={styles.insightTitle}>Popular Services</Text>
+                    <Text style={styles.insightTitle}>{t('dashboard.popularServices')}</Text>
                   </View>
                   {insights.mostFrequentServices.slice(0, 3).map((service, idx) => (
                     <View key={idx} style={styles.insightRow}>
@@ -652,15 +654,15 @@ export default function DashboardScreen() {
                 <View style={styles.summaryRow}>
                   <View style={styles.summaryItem}>
                     <Text style={styles.summaryNumber}>{insights.summary.totalCustomers}</Text>
-                    <Text style={styles.summaryLabel}>Customers</Text>
+                    <Text style={styles.summaryLabel}>{t('dashboard.customers')}</Text>
                   </View>
                   <View style={styles.summaryItem}>
                     <Text style={[styles.summaryNumber, { color: "#10B981" }]}>{insights.summary.vipCount}</Text>
-                    <Text style={styles.summaryLabel}>VIP</Text>
+                    <Text style={styles.summaryLabel}>{t('dashboard.vip')}</Text>
                   </View>
                   <View style={styles.summaryItem}>
                     <Text style={[styles.summaryNumber, { color: "#EF4444" }]}>{insights.summary.atRiskCount}</Text>
-                    <Text style={styles.summaryLabel}>At Risk</Text>
+                    <Text style={styles.summaryLabel}>{t('dashboard.atRisk')}</Text>
                   </View>
                 </View>
               </GlassPanel>
@@ -685,7 +687,7 @@ export default function DashboardScreen() {
           >
             <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
               <View style={styles.modalHeader}>
-                <Animated.Text style={styles.modalTitle}>Booking Details</Animated.Text>
+                <Animated.Text style={styles.modalTitle}>{t('dashboard.bookingDetails')}</Animated.Text>
                 <Pressable onPress={() => setSelectedBooking(null)} style={styles.modalCloseButton}>
                   <Feather name="x" size={20} color="rgba(255,255,255,0.6)" />
                 </Pressable>
@@ -694,17 +696,17 @@ export default function DashboardScreen() {
               {selectedBooking && (
                 <View style={styles.modalBody}>
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Customer</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.customer')}</Text>
                     <Text style={styles.detailValue}>{selectedBooking.customerName || "—"}</Text>
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Service</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.service')}</Text>
                     <Text style={styles.detailValue}>{selectedBooking.serviceName || "—"}</Text>
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Date</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.date')}</Text>
                     <Text style={styles.detailValue}>
                       {new Date(selectedBooking.date).toLocaleDateString("en-US", {
                         weekday: "short",
@@ -716,12 +718,12 @@ export default function DashboardScreen() {
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Time</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.time')}</Text>
                     <Text style={styles.detailValue}>{selectedBooking.time}</Text>
                   </View>
 
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Status</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.status')}</Text>
                     <View style={[
                       styles.statusBadge,
                       selectedBooking.status === "confirmed" && styles.statusConfirmed,
@@ -730,7 +732,7 @@ export default function DashboardScreen() {
                       selectedBooking.status === "cancelled" && styles.statusCancelled,
                     ]}>
                       <Text style={styles.statusText}>
-                        {selectedBooking.status?.charAt(0).toUpperCase() + selectedBooking.status?.slice(1)}
+                        {t(`dashboard.${selectedBooking.status}`)}
                       </Text>
                     </View>
                   </View>
@@ -741,7 +743,7 @@ export default function DashboardScreen() {
                       if (Array.isArray(addonsArray) && addonsArray.length > 0) {
                         return (
                           <View style={styles.addonsSection}>
-                            <Text style={styles.addonsSectionTitle}>Add-ons</Text>
+                            <Text style={styles.addonsSectionTitle}>{t('dashboard.addons')}</Text>
                             {addonsArray.map((addon: { name: string; price: number }, idx: number) => (
                               <View key={idx} style={styles.addonItem}>
                                 <Text style={styles.addonName}>{addon.name}</Text>
@@ -760,7 +762,7 @@ export default function DashboardScreen() {
                   })()}
 
                   <View style={[styles.detailRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>Total</Text>
+                    <Text style={styles.totalLabel}>{t('dashboard.total')}</Text>
                     <Text style={styles.totalValue}>
                       {formatPrice(selectedBooking.totalPrice, business?.currency || "USD")}
                     </Text>
@@ -768,19 +770,19 @@ export default function DashboardScreen() {
 
                   {selectedBooking.notes && (
                     <View style={styles.notesSection}>
-                      <Text style={styles.notesLabel}>Notes</Text>
+                      <Text style={styles.notesLabel}>{t('dashboard.notes')}</Text>
                       <Text style={styles.notesText}>{selectedBooking.notes}</Text>
                     </View>
                   )}
 
                   <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>Payment</Text>
+                    <Text style={styles.detailLabel}>{t('dashboard.payment')}</Text>
                     <View style={[
                       styles.statusBadge,
                       selectedBooking.paymentStatus === "paid" ? styles.statusConfirmed : styles.statusPending
                     ]}>
                       <Text style={styles.statusText}>
-                        {selectedBooking.paymentStatus?.toUpperCase() || "UNPAID"}
+                        {selectedBooking.paymentStatus === "paid" ? t('dashboard.paid') : t('dashboard.unpaid')}
                       </Text>
                     </View>
                   </View>
@@ -801,7 +803,7 @@ export default function DashboardScreen() {
                         }}
                       >
                         <Feather name="dollar-sign" size={16} color="#000" />
-                        <Text style={styles.confirmPaidButtonText}>Mark as Paid</Text>
+                        <Text style={styles.confirmPaidButtonText}>{t('dashboard.markAsPaid')}</Text>
                       </Pressable>
                     ) : (
                       <Pressable
@@ -818,7 +820,7 @@ export default function DashboardScreen() {
                         }}
                       >
                         <Feather name="rotate-ccw" size={16} color="rgba(255,255,255,0.6)" />
-                        <Text style={styles.revertPaidButtonText}>Revert to Unpaid</Text>
+                        <Text style={styles.revertPaidButtonText}>{t('dashboard.revertToUnpaid')}</Text>
                       </Pressable>
                     )}
                   </View>
@@ -838,7 +840,7 @@ export default function DashboardScreen() {
                       }}
                     >
                       <Feather name="check" size={16} color="#000" />
-                      <Text style={styles.confirmBookingText}>Confirm Booking</Text>
+                      <Text style={styles.confirmBookingText}>{t('dashboard.confirmBooking')}</Text>
                     </Pressable>
                   )}
                 </View>

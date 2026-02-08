@@ -26,6 +26,7 @@ import Animated, {
 
 import { Spacing } from "@/constants/theme";
 import { api, Customer } from "@/lib/api";
+import { useI18n } from "@/contexts/I18nContext";
 
 const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
@@ -109,11 +110,13 @@ function CustomerCardCinematic({
     return n.slice(0, 2).toUpperCase();
   };
 
+  const { t } = useI18n();
+
   const getSegment = (bookings: number) => {
-    if (bookings >= 10) return { label: "VIP", color: "#FBBF24" };
-    if (bookings >= 3) return { label: "REGULAR", color: "#60A5FA" };
-    if (bookings === 0) return { label: "NEW", color: "#34D399" };
-    return { label: "AT-RISK", color: "#F87171" };
+    if (bookings >= 10) return { label: t('customers.vip'), color: "#FBBF24" };
+    if (bookings >= 3) return { label: t('customers.regular'), color: "#60A5FA" };
+    if (bookings === 0) return { label: t('customers.new'), color: "#34D399" };
+    return { label: t('customers.atRisk'), color: "#F87171" };
   };
 
   const segment = getSegment(totalBookings);
@@ -151,6 +154,7 @@ export default function CustomersScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation();
+  const { t } = useI18n();
 
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -209,8 +213,8 @@ export default function CustomersScreen() {
     try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
     Alert.alert(
       customer.name,
-      `Email: ${customer.email}\nPhone: ${customer.phone || "N/A"}\nTotal Bookings: ${customer.totalBookings || 0}`,
-      [{ text: "Close", style: "default" }]
+      `${t('customers.email')}: ${customer.email}\n${t('customers.phone')}: ${customer.phone || t('common.na')}\n${t('customers.totalBookings')}: ${customer.totalBookings || 0}`,
+      [{ text: t('common.close'), style: "default" }]
     );
   };
 
@@ -230,9 +234,9 @@ export default function CustomersScreen() {
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
       <Feather name="users" size={48} color="rgba(255,255,255,0.2)" />
-      <Text style={styles.emptyTitle}>No Customers Yet</Text>
+      <Text style={styles.emptyTitle}>{t('customers.noCustomers')}</Text>
       <Text style={styles.emptyMessage}>
-        Customers will appear here after bookings are made
+        {t('customers.noCustomersSubtitle')}
       </Text>
     </View>
   );
@@ -245,7 +249,7 @@ export default function CustomersScreen() {
         style={styles.container}
       >
         <Animated.View style={[styles.header, { paddingTop: insets.top + 20 }, headerAnimatedStyle]}>
-          <Text style={styles.hugeTitle}>Customers</Text>
+          <Text style={styles.hugeTitle}>{t('customers.title')}</Text>
         </Animated.View>
 
         <AnimatedFlatList

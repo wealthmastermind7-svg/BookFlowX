@@ -33,6 +33,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { LinearGradient } from "expo-linear-gradient";
 
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/contexts/I18nContext";
 import { Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { api } from "@/lib/api";
 import { getApiUrl } from "@/lib/query-client";
@@ -225,6 +226,7 @@ function StepIndicator({ currentStep, totalSteps }: { currentStep: number; total
 
 function Step0BrandIntro({ onNext }: { onNext: () => void }) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   return (
     <Animated.View
@@ -328,8 +330,7 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
 
         <Animated.View entering={FadeInUp.delay(200).springify()} style={styles.brandTextSection}>
           <Text style={styles.brandHeading}>
-            Smart Booking{' '}
-            <Text style={styles.brandHeadingItalic}>For Modern Businesses</Text>
+            {t('onboarding.tagline')}
           </Text>
           <Text style={styles.brandDescription}>
             Professional booking links, QR codes, and an informational Voice Assistant — ready in seconds.
@@ -353,7 +354,7 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
           onPress={onNext}
           style={styles.brandGetStartedButton}
         >
-          <Text style={styles.brandGetStartedText}>Get Started</Text>
+          <Text style={styles.brandGetStartedText}>{t('onboarding.getStarted')}</Text>
           <Feather name="arrow-right" size={20} color="#fff" />
         </AnimatedPressable>
       </View>
@@ -371,6 +372,7 @@ function Step1NicheSelection({
   onNext: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   return (
     <Animated.View 
@@ -392,10 +394,10 @@ function Step1NicheSelection({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: '#fff' }]}>
-            What's your business?
+            {t('onboarding.whatsYourBusiness')}
           </Text>
           <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
-            Select your industry to personalize your experience
+            {t('onboarding.selectIndustry')}
           </Text>
         </View>
 
@@ -436,7 +438,7 @@ function Step1NicheSelection({
                   ]}
                   numberOfLines={2}
                 >
-                  {type.name}
+                  {t('businessTypes.' + type.id)}
                 </Text>
                 {selectedType === type.id && (
                   <View style={[styles.checkBadge, { backgroundColor: '#fff' }]}>
@@ -459,7 +461,7 @@ function Step1NicheSelection({
             }
           ]}
         >
-          <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+          <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('common.continue')}</Text>
           <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
       </View>
@@ -481,6 +483,7 @@ function Step2BusinessName({
   isCreating: boolean;
 }) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   
   const generateSlug = (name: string) => {
     return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'your-business';
@@ -515,10 +518,10 @@ function Step2BusinessName({
         >
           <View style={styles.stepHeader}>
             <Text style={[styles.stepTitle, { color: '#fff' }]}>
-              Name your business
+              {t('onboarding.nameYourBusiness')}
             </Text>
             <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
-              This will appear on your booking page
+              {t('onboarding.nameSubtitle')}
             </Text>
           </View>
 
@@ -534,7 +537,7 @@ function Step2BusinessName({
               ]}
               value={businessName}
               onChangeText={onNameChange}
-              placeholder="Enter business name"
+              placeholder={t('onboarding.enterBusinessName')}
               placeholderTextColor="rgba(255,255,255,0.3)"
               autoFocus
               autoCapitalize="words"
@@ -577,7 +580,7 @@ function Step2BusinessName({
                   <ActivityIndicator size="small" color="#000" />
                 ) : (
                   <>
-                    <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+                    <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('common.continue')}</Text>
                     <Feather name="arrow-right" size={20} color="#000" />
                   </>
                 )}
@@ -604,6 +607,7 @@ function Step3AssetPreviews({
   onBack: () => void;
 }) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
   
   const displayUrl = bookingUrl.replace(/^https?:\/\//, "");
   const domain = displayUrl.split("/")[0];
@@ -635,7 +639,7 @@ function Step3AssetPreviews({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: '#fff' }]}>
-            Share Preview
+            {t('onboarding.sharePreview')}
           </Text>
           <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
             This is how your booking link appears when shared on iMessage, WhatsApp, LinkedIn, and social media.
@@ -643,7 +647,7 @@ function Step3AssetPreviews({
         </View>
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.previewSection}>
-          <Text style={[styles.previewLabel]}>LINK PREVIEW</Text>
+          <Text style={[styles.previewLabel]}>{t('onboarding.linkPreview')}</Text>
           
           <View style={styles.messageBubbleContainer}>
             <View style={styles.messageBubble}>
@@ -658,7 +662,7 @@ function Step3AssetPreviews({
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(200)} style={styles.qrSection}>
-          <Text style={[styles.previewLabel]}>QR CODE</Text>
+          <Text style={[styles.previewLabel]}>{t('onboarding.qrCode')}</Text>
           <View style={styles.qrCardContainer}>
             <Text style={styles.qrCardTitle}>Booking QR Code</Text>
             <Pressable 
@@ -720,7 +724,7 @@ function Step3AssetPreviews({
               }
             ]}
           >
-            <Text style={[styles.primaryButtonText, { color: '#000' }]}>Continue</Text>
+            <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('common.continue')}</Text>
             <Feather name="arrow-right" size={20} color="#000" />
           </AnimatedPressable>
         </View>
@@ -741,6 +745,7 @@ function Step4VoicePreview({
   navigation: any;
 }) {
   const insets = useSafeAreaInsets();
+  const { t } = useI18n();
 
   const handleTestVoiceAgent = async () => {
     await Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
@@ -777,7 +782,7 @@ function Step4VoicePreview({
       >
         <View style={styles.stepHeader}>
           <Text style={[styles.stepTitle, { color: '#fff' }]}>
-            Meet your Assistant
+            {t('onboarding.meetAssistant')}
           </Text>
           <Text style={[styles.stepSubtitle, { color: 'rgba(255,255,255,0.6)' }]}>
             Answers questions about your business 24/7
@@ -791,7 +796,7 @@ function Step4VoicePreview({
             </View>
             
             <Text style={[styles.voiceCardTitle, { color: '#fff' }]}>
-              Informational Assistant
+              {t('onboarding.informationalAssistant')}
             </Text>
             <Text style={[styles.voiceCardDescription, { color: 'rgba(255,255,255,0.6)' }]}>
               Answers questions about your services, pricing, and availability, then directs customers to book via Text Booking
@@ -804,17 +809,17 @@ function Step4VoicePreview({
               </View>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>Natural conversations</Text>
+                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>{t('onboarding.naturalConversations')}</Text>
               </View>
               <View style={styles.voiceFeatureRow}>
                 <Feather name="check-circle" size={16} color="#10B981" />
-                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>Trained on your services</Text>
+                <Text style={[styles.voiceFeatureText, { color: 'rgba(255,255,255,0.8)' }]}>{t('onboarding.trainedOnServices')}</Text>
               </View>
             </View>
 
             <View style={[styles.trialBadge, { backgroundColor: 'rgba(255,255,255,0.1)' }]}>
               <Feather name="gift" size={14} color="#fff" />
-              <Text style={[styles.trialBadgeText, { color: '#fff' }]}>5 minutes free trial included</Text>
+              <Text style={[styles.trialBadgeText, { color: '#fff' }]}>{t('onboarding.freeTrialIncluded')}</Text>
             </View>
           </View>
         </Animated.View>
@@ -830,7 +835,7 @@ function Step4VoicePreview({
             }
           ]}
         >
-          <Text style={[styles.primaryButtonText, { color: '#000' }]}>Test Assistant Now</Text>
+          <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('onboarding.testAssistantNow')}</Text>
           <Feather name="arrow-right" size={20} color="#000" />
         </AnimatedPressable>
         
@@ -854,7 +859,7 @@ function Step4VoicePreview({
               { opacity: pressed ? 0.6 : 1 }
             ]}
           >
-            <Text style={[styles.skipButtonText, { color: 'rgba(255,255,255,0.5)' }]}>Skip for now</Text>
+            <Text style={[styles.skipButtonText, { color: 'rgba(255,255,255,0.5)' }]}>{t('onboarding.skipForNow')}</Text>
           </Pressable>
         </View>
       </View>

@@ -17,6 +17,7 @@ import { useNavigation, useRoute, RouteProp } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/contexts/I18nContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { api } from "@/lib/api";
@@ -41,6 +42,7 @@ export default function AgentTrainingScreen() {
   const route = useRoute<RouteProp<RootStackParamList, 'AgentTraining'>>();
   const { businessId, businessName } = route.params;
   const { theme } = useTheme();
+  const { t } = useI18n();
   const headerHeight = useHeaderHeight();
   
   const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
@@ -169,22 +171,22 @@ export default function AgentTrainingScreen() {
         keyboardShouldPersistTaps="handled"
       >
           <GlassCard style={styles.headerCard}>
-            <ThemedText style={styles.headerTitle}>Assistant Training</ThemedText>
+            <ThemedText style={styles.headerTitle}>{t('training.title')}</ThemedText>
             <ThemedText style={styles.headerSubtitle}>
-              Add knowledge to help your informational assistant respond better.
+              {t('training.subtitle')}
             </ThemedText>
           </GlassCard>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Web Crawler</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('training.webCrawler')}</ThemedText>
           <GlassCard style={styles.crawlCard}>
             <ThemedText style={styles.cardInfo}>
-              Enter a website URL to automatically extract content for training.
+              {t('training.webCrawlerDesc')}
             </ThemedText>
             <View style={styles.inputRow}>
               <TextInput
                 style={styles.input}
-                placeholder="https://example.com"
+                placeholder={t('training.urlPlaceholder')}
                 placeholderTextColor="rgba(255,255,255,0.3)"
                 value={crawlUrl}
                 onChangeText={setCrawlUrl}
@@ -200,7 +202,7 @@ export default function AgentTrainingScreen() {
                 {crawling ? (
                   <ActivityIndicator size="small" color="#fff" />
                 ) : (
-                  <ThemedText style={styles.crawlButtonText}>Get Data</ThemedText>
+                  <ThemedText style={styles.crawlButtonText}>{t('training.getData')}</ThemedText>
                 )}
               </Pressable>
             </View>
@@ -208,14 +210,14 @@ export default function AgentTrainingScreen() {
         </View>
 
         <View style={styles.section}>
-          <ThemedText style={styles.sectionTitle}>Custom Content</ThemedText>
+          <ThemedText style={styles.sectionTitle}>{t('training.customContent')}</ThemedText>
           <ThemedText style={styles.cardInfo}>
             Paste information about your company (services, policies, hours) for the assistant to learn.
           </ThemedText>
           <GlassCard style={styles.qaInputCard}>
             <TextInput
               style={[styles.input, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
-              placeholder="Paste company info, pricing, or details here..."
+              placeholder={t('training.customContentPlaceholder')}
               placeholderTextColor="rgba(255,255,255,0.3)"
               value={content}
               onChangeText={setContent}
@@ -247,7 +249,7 @@ export default function AgentTrainingScreen() {
                 {addingQa ? (
                   <ActivityIndicator size="small" color="#000" />
                 ) : (
-                  <ThemedText style={styles.addButtonText}>Add Content</ThemedText>
+                  <ThemedText style={styles.addButtonText}>{t('training.addContent')}</ThemedText>
                 )}
               </Pressable>
             </View>
@@ -258,7 +260,7 @@ export default function AgentTrainingScreen() {
         
         <View style={styles.section}>
           <View style={styles.sectionHeader}>
-            <ThemedText style={styles.sectionTitle}>Training Links</ThemedText>
+            <ThemedText style={styles.sectionTitle}>{t('training.trainingLinks')}</ThemedText>
             <View style={styles.badge}>
               <ThemedText style={styles.badgeText}>{trainingData.length}</ThemedText>
             </View>
@@ -269,7 +271,7 @@ export default function AgentTrainingScreen() {
           ) : trainingData.length === 0 ? (
             <GlassCard style={styles.emptyCard}>
               <Feather name="inbox" size={32} color="rgba(255,255,255,0.2)" />
-              <ThemedText style={styles.emptyText}>No training data added yet</ThemedText>
+              <ThemedText style={styles.emptyText}>{t('training.noTrainingData')}</ThemedText>
             </GlassCard>
           ) : (
             trainingData.map(renderTrainingItem)

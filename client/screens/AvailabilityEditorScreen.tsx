@@ -29,6 +29,7 @@ import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, AvailabilitySchedule } from "@/lib/api";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
+import { useI18n } from "@/contexts/I18nContext";
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const lightPlayBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
@@ -78,6 +79,7 @@ export default function AvailabilityEditorScreen() {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<AvailabilityNavigationProp>();
   const { theme } = useTheme();
+  const { t } = useI18n();
 
   const [schedules, setSchedules] = useState<DaySchedule[]>([]);
   const [loading, setLoading] = useState(true);
@@ -217,8 +219,7 @@ export default function AvailabilityEditorScreen() {
               <Feather name="arrow-left" size={24} color="#fff" />
             </Pressable>
             <View style={styles.headerText}>
-              <Animated.Text style={styles.hugeTitle}>BUSINESS</Animated.Text>
-              <Animated.Text style={styles.hugeTitle}>HOURS</Animated.Text>
+              <Animated.Text style={styles.hugeTitle}>{t('availability.businessHours')}</Animated.Text>
             </View>
           </View>
 
@@ -240,7 +241,7 @@ export default function AvailabilityEditorScreen() {
               {schedule.isActive && (
                 <View style={styles.timeSection}>
                   <View style={styles.timeRow}>
-                    <Animated.Text style={styles.timeLabel}>OPENS</Animated.Text>
+                    <Animated.Text style={styles.timeLabel}>{t('availability.opens')}</Animated.Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.timeButtons}>
                       {TIME_OPTIONS.map((time) => (
                         <Pressable
@@ -265,7 +266,7 @@ export default function AvailabilityEditorScreen() {
                   </View>
 
                   <View style={styles.timeRow}>
-                    <Animated.Text style={styles.timeLabel}>CLOSES</Animated.Text>
+                    <Animated.Text style={styles.timeLabel}>{t('availability.closes')}</Animated.Text>
                     <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.timeButtons}>
                       {TIME_OPTIONS.map((time) => (
                         <Pressable
@@ -305,7 +306,7 @@ export default function AvailabilityEditorScreen() {
               ]}
             >
               <Animated.Text style={styles.saveButtonText}>
-                {saving ? "SAVING..." : "SAVE CHANGES"}
+                {saving ? t('availability.saving') : t('availability.saveChanges')}
               </Animated.Text>
             </Pressable>
           </GlassPanel>

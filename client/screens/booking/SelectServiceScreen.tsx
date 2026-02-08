@@ -21,6 +21,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { formatPrice } from "@/lib/currency";
 import { getApiUrl } from "@/lib/query-client";
+import { useI18n } from "@/contexts/I18nContext";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -262,6 +263,7 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
 export default function SelectServiceScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
   const slug = (route.params as any)?.slug || "default";
@@ -307,13 +309,13 @@ export default function SelectServiceScreen() {
         <View style={styles.header}>
           <View style={styles.headerLeft}>
             <ThemedText style={styles.businessLabel}>BookFlowX</ThemedText>
-            <ThemedText style={styles.headerTitle}>Services</ThemedText>
+            <ThemedText style={styles.headerTitle}>{t('booking.services')}</ThemedText>
           </View>
           <ProgressRing step={1} total={3} />
         </View>
 
         <ThemedText style={styles.subtitle}>
-          Select your preferred treatment to begin.
+          {t('booking.selectService')}
         </ThemedText>
 
         <View style={styles.servicesList}>
@@ -330,7 +332,7 @@ export default function SelectServiceScreen() {
           {services.length === 0 && !loading && (
             <View style={styles.emptyState}>
               <ThemedText style={styles.emptyText}>
-                No services available
+                {t('booking.noServicesAvailable')}
               </ThemedText>
             </View>
           )}

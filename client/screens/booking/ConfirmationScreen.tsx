@@ -21,6 +21,7 @@ import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
+import { useI18n } from "@/contexts/I18nContext";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -35,6 +36,7 @@ const SPRING_CONFIG = {
 export default function ConfirmationScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -95,7 +97,7 @@ export default function ConfirmationScreen() {
     <ThemedView style={styles.container}>
       <View style={[styles.oversizedTextContainer, { top: insets.top + 60 }]}>
         <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.02 : 0.03 }]}>
-          CONFIRMED
+          {t('booking.confirmed')}
         </ThemedText>
       </View>
 
@@ -120,7 +122,7 @@ export default function ConfirmationScreen() {
 
         <Animated.View entering={FadeInUp.delay(400).springify()}>
           <ThemedText style={styles.title}>
-            Booking{"\n"}Confirmed!
+            {t('booking.bookingConfirmed')}
           </ThemedText>
         </Animated.View>
 
@@ -141,19 +143,19 @@ export default function ConfirmationScreen() {
           ]}
         >
           <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
-            <ThemedText style={styles.detailLabel}>Service</ThemedText>
+            <ThemedText style={styles.detailLabel}>{t('dashboard.service')}</ThemedText>
             <ThemedText style={styles.detailValue}>{booking?.serviceName || "--"}</ThemedText>
           </View>
 
           <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
-            <ThemedText style={styles.detailLabel}>Date & Time</ThemedText>
+            <ThemedText style={styles.detailLabel}>{t('dashboard.date')} & {t('dashboard.time')}</ThemedText>
             <ThemedText style={styles.detailValue}>
               {formatDate()} • {booking?.time || "--"}
             </ThemedText>
           </View>
 
           <View style={styles.detailRow}>
-            <ThemedText style={styles.detailLabel}>Total</ThemedText>
+            <ThemedText style={styles.detailLabel}>{t('dashboard.total')}</ThemedText>
             <ThemedText style={styles.detailPrice}>
               {booking ? formatPrice(booking.totalPrice) : "--"}
             </ThemedText>
@@ -179,7 +181,7 @@ export default function ConfirmationScreen() {
             style={[styles.doneButton, { backgroundColor: theme.text }]}
           >
             <ThemedText style={[styles.doneButtonText, { color: theme.buttonText }]}>
-              Done
+              {t('common.done')}
             </ThemedText>
           </Pressable>
         </Animated.View>
@@ -187,7 +189,7 @@ export default function ConfirmationScreen() {
         <View style={styles.confirmationBadge}>
           <Feather name="check-circle" size={12} color={theme.textSecondary} />
           <ThemedText style={styles.confirmationBadgeText}>
-            Confirmation sent to your email
+            {t('booking.confirmationSentToEmail')}
           </ThemedText>
         </View>
       </View>

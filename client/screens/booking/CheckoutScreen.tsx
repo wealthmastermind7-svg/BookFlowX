@@ -16,6 +16,7 @@ import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Service, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
 import { getUpsellSuggestions, UpsellSuggestion } from "@/lib/api";
+import { useI18n } from "@/contexts/I18nContext";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -24,6 +25,7 @@ const { width: SCREEN_WIDTH } = Dimensions.get("window");
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
   const { theme, isDark } = useTheme();
+  const { t } = useI18n();
   const navigation = useNavigation<Navigation>();
   const route = useRoute();
 
@@ -223,15 +225,15 @@ export default function CheckoutScreen() {
         </Animated.View>
 
         <Animated.View entering={FadeInDown.delay(100).springify()} style={styles.titleSection}>
-          <ThemedText style={styles.headerTitle}>Your Details</ThemedText>
+          <ThemedText style={styles.headerTitle}>{t('booking.yourDetails')}</ThemedText>
           <ThemedText style={styles.subtitle}>
-            Complete your reservation for the {service?.name || "service"}.
+            {t('booking.completeReservation', { service: service?.name || "service" })}
           </ThemedText>
         </Animated.View>
 
         <Animated.View entering={FadeInUp.delay(150).springify()} style={styles.formSection}>
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>FULL NAME</ThemedText>
+            <ThemedText style={styles.inputLabel}>{t('booking.fullName')}</ThemedText>
             <TextInput
               style={[
                 styles.input,
@@ -240,7 +242,7 @@ export default function CheckoutScreen() {
                   borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
                 },
               ]}
-              placeholder="John Smith"
+              placeholder={t('booking.namePlaceholder')}
               placeholderTextColor={theme.textTertiary}
               value={customerName}
               onChangeText={setCustomerName}
@@ -249,7 +251,7 @@ export default function CheckoutScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>EMAIL ADDRESS</ThemedText>
+            <ThemedText style={styles.inputLabel}>{t('booking.emailAddress')}</ThemedText>
             <TextInput
               style={[
                 styles.input,
@@ -258,7 +260,7 @@ export default function CheckoutScreen() {
                   borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
                 },
               ]}
-              placeholder="john@example.com"
+              placeholder={t('booking.emailPlaceholder')}
               placeholderTextColor={theme.textTertiary}
               value={customerEmail}
               onChangeText={setCustomerEmail}
@@ -268,7 +270,7 @@ export default function CheckoutScreen() {
           </View>
 
           <View style={styles.inputGroup}>
-            <ThemedText style={styles.inputLabel}>PHONE NUMBER</ThemedText>
+            <ThemedText style={styles.inputLabel}>{t('booking.phoneNumber')}</ThemedText>
             <TextInput
               style={[
                 styles.input,
@@ -277,7 +279,7 @@ export default function CheckoutScreen() {
                   borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
                 },
               ]}
-              placeholder="(555) 000-0000"
+              placeholder={t('booking.phonePlaceholder')}
               placeholderTextColor={theme.textTertiary}
               value={customerPhone}
               onChangeText={setCustomerPhone}
@@ -290,9 +292,9 @@ export default function CheckoutScreen() {
           <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
             <View style={styles.upsellHeader}>
               <Feather name="zap" size={16} color={isDark ? "#FFD700" : "#D4A017"} />
-              <ThemedText style={styles.upsellTitle}>Enhance Your Booking</ThemedText>
+              <ThemedText style={styles.upsellTitle}>{t('booking.enhanceBooking')}</ThemedText>
             </View>
-            <ThemedText style={styles.upsellSubtitle}>Optional add-ons to get more value</ThemedText>
+            <ThemedText style={styles.upsellSubtitle}>{t('booking.optionalAddons')}</ThemedText>
             
             {loadingUpsells ? (
               <View style={styles.upsellLoading}>
@@ -349,10 +351,10 @@ export default function CheckoutScreen() {
               },
             ]}
           >
-            <ThemedText style={styles.summaryTitle}>BOOKING SUMMARY</ThemedText>
+            <ThemedText style={styles.summaryTitle}>{t('booking.bookingSummary')}</ThemedText>
 
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Service</ThemedText>
+              <ThemedText style={styles.summaryLabel}>{t('dashboard.service')}</ThemedText>
               <ThemedText style={styles.summaryValue}>{service?.name || "--"}</ThemedText>
             </View>
 
@@ -366,17 +368,17 @@ export default function CheckoutScreen() {
             )}
 
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Date</ThemedText>
+              <ThemedText style={styles.summaryLabel}>{t('dashboard.date')}</ThemedText>
               <ThemedText style={styles.summaryValue}>{formatDate()}</ThemedText>
             </View>
 
             <View style={styles.summaryRow}>
-              <ThemedText style={styles.summaryLabel}>Time</ThemedText>
+              <ThemedText style={styles.summaryLabel}>{t('dashboard.time')}</ThemedText>
               <ThemedText style={styles.summaryValue}>{time}</ThemedText>
             </View>
 
             <View style={[styles.summaryRow, styles.totalRow]}>
-              <ThemedText style={styles.totalLabel}>Total amount</ThemedText>
+              <ThemedText style={styles.totalLabel}>{t('booking.totalAmount')}</ThemedText>
               <ThemedText style={styles.totalValue}>
                 {service ? formatPrice(getTotalPrice()) : "--"}
               </ThemedText>
@@ -406,14 +408,14 @@ export default function CheckoutScreen() {
           ]}
         >
           <ThemedText style={[styles.confirmButtonText, { color: theme.buttonText }]}>
-            Confirm Booking
+            {t('booking.confirmBooking')}
           </ThemedText>
           <Feather name="lock" size={14} color={theme.buttonText} style={{ marginLeft: 8 }} />
         </Pressable>
 
         <Pressable onPress={handleBack} style={styles.secondaryButton}>
           <ThemedText style={styles.secondaryButtonText}>
-            Review Selections
+            {t('booking.reviewSelections')}
           </ThemedText>
         </Pressable>
       </View>

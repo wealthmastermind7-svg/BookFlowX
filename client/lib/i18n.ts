@@ -35,7 +35,7 @@ const LANGUAGE_STORAGE_KEY = '@bookflow_language';
 
 type TranslationKeys = typeof en;
 
-const translations: Record<string, TranslationKeys> = {
+const translations: Record<string, any> = {
   en, es, fr, de, it, pt, nl, pl, sv, no, da, fi, tr, ar, hi, ja, ko, zh, ru, cs, el, ro, hu, id, ms, th, vi, fil, uk
 };
 

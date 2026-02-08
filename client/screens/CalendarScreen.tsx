@@ -26,6 +26,7 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { api, Booking } from "@/lib/api";
+import { useI18n } from "@/contexts/I18nContext";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
 import { Spacing, BorderRadius } from "@/constants/theme";
 
@@ -65,6 +66,7 @@ export default function CalendarScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
   const navigation = useNavigation<CalendarScreenNavigationProp>();
+  const { t } = useI18n();
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selectedDate, setSelectedDate] = useState<string>(
@@ -253,7 +255,7 @@ export default function CalendarScreen() {
               <Animated.Text style={styles.setupText}>Swipe to change months</Animated.Text>
               <Pressable onPress={handleOpenAvailability} style={styles.glassButtonSmall}>
                 <Feather name="clock" size={14} color="white" />
-                <Animated.Text style={styles.buttonTextSmall}>Set Hours</Animated.Text>
+                <Animated.Text style={styles.buttonTextSmall}>{t('calendar.setHours')}</Animated.Text>
               </Pressable>
             </View>
           </View>
@@ -282,7 +284,7 @@ export default function CalendarScreen() {
             </View>
             <Pressable onPress={handleOpenBlockedSlots} style={styles.glassButtonSmall}>
               <Feather name="slash" size={14} color="rgba(255,255,255,0.6)" />
-              <Animated.Text style={styles.buttonTextSmall}>Block Times</Animated.Text>
+              <Animated.Text style={styles.buttonTextSmall}>{t('calendar.blockTimes')}</Animated.Text>
             </Pressable>
           </View>
 
@@ -326,7 +328,7 @@ export default function CalendarScreen() {
             ))}
             {bookingsForSelectedDate.length === 0 && (
               <GlassPanel style={styles.emptyCard}>
-                <Animated.Text style={styles.emptyText}>No bookings scheduled for this date</Animated.Text>
+                <Animated.Text style={styles.emptyText}>{t('calendar.noBookingsForDate')}</Animated.Text>
               </GlassPanel>
             )}
           </View>

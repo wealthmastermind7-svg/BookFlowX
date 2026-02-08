@@ -5,6 +5,7 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useHeaderHeight } from "@react-navigation/elements";
 import { Feather } from "@expo/vector-icons";
 import { useTheme } from "@/hooks/useTheme";
+import { useI18n } from "@/contexts/I18nContext";
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
@@ -32,12 +33,12 @@ interface BlueprintSummary {
 
 const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
-const TRIGGER_LABELS: Record<string, string> = {
-  booking_created: "New Booking",
-  booking_confirmed: "Booking Confirmed",
-  booking_reminder: "Booking Reminder",
-  booking_completed: "Service Completed",
-  booking_cancelled: "Booking Cancelled",
+const TRIGGER_LABEL_KEYS: Record<string, string> = {
+  booking_created: "workflows.newBooking",
+  booking_confirmed: "workflows.bookingConfirmed",
+  booking_reminder: "workflows.bookingReminder",
+  booking_completed: "workflows.serviceCompleted",
+  booking_cancelled: "workflows.bookingCancelled",
 };
 
 const INDUSTRY_LABELS: Record<string, { label: string; icon: keyof typeof Feather.glyphMap }> = {
@@ -53,6 +54,7 @@ export default function WorkflowsScreen() {
   const headerHeight = useHeaderHeight();
   const navigation = useNavigation();
   const { theme } = useTheme();
+  const { t } = useI18n();
 
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [blueprints, setBlueprints] = useState<BlueprintSummary[]>([]);
@@ -228,7 +230,7 @@ export default function WorkflowsScreen() {
       <View style={styles.cardHeader}>
         <View style={styles.triggerBadge}>
           <ThemedText style={styles.triggerBadgeText}>
-            {TRIGGER_LABELS[workflow.triggerType] || "Workflow"}
+            {TRIGGER_LABEL_KEYS[workflow.triggerType] ? t(TRIGGER_LABEL_KEYS[workflow.triggerType]) : "Workflow"}
           </ThemedText>
         </View>
         <View style={styles.activeToggleRow}>
@@ -272,7 +274,7 @@ export default function WorkflowsScreen() {
           </Pressable>
           <View style={styles.metaItem}>
             <Feather name="shield" size={12} color="rgba(255,255,255,0.4)" />
-            <ThemedText style={styles.metaText}>Runs automatically</ThemedText>
+            <ThemedText style={styles.metaText}>{t('workflows.runsAutomatically')}</ThemedText>
           </View>
         </View>
 
@@ -388,19 +390,19 @@ export default function WorkflowsScreen() {
             }}
           >
             <View style={styles.headerRow}>
-              <ThemedText style={styles.title}>Automation Workflows</ThemedText>
+              <ThemedText style={styles.title}>{t('workflows.title')}</ThemedText>
               <Pressable style={styles.addBtn} onPress={() => setBlueprintModalVisible(true)}>
                 <Feather name="plus" size={20} color="#000" />
-                <ThemedText style={styles.addBtnText}>Choose template</ThemedText>
+                <ThemedText style={styles.addBtnText}>{t('workflows.chooseTemplate')}</ThemedText>
               </Pressable>
             </View>
 
             {workflows.length === 0 ? (
               <View style={styles.emptyState}>
                 <Feather name="zap" size={64} color="rgba(255,255,255,0.1)" />
-                <ThemedText style={styles.emptyTitle}>Intelligent Triggers</ThemedText>
+                <ThemedText style={styles.emptyTitle}>{t('workflows.intelligentTriggers')}</ThemedText>
                 <ThemedText style={styles.emptyDesc}>Automate your booking confirmations, reminders, and follow-ups.</ThemedText>
-                <Button onPress={() => setBlueprintModalVisible(true)}>Choose Industry Template</Button>
+                <Button onPress={() => setBlueprintModalVisible(true)}>{t('workflows.chooseIndustryTemplate')}</Button>
               </View>
             ) : (
               workflows.map(renderWorkflowItem)
@@ -415,7 +417,7 @@ export default function WorkflowsScreen() {
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <View style={styles.modalHeader}>
-              <ThemedText style={styles.modalTitle}>Templates</ThemedText>
+              <ThemedText style={styles.modalTitle}>{t('workflows.templates')}</ThemedText>
               <Pressable onPress={() => setBlueprintModalVisible(false)}><Feather name="x" size={24} color="#fff" /></Pressable>
             </View>
             <ScrollView style={{ maxHeight: 400 }}>
@@ -431,7 +433,7 @@ export default function WorkflowsScreen() {
               ))}
             </ScrollView>
             <Button onPress={() => selectedIndustry && handleInitializeBlueprints(selectedIndustry)} disabled={!selectedIndustry || initializing}>
-              {initializing ? "Setting up..." : "Apply Template"}
+              {initializing ? "Setting up..." : t('workflows.applyTemplate')}
             </Button>
           </View>
         </View>
