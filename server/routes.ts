@@ -53,6 +53,7 @@ import multer from "multer";
 import express from "express";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
 import { getUncachableStripeClient } from "./stripeClient";
+import { stripeService } from "./stripeService";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -3551,6 +3552,136 @@ IMPORTANT:
 
     res.setHeader("Content-Type", "application/javascript");
     res.send(fabScript);
+  });
+
+  app.post("/api/businesses/:businessId/public/book", async (req: Request, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { customerName, customerEmail, customerPhone, serviceId, date, time, addons } = req.body;
+
+      if (!customerName || !customerEmail || !serviceId || !date || !time) {
+        return res.status(400).json({ error: "Missing required fields: customerName, customerEmail, serviceId, date, time" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const service = await storage.getService(serviceId);
+      if (!service) {
+        return res.status(404).json({ error: "Service not found" });
+      }
+
+      let customer = await storage.getCustomerByEmail(businessId, customerEmail);
+      if (!customer) {
+        customer = await storage.createCustomer({
+          businessId,
+          name: customerName,
+          email: customerEmail,
+          phone: customerPhone || "",
+          totalBookings: 0,
+        });
+      }
+
+      let totalPrice = service.price || 0;
+      const parsedAddons: { name: string; price: string }[] = Array.isArray(addons) ? addons : [];
+      for (const addon of parsedAddons) {
+        totalPrice += parseInt(addon.price, 10) || 0;
+      }
+
+      let serviceName = service.name;
+      if (parsedAddons.length > 0) {
+        const addonNames = parsedAddons.map((a) => a.name).join(", ");
+        serviceName = `${service.name} + ${addonNames}`;
+      }
+
+      const booking = await storage.createBooking({
+        businessId,
+        customerId: customer.id,
+        serviceId,
+        date,
+        time,
+        status: "pending",
+        totalPrice,
+        paymentStatus: "unpaid",
+        addons: parsedAddons.length > 0 ? JSON.stringify(parsedAddons) : undefined,
+        notes: serviceName !== service.name ? `Service: ${serviceName}` : undefined,
+      });
+
+      const stripeConnected = !!(business.stripeAccountId && business.stripeChargesEnabled);
+      const requiresPayment = totalPrice > 0 && stripeConnected;
+
+      if (requiresPayment) {
+        const protocol = req.protocol;
+        const host = req.get("host") || "localhost:5000";
+
+        const session = await stripeService.createCheckoutSession(
+          totalPrice,
+          (business.currency || "usd").toLowerCase(),
+          business.stripeAccountId!,
+          `${protocol}://${host}/api/bookings/${booking.id}/payment/success?return_to_app=true`,
+          `${protocol}://${host}/api/bookings/${booking.id}/payment/cancel?return_to_app=true`,
+          {
+            bookingId: booking.id,
+            businessId: business.id,
+            serviceName,
+            customerName,
+            customerEmail,
+          }
+        );
+
+        await storage.updateBooking(booking.id, {
+          stripeCheckoutSessionId: session.id,
+        });
+
+        return res.json({
+          bookingId: booking.id,
+          requiresPayment: true,
+          checkoutUrl: session.url,
+          booking: { ...booking, stripeCheckoutSessionId: session.id },
+        });
+      }
+
+      await storage.updateBooking(booking.id, { status: "confirmed" });
+
+      return res.json({
+        bookingId: booking.id,
+        requiresPayment: false,
+        booking: { ...booking, status: "confirmed" },
+      });
+    } catch (error) {
+      console.error("Error creating public booking:", error);
+      res.status(500).json({ error: "Failed to create booking" });
+    }
+  });
+
+  app.get("/api/bookings/:bookingId/public/status", async (req: Request, res: Response) => {
+    try {
+      const { bookingId } = req.params;
+
+      const booking = await storage.getBooking(bookingId);
+      if (!booking) {
+        return res.status(404).json({ error: "Booking not found" });
+      }
+
+      const service = await storage.getService(booking.serviceId);
+      const customer = await storage.getCustomer(booking.customerId);
+
+      return res.json({
+        id: booking.id,
+        status: booking.status,
+        paymentStatus: booking.paymentStatus,
+        totalPrice: booking.totalPrice,
+        serviceName: service?.name || "Service",
+        date: booking.date,
+        time: booking.time,
+        customerName: customer?.name || "",
+      });
+    } catch (error) {
+      console.error("Error getting public booking status:", error);
+      res.status(500).json({ error: "Failed to get booking status" });
+    }
   });
 
   const httpServer = createServer(app);

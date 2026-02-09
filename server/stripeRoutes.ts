@@ -298,6 +298,45 @@ export function registerStripeRoutes(app: Express) {
         status: "confirmed",
       });
 
+      if (req.query.return_to_app === "true") {
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Successful</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .heading { font-family: 'Cormorant Garamond', serif; }
+    @keyframes checkmark { from { stroke-dashoffset: 50; } to { stroke-dashoffset: 0; } }
+    .checkmark-circle { animation: checkmark 0.6s ease-out forwards; stroke-dasharray: 50; stroke-dashoffset: 50; }
+  </style>
+</head>
+<body class="bg-black min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md w-full text-center">
+    <div class="flex justify-center mb-8">
+      <div class="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center">
+        <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path class="checkmark-circle" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+        </svg>
+      </div>
+    </div>
+    <h1 class="heading text-4xl font-semibold text-white mb-3">Payment Successful</h1>
+    <p class="text-white/60 text-sm mb-6">Booking #${bookingId.slice(0, 8)}</p>
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
+      <p class="text-white/80 text-sm leading-relaxed">
+        Payment confirmed. You can close this window and return to the app.
+      </p>
+    </div>
+    <p class="text-white/30 text-xs">This window can be safely closed.</p>
+  </div>
+</body>
+</html>`;
+        return res.setHeader("Content-Type", "text/html").send(html);
+      }
+
       const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN || "localhost:8081";
       const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/:5000$/, "");
       
@@ -315,6 +354,43 @@ export function registerStripeRoutes(app: Express) {
       await storage.updateBooking(bookingId, {
         paymentStatus: "unpaid",
       });
+
+      if (req.query.return_to_app === "true") {
+        const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Payment Cancelled</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    .heading { font-family: 'Cormorant Garamond', serif; }
+  </style>
+</head>
+<body class="bg-black min-h-screen flex items-center justify-center px-4">
+  <div class="max-w-md w-full text-center">
+    <div class="flex justify-center mb-8">
+      <div class="w-20 h-20 rounded-full border-2 border-white/20 flex items-center justify-center">
+        <svg class="w-10 h-10 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+        </svg>
+      </div>
+    </div>
+    <h1 class="heading text-4xl font-semibold text-white mb-3">Payment Cancelled</h1>
+    <p class="text-white/60 text-sm mb-6">Booking #${bookingId.slice(0, 8)}</p>
+    <div class="bg-white/5 border border-white/10 rounded-2xl p-6 mb-8">
+      <p class="text-white/80 text-sm leading-relaxed">
+        Your payment was not completed. You can close this window and return to the app to try again.
+      </p>
+    </div>
+    <p class="text-white/30 text-xs">This window can be safely closed.</p>
+  </div>
+</body>
+</html>`;
+        return res.setHeader("Content-Type", "text/html").send(html);
+      }
 
       const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN || "localhost:8081";
       const cleanDomain = domain.replace(/^https?:\/\//, "").replace(/:5000$/, "");
