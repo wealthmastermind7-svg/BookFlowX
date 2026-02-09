@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from "react";
-import { View, StyleSheet, Pressable, Dimensions } from "react-native";
+import React, { useEffect, useState, useRef } from "react";
+import { View, StyleSheet, Pressable, Dimensions, ActivityIndicator } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -22,6 +22,7 @@ import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { StorageService, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
 import { useI18n } from "@/contexts/I18nContext";
+import { getApiUrl } from "@/lib/query-client";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -41,16 +42,67 @@ export default function ConfirmationScreen() {
   const route = useRoute();
 
   const bookingId = (route.params as any)?.bookingId || "";
+  const requiresPayment = (route.params as any)?.requiresPayment || false;
+  const initialPaymentStatus = (route.params as any)?.paymentStatus || "free";
+
   const [booking, setBooking] = useState<Booking | null>(null);
+  const [paymentStatus, setPaymentStatus] = useState<string>(initialPaymentStatus);
+  const [isPolling, setIsPolling] = useState(requiresPayment);
+  const pollIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const checkScale = useSharedValue(0);
   const checkOpacity = useSharedValue(0);
 
-  React.useEffect(() => {
+  useEffect(() => {
     loadBooking();
-    animateCheckmark();
-    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    if (!requiresPayment) {
+      animateCheckmark();
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    }
   }, []);
+
+  useEffect(() => {
+    if (requiresPayment && bookingId) {
+      pollPaymentStatus();
+      pollIntervalRef.current = setInterval(pollPaymentStatus, 3000);
+      return () => {
+        if (pollIntervalRef.current) {
+          clearInterval(pollIntervalRef.current);
+        }
+      };
+    }
+  }, [requiresPayment, bookingId]);
+
+  const pollPaymentStatus = async () => {
+    try {
+      const response = await fetch(
+        `${getApiUrl()}api/bookings/${bookingId}/public/status`
+      );
+      if (response.ok) {
+        const data = await response.json();
+        if (data.paymentStatus === "paid") {
+          setPaymentStatus("paid");
+          setIsPolling(false);
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+          }
+          await StorageService.updateBooking(bookingId, { status: "confirmed" });
+          setBooking((prev) => prev ? { ...prev, status: "confirmed" } : prev);
+          animateCheckmark();
+          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+        } else if (data.paymentStatus === "unpaid" && data.status !== "pending") {
+          setPaymentStatus("cancelled");
+          setIsPolling(false);
+          if (pollIntervalRef.current) {
+            clearInterval(pollIntervalRef.current);
+          }
+          animateCheckmark();
+        }
+      }
+    } catch (error) {
+      console.error("[PaymentPoll] Error:", error);
+    }
+  };
 
   const loadBooking = async () => {
     const found = await StorageService.getBookingById(bookingId);
@@ -93,11 +145,50 @@ export default function ConfirmationScreen() {
     });
   };
 
+  const getStatusConfig = () => {
+    if (isPolling) {
+      return {
+        icon: null,
+        title: t('booking.processingPayment') || "Processing Payment",
+        message: t('booking.paymentProcessingMessage') || "Complete your payment in the browser window. This page will update automatically once payment is confirmed.",
+        badgeText: t('booking.waitingForPayment') || "Waiting for payment confirmation...",
+        badgeIcon: "clock" as const,
+      };
+    }
+    if (paymentStatus === "paid") {
+      return {
+        icon: "check" as const,
+        title: t('booking.bookingConfirmed'),
+        message: t('booking.paymentSuccessMessage') || "Your payment was successful and your booking is confirmed. You will receive a confirmation email shortly.",
+        badgeText: t('booking.paymentConfirmed') || "Payment confirmed",
+        badgeIcon: "check-circle" as const,
+      };
+    }
+    if (paymentStatus === "cancelled") {
+      return {
+        icon: "x" as const,
+        title: t('booking.paymentCancelled') || "Payment Cancelled",
+        message: t('booking.paymentCancelledMessage') || "Your payment was cancelled. The booking has been saved but payment is still required. Please contact the business to arrange payment.",
+        badgeText: t('booking.paymentNotCompleted') || "Payment not completed",
+        badgeIcon: "alert-circle" as const,
+      };
+    }
+    return {
+      icon: "check" as const,
+      title: t('booking.bookingConfirmed'),
+      message: t('booking.confirmationMessage') || "Your booking has been successfully confirmed. You will receive a confirmation email shortly.",
+      badgeText: t('booking.confirmationSentToEmail'),
+      badgeIcon: "check-circle" as const,
+    };
+  };
+
+  const statusConfig = getStatusConfig();
+
   return (
     <ThemedView style={styles.container}>
       <View style={[styles.oversizedTextContainer, { top: insets.top + 60 }]}>
         <ThemedText style={[styles.oversizedText, { opacity: isDark ? 0.02 : 0.03 }]}>
-          {t('booking.confirmed')}
+          {isPolling ? (t('booking.processing') || "PROCESSING") : t('booking.confirmed')}
         </ThemedText>
       </View>
 
@@ -110,25 +201,35 @@ export default function ConfirmationScreen() {
           },
         ]}
       >
-        <Animated.View
-          style={[
-            styles.checkmarkContainer,
-            checkAnimatedStyle,
-            { backgroundColor: theme.text },
-          ]}
-        >
-          <Feather name="check" size={48} color={theme.buttonText} />
-        </Animated.View>
+        {isPolling ? (
+          <View style={[styles.checkmarkContainer, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}>
+            <ActivityIndicator size="large" color={theme.text} />
+          </View>
+        ) : (
+          <Animated.View
+            style={[
+              styles.checkmarkContainer,
+              checkAnimatedStyle,
+              { backgroundColor: paymentStatus === "cancelled" ? (isDark ? "#662222" : "#ffdddd") : theme.text },
+            ]}
+          >
+            <Feather
+              name={statusConfig.icon || "check"}
+              size={48}
+              color={paymentStatus === "cancelled" ? (isDark ? "#ff6666" : "#cc0000") : theme.buttonText}
+            />
+          </Animated.View>
+        )}
 
         <Animated.View entering={FadeInUp.delay(400).springify()}>
           <ThemedText style={styles.title}>
-            {t('booking.bookingConfirmed')}
+            {statusConfig.title}
           </ThemedText>
         </Animated.View>
 
         <Animated.View entering={FadeIn.delay(500)}>
           <ThemedText style={styles.message}>
-            Your booking has been successfully confirmed. You will receive a confirmation email shortly.
+            {statusConfig.message}
           </ThemedText>
         </Animated.View>
 
@@ -150,9 +251,28 @@ export default function ConfirmationScreen() {
           <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
             <ThemedText style={styles.detailLabel}>{t('dashboard.date')} & {t('dashboard.time')}</ThemedText>
             <ThemedText style={styles.detailValue}>
-              {formatDate()} • {booking?.time || "--"}
+              {formatDate()} {"\u2022"} {booking?.time || "--"}
             </ThemedText>
           </View>
+
+          {requiresPayment ? (
+            <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+              <ThemedText style={styles.detailLabel}>{t('booking.paymentStatusLabel') || "Payment"}</ThemedText>
+              <View style={styles.paymentBadge}>
+                <View style={[
+                  styles.statusDot,
+                  { backgroundColor: paymentStatus === "paid" ? "#22c55e" : paymentStatus === "cancelled" ? "#ef4444" : "#f59e0b" }
+                ]} />
+                <ThemedText style={[styles.detailValue, { 
+                  color: paymentStatus === "paid" ? "#22c55e" : paymentStatus === "cancelled" ? "#ef4444" : "#f59e0b"
+                }]}>
+                  {paymentStatus === "paid" ? (t('booking.paid') || "Paid") : 
+                   paymentStatus === "cancelled" ? (t('booking.cancelled') || "Cancelled") : 
+                   (t('booking.pending') || "Pending")}
+                </ThemedText>
+              </View>
+            </View>
+          ) : null}
 
           <View style={styles.detailRow}>
             <ThemedText style={styles.detailLabel}>{t('dashboard.total')}</ThemedText>
@@ -187,9 +307,9 @@ export default function ConfirmationScreen() {
         </Animated.View>
 
         <View style={styles.confirmationBadge}>
-          <Feather name="check-circle" size={12} color={theme.textSecondary} />
+          <Feather name={statusConfig.badgeIcon} size={12} color={theme.textSecondary} />
           <ThemedText style={styles.confirmationBadgeText}>
-            {t('booking.confirmationSentToEmail')}
+            {statusConfig.badgeText}
           </ThemedText>
         </View>
       </View>
@@ -270,6 +390,16 @@ const styles = StyleSheet.create({
     fontSize: 20,
     fontWeight: "700",
     letterSpacing: -0.5,
+  },
+  paymentBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 6,
+  },
+  statusDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   bottomSection: {
     position: "absolute",

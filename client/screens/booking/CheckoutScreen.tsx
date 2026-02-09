@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from "react";
-import { View, StyleSheet, Pressable, TextInput, Dimensions, ActivityIndicator } from "react-native";
+import React, { useState, useEffect, useRef } from "react";
+import { View, StyleSheet, Pressable, TextInput, Dimensions, ActivityIndicator, Platform, Linking } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -17,6 +17,9 @@ import { StorageService, Service, Booking } from "@/lib/storage";
 import { formatPrice } from "@/lib/currency";
 import { getUpsellSuggestions, UpsellSuggestion } from "@/lib/api";
 import { useI18n } from "@/contexts/I18nContext";
+import { getApiUrl } from "@/lib/query-client";
+import { api } from "@/lib/api";
+import * as WebBrowser from "expo-web-browser";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -145,7 +148,6 @@ export default function CheckoutScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
 
     try {
-      const bookingId = `booking_${Date.now()}`;
       const selectedAddonsList = Array.from(selectedAddons)
         .map((idx) => upsellSuggestions[idx])
         .filter(Boolean)
@@ -153,11 +155,42 @@ export default function CheckoutScreen() {
           name: addon.name, 
           price: (addon.price * 100).toString() 
         }));
+
+      const businessId = api.getBusinessId();
+      if (!businessId) {
+        throw new Error("No business context");
+      }
+
+      const response = await fetch(
+        `${getApiUrl()}api/businesses/${businessId}/public/book`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customerName: customerName.trim(),
+            customerEmail: customerEmail.trim(),
+            customerPhone: customerPhone.trim() || undefined,
+            serviceId,
+            date: date.toISOString().split("T")[0],
+            time,
+            addons: selectedAddonsList.length > 0 ? selectedAddonsList : undefined,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || "Failed to create booking");
+      }
+
+      const result = await response.json();
+      const { bookingId, requiresPayment, checkoutUrl } = result;
+
       const selectedAddonNames = selectedAddonsList.map((a) => a.name);
       const serviceName = selectedAddonNames.length > 0
         ? `${service?.name || "Service"} + ${selectedAddonNames.join(", ")}`
         : (service?.name || "Service");
-      const booking: Booking = {
+      const localBooking: Booking = {
         id: bookingId,
         customerId: `customer_${Date.now()}`,
         customerName: customerName.trim(),
@@ -165,15 +198,32 @@ export default function CheckoutScreen() {
         serviceName,
         date: date.toISOString().split("T")[0],
         time,
-        status: "confirmed",
+        status: requiresPayment ? "pending" : "confirmed",
         totalPrice: getTotalPrice(),
         createdAt: new Date().toISOString(),
         addons: selectedAddonsList.length > 0 ? JSON.stringify(selectedAddonsList) : undefined,
       };
+      await StorageService.addBooking(localBooking);
 
-      await StorageService.addBooking(booking);
+      if (requiresPayment && checkoutUrl) {
+        if (Platform.OS === "web") {
+          window.open(checkoutUrl, "_self");
+        } else {
+          await WebBrowser.openBrowserAsync(checkoutUrl);
+        }
 
-      navigation.navigate("Confirmation", { bookingId });
+        navigation.navigate("Confirmation", { 
+          bookingId, 
+          paymentStatus: "pending",
+          requiresPayment: true,
+        });
+      } else {
+        navigation.navigate("Confirmation", { 
+          bookingId,
+          paymentStatus: "free",
+          requiresPayment: false,
+        });
+      }
     } catch (error) {
       console.error("Booking error:", error);
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);

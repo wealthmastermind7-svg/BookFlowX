@@ -9,7 +9,7 @@ export type BookingFlowParamList = {
   SelectService: undefined;
   SelectTime: { serviceId: string };
   Checkout: { serviceId: string; timeSlotId: string };
-  Confirmation: { bookingId: string };
+  Confirmation: { bookingId: string; paymentStatus?: string; requiresPayment?: boolean };
 };
 
 const Stack = createNativeStackNavigator<BookingFlowParamList>();
