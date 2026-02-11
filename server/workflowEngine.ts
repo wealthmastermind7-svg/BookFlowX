@@ -67,17 +67,6 @@ export const INDUSTRY_BLUEPRINTS = {
       }),
       delayMinutes: -120,
     },
-    {
-      name: "Post-Service Follow Up",
-      description: "Send follow-up after service completion",
-      triggerType: "booking_completed",
-      actionType: "send_email",
-      actionConfig: JSON.stringify({
-        subject: "How was your visit?",
-        templateType: "followup",
-      }),
-      delayMinutes: 1440,
-    },
   ],
   fitness: [
     {
