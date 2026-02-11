@@ -500,37 +500,39 @@ export default function DashboardScreen() {
             </Pressable>
           )}
 
-          <Pressable 
-            onPress={() => {
-              if (business?.slug) {
-                Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-                navigation.navigate("VoiceBooking", { businessSlug: business.slug });
-              }
-            }}
-          >
-            <GlassPanel style={styles.voiceAspirationalBanner}>
-              <View style={styles.voiceAspirationalHeader}>
-                <View style={styles.voiceIconStack}>
-                  <Feather name="mic" size={16} color={isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.5)"} />
-                  <ThemedText style={{ fontSize: 10, fontWeight: "800", color: isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", marginLeft: 8 }}>
-                    {isExhausted ? "ALLOWANCE REACHED" : `${remainingMinutes} MIN LEFT`}
-                  </ThemedText>
+          {business?.slug && voiceSub?.subscription?.tier !== 'free' && (
+            <Pressable 
+              onPress={() => {
+                if (business?.slug) {
+                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+                  navigation.navigate("VoiceBooking", { businessSlug: business.slug });
+                }
+              }}
+            >
+              <GlassPanel style={styles.voiceAspirationalBanner}>
+                <View style={styles.voiceAspirationalHeader}>
+                  <View style={styles.voiceIconStack}>
+                    <Feather name="mic" size={16} color={isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.5)"} />
+                    <ThemedText style={{ fontSize: 10, fontWeight: "800", color: isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", marginLeft: 8 }}>
+                      {isExhausted ? "LIMIT REACHED" : `${remainingMinutes} MIN LEFT`}
+                    </ThemedText>
+                  </View>
+                  <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Assistant</Animated.Text>
                 </View>
-                <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Booking</Animated.Text>
-              </View>
-              <Animated.Text style={styles.voiceAspirationalDesc}>
-                {isExhausted 
-                  ? "Your monthly allowance has been reached. Upgrade to continue assisting customers."
-                  : "Let your business breathe with an Informational Assistant that handles calls naturally."}
-              </Animated.Text>
-              <View style={styles.voiceAspirationalAction}>
-                <Animated.Text style={styles.voiceAspirationalLink}>
-                  {isExhausted ? t('dashboard.upgradeNow') : t('dashboard.previewExperience')}
+                <Animated.Text style={styles.voiceAspirationalDesc}>
+                  {isExhausted 
+                    ? "Your limit has been reached. Upgrade to continue assisting customers."
+                    : "Let your business breathe with an Informational Assistant that handles calls naturally."}
                 </Animated.Text>
-                <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
-              </View>
-            </GlassPanel>
-          </Pressable>
+                <View style={styles.voiceAspirationalAction}>
+                  <Animated.Text style={styles.voiceAspirationalLink}>
+                    {isExhausted ? t('dashboard.upgradeNow') : t('dashboard.previewExperience')}
+                  </Animated.Text>
+                  <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
+                </View>
+              </GlassPanel>
+            </Pressable>
+          )}
 
           <View style={styles.metersRow}>
             <GlassPanel style={styles.meterCard}>

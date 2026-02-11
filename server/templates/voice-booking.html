@@ -427,17 +427,17 @@
             '<span style="font-size:20px;font-weight:700;">' + data.upgradeTo.name + '</span>' +
             '<span style="font-size:20px;font-weight:700;">' + data.upgradeTo.price + '</span>' +
           '</div>' +
-          '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;">' + data.upgradeTo.minutes + ' minutes allowance per month</div>' +
+          '<div style="font-size:13px;color:rgba(255,255,255,0.5);margin-bottom:16px;">' + data.upgradeTo.minutes + ' minutes limit</div>' +
           '<a href="/billing/' + businessSlug + '" style="display:block;width:100%;padding:16px;background:#fff;color:#000;text-decoration:none;border-radius:16px;font-size:15px;font-weight:600;text-align:center;">Upgrade Now</a>' +
         '</div>';
       }
 
       overlay.innerHTML = '<div style="width:100%;max-width:420px;text-align:center;">' +
-        '<div style="font-family:Cormorant Garamond,serif;font-size:48px;font-weight:700;letter-spacing:-2px;line-height:0.95;margin-bottom:32px;">ALLOWANCE<br>REACHED</div>' +
+        '<div style="font-family:Cormorant Garamond,serif;font-size:48px;font-weight:700;letter-spacing:-2px;line-height:0.95;margin-bottom:32px;">LIMIT<br>REACHED</div>' +
         '<div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:20px;padding:24px;margin-bottom:16px;">' +
           '<div style="display:inline-block;padding:4px 14px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:1.5px;background:rgba(239,68,68,0.2);color:#EF4444;margin-bottom:12px;">' + (data.currentTier || 'FREE').toUpperCase() + ' PLAN</div>' +
-          '<div style="font-size:16px;font-weight:600;margin-bottom:6px;">Monthly allowance reached</div>' +
-          '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + data.minutesUsed + ' of ' + data.minutesLimit + ' minutes allowance used</div>' +
+          '<div style="font-size:16px;font-weight:600;margin-bottom:6px;">Limit reached</div>' +
+          '<div style="font-size:13px;color:rgba(255,255,255,0.4);margin-bottom:16px;">' + data.minutesUsed + ' of ' + data.minutesLimit + ' minutes used</div>' +
           '<div style="height:6px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden;"><div style="height:100%;background:#EF4444;border-radius:3px;width:100%;"></div></div>' +
         '</div>' +
         upgradeHtml +
@@ -458,7 +458,7 @@
       if (isCallActive) {
         vapiInstance.stop();
       } else {
-        updateStatus('connecting', 'Checking allowance...');
+        updateStatus('connecting', 'Checking limit...');
         
         var minuteCheck = await checkMinutesBeforeCall();
         if (minuteCheck.isExhausted) {
@@ -509,7 +509,7 @@
             setInterval(async () => {
               const check = await checkMinutesBeforeCall();
               if (check.isExhausted) {
-                console.log('[Vapi] Allowance reached mid-call, allowing current call to finish');
+                console.log('[Vapi] Limit reached mid-call, allowing current call to finish');
               }
             }, 60000);
           });

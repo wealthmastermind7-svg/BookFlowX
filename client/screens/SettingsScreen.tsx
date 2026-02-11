@@ -491,21 +491,6 @@ export default function SettingsScreen() {
       <View style={styles.backgroundOverlay} />
       <View style={{ flex: 1 }}>
         <ScrollView contentContainerStyle={{ paddingTop: headerHeight + 40, paddingBottom: tabBarHeight + 60, paddingHorizontal: 24 }}>
-          {isTrialActive && !isPremium && (
-            <GlassCard style={{ marginBottom: 24, paddingHorizontal: 20, paddingVertical: 20, borderColor: 'rgba(255,255,255,0.2)', backgroundColor: 'rgba(255,255,255,0.05)' }}>
-              <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'nowrap', gap: 16 }}>
-                <View style={{ flex: 1 }}>
-                  <ThemedText style={{ fontSize: 18, fontWeight: '700', marginBottom: 6, letterSpacing: -0.5, color: '#fff' }}>{t('settings.freeTrialActive')}</ThemedText>
-                  <ThemedText style={{ fontSize: 14, color: 'rgba(255,255,255,0.6)', lineHeight: 20, fontWeight: '400' }}>
-                    {trialDaysLeft} days left to use booking links & QR codes for free.
-                  </ThemedText>
-                </View>
-                <View style={{ backgroundColor: '#fff', paddingHorizontal: 14, paddingVertical: 8, borderRadius: 12 }}>
-                  <ThemedText style={{ fontSize: 12, fontWeight: '900', color: '#000', letterSpacing: 1 }}>TRIAL</ThemedText>
-                </View>
-              </View>
-            </GlassCard>
-          )}
 
           <View style={styles.sectionHeader}>
             <ThemedText style={styles.sectionTitle}>
@@ -627,10 +612,10 @@ export default function SettingsScreen() {
             <View style={styles.usageContainer}>
               <View style={styles.usageHeader}>
                 <ThemedText style={styles.usageLabel}>
-                  {voiceSub?.subscription.tier === 'free' ? 'Trial Allowance' : 'Monthly Allowance'}
+                  {voiceSub?.subscription.tier === 'free' ? 'Trial Limit' : 'Voice Limit'}
                 </ThemedText>
                 <ThemedText style={[styles.usageValue, isVoiceExhausted && { color: '#EF4444' }, !isVoiceExhausted && percentUsed > 80 && { color: '#F59E0B' }]}>
-                  {voiceSub ? `${voiceSub.usage.remaining} / ${voiceSub.subscription.minutesLimit} min` : '5 / 5 min'}
+                  {voiceSub ? `${voiceSub.usage.remaining} / ${voiceSub.subscription.minutesLimit} min` : '5 min'}
                 </ThemedText>
               </View>
               <View style={styles.progressBarBg}>
@@ -641,7 +626,7 @@ export default function SettingsScreen() {
               </View>
               {isVoiceExhausted ? (
                 <ThemedText style={{ fontSize: 11, color: '#EF4444', marginTop: 8, fontWeight: '600' }}>
-                  Allowance reached — upgrade to continue assisting customers
+                  Limit reached — upgrade to continue assisting customers
                 </ThemedText>
               ) : voiceSub?.subscription.tier === 'free' ? (
                 <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
