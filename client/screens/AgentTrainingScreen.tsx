@@ -125,14 +125,8 @@ export default function AgentTrainingScreen() {
     }
   };
 
-  const GlassCard = ({ children, style }: any) => (
-    <View style={[styles.glassCard, style]}>
-      {children}
-    </View>
-  );
-
   const renderTrainingItem = (item: TrainingDataType) => (
-    <GlassCard key={item.id} style={styles.itemCard}>
+    <View key={item.id} style={[styles.glassCard, styles.itemCard]}>
       <View style={styles.itemIconBox}>
         <Feather 
           name={item.type === 'website_crawl' ? 'globe' : item.type === 'qa_pair' ? 'message-square' : 'file-text'} 
@@ -151,7 +145,7 @@ export default function AgentTrainingScreen() {
       <Pressable onPress={() => handleDelete(item.id)} style={styles.deleteButton}>
         <Feather name="trash-2" size={18} color="#EF4444" />
       </Pressable>
-    </GlassCard>
+    </View>
   );
 
   return (
@@ -170,16 +164,16 @@ export default function AgentTrainingScreen() {
         }}
         keyboardShouldPersistTaps="handled"
       >
-          <GlassCard style={styles.headerCard}>
+          <View style={[styles.glassCard, styles.headerCard]}>
             <ThemedText style={styles.headerTitle}>{t('training.title')}</ThemedText>
             <ThemedText style={styles.headerSubtitle}>
               {t('training.subtitle')}
             </ThemedText>
-          </GlassCard>
+          </View>
 
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{t('training.webCrawler')}</ThemedText>
-          <GlassCard style={styles.crawlCard}>
+          <View style={[styles.glassCard, styles.crawlCard]}>
             <ThemedText style={styles.cardInfo}>
               {t('training.webCrawlerDesc')}
             </ThemedText>
@@ -206,7 +200,7 @@ export default function AgentTrainingScreen() {
                 )}
               </Pressable>
             </View>
-          </GlassCard>
+          </View>
         </View>
 
         <View style={styles.section}>
@@ -214,7 +208,7 @@ export default function AgentTrainingScreen() {
           <ThemedText style={styles.cardInfo}>
             Paste information about your company (services, policies, hours) for the assistant to learn.
           </ThemedText>
-          <GlassCard style={styles.qaInputCard}>
+          <View style={[styles.glassCard, styles.qaInputCard]}>
             <TextInput
               style={[styles.input, { height: 120, textAlignVertical: 'top', paddingTop: 12 }]}
               placeholder={t('training.customContentPlaceholder')}
@@ -253,7 +247,7 @@ export default function AgentTrainingScreen() {
                 )}
               </Pressable>
             </View>
-          </GlassCard>
+          </View>
         </View>
 
         {/* Q&A Section removed due to typing issues on iOS */}
@@ -269,10 +263,10 @@ export default function AgentTrainingScreen() {
           {loading ? (
             <ActivityIndicator style={{ marginTop: 20 }} color="#fff" />
           ) : trainingData.length === 0 ? (
-            <GlassCard style={styles.emptyCard}>
+            <View style={[styles.glassCard, styles.emptyCard]}>
               <Feather name="inbox" size={32} color="rgba(255,255,255,0.2)" />
               <ThemedText style={styles.emptyText}>{t('training.noTrainingData')}</ThemedText>
-            </GlassCard>
+            </View>
           ) : (
             trainingData.map(renderTrainingItem)
           )}
