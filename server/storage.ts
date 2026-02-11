@@ -747,7 +747,7 @@ export class DatabaseStorage implements IStorage {
       await db
         .update(voiceSubscriptions)
         .set({
-          usedMinutes: sub.usedMinutes + minutes,
+          minutesUsed: sub.minutesUsed + minutes,
           updatedAt: new Date(),
         })
         .where(eq(voiceSubscriptions.businessId, businessId));
@@ -759,7 +759,7 @@ export class DatabaseStorage implements IStorage {
     if (!sub) {
       return { available: true, remainingMinutes: 5 }; // 5 minute free trial
     }
-    const remaining = sub.totalMinutes - sub.usedMinutes;
+    const remaining = sub.minutesLimit - sub.minutesUsed;
     return {
       available: remaining > 0,
       remainingMinutes: Math.max(0, remaining),
@@ -772,8 +772,8 @@ export class DatabaseStorage implements IStorage {
       return { usedMinutes: 0, totalMinutes: 5 };
     }
     return {
-      usedMinutes: sub.usedMinutes,
-      totalMinutes: sub.totalMinutes,
+      usedMinutes: sub.minutesUsed,
+      totalMinutes: sub.minutesLimit,
     };
   }
 

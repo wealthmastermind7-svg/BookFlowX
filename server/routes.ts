@@ -430,7 +430,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const remainingMinutes = Math.max(0, subscription.totalMinutes - subscription.usedMinutes);
+      const remainingMinutes = Math.max(0, subscription.minutesLimit - subscription.minutesUsed);
       const isExhausted = remainingMinutes <= 0;
 
       const upgradeMap: Record<string, { tier: string; name: string; price: string; minutes: number } | null> = {
@@ -2235,17 +2235,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         },
         usage: {
           available: usage.available,
-          remaining: usage.remaining,
-          percentUsed: Math.round((usage.used / usage.limit) * 100),
-          limit: usage.limit,
-          used: usage.used
-        },
-        stats: {
-          totalCalls: stats.totalCalls,
-          bookingsCreated: stats.bookingsCreated,
-          conversionRate: stats.totalCalls > 0 
-            ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) 
-            : 0,
+          remaining: usage.remainingMinutes,
+          percentUsed: stats.totalMinutes > 0 ? Math.round((stats.usedMinutes / stats.totalMinutes) * 100) : 0,
+          limit: stats.totalMinutes,
+          used: stats.usedMinutes
         },
       });
     } catch (error) {
@@ -2925,8 +2918,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           business: null,
         };
         const upgradeTo = upgradeMap[subscription.tier] || null;
-        const usedMin = subscription.usedMinutes;
-        const totalMin = subscription.totalMinutes;
+        const usedMin = subscription.minutesUsed;
+        const totalMin = subscription.minutesLimit;
         const tierLabel = subscription.tier.charAt(0).toUpperCase() + subscription.tier.slice(1);
 
         const html = `<!DOCTYPE html>
