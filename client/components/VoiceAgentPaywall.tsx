@@ -156,7 +156,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
                 {currentTier === "free" ? "TRIAL STATUS" : `${currentTier.toUpperCase()} PLAN`}
               </ThemedText>
               <ThemedText style={styles.trialMinutes}>
-                {minutesUsed} / {minutesLimit} minutes allowance
+                {minutesUsed} / {minutesLimit} minutes
               </ThemedText>
             </View>
             <View style={[styles.statusBadge, { backgroundColor: isExhausted ? "rgba(239, 68, 68, 0.2)" : "rgba(34, 197, 94, 0.2)" }]}>
@@ -174,8 +174,8 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
             <View>
               <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 20, marginBottom: 16 }}>
                 {currentTier === "free"
-                  ? "You've reached your monthly voice allowance. Upgrade to continue assisting customers."
-                  : `You've reached your monthly voice allowance of ${minutesLimit} minutes.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : " Your allowance will reset at the start of your next billing period."}`
+                  ? "You've reached your voice limit. Upgrade to continue assisting customers."
+                  : `You've reached your voice limit of ${minutesLimit} minutes.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : ""}`
                 }
               </ThemedText>
               {upgradeTo ? (
@@ -193,7 +193,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
               onPress={() => onClose()}
               style={styles.previewBtn}
             >
-              <ThemedText style={styles.previewBtnText}>Test Voice Agent Now</ThemedText>
+              <ThemedText style={styles.previewBtnText}>Test Voice Assistant Now</ThemedText>
               <Feather name="arrow-right" size={16} color="#000" />
             </Pressable>
           )}
@@ -293,7 +293,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
         </Pressable>
 
         <ThemedText style={styles.disclaimer}>
-          Voice Agent plans are optional in-app subscriptions that provide monthly voice booking minutes. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period. Cancel anytime in Settings.
+          Voice Assistant plans are optional in-app subscriptions that provide voice minutes for your Informational Assistant. Payment will be charged to your Apple ID account at confirmation of purchase. Subscription automatically renews unless auto-renew is turned off at least 24-hours before the end of the current period. Cancel anytime in Settings.
         </ThemedText>
       </ScrollView>
     </View>

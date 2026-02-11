@@ -540,7 +540,7 @@ export default function SettingsScreen() {
               </View>
               <View style={{ height: 12 }} />
               <ThemedText style={[styles.featureText, { fontSize: 12, fontStyle: 'italic', opacity: 0.7 }]}>
-                Voice Booking sold separately as optional add-on.
+                Voice Assistant sold separately as optional add-on.
               </ThemedText>
             </View>
 

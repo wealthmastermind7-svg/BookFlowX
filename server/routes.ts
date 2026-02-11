@@ -465,31 +465,19 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (!business) {
         return res.status(404).json({ error: "Business not found" });
       }
-      // FORCED DEVELOPMENT/EXPO GO OVERRIDE: Always subscribed
-      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true" || (req.headers['user-agent'] && req.headers['user-agent'].includes('ExpoGo'))) {
-        return res.json({
-          isSubscribed: true,
-          tier: "business"
-        });
-      }
 
-      // Create voice subscription if it doesn't exist
-      let voiceSub = await storage.getVoiceSubscription(business.id);
+      const voiceSub = await storage.getVoiceSubscription(business.id);
       if (!voiceSub) {
-        voiceSub = await storage.createVoiceSubscription({
-          businessId: business.id,
-          tier: "starter",
-          minutesLimit: 5,
-          minutesUsed: 0,
-          status: "active",
+        return res.json({
+          isSubscribed: false,
+          tier: "free"
         });
       }
-      const subscription = voiceSub;
-      const hasActiveSubscription = subscription.status === "active" && subscription.tier !== "free";
-      const hasFreeTrial = subscription.status === "active" && subscription.tier === "free" && subscription.minutesUsed < subscription.minutesLimit;
+      const hasActiveSubscription = voiceSub.status === "active" && voiceSub.tier !== "free";
+      const hasFreeTrial = voiceSub.status === "active" && voiceSub.tier === "free" && voiceSub.minutesUsed < voiceSub.minutesLimit;
       res.json({
         isSubscribed: hasActiveSubscription || hasFreeTrial,
-        tier: subscription?.tier || "free"
+        tier: voiceSub.tier || "free"
       });
     } catch (error) {
       console.error("Error getting public voice status:", error);
@@ -1765,10 +1753,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const now = new Date();
           const createdAt = business.createdAt ? new Date(business.createdAt) : now;
           
-          // FORCED DEVELOPMENT OVERRIDE: Always active in dev
-          if (process.env.NODE_ENV === 'development') {
-            // Skip expiration check
-          } else {
+          {
             const trialDays = 7;
             const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
             const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
@@ -2181,23 +2166,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { businessId } = req.params;
 
-      // Mock premium for testing in Expo Go / Development
-      if (process.env.NODE_ENV === "development" || req.query.test_premium === "true" || (req.headers['user-agent'] && req.headers['user-agent'].includes('ExpoGo'))) {
+      const voiceSub = await storage.getVoiceSubscription(businessId);
+      if (!voiceSub) {
         return res.json({
           subscription: {
-            tier: 'business',
-            status: 'active',
-            minutesLimit: 500,
+            tier: 'free',
+            status: 'inactive',
+            minutesLimit: 0,
             minutesUsed: 0,
-            periodStart: new Date(),
-            periodEnd: new Date(Date.now() + 365 * 24 * 60 * 60 * 1000),
-            stripeSubscriptionId: 'mock_stripe_id',
+            periodStart: null,
+            periodEnd: null,
+            stripeSubscriptionId: null,
           },
           usage: {
-            available: true,
-            remaining: 500,
+            available: false,
+            remaining: 0,
             percentUsed: 0,
-            limit: 500,
+            limit: 0,
             used: 0
           },
           stats: {
@@ -2205,18 +2190,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             bookingsCreated: 0,
             conversionRate: 0,
           },
-        });
-      }
-
-      // Create voice subscription if it doesn't exist
-      let voiceSub = await storage.getVoiceSubscription(businessId);
-      if (!voiceSub) {
-        voiceSub = await storage.createVoiceSubscription({
-          businessId,
-          tier: "starter",
-          minutesLimit: 5,
-          minutesUsed: 0,
-          status: "active",
         });
       }
       const subscription = voiceSub;
@@ -2480,20 +2453,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).send("Business not found");
       }
 
-      // Create voice subscription if it doesn't exist
-      let voiceSub = await storage.getVoiceSubscription(businessId);
-      if (!voiceSub) {
-        voiceSub = await storage.createVoiceSubscription({
-          businessId,
-          tier: "starter",
-          minutesLimit: 5,
-          minutesUsed: 0,
-          status: "active",
-        });
-      }
-      const subscription = voiceSub;
-      const usage = await storage.checkVoiceMinutesAvailable(businessId);
-      const stats = await storage.getVoiceUsageStats(businessId);
+      const voiceSub = await storage.getVoiceSubscription(businessId);
+      const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 0, minutesUsed: 0 };
+      const usage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: false, remaining: 0, percentUsed: 0, limit: 0, used: 0 };
+      const stats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { totalCalls: 0, bookingsCreated: 0, conversionRate: 0 };
       
       const html = `<!DOCTYPE html>
 <html lang="en">

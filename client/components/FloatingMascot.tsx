@@ -44,7 +44,7 @@ const SETTINGS_TIPS: MascotTip[] = [
   },
   {
     title: "Voice Assistant Tiers",
-    message: "Start with a 5-minute free allowance. Upgrade to Starter, Pro, or Business to continue assisting customers as your business grows.",
+    message: "Start with a 5-minute free trial. Upgrade to Starter, Pro, or Business to continue assisting customers as your business grows.",
     icon: "trending-up",
   },
 ];
@@ -62,12 +62,12 @@ const SCREEN_TIPS: Record<string, MascotTip> = {
   },
   Services: {
     title: "Your Services",
-    message: "Create services your customers can book. Try the AI assistant to set up multiple services instantly!",
+    message: "Create services your customers can book. Try the smart assistant to set up multiple services instantly!",
     icon: "briefcase",
   },
   Customers: {
     title: "Customer Insights",
-    message: "See all your customers here. The AI automatically segments them into VIP, Regular, At-Risk, and New.",
+    message: "See all your customers here. Customers are automatically segmented into VIP, Regular, At-Risk, and New.",
     icon: "users",
   },
   Settings: {

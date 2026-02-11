@@ -40,7 +40,7 @@ export function PremiumBanner({ onPress }: PremiumBannerProps) {
             <Text style={styles.priceText}>Lifetime Access</Text>
           </View>
           <Text style={[styles.subtitle, { fontSize: 11, marginTop: 8, fontStyle: 'italic', opacity: 0.6 }]}>
-            Voice booking sold separately.
+            Voice Assistant sold separately.
           </Text>
         </View>
         <Feather name="chevron-right" size={22} color="rgba(255,255,255,0.5)" />
