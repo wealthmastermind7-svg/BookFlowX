@@ -39,6 +39,7 @@ export const businesses = pgTable("businesses", {
   stripePayoutsEnabled: boolean("stripe_payouts_enabled").default(false),
   stripeChargesEnabled: boolean("stripe_charges_enabled").default(false),
   currency: text("currency").default("USD"),
+  language: text("language").default("en"),
   publicPhone: text("public_phone"),
   publicWebsite: text("public_website"),
   createdAt: timestamp("created_at").defaultNow(),

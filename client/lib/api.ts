@@ -105,6 +105,7 @@ export interface Business {
   bookingUrl?: string | null;
   ownerToken?: string | null;
   currency?: string | null;
+  language?: string | null;
   createdAt?: string | null;
   updatedAt?: string | null;
 }

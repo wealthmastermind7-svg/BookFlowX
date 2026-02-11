@@ -444,10 +444,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         available: !isExhausted,
         isExhausted,
         currentTier: subscription.tier,
-        minutesUsed: subscription.usedMinutes,
-        minutesLimit: subscription.totalMinutes,
+        minutesUsed: subscription.minutesUsed,
+        minutesLimit: subscription.minutesLimit,
         minutesRemaining: remainingMinutes,
-        percentUsed: subscription.totalMinutes > 0 ? Math.round((subscription.usedMinutes / subscription.totalMinutes) * 100) : 0,
+        percentUsed: subscription.minutesLimit > 0 ? Math.round((subscription.minutesUsed / subscription.minutesLimit) * 100) : 0,
         upgradeTo: isExhausted ? upgradeMap[subscription.tier] || null : null,
         periodEnd: subscription.periodEnd,
       });
@@ -473,7 +473,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const subscription = await storage.getOrCreateVoiceSubscription(business.id);
+      // Create voice subscription if it doesn't exist
+      let voiceSub = await storage.getVoiceSubscription(business.id);
+      if (!voiceSub) {
+        voiceSub = await storage.createVoiceSubscription({
+          businessId: business.id,
+          tier: "starter",
+          minutesLimit: 5,
+          minutesUsed: 0,
+          status: "active",
+        });
+      }
+      const subscription = voiceSub;
       const hasActiveSubscription = subscription.status === "active" && subscription.tier !== "free";
       const hasFreeTrial = subscription.status === "active" && subscription.tier === "free" && subscription.minutesUsed < subscription.minutesLimit;
       res.json({
@@ -2197,7 +2208,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
 
-      const subscription = await storage.getOrCreateVoiceSubscription(businessId);
+      // Create voice subscription if it doesn't exist
+      let voiceSub = await storage.getVoiceSubscription(businessId);
+      if (!voiceSub) {
+        voiceSub = await storage.createVoiceSubscription({
+          businessId,
+          tier: "starter",
+          minutesLimit: 5,
+          minutesUsed: 0,
+          status: "active",
+        });
+      }
+      const subscription = voiceSub;
       const usage = await storage.checkVoiceMinutesAvailable(businessId);
       const stats = await storage.getVoiceUsageStats(businessId);
       
@@ -2465,7 +2487,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).send("Business not found");
       }
 
-      const subscription = await storage.getOrCreateVoiceSubscription(businessId);
+      // Create voice subscription if it doesn't exist
+      let voiceSub = await storage.getVoiceSubscription(businessId);
+      if (!voiceSub) {
+        voiceSub = await storage.createVoiceSubscription({
+          businessId,
+          tier: "starter",
+          minutesLimit: 5,
+          minutesUsed: 0,
+          status: "active",
+        });
+      }
+      const subscription = voiceSub;
       const usage = await storage.checkVoiceMinutesAvailable(businessId);
       const stats = await storage.getVoiceUsageStats(businessId);
       
@@ -2873,7 +2906,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const usage = await storage.checkVoiceMinutesAvailable(config.businessId);
       
       if (!usage.available) {
-        const subscription = await storage.getOrCreateVoiceSubscription(config.businessId);
+        // Create voice subscription if it doesn't exist
+        let voiceSub = await storage.getVoiceSubscription(config.businessId);
+        if (!voiceSub) {
+          voiceSub = await storage.createVoiceSubscription({
+            businessId: config.businessId,
+            tier: "starter",
+            minutesLimit: 5,
+            minutesUsed: 0,
+            status: "active",
+          });
+        }
+        const subscription = voiceSub;
         const upgradeMap: Record<string, { name: string; price: string; minutes: number } | null> = {
           free: { name: "Starter", price: "$49", minutes: 60 },
           starter: { name: "Pro", price: "$149", minutes: 200 },

@@ -915,7 +915,17 @@ export default function SettingsScreen() {
               {languages.map(l => (
                 <Pressable
                   key={l.code}
-                  onPress={() => { changeLanguage(l.code); setLanguageModalVisible(false); }}
+                  onPress={async () => { 
+                    changeLanguage(l.code); 
+                    setLanguageModalVisible(false);
+                    try {
+                      await api.updateBusiness({ language: l.code });
+                      const updated = await api.getBusiness();
+                      if (updated) setBusiness(updated);
+                    } catch (error) {
+                      console.error("Error updating business language:", error);
+                    }
+                  }}
                   style={[styles.currencyRow, lang === l.code && { backgroundColor: 'rgba(255,255,255,0.08)' }]}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>

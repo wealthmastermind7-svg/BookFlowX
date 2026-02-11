@@ -108,10 +108,26 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
         .filter(c => c !== '')
         .join("\n\n");
 
+      // Language Map for first messages
+      const firstMessageMap: Record<string, string> = {
+        en: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. Feel free to speak in any language. How can I help you today?`,
+        es: `¡Hola! Soy el asistente de ${business.name}. Puedo informarle sobre nuestros servicios, precios o qué esperar. Siéntase libre de hablar en cualquier idioma. ¿Cómo puedo ayudarle hoy?`,
+        fr: `Bonjour ! Je suis l'assistant de ${business.name}. Je peux tout vous dire sur nos services, nos tarifs ou ce à quoi vous attendre. N'hésitez pas à parler dans n'importe quelle langue. Comment puis-je vous aider aujourd'hui ?`,
+        de: `Hallo! Ich bin der Assistent für ${business.name}. Ich kann Ihnen alles über unsere Dienstleistungen, Preise oder was Sie erwartet, erzählen. Sie können gerne in jeder Sprache sprechen. Wie kann ich Ihnen heute helfen?`,
+        pt: `Olá! Eu sou o assistente da ${business.name}. Posso contar tudo sobre nossos serviços, preços ou o que esperar. Sinta-se à vontade para falar em qualquer idioma. Como posso ajudá-lo hoje?`,
+        it: `Ciao! Sono l'assistente di ${business.name}. Posso dirti tutto sui nostri servizi, sui prezzi o su cosa aspettarti. Sentiti libero di parlare in qualsiasi lingua. Come posso aiutarti oggi?`,
+        nl: `Hallo! Ik ben de assistent voor ${business.name}. Ik kan je alles vertellen over onze diensten, prijzen of wat je kunt verwachten. Voel je vrij om in elke taal te spreken. Hoe kan ik je vandaag helpen?`,
+      };
+
+      const businessLanguage = (business as any).language || 'en';
+      const firstMessage = firstMessageMap[businessLanguage] || firstMessageMap.en;
+
       const systemPrompt = `You are a friendly, helpful assistant for ${business.name}. Your role is to answer questions about the business and its services.
 
 MULTILINGUAL SUPPORT:
+- The business's primary language is ${businessLanguage}.
 - You MUST detect the language the caller is speaking and respond ENTIRELY in that same language.
+- Start the conversation in ${businessLanguage === 'en' ? 'English' : businessLanguage} as specified in the first message.
 - If the caller switches languages mid-conversation, switch with them seamlessly.
 - Supported languages: English, Spanish, French, German, Italian, Portuguese, Dutch, Polish, Swedish, Norwegian, Danish, Finnish, Turkish, Arabic, Hindi, Japanese, Korean, Chinese (Mandarin), Russian, Czech, Greek, Romanian, Hungarian, Indonesian, Malay, Thai, Vietnamese, Filipino, Ukrainian.
 - Default to English if the language cannot be determined.
@@ -174,7 +190,7 @@ IMPORTANT:
             model: "nova-2",
             language: "multi"
           },
-          firstMessage: `Hi there! I'm the assistant for ${business.name}. I can tell you all about our services, pricing, or what to expect. Feel free to speak in any language. How can I help you today?`,
+          firstMessage: firstMessage,
           model: {
             provider: "openai",
             model: "gpt-4o-mini",
