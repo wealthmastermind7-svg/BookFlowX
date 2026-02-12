@@ -2,7 +2,7 @@
   "expo": {
     "name": "BookFlowX",
     "slug": "bookflowx",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
     "scheme": "bookflow",
@@ -10,7 +10,7 @@
     "ios": {
       "supportsTablet": false,
       "bundleIdentifier": "com.bookflow.app",
-      "buildNumber": "2",
+      "buildNumber": "3",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "NSMicrophoneUsageDescription": "BookFlow needs access to your microphone for voice booking commands.",
@@ -27,7 +27,7 @@
       "edgeToEdgeEnabled": true,
       "predictiveBackGestureEnabled": false,
       "package": "com.bookflow.app",
-      "versionCode": 2
+      "versionCode": 3
     },
     "web": {
       "output": "single",
