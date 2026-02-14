@@ -1,4 +1,5 @@
 import type { Application, Request, Response } from "express";
+import { initTools, TOOLS_LIST } from "./seo-tools";
 
 const DOMAIN = "https://confirmbooking.online";
 const BRAND = "BookFlow";
@@ -347,8 +348,10 @@ function footer(): string {
         <div>
           <h4 class="text-pearl font-semibold text-sm mb-4 uppercase tracking-wider">Resources</h4>
           <ul class="space-y-2">
-            <li><a href="/tools" class="text-silver text-sm hover:text-pearl transition-colors">Free Tools</a></li>
+            <li><a href="/tools" class="text-silver text-sm hover:text-pearl transition-colors">Free Tools (${TOOLS_LIST.length + 1})</a></li>
             <li><a href="/tools/no-show-calculator" class="text-silver text-sm hover:text-pearl transition-colors">No-Show Calculator</a></li>
+            <li><a href="/tools/client-lifetime-value" class="text-silver text-sm hover:text-pearl transition-colors">Client Lifetime Value</a></li>
+            <li><a href="/tools/revenue-per-hour" class="text-silver text-sm hover:text-pearl transition-colors">Revenue Per Hour</a></li>
             <li><a href="/booking-software" class="text-silver text-sm hover:text-pearl transition-colors">All Industries</a></li>
             <li><a href="/terms" class="text-silver text-sm hover:text-pearl transition-colors">Terms of Service</a></li>
             <li><a href="/privacy" class="text-silver text-sm hover:text-pearl transition-colors">Privacy Policy</a></li>
@@ -913,11 +916,16 @@ function noShowCalculatorPage(): string {
 
 function toolsDirectoryPage(): string {
   const title = `Free Business Tools | ${BRAND}`;
-  const description = `Free tools for service businesses. Calculate no-show costs, optimize your scheduling, and grow your business with ${BRAND}.`;
+  const description = `21 free tools for service businesses. Calculate revenue, optimize scheduling, reduce no-shows, and grow your business with ${BRAND}.`;
   const canonical = `${DOMAIN}/tools`;
-  const keywords = "free business tools, no-show calculator, booking tools, scheduling tools";
+  const keywords = "free business tools, no-show calculator, booking tools, scheduling tools, revenue calculator, client lifetime value, utilization rate";
 
   const head = headTags(title, description, canonical, keywords);
+
+  const allTools = [
+    { slug: "no-show-calculator", name: "No-Show Cost Calculator", description: "Find out how much revenue your business loses to appointment no-shows every year.", icon: "$" },
+    ...TOOLS_LIST,
+  ];
 
   const body = `
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -931,25 +939,54 @@ function toolsDirectoryPage(): string {
         Free Business<br><span class="text-silver">Tools</span>
       </h1>
       <p class="text-silver text-lg sm:text-xl max-w-3xl leading-relaxed">
-        Practical tools to help you understand your business performance and make smarter decisions. No signup required.
+        ${allTools.length} practical tools to help you understand your business performance and make smarter decisions. No signup required.
       </p>
     </section>
 
-    <section>
+    <section class="mb-16">
+      <h2 class="font-heading text-2xl font-semibold text-pearl mb-8">Revenue &amp; Pricing</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        ${allTools.filter(t => ["no-show-calculator","revenue-per-chair","service-pricing","hourly-rate","tip-calculator","break-even","revenue-per-hour"].includes(t.slug)).map(t => toolCard(t)).join("")}
+      </div>
+
+      <h2 class="font-heading text-2xl font-semibold text-pearl mb-8">Time &amp; Scheduling</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        ${allTools.filter(t => ["booking-capacity","staff-scheduling","timezone-converter","appointment-buffer","business-hours-optimizer","service-duration"].includes(t.slug)).map(t => toolCard(t)).join("")}
+      </div>
+
+      <h2 class="font-heading text-2xl font-semibold text-pearl mb-8">Client &amp; Marketing</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+        ${allTools.filter(t => ["client-lifetime-value","client-retention-rate","rebooking-rate","marketing-roi","email-open-rate"].includes(t.slug)).map(t => toolCard(t)).join("")}
+      </div>
+
+      <h2 class="font-heading text-2xl font-semibold text-pearl mb-8">Business Operations</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        <a href="/tools/no-show-calculator" class="glass-card rounded-2xl p-8 block group">
-          <div class="w-12 h-12 rounded-xl bg-pearl/10 flex items-center justify-center mb-6">
-            <span class="text-pearl text-xl font-heading font-semibold">$</span>
-          </div>
-          <h2 class="font-heading text-2xl font-semibold text-pearl mb-3">No-Show Cost Calculator</h2>
-          <p class="text-silver text-sm mb-4 leading-relaxed">Find out how much revenue your business loses to appointment no-shows every year. Enter your numbers and see the impact instantly.</p>
-          <span class="text-silver text-xs group-hover:text-pearl transition-colors">Try it free &rarr;</span>
-        </a>
+        ${allTools.filter(t => ["cancellation-cost","deposit-calculator","utilization-rate"].includes(t.slug)).map(t => toolCard(t)).join("")}
+      </div>
+    </section>
+
+    <section class="text-center py-12">
+      <div class="glass-card rounded-3xl p-12">
+        <h2 class="font-heading text-3xl sm:text-4xl font-semibold mb-4">Ready to Grow Your Business?</h2>
+        <p class="text-silver text-lg mb-8 max-w-xl mx-auto">${BRAND} gives you the tools to manage bookings, reduce no-shows, and increase revenue. Try it free today.</p>
+        <a href="${utmLink("seo", "tools-directory", "cta")}" class="cta-btn">Start Free Today</a>
       </div>
     </section>
   </div>`;
 
   return wrapPage(head, body);
+}
+
+function toolCard(t: { slug: string; name: string; description: string; icon: string }): string {
+  return `
+    <a href="/tools/${t.slug}" class="glass-card rounded-2xl p-8 block group">
+      <div class="w-12 h-12 rounded-xl bg-pearl/10 flex items-center justify-center mb-6">
+        <span class="text-pearl text-xl font-heading font-semibold">${t.icon}</span>
+      </div>
+      <h3 class="font-heading text-2xl font-semibold text-pearl mb-3">${t.name}</h3>
+      <p class="text-silver text-sm mb-4 leading-relaxed">${t.description}</p>
+      <span class="text-silver text-xs group-hover:text-pearl transition-colors">Try it free &rarr;</span>
+    </a>`;
 }
 
 function generateSitemap(): string {
@@ -968,6 +1005,9 @@ function generateSitemap(): string {
   addUrl("/compare", "0.8", "weekly");
   addUrl("/tools", "0.8", "monthly");
   addUrl("/tools/no-show-calculator", "0.7", "monthly");
+  for (const tool of TOOLS_LIST) {
+    addUrl(`/tools/${tool.slug}`, "0.7", "monthly");
+  }
 
   for (const industry of INDUSTRIES) {
     addUrl(`/booking-software/${industry}`, "0.8", "weekly");
@@ -995,6 +1035,7 @@ Sitemap: ${DOMAIN}/sitemap.xml
 }
 
 export function registerSeoRoutes(app: Application): void {
+  initTools({ headTags, breadcrumbs, wrapPage, utmLink, BRAND, DOMAIN });
 
   app.get("/seo", (_req: Request, res: Response) => {
     res.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -1069,6 +1110,13 @@ export function registerSeoRoutes(app: Application): void {
     res.send(noShowCalculatorPage());
   });
 
+  for (const tool of TOOLS_LIST) {
+    app.get(`/tools/${tool.slug}`, (_req: Request, res: Response) => {
+      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.send(tool.fn());
+    });
+  }
+
   app.get("/sitemap.xml", (_req: Request, res: Response) => {
     res.setHeader("Content-Type", "application/xml; charset=utf-8");
     res.setHeader("Cache-Control", "public, max-age=86400");
@@ -1081,5 +1129,5 @@ export function registerSeoRoutes(app: Application): void {
     res.send(generateRobotsTxt());
   });
 
-  console.log(`[SEO] Registered SEO routes: ${INDUSTRIES.length} industries x ${LOCATIONS.length} locations = ${INDUSTRIES.length * LOCATIONS.length} programmatic pages + ${COMPETITORS.length} comparison pages + tools`);
+  console.log(`[SEO] Registered SEO routes: ${INDUSTRIES.length} industries x ${LOCATIONS.length} locations = ${INDUSTRIES.length * LOCATIONS.length} programmatic pages + ${COMPETITORS.length} comparison pages + ${TOOLS_LIST.length + 1} tools`);
 }
