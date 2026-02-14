@@ -4,6 +4,7 @@ import { registerRoutes } from "./routes";
 import { registerStripeRoutes } from "./stripeRoutes";
 import vapiRoutes from "./vapiRoutes";
 import { registerSeoRoutes } from "./seo-routes";
+import { registerOutreachRoutes } from "./outreach";
 import { WebhookHandlers } from "./webhookHandlers";
 import { runMigrations } from "stripe-replit-sync";
 import { getStripeSync } from "./stripeClient";
@@ -771,6 +772,7 @@ import { processReminders } from "./workflowEngine";
   });
 
   registerSeoRoutes(app);
+  registerOutreachRoutes(app);
 
   app.use(express.static(path.join(__dirname, "../public")));
 
