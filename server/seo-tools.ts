@@ -1816,7 +1816,120 @@ export function serviceDurationEstimator(): string {
   return wrapPage(head, body);
 }
 
+export function qrCodeGenerator(): string {
+  const title = `Free Custom QR Code Generator | ${BRAND}`;
+  const description = `Create high-quality, custom QR codes for your business. Perfect for booking links, menus, and business cards. Free tool by ${BRAND}.`;
+  const canonical = `${DOMAIN}/tools/qr-code-generator`;
+  const keywords = "qr code generator, free qr code, custom qr code, booking qr code, business qr code";
+  const ctaUrl = utmLink("seo", "tool", "qr-code-generator");
+  const head = headTags(title, description, canonical, keywords);
+
+  const body = `
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    ${breadcrumbs([
+      { label: "Home", href: "/seo" },
+      { label: "Free Tools", href: "/tools" },
+      { label: "QR Code Generator" },
+    ])}
+
+    <section class="mb-12">
+      <h1 class="font-heading text-4xl sm:text-5xl font-semibold mb-6 leading-tight">
+        Custom QR Code<br><span class="text-silver">Generator</span>
+      </h1>
+      <p class="text-silver text-lg max-w-2xl leading-relaxed">
+        Generate professional QR codes for your booking links, website, or digital menu. Download and use them anywhere.
+      </p>
+    </section>
+
+    <section class="glass-card rounded-3xl p-8 sm:p-12 mb-16">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+        <div class="space-y-6">
+          <div>
+            <label class="block text-pearl font-medium mb-2 text-sm" for="qr-text">URL or Text</label>
+            <input type="text" id="qr-text" placeholder="https://your-booking-link.com" 
+              class="w-full bg-graphite border border-white/10 rounded-xl px-4 py-3 text-pearl text-lg focus:outline-none focus:border-pearl/30 transition-colors">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-pearl font-medium mb-2 text-sm" for="qr-color">QR Color</label>
+              <input type="color" id="qr-color" value="#f5f5f7" class="w-full h-12 bg-graphite border border-white/10 rounded-xl px-1 py-1 cursor-pointer">
+            </div>
+            <div>
+              <label class="block text-pearl font-medium mb-2 text-sm" for="qr-bg">Background</label>
+              <input type="color" id="qr-bg" value="#000000" class="w-full h-12 bg-graphite border border-white/10 rounded-xl px-1 py-1 cursor-pointer">
+            </div>
+          </div>
+
+          <div class="pt-4">
+            <button id="qr-download" class="cta-btn w-full text-center">Download PNG</button>
+          </div>
+        </div>
+
+        <div class="flex flex-col items-center justify-center p-8 bg-black/40 rounded-2xl border border-white/5 min-h-[300px]">
+          <div id="qr-canvas-container" class="bg-white p-4 rounded-xl shadow-2xl">
+            <canvas id="qr-canvas"></canvas>
+          </div>
+          <p class="text-silver text-xs mt-6">Preview updates instantly as you type</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="text-center py-12">
+      <div class="glass-card rounded-3xl p-12">
+        <h2 class="font-heading text-3xl sm:text-4xl font-semibold mb-4">Get More Bookings with QR Codes</h2>
+        <p class="text-silver text-lg mb-8 max-w-xl mx-auto">${BRAND} automatically generates QR codes for every business. Print them on your front door and let clients book in seconds.</p>
+        <a href="${ctaUrl}" class="cta-btn">Start Free Today</a>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script>
+    (function() {
+      const textInput = document.getElementById('qr-text');
+      const colorInput = document.getElementById('qr-color');
+      const bgInput = document.getElementById('qr-bg');
+      const canvas = document.getElementById('qr-canvas');
+      const downloadBtn = document.getElementById('qr-download');
+
+      function generate() {
+        const text = textInput.value || 'https://confirmbooking.online';
+        const color = colorInput.value;
+        const bg = bgInput.value;
+
+        QRCode.toCanvas(canvas, text, {
+          width: 256,
+          margin: 1,
+          color: {
+            dark: color,
+            light: bg
+          }
+        }, function(error) {
+          if (error) console.error(error);
+        });
+      }
+
+      textInput.addEventListener('input', generate);
+      colorInput.addEventListener('input', generate);
+      bgInput.addEventListener('input', generate);
+      
+      downloadBtn.addEventListener('click', function() {
+        const link = document.createElement('a');
+        link.download = 'bookflow-qr-code.png';
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+
+      generate();
+    })();
+  </script>`;
+
+  return wrapPage(head, body);
+}
+
 export const TOOLS_LIST: { slug: string; name: string; description: string; icon: string; fn: () => string }[] = [
+  { slug: "qr-code-generator", name: "QR Code Generator", description: "Create custom QR codes for your booking links and marketing materials.", icon: "QR", fn: qrCodeGenerator },
   { slug: "revenue-per-chair", name: "Revenue Per Chair Calculator", description: "Calculate daily, monthly, and annual revenue per chair or station.", icon: "$", fn: revenuePerChairCalculator },
   { slug: "service-pricing", name: "Service Pricing Calculator", description: "Find the ideal price for your services based on costs and profit margin.", icon: "$", fn: servicePricingCalculator },
   { slug: "hourly-rate", name: "Hourly Rate Calculator", description: "Determine the hourly rate needed to reach your income goals.", icon: "$", fn: hourlyRateCalculator },

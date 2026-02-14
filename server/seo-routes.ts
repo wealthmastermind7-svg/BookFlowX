@@ -961,7 +961,7 @@ function toolsDirectoryPage(): string {
 
       <h2 class="font-heading text-2xl font-semibold text-pearl mb-8">Business Operations</h2>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        ${allTools.filter(t => ["cancellation-cost","deposit-calculator","utilization-rate"].includes(t.slug)).map(t => toolCard(t)).join("")}
+        ${allTools.filter(t => ["qr-code-generator", "cancellation-cost", "deposit-calculator", "utilization-rate"].includes(t.slug)).map(t => toolCard(t)).join("")}
       </div>
     </section>
 
