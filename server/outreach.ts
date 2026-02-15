@@ -123,7 +123,7 @@ function outreachPage(): string {
     body { background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
     .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s ease; }
     .glass-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
-    .email-preview-frame { background: #f5f5f5; border-radius: 16px; padding: 24px; }
+    .email-preview-frame { background: #f5f5f5; border-radius: 16px; padding: 24px; min-height: 800px; position: relative; }
     .toast { position: fixed; bottom: 24px; right: 24px; background: #222; color: #f5f5f7; padding: 16px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 100; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; font-size: 14px; pointer-events: none; }
     .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .toast.error { border-color: #ff4444; }
@@ -250,8 +250,7 @@ function outreachPage(): string {
       const el = doc.getElementById(id);
       if (el) {
         el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        // Highlight effect
-        const originalBg = el.style.background;
+        el.style.transition = 'box-shadow 0.5s ease';
         el.style.boxShadow = '0 0 40px rgba(255,255,255,0.15)';
         setTimeout(() => { el.style.boxShadow = 'none'; }, 2000);
       }
@@ -270,7 +269,7 @@ function outreachPage(): string {
     function generateEmailHTML(inputs) {
       const ind = INDUSTRIES[inputs.industry] || INDUSTRIES['salon'];
       const services = ind.services;
-      const bookingUrl = 'confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      const bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
       const servicesHTML = services.map(s => 
         '<tr>' +
@@ -293,8 +292,8 @@ function outreachPage(): string {
 
       return '<!DOCTYPE html>' +
 '<html lang="en">' +
-'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html { scroll-behavior: smooth; } ::-webkit-scrollbar { display: none; }</style></head>' +
-'<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif;">' +
+'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html { scroll-behavior: smooth; } ::-webkit-scrollbar { display: none; } body { margin: 0; padding: 0; }</style></head>' +
+'<body style="background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif;">' +
 '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f5f5f5;">' +
 '<tr><td align="center" style="padding: 40px 20px;">' +
 '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 520px; background-color: #000000; border-radius: 24px; overflow: hidden;">' +
@@ -314,7 +313,7 @@ customBlock +
 
 '<tr><td style="padding: 8px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">1. Your Booking Page</div>' +
-  '<div id="preview-booking" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
+  '<div id="preview-booking" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
     '<div style="padding: 24px 20px 16px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 8px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 20px; font-weight: 600; color: #ffffff;">Book an Appointment</div>' +
@@ -331,18 +330,18 @@ customBlock +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">2. Your QR Code</div>' +
-  '<div id="preview-qr" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center; transition: box-shadow 0.5s ease;">' +
+  '<div id="preview-qr" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center;">' +
     '<div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px;">' +
       '<canvas id="qr-preview" width="140" height="140"></canvas>' +
     '</div>' +
     '<p style="margin: 12px 0 0; font-size: 12px; color: rgba(255,255,255,0.4);">Customers scan to book instantly</p>' +
-    '<p style="margin: 4px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">' + bookingUrl + '</p>' +
+    '<p style="margin: 4px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">' + bookingUrl.replace("https://","") + '</p>' +
   '</div>' +
 '</td></tr>' +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">3. Booking Confirmation Email</div>' +
-  '<div id="preview-confirmed" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
+  '<div id="preview-confirmed" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
     '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">CONFIRMED</div>' +
@@ -362,7 +361,7 @@ customBlock +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">4. Automatic Reminder Email</div>' +
-  '<div id="preview-reminder" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
+  '<div id="preview-reminder" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
     '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">REMINDER</div>' +
@@ -394,13 +393,18 @@ customBlock +
       const inputs = getInputs();
       const html = generateEmailHTML(inputs);
       const container = document.getElementById('emailPreview');
-      const iframe = document.createElement('iframe');
-      iframe.style.width = '100%';
-      iframe.style.border = 'none';
-      iframe.style.borderRadius = '12px';
-      iframe.style.minHeight = '1200px';
-      container.innerHTML = '';
-      container.appendChild(iframe);
+      
+      let iframe = container.querySelector('iframe');
+      if (!iframe) {
+        iframe = document.createElement('iframe');
+        iframe.style.width = '100%';
+        iframe.style.border = 'none';
+        iframe.style.borderRadius = '12px';
+        iframe.style.minHeight = '1200px';
+        container.innerHTML = '';
+        container.appendChild(iframe);
+      }
+      
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       doc.open();
       doc.write(html);
@@ -409,145 +413,23 @@ customBlock +
       iframe.onload = function() {
         iframe.style.height = doc.body.scrollHeight + 40 + 'px';
       };
+      
       setTimeout(function() {
         if (doc.body) iframe.style.height = doc.body.scrollHeight + 40 + 'px';
-      }, 300);
-
-      setTimeout(function() {
+        
         try {
           const qrCanvas = doc.getElementById('qr-preview');
           if (qrCanvas && typeof QRCode !== 'undefined') {
-            var bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+            const bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
             QRCode.toCanvas(qrCanvas, bookingUrl, { width: 140, margin: 0, color: { dark: '#000000', light: '#ffffff' } });
           }
-        } catch(e) { console.log('QR render skipped for iframe'); }
-      }, 100);
-    }
-
-    function getEmailOnlyHTML(inputs) {
-      const ind = INDUSTRIES[inputs.industry] || INDUSTRIES['salon'];
-      const services = ind.services;
-      const bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-
-      const servicesHTML = services.map(s => 
-        '<tr>' +
-          '<td style="padding: 12px 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
-            '<div style="font-size: 14px; font-weight: 500; color: #ffffff;">' + s.name + '</div>' +
-            '<div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px;">' + s.duration + '</div>' +
-          '</td>' +
-          '<td style="padding: 12px 20px; text-align: right; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
-            '<span style="font-size: 15px; font-weight: 600; color: #ffffff;">' + (s.price === 0 ? 'Free' : '$' + s.price) + '</span>' +
-          '</td>' +
-        '</tr>'
-      ).join('');
-
-      const customBlock = inputs.customMessage ? 
-        '<tr><td style="padding: 0 32px 24px; background-color: #000000;">' +
-          '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 20px 24px;">' +
-            '<p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.7; font-style: italic;">"' + inputs.customMessage.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '"</p>' +
-          '</div>' +
-        '</td></tr>' : '';
-
-      return '<!DOCTYPE html>' +
-'<html lang="en">' +
-'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>' +
-'<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif;">' +
-'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f5f5f5;">' +
-'<tr><td align="center" style="padding: 40px 20px;">' +
-'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="max-width: 520px; background-color: #000000; border-radius: 24px; overflow: hidden;">' +
-
-'<tr><td style="padding: 48px 32px 24px; text-align: center; background: linear-gradient(180deg, #1a1a1a 0%, #000000 100%);">' +
-  '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 4px; color: rgba(255,255,255,0.4); margin-bottom: 16px;">Exclusive Preview For</div>' +
-  '<h1 style="margin: 0; font-size: 36px; font-weight: 700; letter-spacing: -1.5px; color: #ffffff; line-height: 1.1;">' + inputs.businessName + '</h1>' +
-  '<p style="margin: 12px 0 0; font-size: 14px; color: rgba(255,255,255,0.5); font-weight: 300;">Your online booking experience, reimagined</p>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 32px 32px 16px; background-color: #000000;">' +
-  '<p style="margin: 0; font-size: 16px; color: rgba(255,255,255,0.9); font-weight: 300; line-height: 1.6;">Hi ' + inputs.ownerName + ',</p>' +
-  '<p style="margin: 12px 0 0; font-size: 14px; color: rgba(255,255,255,0.6); line-height: 1.7;">I put together a quick preview of what your customers\\u2019 booking experience could look like with BookFlow. Everything below is a working mockup based on ' + inputs.businessName + '.</p>' +
-'</td></tr>' +
-
-customBlock +
-
-'<tr><td style="padding: 8px 32px 8px; background-color: #000000;">' +
-  '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">1. Your Booking Page</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
-    '<div style="padding: 24px 20px 16px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
-      '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 8px;">' + inputs.businessName + '</div>' +
-      '<div style="font-size: 20px; font-weight: 600; color: #ffffff;">Book an Appointment</div>' +
-      '<div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">Select a service to get started</div>' +
-    '</div>' +
-    '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">' +
-      servicesHTML +
-    '</table>' +
-    '<div style="padding: 16px 20px; text-align: center;">' +
-      '<div style="display: inline-block; background: #f5f5f7; color: #000; padding: 10px 32px; border-radius: 100px; font-size: 13px; font-weight: 600;">Book Now</div>' +
-    '</div>' +
-  '</div>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
-  '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">2. Your QR Code</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center;">' +
-    '<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(bookingUrl) + '&bgcolor=ffffff&color=000000" alt="QR Code" width="140" height="140" style="border-radius: 8px;" />' +
-    '<p style="margin: 12px 0 0; font-size: 12px; color: rgba(255,255,255,0.4);">Customers scan to book instantly</p>' +
-    '<p style="margin: 4px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">' + bookingUrl.replace('https://','') + '</p>' +
-  '</div>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
-  '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">3. Booking Confirmation Email</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
-    '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
-      '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
-      '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">CONFIRMED</div>' +
-      '<div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">Your booking has been secured</div>' +
-    '</div>' +
-    '<div style="padding: 16px 20px;">' +
-      '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Service</td><td style="text-align: right; font-size: 13px; font-weight: 600; color: #fff; padding: 6px 0;">' + services[0].name + '</td></tr>' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Date</td><td style="text-align: right; font-size: 13px; font-weight: 600; color: #fff; padding: 6px 0;">Tuesday, March 4, 2026</td></tr>' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Time</td><td style="text-align: right; font-size: 13px; font-weight: 600; color: #fff; padding: 6px 0;">2:30 PM</td></tr>' +
-        '<tr><td colspan="2" style="padding: 8px 0;"><div style="height: 1px; background: rgba(255,255,255,0.08);"></div></td></tr>' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Total</td><td style="text-align: right; font-size: 18px; font-weight: 700; color: #fff; padding: 6px 0;">' + (services[0].price === 0 ? 'Free' : '$' + services[0].price + '.00') + '</td></tr>' +
-      '</table>' +
-    '</div>' +
-  '</div>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
-  '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">4. Automatic Reminder Email</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
-    '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
-      '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
-      '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">REMINDER</div>' +
-      '<div style="font-size: 12px; color: rgba(255,255,255,0.4); margin-top: 4px;">Your appointment is in 24 hours</div>' +
-    '</div>' +
-    '<div style="padding: 16px 20px;">' +
-      '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Service</td><td style="text-align: right; font-size: 13px; font-weight: 600; color: #fff; padding: 6px 0;">' + services[0].name + '</td></tr>' +
-        '<tr><td style="font-size: 10px; text-transform: uppercase; letter-spacing: 2px; color: rgba(255,255,255,0.35); padding: 6px 0;">Date</td><td style="text-align: right; font-size: 13px; font-weight: 600; color: #fff; padding: 6px 0;">Tomorrow at 2:30 PM</td></tr>' +
-      '</table>' +
-    '</div>' +
-  '</div>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 32px; text-align: center; background-color: #000000;">' +
-  '<p style="margin: 0 0 16px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7;">This is just a taste. BookFlow handles online booking, automatic reminders, customer management, and payments \\u2014 all in one app.</p>' +
-  '<a href="https://confirmbooking.online?utm_source=outreach&utm_medium=email&utm_campaign=cold-email" style="display: inline-block; background: #f5f5f7; color: #000; padding: 14px 40px; border-radius: 100px; font-size: 14px; font-weight: 600; text-decoration: none; letter-spacing: 0.3px;">Try BookFlow Free</a>' +
-'</td></tr>' +
-
-'<tr><td style="padding: 20px 32px 28px; background-color: #000000; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">' +
-  '<p style="margin: 0; font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.2);">Powered by BookFlow</p>' +
-  '<p style="margin: 8px 0 0; font-size: 11px; color: rgba(255,255,255,0.25);">confirmbooking.online</p>' +
-'</td></tr>' +
-
-'</table></td></tr></table></body></html>';
+        } catch(e) { console.error('QR render error:', e); }
+      }, 300);
     }
 
     async function copyHTML() {
       const inputs = getInputs();
-      const html = getEmailOnlyHTML(inputs);
+      const html = generateEmailHTML(inputs); // Use the same HTML generation
       const btn = document.getElementById('copyBtn');
       const originalText = btn.textContent;
       try {
@@ -556,15 +438,7 @@ customBlock +
         btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = originalText; }, 2000);
       } catch(e) {
-        const ta = document.createElement('textarea');
-        ta.value = html;
-        document.body.appendChild(ta);
-        ta.select();
-        document.execCommand('copy');
-        document.body.removeChild(ta);
-        showToast('Email HTML copied!', 'success');
-        btn.textContent = 'Copied!';
-        setTimeout(() => { btn.textContent = originalText; }, 2000);
+        showToast('Failed to copy. Please try again.', 'error');
       }
     }
 
@@ -604,7 +478,9 @@ customBlock +
       document.getElementById(id).addEventListener('input', renderPreview);
       document.getElementById(id).addEventListener('change', renderPreview);
     });
-    renderPreview();
+    
+    // Initial render
+    window.onload = renderPreview;
   </script>
 </body>
 </html>`;
