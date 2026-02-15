@@ -98,7 +98,6 @@ function outreachPage(): string {
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -266,7 +265,7 @@ function outreachPage(): string {
       };
     }
 
-    function generateEmailHTML(inputs) {
+    function generateEmailHTML(inputs, isForPreview = false) {
       const ind = INDUSTRIES[inputs.industry] || INDUSTRIES['salon'];
       const services = ind.services;
       const bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
@@ -289,6 +288,10 @@ function outreachPage(): string {
             '<p style="margin: 0; font-size: 13px; color: rgba(255,255,255,0.7); line-height: 1.7; font-style: italic;">"' + inputs.customMessage.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '"</p>' +
           '</div>' +
         '</td></tr>' : '';
+
+      const qrSource = isForPreview 
+        ? '<div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px;"><img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(bookingUrl) + '&bgcolor=ffffff&color=000000" alt="QR Code" width="140" height="140" /></div>'
+        : '<img src="https://api.qrserver.com/v1/create-qr-code/?size=140x140&data=' + encodeURIComponent(bookingUrl) + '&bgcolor=ffffff&color=000000" alt="QR Code" width="140" height="140" style="border-radius: 8px;" />';
 
       return '<!DOCTYPE html>' +
 '<html lang="en">' +
@@ -331,9 +334,7 @@ customBlock +
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">2. Your QR Code</div>' +
   '<div id="preview-qr" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center;">' +
-    '<div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px;">' +
-      '<canvas id="qr-preview" width="140" height="140"></canvas>' +
-    '</div>' +
+    qrSource +
     '<p style="margin: 12px 0 0; font-size: 12px; color: rgba(255,255,255,0.4);">Customers scan to book instantly</p>' +
     '<p style="margin: 4px 0 0; font-size: 11px; color: rgba(255,255,255,0.3);">' + bookingUrl.replace("https://","") + '</p>' +
   '</div>' +
@@ -391,7 +392,7 @@ customBlock +
 
     function renderPreview() {
       const inputs = getInputs();
-      const html = generateEmailHTML(inputs);
+      const html = generateEmailHTML(inputs, true);
       const container = document.getElementById('emailPreview');
       
       let iframe = container.querySelector('iframe');
@@ -416,36 +417,28 @@ customBlock +
       
       setTimeout(function() {
         if (doc.body) iframe.style.height = doc.body.scrollHeight + 40 + 'px';
-        
-        try {
-          const qrCanvas = doc.getElementById('qr-preview');
-          if (qrCanvas && typeof QRCode !== 'undefined') {
-            const bookingUrl = 'https://confirmbooking.online/book/' + inputs.businessName.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-            QRCode.toCanvas(qrCanvas, bookingUrl, { width: 140, margin: 0, color: { dark: '#000000', light: '#ffffff' } });
-          }
-        } catch(e) { console.error('QR render error:', e); }
       }, 300);
     }
 
     async function copyHTML() {
       const inputs = getInputs();
-      const html = generateEmailHTML(inputs);
+      const html = generateEmailHTML(inputs, false);
       const btn = document.getElementById('copyBtn');
       const originalText = btn.textContent;
       try {
         await navigator.clipboard.writeText(html);
-        showToast('Email HTML copied to clipboard!', 'success');
+        showToast('Email HTML copied!', 'success');
         btn.textContent = 'Copied!';
         setTimeout(() => { btn.textContent = originalText; }, 2000);
       } catch(e) {
-        showToast('Failed to copy. Please try again.', 'error');
+        showToast('Failed to copy', 'error');
       }
     }
 
     async function sendEmail() {
       const inputs = getInputs();
       if (!inputs.ownerEmail) {
-        showToast('Please enter an email address', 'error');
+        showToast('Enter an email address', 'error');
         return;
       }
       const btn = document.getElementById('sendBtn');
@@ -460,15 +453,15 @@ customBlock +
         });
         const data = await res.json();
         if (data.success) {
-          showToast('Email sent to ' + inputs.ownerEmail + '!', 'success');
+          showToast('Sent to ' + inputs.ownerEmail, 'success');
           btn.textContent = 'Sent!';
           setTimeout(() => { btn.textContent = originalText; }, 3000);
         } else {
-          showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
+          showToast('Failed: ' + (data.error || 'Check server'), 'error');
           btn.textContent = originalText;
         }
       } catch(e) {
-        showToast('Network error: ' + e.message, 'error');
+        showToast('Network error', 'error');
         btn.textContent = originalText;
       }
       btn.disabled = false;
@@ -479,8 +472,7 @@ customBlock +
       document.getElementById(id).addEventListener('change', renderPreview);
     });
     
-    // Force initial render after everything is loaded
-    setTimeout(renderPreview, 100);
+    setTimeout(renderPreview, 200);
   </script>
 </body>
 </html>`;
@@ -613,7 +605,7 @@ ${customBlock}
   </div>
 </td></tr>
 
-<tr><td style="padding: 32; text-align: center; background-color: #000000;">
+<tr><td style="padding: 32px; text-align: center; background-color: #000000;">
   <p style="margin: 0 0 16px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7;">This is just a taste. BookFlow handles online booking, automatic reminders, customer management, and payments \u2014 all in one app.</p>
   <a href="https://confirmbooking.online?utm_source=outreach&utm_medium=email&utm_campaign=cold-email" style="display: inline-block; background: #f5f5f7; color: #000; padding: 14px 40px; border-radius: 100px; font-size: 14px; font-weight: 600; text-decoration: none; letter-spacing: 0.3px;">Try BookFlow Free</a>
 </td></tr>
