@@ -429,7 +429,7 @@ customBlock +
 
     async function copyHTML() {
       const inputs = getInputs();
-      const html = generateEmailHTML(inputs); // Use the same HTML generation
+      const html = generateEmailHTML(inputs);
       const btn = document.getElementById('copyBtn');
       const originalText = btn.textContent;
       try {
@@ -479,8 +479,8 @@ customBlock +
       document.getElementById(id).addEventListener('change', renderPreview);
     });
     
-    // Initial render
-    window.onload = renderPreview;
+    // Force initial render after everything is loaded
+    setTimeout(renderPreview, 100);
   </script>
 </body>
 </html>`;
@@ -613,7 +613,7 @@ ${customBlock}
   </div>
 </td></tr>
 
-<tr><td style="padding: 32px; text-align: center; background-color: #000000;">
+<tr><td style="padding: 32; text-align: center; background-color: #000000;">
   <p style="margin: 0 0 16px; font-size: 14px; color: rgba(255,255,255,0.7); line-height: 1.7;">This is just a taste. BookFlow handles online booking, automatic reminders, customer management, and payments \u2014 all in one app.</p>
   <a href="https://confirmbooking.online?utm_source=outreach&utm_medium=email&utm_campaign=cold-email" style="display: inline-block; background: #f5f5f7; color: #000; padding: 14px 40px; border-radius: 100px; font-size: 14px; font-weight: 600; text-decoration: none; letter-spacing: 0.3px;">Try BookFlow Free</a>
 </td></tr>
