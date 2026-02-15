@@ -120,14 +120,19 @@ function outreachPage(): string {
     };
   </script>
   <style>
-    body { background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    body { background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
     .glass-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); transition: all 0.3s ease; }
     .glass-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.15); }
     .email-preview-frame { background: #f5f5f5; border-radius: 16px; padding: 24px; }
-    .toast { position: fixed; bottom: 24px; right: 24px; background: #222; color: #f5f5f7; padding: 16px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 100; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; font-size: 14px; }
-    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast { position: fixed; bottom: 24px; right: 24px; background: #222; color: #f5f5f7; padding: 16px 24px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); z-index: 100; opacity: 0; transform: translateY(20px); transition: all 0.3s ease; font-size: 14px; pointer-events: none; }
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .toast.error { border-color: #ff4444; }
     .toast.success { border-color: #44ff88; }
+    
+    ::-webkit-scrollbar { width: 8px; }
+    ::-webkit-scrollbar-track { background: #000; }
+    ::-webkit-scrollbar-thumb { background: #222; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
   </style>
 </head>
 <body>
@@ -146,7 +151,10 @@ function outreachPage(): string {
       <!-- Input Form -->
       <div class="lg:col-span-2">
         <div class="glass-card rounded-2xl p-6 space-y-5 sticky top-8">
-          <h2 class="font-heading text-2xl font-semibold mb-2">Business Details</h2>
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="font-heading text-2xl font-semibold">Business Details</h2>
+            <button onclick="resetForm()" class="text-silver text-[10px] uppercase tracking-widest hover:text-pearl transition-colors">Reset</button>
+          </div>
           
           <div>
             <label class="block text-pearl font-medium mb-1.5 text-xs uppercase tracking-wider" for="ownerName">Owner Name</label>
@@ -182,13 +190,20 @@ function outreachPage(): string {
 
           <div class="pt-2 space-y-3">
             <button id="sendBtn" onclick="sendEmail()"
-              class="w-full bg-pearl text-black font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg text-sm">
+              class="w-full bg-pearl text-black font-semibold py-3 rounded-xl transition-all hover:scale-[1.02] hover:shadow-lg active:scale-[0.98] text-sm">
               Send via Email
             </button>
-            <button onclick="copyHTML()"
-              class="w-full border border-white/20 text-pearl font-medium py-3 rounded-xl transition-all hover:bg-white/5 text-sm">
+            <button id="copyBtn" onclick="copyHTML()"
+              class="w-full border border-white/20 text-pearl font-medium py-3 rounded-xl transition-all hover:bg-white/5 active:scale-[0.98] text-sm">
               Copy Email HTML
             </button>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3 pt-2">
+             <button onclick="scrollToSection('preview-booking')" class="text-silver text-[10px] text-center border border-white/5 py-2 rounded-lg hover:bg-white/5 transition-colors uppercase tracking-widest">1. Booking</button>
+             <button onclick="scrollToSection('preview-qr')" class="text-silver text-[10px] text-center border border-white/5 py-2 rounded-lg hover:bg-white/5 transition-colors uppercase tracking-widest">2. QR Code</button>
+             <button onclick="scrollToSection('preview-confirmed')" class="text-silver text-[10px] text-center border border-white/5 py-2 rounded-lg hover:bg-white/5 transition-colors uppercase tracking-widest">3. Confirmed</button>
+             <button onclick="scrollToSection('preview-reminder')" class="text-silver text-[10px] text-center border border-white/5 py-2 rounded-lg hover:bg-white/5 transition-colors uppercase tracking-widest">4. Reminder</button>
           </div>
         </div>
       </div>
@@ -216,6 +231,30 @@ function outreachPage(): string {
       t.textContent = msg;
       t.className = 'toast ' + type + ' show';
       setTimeout(() => { t.className = 'toast'; }, 3500);
+    }
+
+    function resetForm() {
+      document.getElementById('ownerName').value = 'John';
+      document.getElementById('businessName').value = 'Elite Cuts';
+      document.getElementById('industry').value = 'salon';
+      document.getElementById('ownerEmail').value = '';
+      document.getElementById('customMessage').value = '';
+      renderPreview();
+      showToast('Form reset', 'success');
+    }
+
+    function scrollToSection(id) {
+      const iframe = document.querySelector('#emailPreview iframe');
+      if (!iframe) return;
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const el = doc.getElementById(id);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        // Highlight effect
+        const originalBg = el.style.background;
+        el.style.boxShadow = '0 0 40px rgba(255,255,255,0.15)';
+        setTimeout(() => { el.style.boxShadow = 'none'; }, 2000);
+      }
     }
 
     function getInputs() {
@@ -254,7 +293,7 @@ function outreachPage(): string {
 
       return '<!DOCTYPE html>' +
 '<html lang="en">' +
-'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>' +
+'<head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><style>html { scroll-behavior: smooth; } ::-webkit-scrollbar { display: none; }</style></head>' +
 '<body style="margin: 0; padding: 0; background-color: #f5f5f5; font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, \'Helvetica Neue\', Arial, sans-serif;">' +
 '<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background-color: #f5f5f5;">' +
 '<tr><td align="center" style="padding: 40px 20px;">' +
@@ -275,7 +314,7 @@ customBlock +
 
 '<tr><td style="padding: 8px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">1. Your Booking Page</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
+  '<div id="preview-booking" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
     '<div style="padding: 24px 20px 16px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 8px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 20px; font-weight: 600; color: #ffffff;">Book an Appointment</div>' +
@@ -292,7 +331,7 @@ customBlock +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">2. Your QR Code</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center;">' +
+  '<div id="preview-qr" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 24px; text-align: center; transition: box-shadow 0.5s ease;">' +
     '<div style="display: inline-block; background: #ffffff; padding: 12px; border-radius: 12px;">' +
       '<canvas id="qr-preview" width="140" height="140"></canvas>' +
     '</div>' +
@@ -303,7 +342,7 @@ customBlock +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">3. Booking Confirmation Email</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
+  '<div id="preview-confirmed" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
     '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">CONFIRMED</div>' +
@@ -323,7 +362,7 @@ customBlock +
 
 '<tr><td style="padding: 24px 32px 8px; background-color: #000000;">' +
   '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.35); margin-bottom: 16px;">4. Automatic Reminder Email</div>' +
-  '<div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden;">' +
+  '<div id="preview-reminder" style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; overflow: hidden; transition: box-shadow 0.5s ease;">' +
     '<div style="padding: 20px 20px 12px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">' +
       '<div style="font-size: 10px; text-transform: uppercase; letter-spacing: 3px; color: rgba(255,255,255,0.4); margin-bottom: 6px;">' + inputs.businessName + '</div>' +
       '<div style="font-size: 28px; font-weight: 700; color: #ffffff; letter-spacing: -1px;">REMINDER</div>' +
@@ -509,9 +548,13 @@ customBlock +
     async function copyHTML() {
       const inputs = getInputs();
       const html = getEmailOnlyHTML(inputs);
+      const btn = document.getElementById('copyBtn');
+      const originalText = btn.textContent;
       try {
         await navigator.clipboard.writeText(html);
         showToast('Email HTML copied to clipboard!', 'success');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
       } catch(e) {
         const ta = document.createElement('textarea');
         ta.value = html;
@@ -520,6 +563,8 @@ customBlock +
         document.execCommand('copy');
         document.body.removeChild(ta);
         showToast('Email HTML copied!', 'success');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = originalText; }, 2000);
       }
     }
 
@@ -530,6 +575,7 @@ customBlock +
         return;
       }
       const btn = document.getElementById('sendBtn');
+      const originalText = btn.textContent;
       btn.textContent = 'Sending...';
       btn.disabled = true;
       try {
@@ -541,13 +587,16 @@ customBlock +
         const data = await res.json();
         if (data.success) {
           showToast('Email sent to ' + inputs.ownerEmail + '!', 'success');
+          btn.textContent = 'Sent!';
+          setTimeout(() => { btn.textContent = originalText; }, 3000);
         } else {
           showToast('Failed: ' + (data.error || 'Unknown error'), 'error');
+          btn.textContent = originalText;
         }
       } catch(e) {
         showToast('Network error: ' + e.message, 'error');
+        btn.textContent = originalText;
       }
-      btn.textContent = 'Send via Email';
       btn.disabled = false;
     }
 
