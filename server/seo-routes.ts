@@ -11,37 +11,32 @@ const DOWNLOAD_LINK = "https://confirmbooking.online";
 function getEmailTemplate(businessName: string, bookingLink: string): string {
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
-      <div style="margin-bottom: 32px;">
-        <span style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px;">Share Preview</span>
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0;">Your Booking Link</h1>
+      <div style="margin-bottom: 32px; text-align: center;">
+        <img src="https://confirmbooking.online/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Smart Booking For Modern Businesses</h1>
       </div>
 
-      <div style="background: #007AFF; color: #fff; padding: 12px 20px; border-radius: 18px; margin-bottom: 24px; display: inline-block;">
-        Hey! Here's my booking link 👇
+      <p style="font-size: 18px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
+        I thought you might be interested in having a custom smart QR code and custom booking link for <strong>${businessName}</strong> that helps you to offer more of your services and have automatic appointment confirmations and reminders so as to reduce no-shows.
+      </p>
+
+      <div style="margin-bottom: 40px;">
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
+        <img src="https://confirmbooking.online/assets/images/share-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
+        <img src="https://confirmbooking.online/assets/images/qr-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
+        <img src="https://confirmbooking.online/assets/images/confirmation-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
+        <img src="https://confirmbooking.online/assets/images/reminder-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
       </div>
 
-      <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 32px;">
-        <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-          <h2 style="font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
-          <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
-        </div>
-        <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
-          <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
-              <img src="https://confirmbooking.online/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
-            </div>
-            <div>
-              <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
-              <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
-              <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
-            </div>
-          </div>
-          <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
-        </div>
-      </div>
-
-      <div style="text-align: center;">
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 16px 40px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block;">View Booking Page</a>
+      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px;">
+        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Ready to modernize your booking experience?</p>
+        <a href="https://confirmbooking.online" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">Get Started with BookFlow</a>
       </div>
     </div>
   `;
