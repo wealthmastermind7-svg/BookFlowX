@@ -15,8 +15,8 @@ import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
 import sharp from "sharp";
+import { sendBookingConfirmation } from "./email";
 import { sendBookingNotification, sendTestNotification } from "./notifications";
-import { sendBookingConfirmation, sendColdEmail } from "./email";
 import { 
   verifyBusinessOwnership, 
   verifyServiceOwnership, 
@@ -231,6 +231,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === WORKFLOWS API ===
   
+  app.post("/api/test-email", async (req: Request, res: Response) => {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ error: "Email is required" });
+    
+    try {
+      const success = await sendBookingConfirmation({
+        customerName: "Test User",
+        customerEmail: email,
+        serviceName: "Test Service",
+        date: new Date().toISOString().split('T')[0],
+        time: "10:00 AM",
+        price: 5000,
+        confirmationNumber: "TEST-123",
+        businessName: "BookFlow Test",
+      });
+      
+      if (success) {
+        res.json({ message: "Test email sent successfully" });
+      } else {
+        res.status(500).json({ error: "Failed to send test email. Check server logs." });
+      }
+    } catch (error) {
+      console.error("Error in test-email route:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
 
   // === GOOGLE CALENDAR OAUTH ===
 
@@ -381,37 +407,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
-  // === BUSINESSES API ===
-  
-  app.post("/api/businesses/:businessId/send-cold-email", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
-    try {
-      const { businessId } = req.params;
-      const { email } = req.body;
-      
-      if (!email) {
-        return res.status(400).json({ error: "Target email is required" });
-      }
-
-      const business = await storage.getBusiness(businessId);
-      if (!business) {
-        return res.status(404).json({ error: "Business not found" });
-      }
-
-      const bookingUrl = getBookingUrlForBusiness(business, req);
-      
-      const success = await sendColdEmail(email, business.name, bookingUrl);
-      
-      if (success) {
-        res.json({ message: "Cold email sent successfully" });
-      } else {
-        res.status(500).json({ error: "Failed to send cold email" });
-      }
-    } catch (error) {
-      console.error("Error sending cold email:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
-
   app.get("/api/voice/:slug/check-minutes", async (req: Request, res: Response) => {
     try {
       const { slug } = req.params;
@@ -2210,7 +2205,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
           periodStart: subscription.periodStart,
           periodEnd: subscription.periodEnd,
           stripeSubscriptionId: subscription.stripeSubscriptionId,
-          stripeCustomerId: subscription.stripeCustomerId,
         },
         usage: {
           available: usage.available,
@@ -2460,9 +2454,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const voiceSub = await storage.getVoiceSubscription(businessId);
-      const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 5, minutesUsed: 0, stripeSubscriptionId: null, stripeCustomerId: null };
-      const voiceUsage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: true, remainingMinutes: 5 };
-      const voiceStats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { usedMinutes: 0, totalMinutes: 5 };
+      const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 0, minutesUsed: 0 };
+      const usage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: false, remaining: 0, percentUsed: 0, limit: 0, used: 0 };
+      const stats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { totalCalls: 0, bookingsCreated: 0, conversionRate: 0 };
       
       const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2522,25 +2516,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <p style="color: rgba(255,255,255,0.5); font-size: 13px;">${subscription.minutesLimit} minutes/month</p>
       
       <div class="usage-bar">
-        <div class="usage-fill ${voiceUsage.remainingMinutes < 2 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
+        <div class="usage-fill ${usage.remaining < 10 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5);">
         <span>${subscription.minutesUsed} min used</span>
-        <span>${voiceUsage.remainingMinutes} min remaining</span>
+        <span>${usage.remaining} min remaining</span>
       </div>
 
       <div class="stats-row">
         <div class="stat">
-          <div class="stat-value">${voiceStats.usedMinutes}</div>
-          <div class="stat-label">USED MIN</div>
+          <div class="stat-value">${stats.totalCalls}</div>
+          <div class="stat-label">CALLS</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${voiceStats.totalMinutes}</div>
-          <div class="stat-label">TOTAL MIN</div>
+          <div class="stat-value">${stats.bookingsCreated}</div>
+          <div class="stat-label">BOOKINGS</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${voiceStats.totalMinutes > 0 ? Math.round((voiceStats.usedMinutes / voiceStats.totalMinutes) * 100) : 0}%</div>
-          <div class="stat-label">USAGE</div>
+          <div class="stat-value">${stats.totalCalls > 0 ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) : 0}%</div>
+          <div class="stat-label">CONVERSION</div>
         </div>
       </div>
 

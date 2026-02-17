@@ -300,25 +300,6 @@ export default function SettingsScreen() {
     return currency ? `${currency.id} ${currency.symbol}` : "USD $";
   };
 
-  const [coldEmailModalVisible, setColdEmailModalVisible] = useState(false);
-  const [coldEmailValue, setColdEmailValue] = useState("");
-  const [coldEmailLoading, setColdEmailLoading] = useState(false);
-
-  const handleSendColdEmail = async () => {
-    if (!business || !coldEmailValue) return;
-    setColdEmailLoading(true);
-    try {
-      await api.sendColdEmail(business.id, coldEmailValue);
-      Alert.alert("Success", "Cold email sent successfully.");
-      setColdEmailModalVisible(false);
-      setColdEmailValue("");
-    } catch (error) {
-      Alert.alert("Error", "Failed to send cold email.");
-    } finally {
-      setColdEmailLoading(false);
-    }
-  };
-
   const handleOpenSharePreview = () => {
     if (!business || !checkShareAccess()) return;
     const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
@@ -684,10 +665,6 @@ export default function SettingsScreen() {
               <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
               <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="maximize" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Show QR</ThemedText></Pressable>
             </View>
-            <Pressable onPress={() => setColdEmailModalVisible(true)} style={[styles.secondaryButton, { marginTop: 12, borderStyle: 'dashed', borderWidth: 1, borderColor: 'rgba(255,255,255,0.2)' }]}>
-              <Feather name="mail" size={16} color="rgba(255,255,255,0.6)" style={{ marginRight: 8 }} />
-              <ThemedText style={styles.secondaryButtonText}>Send Cold Email Template</ThemedText>
-            </Pressable>
           </GlassCard>
 
           <View style={{ height: 32 }} />
@@ -825,32 +802,6 @@ export default function SettingsScreen() {
 
       <Modal visible={voicePaywallVisible} animationType="slide" presentationStyle="pageSheet" onRequestClose={() => setVoicePaywallVisible(false)}>
         <VoiceAgentPaywall businessId={business?.id || ""} onClose={() => { setVoicePaywallVisible(false); if ((voiceSub?.subscription.minutesUsed || 0) < (voiceSub?.subscription.minutesLimit || 5)) navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" }); }} onSubscribe={handleVoiceSubscribe} isLoading={voiceCheckoutLoading} />
-      </Modal>
-
-      <Modal visible={coldEmailModalVisible} transparent animationType="fade" onRequestClose={() => setColdEmailModalVisible(false)}>
-        <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
-            <ThemedText style={styles.modalTitle}>Send Cold Email</ThemedText>
-            <ThemedText style={{ color: 'rgba(255,255,255,0.5)', fontSize: 13, marginBottom: 20, textAlign: 'center' }}>
-              We'll send a premium share preview template to this prospective customer.
-            </ThemedText>
-            <TextInput 
-              style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} 
-              value={coldEmailValue} 
-              onChangeText={setColdEmailValue} 
-              placeholder="Prospective customer email" 
-              placeholderTextColor="#666"
-              keyboardType="email-address"
-              autoCapitalize="none"
-            />
-            <Button onPress={handleSendColdEmail} disabled={coldEmailLoading}>
-              {coldEmailLoading ? "Sending..." : "Send Email"}
-            </Button>
-            <Pressable onPress={() => setColdEmailModalVisible(false)} style={styles.secondaryButton}>
-              <ThemedText style={styles.secondaryButtonText}>Cancel</ThemedText>
-            </Pressable>
-          </View>
-        </View>
       </Modal>
 
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
