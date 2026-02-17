@@ -400,13 +400,14 @@ export function registerSeoRoutes(app: Application): void {
   initTools({ headTags, breadcrumbs, wrapPage, utmLink, BRAND, DOMAIN });
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
-    if (req.query.token !== process.env.SESSION_SECRET) return res.status(403).send("Unauthorized");
-    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient" style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Slug" style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Email</button></form><div id="m" style="margin-top:20px;"></div><script>document.getElementById('f').onsubmit=async(e)=>{e.preventDefault();document.getElementById('m').innerText='Sending...';const r=await fetch('/api/internal/send-outreach?token=${req.query.token}',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:document.getElementById('t').value,businessName:document.getElementById('b').value,slug:document.getElementById('s').value})});document.getElementById('m').innerText=r.ok?'Sent':'Error';}</script></body></html>`);
+    // Simplified access for the user
+    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug (e.g. my-shop)" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>document.getElementById('f').onsubmit=async(e)=>{e.preventDefault();const m=document.getElementById('m');m.innerText='Sending...';m.style.color='#fff';try{const r=await fetch('/api/internal/send-outreach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:document.getElementById('t').value,businessName:document.getElementById('b').value,slug:document.getElementById('s').value})});if(r.ok){m.innerText='✅ Email sent successfully!';m.style.color='#10b981';}else{const t=await r.text();m.innerText='❌ Error: '+t;m.style.color='#ef4444';}}catch(err){m.innerText='❌ Connection error';m.style.color='#ef4444';}}</script></body></html>`);
   });
 
   app.post("/api/internal/send-outreach", async (req: Request, res: Response) => {
-    if (req.query.token !== process.env.SESSION_SECRET) return res.status(403).send("Unauthorized");
     const { to, businessName, slug } = req.body;
+    if (!to || !businessName || !slug) return res.status(400).send("Missing fields");
+    
     try {
       const pm = require("postmark");
       const client = new pm.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
@@ -418,7 +419,10 @@ export function registerSeoRoutes(app: Application): void {
         MessageStream: "outbound"
       });
       res.sendStatus(200);
-    } catch (e: any) { res.status(500).send(e.message); }
+    } catch (e: any) { 
+      console.error("Outreach Error:", e);
+      res.status(500).send(e.message); 
+    }
   });
 
   app.get("/seo", (req, res) => res.send(seoHomepage()));
