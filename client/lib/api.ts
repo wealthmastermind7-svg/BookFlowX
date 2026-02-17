@@ -558,6 +558,10 @@ class ApiClient {
     return getSecureToken();
   }
 
+  async sendColdEmail(businessId: string, email: string): Promise<{ message: string }> {
+    return makeRequest<{ message: string }>("POST", `/api/businesses/${businessId}/send-cold-email`, { email });
+  }
+
   async createVoiceCheckout(businessId: string, tierId: string): Promise<{ url: string }> {
     return makeRequest<{ url: string }>("POST", "/api/voice-checkout", { businessId, tierId });
   }

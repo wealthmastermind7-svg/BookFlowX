@@ -15,8 +15,8 @@ import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
 import sharp from "sharp";
-import { sendBookingConfirmation } from "./email";
 import { sendBookingNotification, sendTestNotification } from "./notifications";
+import { sendBookingConfirmation, sendColdEmail } from "./email";
 import { 
   verifyBusinessOwnership, 
   verifyServiceOwnership, 
@@ -231,32 +231,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // === WORKFLOWS API ===
   
-  app.post("/api/test-email", async (req: Request, res: Response) => {
-    const { email } = req.body;
-    if (!email) return res.status(400).json({ error: "Email is required" });
-    
-    try {
-      const success = await sendBookingConfirmation({
-        customerName: "Test User",
-        customerEmail: email,
-        serviceName: "Test Service",
-        date: new Date().toISOString().split('T')[0],
-        time: "10:00 AM",
-        price: 5000,
-        confirmationNumber: "TEST-123",
-        businessName: "BookFlow Test",
-      });
-      
-      if (success) {
-        res.json({ message: "Test email sent successfully" });
-      } else {
-        res.status(500).json({ error: "Failed to send test email. Check server logs." });
-      }
-    } catch (error) {
-      console.error("Error in test-email route:", error);
-      res.status(500).json({ error: "Internal server error" });
-    }
-  });
 
   // === GOOGLE CALENDAR OAUTH ===
 
@@ -407,6 +381,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
   
+  // === BUSINESSES API ===
+  
+  app.post("/api/businesses/:businessId/send-cold-email", verifyBusinessOwnership, async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ error: "Target email is required" });
+      }
+
+      const business = await storage.getBusiness(businessId);
+      if (!business) {
+        return res.status(404).json({ error: "Business not found" });
+      }
+
+      const bookingUrl = getBookingUrlForBusiness(business, req);
+      
+      const success = await sendColdEmail(email, business.name, bookingUrl);
+      
+      if (success) {
+        res.json({ message: "Cold email sent successfully" });
+      } else {
+        res.status(500).json({ error: "Failed to send cold email" });
+      }
+    } catch (error) {
+      console.error("Error sending cold email:", error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  });
+
   app.get("/api/voice/:slug/check-minutes", async (req: Request, res: Response) => {
     try {
       const { slug } = req.params;

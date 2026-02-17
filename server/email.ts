@@ -1,4 +1,6 @@
 import * as postmark from 'postmark';
+import path from "path";
+import fs from "fs";
 
 function getPostmarkClient(): postmark.ServerClient | null {
   const serverToken = process.env.POSTMARK_SERVER_TOKEN;
@@ -48,15 +50,13 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
       weekday: 'long', month: 'long', day: 'numeric', year: 'numeric'
     });
 
-    // PROTECT DOMAIN REPUTATION: 
-    // We block internal dummy domains, example.com, and resend.dev test emails.
     const isInternalDemo = data.customerEmail.toLowerCase().endsWith('@internal.bookflow.app');
     const isExampleDomain = data.customerEmail.toLowerCase().endsWith('@example.com');
     const isResendDev = data.customerEmail.toLowerCase().includes('@resend.dev');
 
     if (isInternalDemo || isExampleDomain || isResendDev) {
       console.log(`[Postmark] BLOCKING delivery to test/example address: ${data.customerEmail}`);
-      return true; // Skip actual sending
+      return true;
     }
 
     console.log(`[Postmark] Attempting to send live email to: ${data.customerEmail}`);
@@ -129,7 +129,7 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
                 ${data.addons && data.addons.length > 0 ? data.addons.map(addon => {
                   const displayPrice = typeof addon.price === 'number' 
                     ? (addon.price / 100).toFixed(2) 
-                    : (parseFloat(addon.price) / 100).toFixed(2);
+                    : (parseFloat(addon.price as string) / 100).toFixed(2);
                   return `
                 <!-- Add-on -->
                 <tr>
@@ -233,6 +233,36 @@ export async function sendBookingConfirmation(data: BookingConfirmationData): Pr
     return true;
   } catch (error) {
     console.error('[Postmark] Exception:', error);
+    return false;
+  }
+}
+
+export async function sendColdEmail(email: string, businessName: string, bookingUrl: string): Promise<boolean> {
+  const client = getPostmarkClient();
+  if (!client) {
+    console.log('[Postmark] Client not initialized, skipping email');
+    return false;
+  }
+
+  try {
+    const templatePath = path.resolve(process.cwd(), 'server/templates/cold-email.html');
+    let html = fs.readFileSync(templatePath, 'utf-8');
+    
+    html = html.replace(/\{\{businessName\}\}/g, businessName);
+    html = html.replace(/\{\{bookingUrl\}\}/g, bookingUrl);
+
+    await client.sendEmail({
+      From: `${businessName} <bookings@confirmbooking.online>`,
+      To: email,
+      Subject: `Reserve your space with ${businessName}`,
+      HtmlBody: html,
+      MessageStream: "outbound"
+    });
+
+    console.log(`[Postmark] Cold email sent successfully to ${email}`);
+    return true;
+  } catch (error) {
+    console.error('[Postmark] Cold Email Exception:', error);
     return false;
   }
 }
