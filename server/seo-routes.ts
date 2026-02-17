@@ -1,5 +1,6 @@
 import type { Application, Request, Response } from "express";
 import { initTools, TOOLS_LIST } from "./seo-tools";
+import Postmark from "postmark";
 
 const DOMAIN = "https://confirmbooking.online";
 const BRAND = "BookFlow";
@@ -401,7 +402,41 @@ export function registerSeoRoutes(app: Application): void {
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
     // Simplified access for the user
-    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug (e.g. my-shop)" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>document.getElementById('f').onsubmit=async(e)=>{e.preventDefault();const m=document.getElementById('m');m.innerText='Sending...';m.style.color='#fff';try{const r=await fetch('/api/internal/send-outreach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({to:document.getElementById('t').value,businessName:document.getElementById('b').value,slug:document.getElementById('s').value})});if(r.ok){m.innerText='✅ Email sent successfully!';m.style.color='#10b981';}else{const t=await r.text();m.innerText='❌ Error: '+t;m.style.color='#ef4444';}}catch(err){m.innerText='❌ Connection error';m.style.color='#ef4444';}}</script></body></html>`);
+    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>
+      const nameInput = document.getElementById('b');
+      const slugInput = document.getElementById('s');
+      nameInput.oninput = () => {
+        slugInput.value = nameInput.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      };
+      document.getElementById('f').onsubmit=async(e)=>{
+        e.preventDefault();
+        const m=document.getElementById('m');
+        m.innerText='Sending...';
+        m.style.color='#fff';
+        try {
+          const r=await fetch('/api/internal/send-outreach',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({
+              to:document.getElementById('t').value,
+              businessName:document.getElementById('b').value,
+              slug:document.getElementById('s').value
+            })
+          });
+          if(r.ok){
+            m.innerText='✅ Email sent successfully!';
+            m.style.color='#10b981';
+          }else{
+            const t=await r.text();
+            m.innerText='❌ Error: '+t;
+            m.style.color='#ef4444';
+          }
+        } catch(err) {
+          m.innerText='❌ Connection error';
+          m.style.color='#ef4444';
+        }
+      }
+    </script></body></html>`);
   });
 
   app.post("/api/internal/send-outreach", async (req: Request, res: Response) => {
@@ -409,8 +444,7 @@ export function registerSeoRoutes(app: Application): void {
     if (!to || !businessName || !slug) return res.status(400).send("Missing fields");
     
     try {
-      const pm = require("postmark");
-      const client = new pm.ServerClient(process.env.POSTMARK_SERVER_TOKEN);
+      const client = new Postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
       await client.sendEmail({
         From: "hello@confirmbooking.online",
         To: to,
