@@ -68,13 +68,31 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
         </div>
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
-        <img src="${imageUrls.qr}" alt="QR Code Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <div style="background: #fff; padding: 32px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+          <img src="${imageUrls.qr}" alt="QR Code" style="width: 200px; height: 200px; margin-bottom: 16px;">
+          <div style="color: #000; font-weight: 600; font-size: 18px;">${businessName}</div>
+          <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">SCAN TO BOOK</div>
+        </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <img src="${imageUrls.confirmation}" alt="Confirmation Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <div style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 24px; margin-bottom: 24px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="color: #10b981; font-weight: 600; font-size: 14px;">✓ BOOKING CONFIRMED</div>
+            <div style="color: #444; font-size: 12px;">JUST NOW</div>
+          </div>
+          <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #f5f5f7; margin-bottom: 8px;">${businessName}</div>
+          <div style="color: #888; font-size: 14px;">Your appointment has been successfully scheduled. We look forward to seeing you.</div>
+        </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <img src="${imageUrls.reminder}" alt="Reminder Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
+        <div style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 24px; margin-bottom: 32px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+            <div style="color: #f5f5f7; font-weight: 600; font-size: 14px;">🔔 REMINDER</div>
+            <div style="color: #444; font-size: 12px;">1 HOUR BEFORE</div>
+          </div>
+          <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #f5f5f7; margin-bottom: 8px;">${businessName}</div>
+          <div style="color: #888; font-size: 14px;">Friendly reminder for your service today at 2:00 PM. Tap to see directions.</div>
+        </div>
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
