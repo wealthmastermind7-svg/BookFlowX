@@ -11,8 +11,8 @@ const DOWNLOAD_LINK = "https://confirmbooking.online";
 function getEmailTemplate(businessName: string, bookingLink: string, niche: string = "auto-detailing"): string {
   const imageUrls = {
     qr: `${DOMAIN}/assets/images/qr-preview.png`,
-    confirmation: `${DOMAIN}/assets/images/confirmation-preview.png`,
-    reminder: `${DOMAIN}/assets/images/reminder-preview.png`
+    confirmation: `${DOMAIN}/assets/images/confirmation-preview-real.jpg`,
+    reminder: `${DOMAIN}/assets/images/reminder-preview-real.jpg`
   };
 
   return `
@@ -69,31 +69,50 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
         <div style="background: #fff; padding: 32px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
-          <img src="${imageUrls.qr}" alt="QR Code" style="width: 200px; height: 200px; margin-bottom: 16px;">
-          <div style="color: #000; font-weight: 600; font-size: 18px;">${businessName}</div>
-          <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">SCAN TO BOOK</div>
+          <div style="background: #f5f5f7; padding: 20px; border-radius: 16px; margin-bottom: 16px; display: inline-block;">
+            <img src="${imageUrls.qr}" alt="QR Code" style="width: 180px; height: 180px;">
+          </div>
+          <div style="color: #000; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600;">${businessName}</div>
+          <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">SCAN TO BOOK</div>
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <div style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 24px; margin-bottom: 24px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div style="color: #10b981; font-weight: 600; font-size: 14px;">✓ BOOKING CONFIRMED</div>
-            <div style="color: #444; font-size: 12px;">JUST NOW</div>
+        <div style="margin-bottom: 24px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+          <img src="${imageUrls.confirmation}" alt="Confirmation" style="width: 100%; display: block;">
+          <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
+            <div style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">${businessName}</div>
           </div>
-          <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #f5f5f7; margin-bottom: 8px;">${businessName}</div>
-          <div style="color: #888; font-size: 14px;">Your appointment has been successfully scheduled. We look forward to seeing you.</div>
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <div style="background: #111; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; padding: 24px; margin-bottom: 32px;">
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-            <div style="color: #f5f5f7; font-weight: 600; font-size: 14px;">🔔 REMINDER</div>
-            <div style="color: #444; font-size: 12px;">1 HOUR BEFORE</div>
+        <div style="margin-bottom: 32px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+          <img src="${imageUrls.reminder}" alt="Reminder" style="width: 100%; display: block;">
+          <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
+            <div style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">${businessName}</div>
           </div>
-          <div style="font-family: 'Cormorant Garamond', serif; font-size: 24px; color: #f5f5f7; margin-bottom: 8px;">${businessName}</div>
-          <div style="color: #888; font-size: 14px;">Friendly reminder for your service today at 2:00 PM. Tap to see directions.</div>
         </div>
       </div>
+
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
+        There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
+      </p>
+
+      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
+        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Try your custom booking demo:</p>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
+      </div>
+
+      <p style="font-size: 14px; color: #888; line-height: 1.6;">
+        If you’d like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
+      </p>
+
+      <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
+        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
+      </div>
+    </div>
+  `;
+}
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
         There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
