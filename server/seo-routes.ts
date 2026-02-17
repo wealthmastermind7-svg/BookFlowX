@@ -12,7 +12,8 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
   const imageUrls = {
     qr: `${DOMAIN}/assets/images/qr-preview.png`,
     confirmation: `${DOMAIN}/assets/images/confirmation-preview-real.jpg`,
-    reminder: `${DOMAIN}/assets/images/reminder-preview-real.jpg`
+    reminder: `${DOMAIN}/assets/images/reminder-preview-real.jpg`,
+    qrReal: `${DOMAIN}/assets/images/qr-preview-real.png`
   };
 
   return `
@@ -52,67 +53,50 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
             <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
             <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
           </div>
-          <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 12px;">
-              <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
-                <img src="${DOMAIN}/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
+          <div style="padding: 24px;">
+            <div style="display: flex; align-items: center; justify-content: space-between;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
+                  <img src="${DOMAIN}/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
+                </div>
+                <div>
+                  <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
+                  <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                  <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
+                </div>
               </div>
-              <div>
-                <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
-                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
-                <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
-              </div>
+              <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
             </div>
-            <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
           </div>
         </div>
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
-        <div style="background: #fff; padding: 32px; border-radius: 24px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
-          <div style="background: #f5f5f7; padding: 20px; border-radius: 16px; margin-bottom: 16px; display: inline-block;">
-            <img src="${imageUrls.qr}" alt="QR Code" style="width: 180px; height: 180px;">
+        <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; position: relative; overflow: hidden;">
+          <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block; position: relative; z-index: 1; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
+            <img src="${imageUrls.qr}" alt="QR Code" style="width: 200px; height: 200px; display: block;">
           </div>
-          <div style="color: #000; font-family: 'Cormorant Garamond', serif; font-size: 28px; font-weight: 600;">${businessName}</div>
-          <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 2px; margin-top: 4px;">SCAN TO BOOK</div>
+          <div style="position: relative; z-index: 1; margin-top: 24px;">
+            <div style="color: #f5f5f7; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${businessName}</div>
+            <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK</div>
+          </div>
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <div style="margin-bottom: 24px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+        <div style="margin-bottom: 24px; border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; position: relative;">
           <img src="${imageUrls.confirmation}" alt="Confirmation" style="width: 100%; display: block;">
           <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
-            <div style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">${businessName}</div>
+            <div style="color: #f5f5f7; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">${businessName}</div>
           </div>
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <div style="margin-bottom: 32px; border-radius: 24px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); position: relative;">
+        <div style="margin-bottom: 32px; border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; position: relative;">
           <img src="${imageUrls.reminder}" alt="Reminder" style="width: 100%; display: block;">
           <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
-            <div style="color: #888; font-size: 10px; text-transform: uppercase; letter-spacing: 2px; margin-bottom: 4px;">${businessName}</div>
+            <div style="color: #f5f5f7; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">${businessName}</div>
           </div>
         </div>
       </div>
-
-      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
-        There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
-      </p>
-
-      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
-        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Try your custom booking demo:</p>
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
-      </div>
-
-      <p style="font-size: 14px; color: #888; line-height: 1.6;">
-        If you’d like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
-      </p>
-
-      <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
-        <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
-        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
-      </div>
-    </div>
-  `;
-}
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
         There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
@@ -556,14 +540,14 @@ export function registerSeoRoutes(app: Application): void {
     }
   });
 
-  app.get("/book/:slug", (req: Request, res:Response) => {
+  app.get("/book/:slug", (req: Request, res: Response) => {
     const { slug } = req.params;
     // Serve a demo booking page for the slug
     const niche = (req.query.niche as string) || "auto-detailing";
     const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
     res.send(`<!DOCTYPE html><html><head>
-      ${headTags(`Book Appointment | ${businessName}`, `Book your next service with ${businessName} online.`, `${DOMAIN}/book/${slug}`, "")}
+      ${headTags(\`Book Appointment | \${businessName}\`, \`Book your next service with \${businessName} online.\`, \`\${DOMAIN}/book/\${slug}\`, "")}
       <style>
         .demo-badge { background: #f5f5f7; color: #000; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
       </style>
@@ -571,7 +555,7 @@ export function registerSeoRoutes(app: Application): void {
     <body class="bg-black text-white p-8">
       <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-8">
-          <h1 class="font-heading text-3xl">${businessName}</h1>
+          <h1 class="font-heading text-3xl">\${businessName}</h1>
           <span class="demo-badge">DEMO PREVIEW</span>
         </div>
         <div class="glass-card rounded-3xl p-6 mb-6">
@@ -606,15 +590,20 @@ export function registerSeoRoutes(app: Application): void {
   app.get("/compare/:c", (req, res) => res.send(comparisonPage(req.params.c)));
   app.get("/tools", (req, res) => res.send(toolsDirectoryPage()));
   app.get("/tools/no-show-calculator", (req, res) => res.send(noShowCalculatorPage()));
-  for (const t of TOOLS_LIST) { app.get(`/tools/${t.slug}`, (req, res) => res.send(t.fn())); }
-  app.get("/sitemap.xml", (req, res) => { res.setHeader("Content-Type", "application/xml"); res.send(generateSitemap()); });
-  app.get("/robots.txt", (req, res) => res.send(generateRobotsTxt()));
+  app.get("/sitemap.xml", (req, res) => {
+    res.header("Content-Type", "application/xml");
+    res.send(generateSitemap());
+  });
+  app.get("/robots.txt", (req, res) => {
+    res.header("Content-Type", "text/plain");
+    res.send(generateRobotsTxt());
+  });
 }
 
-const INDUSTRIES = ["salon", "barbershop", "spa", "auto-detailing", "fitness", "yoga", "dental", "medical", "veterinary", "tattoo", "massage", "photography", "tutoring", "consulting", "coaching", "cleaning", "plumbing", "electrical", "hvac", "landscaping"];
-const LOCATIONS = ["new-york", "los-angeles", "chicago", "houston", "phoenix", "philadelphia", "san-antonio", "san-diego", "dallas", "san-jose", "austin", "jacksonville", "san-francisco", "columbus", "charlotte", "indianapolis", "seattle", "denver", "washington-dc", "nashville", "atlanta", "miami", "tampa", "portland", "las-vegas", "sacramento", "mesa", "kansas-city", "long-beach", "raleigh", "oakland", "minneapolis", "tulsa", "bakersfield", "aurora", "anaheim", "honolulu", "santa-ana", "riverside", "stockton", "henderson", "st-louis", "pittsburgh", "cincinnati", "milwaukee", "orlando", "boise", "tucson", "omaha", "el-paso", "detroit"];
-const COMPETITORS = ["calendly", "acuity-scheduling", "square-appointments", "vagaro", "mindbody", "fresha", "booksy", "setmore", "simplybook", "schedulicity"];
+function formatIndustryName(i: string) { return i.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }
+function formatCompetitorName(c: string) { return c.charAt(0).toUpperCase() + c.slice(1); }
+function formatLocationName(l: string) { return l.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }
 
-function formatIndustryName(s: string) { return s.charAt(0).toUpperCase() + s.slice(1); }
-function formatLocationName(s: string) { return s.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }
-function formatCompetitorName(s: string) { return s.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }
+const INDUSTRIES = ["salon", "barbershop", "fitness", "spa", "tattoo", "massage", "auto-detailing", "personal-trainer", "yoga", "therapy"];
+const COMPETITORS = ["calendly", "acuity", "vagaro", "mindbody", "fresha"];
+const LOCATIONS = ["new-york", "los-angeles", "chicago", "houston", "phoenix", "philadelphia", "san-antonio", "san-diego", "dallas", "san-jose"];
