@@ -47,44 +47,34 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
 
       <div style="margin-bottom: 40px;">
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
-        
-        <!-- Premium Sleek Booking Link Card -->
-        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 32px;">
-          <div style="background: #111; padding: 48px 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05); position: relative;">
-            <div style="position: absolute; top: 20px; right: 20px; opacity: 0.2;">
-              <img src="${DOMAIN}/favicon.png" style="width: 40px; height: 40px; filter: grayscale(1);">
-            </div>
-            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 56px; line-height: 0.9; margin: 0; color: #f5f5f7; letter-spacing: -2px; font-weight: 500;">RESERVE<br>YOUR<br>SPACE</h2>
-            <div style="width: 40px; height: 1px; background: rgba(255,255,255,0.2); margin: 32px auto 0;"></div>
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 24px;">
+          <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
+            <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
           </div>
-          <div style="padding: 24px 32px; background: #000; display: flex; align-items: center; justify-content: space-between;">
-            <div style="display: flex; align-items: center; gap: 16px;">
-              <div style="width: 44px; height: 44px; border-radius: 12px; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
                 <img src="${DOMAIN}/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
               </div>
-              <div style="text-align: left;">
-                <div style="color: #f5f5f7; font-weight: 600; font-size: 18px; letter-spacing: -0.5px;">${businessName}</div>
-                <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-top: 2px; font-weight: 500;">SMART BOOKING INTERFACE</div>
+              <div>
+                <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
+                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
               </div>
             </div>
-            <div style="width: 36px; height: 36px; border: 1px solid rgba(255,255,255,0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7; font-size: 18px; transition: all 0.3s ease;">↗</div>
+            <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
           </div>
         </div>
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 24px; margin-bottom: 32px; text-align: center;">
-          <img src="${imageUrls.qr}" alt="QR Code Preview" style="width: 100%; border-radius: 16px; display: block;">
-        </div>
+        <img src="${imageUrls.qr}" alt="QR Code Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 24px; margin-bottom: 32px; text-align: center;">
-          <img src="${imageUrls.confirmation}" alt="Confirmation Preview" style="width: 100%; border-radius: 16px; display: block;">
-        </div>
+        <img src="${imageUrls.confirmation}" alt="Confirmation Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 24px; padding: 24px; margin-bottom: 40px; text-align: center;">
-          <img src="${imageUrls.reminder}" alt="Reminder Preview" style="width: 100%; border-radius: 16px; display: block;">
-        </div>
+        <img src="${imageUrls.reminder}" alt="Reminder Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
@@ -93,19 +83,16 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
         <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Try your custom booking demo:</p>
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px; letter-spacing: 0.5px;">View Booking Page</a>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
       </div>
 
-      <p style="font-size: 14px; color: #888; line-height: 1.6; text-align: center;">
+      <p style="font-size: 14px; color: #888; line-height: 1.6;">
         If you’d like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
       </p>
 
-      <div style="margin-top: 48px; padding-top: 32px; border-top: 1px solid rgba(255,255,255,0.05); text-align: center;">
-        <div style="display: inline-flex; align-items: center; gap: 10px; margin-bottom: 8px;">
-          <img src="${DOMAIN}/favicon.png" style="width: 20px; height: 20px; opacity: 0.8;">
-          <span style="color: #f5f5f7; font-weight: 600; letter-spacing: 1px; font-size: 15px;">BookFlow</span>
-        </div>
-        <p style="color: #555; font-size: 11px; text-transform: uppercase; letter-spacing: 2px;">Premium Booking Infrastructure</p>
+      <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
+        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
       </div>
     </div>
   `;
