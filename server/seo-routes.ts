@@ -9,10 +9,17 @@ const DOWNLOAD_LINK = "https://confirmbooking.online";
 
 // Email Template with Share Preview Look
 function getEmailTemplate(businessName: string, bookingLink: string): string {
+  const imageUrls = {
+    share: `${DOMAIN}/assets/images/share-preview.png`,
+    qr: `${DOMAIN}/assets/images/qr-preview.png`,
+    confirmation: `${DOMAIN}/assets/images/confirmation-preview.png`,
+    reminder: `${DOMAIN}/assets/images/reminder-preview.png`
+  };
+
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px; text-align: center;">
-        <img src="https://confirmbooking.online/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
+        <img src="${DOMAIN}/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
         <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Smart Booking For Modern Businesses</h1>
       </div>
 
@@ -22,21 +29,21 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
 
       <div style="margin-bottom: 40px;">
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
-        <img src="https://confirmbooking.online/assets/images/share-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <img src="${imageUrls.share}" alt="Booking Link Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
-        <img src="https://confirmbooking.online/assets/images/qr-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <img src="${imageUrls.qr}" alt="QR Code Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <img src="https://confirmbooking.online/assets/images/confirmation-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <img src="${imageUrls.confirmation}" alt="Confirmation Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <img src="https://confirmbooking.online/assets/images/reminder-preview.png" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
+        <img src="${imageUrls.reminder}" alt="Reminder Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
       </div>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px;">
         <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Ready to modernize your booking experience?</p>
-        <a href="https://confirmbooking.online" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">Get Started with BookFlow</a>
+        <a href="${DOMAIN}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">Get Started with BookFlow</a>
       </div>
     </div>
   `;
