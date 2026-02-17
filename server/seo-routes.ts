@@ -474,50 +474,108 @@ export function registerSeoRoutes(app: Application): void {
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
     // Simplified access for the user
-    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><select id="n" style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff">
-      <option value="auto-detailing">Auto Detailing</option>
-      <option value="salon">Hair Salon</option>
-      <option value="barbershop">Barbershop</option>
-      <option value="fitness">Fitness / Gym</option>
-      <option value="spa">Spa / Wellness</option>
-      <option value="tattoo">Tattoo Studio</option>
-      <option value="massage">Massage Therapy</option>
-    </select><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>
-      const nameInput = document.getElementById('b');
-      const slugInput = document.getElementById('s');
-      nameInput.oninput = () => {
-        slugInput.value = nameInput.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-      };
-      document.getElementById('f').onsubmit=async(e)=>{
-        e.preventDefault();
-        const m=document.getElementById('m');
-        m.innerText='Sending...';
-        m.style.color='#fff';
-        try {
-          const r=await fetch('/api/internal/send-outreach',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({
-              to:document.getElementById('t').value,
-              businessName:document.getElementById('b').value,
-              slug:document.getElementById('s').value,
-              niche:document.getElementById('n').value
-            })
-          });
-          if(r.ok){
-            m.innerText='✅ Email sent successfully!';
-            m.style.color='#10b981';
-          }else{
-            const t=await r.text();
-            m.innerText='❌ Error: '+t;
-            m.style.color='#ef4444';
+    res.send(`<!DOCTYPE html><html><head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Outreach | ${BRAND}</title>
+      <script src="https://cdn.tailwindcss.com"></script>
+      <style>
+        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+        input, select { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; }
+        input:focus, select:focus { border-color: #444 !important; outline: none; }
+      </style>
+    </head>
+    <body class="min-h-screen flex items-center justify-center p-6">
+      <div class="w-full max-w-md">
+        <div class="mb-10 text-center">
+          <img src="/favicon.png" class="w-12 h-12 mx-auto mb-4">
+          <h1 class="text-3xl font-semibold tracking-tight">Outreach</h1>
+          <p class="text-gray-500 text-sm mt-2">Generate and send premium booking previews</p>
+        </div>
+        
+        <form id="f" class="space-y-4">
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Recipient Email</label>
+            <input id="t" type="email" placeholder="client@example.com" required class="w-full p-4 rounded-2xl text-base">
+          </div>
+          
+          <div class="grid grid-cols-1 gap-4">
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Name</label>
+              <input id="b" placeholder="Luxury Auto Spa" required class="w-full p-4 rounded-2xl text-base">
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Slug</label>
+              <input id="s" placeholder="luxury-auto-spa" required class="w-full p-4 rounded-2xl text-base text-gray-400">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
+            <select id="n" class="w-full p-4 rounded-2xl text-base appearance-none bg-no-repeat bg-right">
+              <option value="auto-detailing">Auto Detailing</option>
+              <option value="salon">Hair Salon</option>
+              <option value="barbershop">Barbershop</option>
+              <option value="fitness">Fitness / Gym</option>
+              <option value="spa">Spa / Wellness</option>
+              <option value="tattoo">Tattoo Studio</option>
+              <option value="massage">Massage Therapy</option>
+            </select>
+          </div>
+
+          <button class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
+            Send Booking Preview
+          </button>
+        </form>
+        
+        <div id="m" class="mt-8 text-center font-medium min-h-[24px]"></div>
+      </div>
+
+      <script>
+        const nameInput = document.getElementById('b');
+        const slugInput = document.getElementById('s');
+        nameInput.oninput = () => {
+          slugInput.value = nameInput.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+        };
+        document.getElementById('f').onsubmit=async(e)=>{
+          e.preventDefault();
+          const btn = e.target.querySelector('button');
+          const m=document.getElementById('m');
+          btn.disabled = true;
+          btn.style.opacity = '0.5';
+          m.innerText='Sending premium outreach...';
+          m.className='mt-8 text-center font-medium text-white animate-pulse';
+          
+          try {
+            const r=await fetch('/api/internal/send-outreach',{
+              method:'POST',
+              headers:{'Content-Type':'application/json'},
+              body:JSON.stringify({
+                to:document.getElementById('t').value,
+                businessName:document.getElementById('b').value,
+                slug:document.getElementById('s').value,
+                niche:document.getElementById('n').value
+              })
+            });
+            if(r.ok){
+              m.innerText='✅ Email sent successfully!';
+              m.className='mt-8 text-center font-medium text-green-400';
+              e.target.reset();
+            }else{
+              const t=await r.text();
+              m.innerText='❌ Error: '+t;
+              m.className='mt-8 text-center font-medium text-red-400';
+            }
+          } catch(err) {
+            m.innerText='❌ Connection error';
+            m.className='mt-8 text-center font-medium text-red-400';
+          } finally {
+            btn.disabled = false;
+            btn.style.opacity = '1';
           }
-        } catch(err) {
-          m.innerText='❌ Connection error';
-          m.style.color='#ef4444';
         }
-      }
-    </script></body></html>`);
+      </script>
+    </body></html>`);
   });
 
   app.post("/api/internal/send-outreach", async (req: Request, res: Response) => {
@@ -547,7 +605,7 @@ export function registerSeoRoutes(app: Application): void {
     const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
     res.send(`<!DOCTYPE html><html><head>
-      ${headTags(\`Book Appointment | \${businessName}\`, \`Book your next service with \${businessName} online.\`, \`\${DOMAIN}/book/\${slug}\`, "")}
+      ${headTags(`Book Appointment | ${businessName}`, `Book your next service with ${businessName} online.`, `${DOMAIN}/book/${slug}`, "")}
       <style>
         .demo-badge { background: #f5f5f7; color: #000; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
       </style>
@@ -555,7 +613,7 @@ export function registerSeoRoutes(app: Application): void {
     <body class="bg-black text-white p-8">
       <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-8">
-          <h1 class="font-heading text-3xl">\${businessName}</h1>
+          <h1 class="font-heading text-3xl">${businessName}</h1>
           <span class="demo-badge">DEMO PREVIEW</span>
         </div>
         <div class="glass-card rounded-3xl p-6 mb-6">
