@@ -20,11 +20,30 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px; text-align: center;">
         <img src="${DOMAIN}/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Smart Booking For Modern Businesses</h1>
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Smart Booking Link & QR Code for ${businessName}</h1>
       </div>
 
-      <p style="font-size: 18px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
-        I thought you might be interested in having a custom smart QR code and custom booking link for <strong>${businessName}</strong> that helps you to offer more of your services and have automatic appointment confirmations and reminders so as to reduce no-shows.
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
+        Hi there,
+      </p>
+      
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
+        I noticed <strong>${businessName}</strong> offers services that rely on customer appointments, and I wanted to share something that could immediately help increase confirmed bookings and reduce no-shows.
+      </p>
+
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
+        We’ve created a custom smart booking link and QR code specifically for <strong>${businessName}</strong> that allows customers to:
+      </p>
+
+      <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 1.8;">
+        <li>Book services instantly from their phone</li>
+        <li>Receive automatic confirmations and reminders</li>
+        <li>Avoid double bookings or missed messages</li>
+        <li>Access your services 24/7 without calling</li>
+      </ul>
+
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
+        This gives your business a professional, always-on booking system without changing how you currently operate. You simply share the link or print the QR code, and customers handle the rest.
       </p>
 
       <div style="margin-bottom: 40px;">
@@ -41,9 +60,22 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
         <img src="${imageUrls.reminder}" alt="Reminder Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 32px;">
       </div>
 
-      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px;">
-        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Ready to modernize your booking experience?</p>
-        <a href="${DOMAIN}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">Get Started with BookFlow</a>
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
+        There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
+      </p>
+
+      <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
+        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Your custom booking link:</p>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
+      </div>
+
+      <p style="font-size: 14px; color: #888; line-height: 1.6;">
+        If you’d like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
+      </p>
+
+      <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
+        <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
+        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
       </div>
     </div>
   `;
