@@ -2210,6 +2210,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           periodStart: subscription.periodStart,
           periodEnd: subscription.periodEnd,
           stripeSubscriptionId: subscription.stripeSubscriptionId,
+          stripeCustomerId: subscription.stripeCustomerId,
         },
         usage: {
           available: usage.available,
@@ -2459,9 +2460,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const voiceSub = await storage.getVoiceSubscription(businessId);
-      const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 0, minutesUsed: 0 };
-      const usage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: false, remaining: 0, percentUsed: 0, limit: 0, used: 0 };
-      const stats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { totalCalls: 0, bookingsCreated: 0, conversionRate: 0 };
+      const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 5, minutesUsed: 0, stripeSubscriptionId: null, stripeCustomerId: null };
+      const voiceUsage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: true, remainingMinutes: 5 };
+      const voiceStats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { usedMinutes: 0, totalMinutes: 5 };
       
       const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2521,25 +2522,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
       <p style="color: rgba(255,255,255,0.5); font-size: 13px;">${subscription.minutesLimit} minutes/month</p>
       
       <div class="usage-bar">
-        <div class="usage-fill ${usage.remaining < 10 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
+        <div class="usage-fill ${voiceUsage.remainingMinutes < 2 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5);">
         <span>${subscription.minutesUsed} min used</span>
-        <span>${usage.remaining} min remaining</span>
+        <span>${voiceUsage.remainingMinutes} min remaining</span>
       </div>
 
       <div class="stats-row">
         <div class="stat">
-          <div class="stat-value">${stats.totalCalls}</div>
-          <div class="stat-label">CALLS</div>
+          <div class="stat-value">${voiceStats.usedMinutes}</div>
+          <div class="stat-label">USED MIN</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${stats.bookingsCreated}</div>
-          <div class="stat-label">BOOKINGS</div>
+          <div class="stat-value">${voiceStats.totalMinutes}</div>
+          <div class="stat-label">TOTAL MIN</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${stats.totalCalls > 0 ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) : 0}%</div>
-          <div class="stat-label">CONVERSION</div>
+          <div class="stat-value">${voiceStats.totalMinutes > 0 ? Math.round((voiceStats.usedMinutes / voiceStats.totalMinutes) * 100) : 0}%</div>
+          <div class="stat-label">USAGE</div>
         </div>
       </div>
 
