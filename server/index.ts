@@ -208,7 +208,7 @@ function configureExpoAndLanding(app: express.Application) {
       return next();
     }
 
-    if (req.path !== "/" && req.path !== "/home" && req.path !== "/manifest" && req.path !== "/pitch") {
+    if (req.path !== "/" && req.path !== "/home" && req.path !== "/manifest" && req.path !== "/pitch" && !req.path.startsWith("/internal")) {
       return next();
     }
 
@@ -228,6 +228,10 @@ function configureExpoAndLanding(app: express.Application) {
 
     if (req.path === "/pitch") {
       return res.sendFile(path.join(process.cwd(), "server", "static", "pitchbook.html"));
+    }
+
+    if (req.path.startsWith("/internal")) {
+      return next();
     }
 
     next();

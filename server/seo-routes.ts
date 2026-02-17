@@ -12,7 +12,7 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px;">
         <span style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px;">Share Preview</span>
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Booking Link</h1>
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0;">Your Booking Link</h1>
       </div>
 
       <div style="background: #007AFF; color: #fff; padding: 12px 20px; border-radius: 18px; margin-bottom: 24px; display: inline-block;">
@@ -21,12 +21,14 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
 
       <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 32px;">
         <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-          <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
+          <h2 style="font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
           <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
         </div>
         <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
           <div style="display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; background: #fff; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 24px;">😊</div>
+            <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
+              <img src="https://confirmbooking.online/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
+            </div>
             <div>
               <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
               <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
