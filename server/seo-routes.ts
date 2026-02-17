@@ -1,20 +1,116 @@
 import type { Application, Request, Response } from "express";
 import { initTools, TOOLS_LIST } from "./seo-tools";
 import Postmark from "postmark";
+import QRCode from "qrcode";
 
 const DOMAIN = "https://confirmbooking.online";
 const BRAND = "BookFlow";
 const TAGLINE = "Smart Booking For Modern Businesses";
 const DOWNLOAD_LINK = "https://confirmbooking.online";
 
-// Email Template with Share Preview Look
-function getEmailTemplate(businessName: string, bookingLink: string, niche: string = "auto-detailing"): string {
-  const imageUrls = {
-    qr: `${DOMAIN}/assets/images/qr-preview.png`,
-    confirmation: `${DOMAIN}/assets/images/confirmation-preview-real.jpg`,
-    reminder: `${DOMAIN}/assets/images/reminder-preview-real.jpg`,
-    qrReal: `${DOMAIN}/assets/images/qr-preview-real.png`
-  };
+function renderConfirmationPreview(businessName: string): string {
+  const upperName = businessName.toUpperCase();
+  return `
+    <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
+      <div style="padding: 40px 32px 24px; text-align: center;">
+        <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; font-family: 'Inter', sans-serif;">${upperName}</div>
+        <div style="font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">CONFIRMED</div>
+        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your booking has been secured</div>
+      </div>
+      <div style="padding: 24px 32px;">
+        <div style="color: #f5f5f7; font-size: 20px; font-family: 'Inter', sans-serif; margin-bottom: 20px;">Hi John Smith,</div>
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px; margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">CONFIRMATION</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">B7E6AD10</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Interior Detail</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Friday, February 13, 2026</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TIME</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">4:00 PM</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);"></td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
+              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">$175.00</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div style="padding: 0 32px 20px; text-align: center;">
+        <div style="color: #666; font-size: 13px; font-style: italic; font-family: 'Inter', sans-serif;">Need to reschedule? Contact ${businessName} directly.</div>
+      </div>
+      <div style="padding: 16px 32px 24px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="color: #444; font-size: 10px; text-transform: uppercase; letter-spacing: 4px; font-family: 'Inter', sans-serif;">POWERED BY BOOKFLOW</div>
+      </div>
+    </div>`;
+}
+
+function renderReminderPreview(businessName: string): string {
+  const upperName = businessName.toUpperCase();
+  return `
+    <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
+      <div style="padding: 40px 32px 24px; text-align: center;">
+        <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; font-family: 'Inter', sans-serif;">${upperName}</div>
+        <div style="font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">REMINDER</div>
+        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your appointment is coming up soon</div>
+      </div>
+      <div style="padding: 24px 32px;">
+        <div style="color: #f5f5f7; font-size: 20px; font-family: 'Inter', sans-serif; margin-bottom: 20px;">Hi John Smith,</div>
+        <div style="background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px; margin-bottom: 24px;">
+          <table style="width: 100%; border-collapse: collapse;">
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">CONFIRMATION</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">B7E6AD10</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Interior Detail</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Friday, February 13, 2026</td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TIME</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">4:00 PM</td>
+            </tr>
+            <tr>
+              <td colspan="2" style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);"></td>
+            </tr>
+            <tr>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
+              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">$175.00</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div style="padding: 0 32px 20px; text-align: center;">
+        <div style="color: #666; font-size: 13px; font-style: italic; font-family: 'Inter', sans-serif;">Need to reschedule? Contact ${businessName} directly.</div>
+      </div>
+      <div style="padding: 16px 32px 24px; text-align: center; border-top: 1px solid rgba(255,255,255,0.05);">
+        <div style="color: #444; font-size: 10px; text-transform: uppercase; letter-spacing: 4px; font-family: 'Inter', sans-serif;">POWERED BY BOOKFLOW</div>
+      </div>
+    </div>`;
+}
+
+async function getEmailTemplate(businessName: string, bookingLink: string, niche: string = "auto-detailing"): Promise<string> {
+  const qrDataUrl = await QRCode.toDataURL(bookingLink, {
+    width: 400,
+    margin: 2,
+    color: { dark: "#000000", light: "#ffffff" },
+    errorCorrectionLevel: "M"
+  });
 
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
@@ -23,16 +119,14 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
         <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Smart Booking Link & QR Code for ${businessName}</h1>
       </div>
 
-      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        Hi there,
-      </p>
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">Hi there,</p>
       
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
         I noticed <strong>${businessName}</strong> offers services that rely on customer appointments, and I wanted to share something that could immediately help increase confirmed bookings and reduce no-shows.
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        We’ve created a custom smart booking link and QR code specifically for <strong>${businessName}</strong> that allows customers to:
+        We've created a custom smart booking link and QR code specifically for <strong>${businessName}</strong> that allows customers to:
       </p>
 
       <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 1.8;">
@@ -54,52 +148,48 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
             <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
           </div>
           <div style="padding: 24px;">
-            <div style="display: flex; align-items: center; justify-content: space-between;">
-              <div style="display: flex; align-items: center; gap: 12px;">
-                <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
-                  <img src="${DOMAIN}/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
+            <table style="width: 100%;"><tr>
+              <td style="width: 44px; vertical-align: middle;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; background: #fff;">
+                  <img src="${DOMAIN}/favicon.png" style="width: 40px; height: 40px; display: block;">
                 </div>
-                <div>
-                  <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
-                  <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
-                  <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
-                </div>
-              </div>
-              <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
-            </div>
+              </td>
+              <td style="vertical-align: middle; padding-left: 12px;">
+                <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
+                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
+              </td>
+              <td style="width: 36px; vertical-align: middle; text-align: right;">
+                <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; text-align: center; line-height: 32px; color: #f5f5f7; font-size: 16px;">↗</div>
+              </td>
+            </tr></table>
           </div>
         </div>
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
-        <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px; position: relative; overflow: hidden;">
-          <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block; position: relative; z-index: 1; box-shadow: 0 20px 40px rgba(0,0,0,0.4);">
-            <img src="${imageUrls.qr}" alt="QR Code" style="width: 200px; height: 200px; display: block;">
+        <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+          <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block;">
+            <img src="${qrDataUrl}" alt="QR Code for ${businessName}" style="width: 200px; height: 200px; display: block;">
           </div>
-          <div style="position: relative; z-index: 1; margin-top: 24px;">
+          <div style="margin-top: 24px;">
             <div style="color: #f5f5f7; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${businessName}</div>
             <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK</div>
           </div>
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
-        <div style="margin-bottom: 24px; border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; position: relative;">
-          <img src="${imageUrls.confirmation}" alt="Confirmation" style="width: 100%; display: block;">
-          <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
-            <div style="color: #f5f5f7; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">${businessName}</div>
-          </div>
+        <div style="margin-bottom: 24px;">
+          ${renderConfirmationPreview(businessName)}
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
-        <div style="margin-bottom: 32px; border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1); background: #000; position: relative;">
-          <img src="${imageUrls.reminder}" alt="Reminder" style="width: 100%; display: block;">
-          <div style="position: absolute; top: 20px; left: 0; right: 0; text-align: center;">
-            <div style="color: #f5f5f7; font-size: 10px; text-transform: uppercase; letter-spacing: 2px;">${businessName}</div>
-          </div>
+        <div style="margin-bottom: 32px;">
+          ${renderReminderPreview(businessName)}
         </div>
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
-        There’s no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
+        There's no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
@@ -108,7 +198,7 @@ function getEmailTemplate(businessName: string, bookingLink: string, niche: stri
       </div>
 
       <p style="font-size: 14px; color: #888; line-height: 1.6;">
-        If you’d like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
+        If you'd like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
       </p>
 
       <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
@@ -473,7 +563,6 @@ export function registerSeoRoutes(app: Application): void {
   initTools({ headTags, breadcrumbs, wrapPage, utmLink, BRAND, DOMAIN });
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
-    // Simplified access for the user
     res.send(`<!DOCTYPE html><html><head>
       <meta charset="utf-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -558,16 +647,16 @@ export function registerSeoRoutes(app: Application): void {
               })
             });
             if(r.ok){
-              m.innerText='✅ Email sent successfully!';
+              m.innerText='Email sent successfully!';
               m.className='mt-8 text-center font-medium text-green-400';
               e.target.reset();
             }else{
               const t=await r.text();
-              m.innerText='❌ Error: '+t;
+              m.innerText='Error: '+t;
               m.className='mt-8 text-center font-medium text-red-400';
             }
           } catch(err) {
-            m.innerText='❌ Connection error';
+            m.innerText='Connection error';
             m.className='mt-8 text-center font-medium text-red-400';
           } finally {
             btn.disabled = false;
@@ -584,11 +673,12 @@ export function registerSeoRoutes(app: Application): void {
     
     try {
       const client = new Postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
+      const emailHtml = await getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, niche);
       await client.sendEmail({
         From: "hello@confirmbooking.online",
         To: to,
         Subject: `Your Smart Booking Link & QR Code for ${businessName}`,
-        HtmlBody: getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, niche),
+        HtmlBody: emailHtml,
         MessageStream: "outbound"
       });
       res.sendStatus(200);
@@ -600,7 +690,6 @@ export function registerSeoRoutes(app: Application): void {
 
   app.get("/book/:slug", (req: Request, res: Response) => {
     const { slug } = req.params;
-    // Serve a demo booking page for the slug
     const niche = (req.query.niche as string) || "auto-detailing";
     const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
@@ -622,14 +711,14 @@ export function registerSeoRoutes(app: Application): void {
             <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
               <div>
                 <div class="font-medium">Standard Service</div>
-                <div class="text-silver text-sm">45 mins • $80</div>
+                <div class="text-silver text-sm">45 mins - $80</div>
               </div>
               <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
             </div>
             <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
               <div>
                 <div class="font-medium">Premium Package</div>
-                <div class="text-silver text-sm">90 mins • $150</div>
+                <div class="text-silver text-sm">90 mins - $150</div>
               </div>
               <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
             </div>
