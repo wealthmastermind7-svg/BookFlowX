@@ -519,14 +519,14 @@ export function registerSeoRoutes(app: Application): void {
     }
   });
 
-  app.get("/book/:slug", (req: Request, res: Response) => {
+  app.get("/book/:slug", (req: Request, res:Response) => {
     const { slug } = req.params;
     // Serve a demo booking page for the slug
-    const niche = req.query.niche as string || "auto-detailing";
+    const niche = (req.query.niche as string) || "auto-detailing";
     const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
     
     res.send(`<!DOCTYPE html><html><head>
-      ${headTags(\`Book Appointment | \${businessName}\`, \`Book your next service with \${businessName} online.\`, \`\${DOMAIN}/book/\${slug}\`, "")}
+      ${headTags(`Book Appointment | ${businessName}`, `Book your next service with ${businessName} online.`, `${DOMAIN}/book/${slug}`, "")}
       <style>
         .demo-badge { background: #f5f5f7; color: #000; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
       </style>
@@ -534,7 +534,7 @@ export function registerSeoRoutes(app: Application): void {
     <body class="bg-black text-white p-8">
       <div class="max-w-md mx-auto">
         <div class="flex justify-between items-center mb-8">
-          <h1 class="font-heading text-3xl">\${businessName}</h1>
+          <h1 class="font-heading text-3xl">${businessName}</h1>
           <span class="demo-badge">DEMO PREVIEW</span>
         </div>
         <div class="glass-card rounded-3xl p-6 mb-6">
