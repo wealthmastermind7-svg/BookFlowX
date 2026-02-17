@@ -8,9 +8,8 @@ const TAGLINE = "Smart Booking For Modern Businesses";
 const DOWNLOAD_LINK = "https://confirmbooking.online";
 
 // Email Template with Share Preview Look
-function getEmailTemplate(businessName: string, bookingLink: string): string {
+function getEmailTemplate(businessName: string, bookingLink: string, niche: string = "auto-detailing"): string {
   const imageUrls = {
-    share: `${DOMAIN}/assets/images/share-preview.png`,
     qr: `${DOMAIN}/assets/images/qr-preview.png`,
     confirmation: `${DOMAIN}/assets/images/confirmation-preview.png`,
     reminder: `${DOMAIN}/assets/images/reminder-preview.png`
@@ -48,7 +47,25 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
 
       <div style="margin-bottom: 40px;">
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
-        <img src="${imageUrls.share}" alt="Booking Link Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 24px;">
+          <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
+            <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
+          </div>
+          <div style="padding: 24px; display: flex; align-items: center; justify-content: space-between;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <div style="width: 40px; height: 40px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; background: #fff;">
+                <img src="${DOMAIN}/favicon.png" style="width: 100%; height: 100%; object-fit: cover;">
+              </div>
+              <div>
+                <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
+                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
+              </div>
+            </div>
+            <div style="width: 32px; height: 32px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #f5f5f7;">↗</div>
+          </div>
+        </div>
         
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
         <img src="${imageUrls.qr}" alt="QR Code Preview" style="width: 100%; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
@@ -65,7 +82,7 @@ function getEmailTemplate(businessName: string, bookingLink: string): string {
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
-        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Your custom booking link:</p>
+        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Try your custom booking demo:</p>
         <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
       </div>
 
@@ -436,7 +453,15 @@ export function registerSeoRoutes(app: Application): void {
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
     // Simplified access for the user
-    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>
+    res.send(`<!DOCTYPE html><html><body style="background:#000;color:#fff;font-family:sans-serif;padding:40px;"><h1 style="font-size:32px;margin-bottom:24px;">Outreach</h1><form id="f" style="display:flex;flex-direction:column;gap:16px;max-width:400px;"><input id="t" type="email" placeholder="Recipient Email" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="b" placeholder="Business Name" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><input id="s" placeholder="Business Slug" required style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff"><select id="n" style="padding:12px;border-radius:8px;border:1px solid #333;background:#111;color:#fff">
+      <option value="auto-detailing">Auto Detailing</option>
+      <option value="salon">Hair Salon</option>
+      <option value="barbershop">Barbershop</option>
+      <option value="fitness">Fitness / Gym</option>
+      <option value="spa">Spa / Wellness</option>
+      <option value="tattoo">Tattoo Studio</option>
+      <option value="massage">Massage Therapy</option>
+    </select><button style="padding:16px;border-radius:8px;background:#fff;color:#000;font-weight:bold;cursor:pointer">Send Booking Preview</button></form><div id="m" style="margin-top:20px;font-weight:500;"></div><script>
       const nameInput = document.getElementById('b');
       const slugInput = document.getElementById('s');
       nameInput.oninput = () => {
@@ -454,7 +479,8 @@ export function registerSeoRoutes(app: Application): void {
             body:JSON.stringify({
               to:document.getElementById('t').value,
               businessName:document.getElementById('b').value,
-              slug:document.getElementById('s').value
+              slug:document.getElementById('s').value,
+              niche:document.getElementById('n').value
             })
           });
           if(r.ok){
@@ -474,7 +500,7 @@ export function registerSeoRoutes(app: Application): void {
   });
 
   app.post("/api/internal/send-outreach", async (req: Request, res: Response) => {
-    const { to, businessName, slug } = req.body;
+    const { to, businessName, slug, niche } = req.body;
     if (!to || !businessName || !slug) return res.status(400).send("Missing fields");
     
     try {
@@ -482,8 +508,8 @@ export function registerSeoRoutes(app: Application): void {
       await client.sendEmail({
         From: "hello@confirmbooking.online",
         To: to,
-        Subject: `Booking Preview for ${businessName}`,
-        HtmlBody: getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`),
+        Subject: `Your Smart Booking Link & QR Code for ${businessName}`,
+        HtmlBody: getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, niche),
         MessageStream: "outbound"
       });
       res.sendStatus(200);
@@ -491,6 +517,48 @@ export function registerSeoRoutes(app: Application): void {
       console.error("Outreach Error:", e);
       res.status(500).send(e.message); 
     }
+  });
+
+  app.get("/book/:slug", (req: Request, res: Response) => {
+    const { slug } = req.params;
+    // Serve a demo booking page for the slug
+    const niche = req.query.niche as string || "auto-detailing";
+    const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+    
+    res.send(`<!DOCTYPE html><html><head>
+      ${headTags(\`Book Appointment | \${businessName}\`, \`Book your next service with \${businessName} online.\`, \`\${DOMAIN}/book/\${slug}\`, "")}
+      <style>
+        .demo-badge { background: #f5f5f7; color: #000; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
+      </style>
+    </head>
+    <body class="bg-black text-white p-8">
+      <div class="max-w-md mx-auto">
+        <div class="flex justify-between items-center mb-8">
+          <h1 class="font-heading text-3xl">\${businessName}</h1>
+          <span class="demo-badge">DEMO PREVIEW</span>
+        </div>
+        <div class="glass-card rounded-3xl p-6 mb-6">
+          <h2 class="text-xl font-semibold mb-4">Select Service</h2>
+          <div class="space-y-4">
+            <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
+              <div>
+                <div class="font-medium">Standard Service</div>
+                <div class="text-silver text-sm">45 mins • $80</div>
+              </div>
+              <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
+            </div>
+            <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
+              <div>
+                <div class="font-medium">Premium Package</div>
+                <div class="text-silver text-sm">90 mins • $150</div>
+              </div>
+              <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
+            </div>
+          </div>
+        </div>
+        <p class="text-center text-silver text-xs">Powered by BookFlow - Smart Booking Infrastructure</p>
+      </div>
+    </body></html>`);
   });
 
   app.get("/seo", (req, res) => res.send(seoHomepage()));
