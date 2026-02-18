@@ -104,13 +104,8 @@ function renderReminderPreview(businessName: string): string {
     </div>`;
 }
 
-async function getEmailTemplate(businessName: string, bookingLink: string, niche: string = "auto-detailing"): Promise<string> {
-  const qrDataUrl = await QRCode.toDataURL(bookingLink, {
-    width: 400,
-    margin: 2,
-    color: { dark: "#000000", light: "#ffffff" },
-    errorCorrectionLevel: "M"
-  });
+function getEmailTemplate(businessName: string, bookingLink: string, slug: string, niche: string = "auto-detailing"): string {
+  const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}`;
 
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
@@ -169,7 +164,7 @@ async function getEmailTemplate(businessName: string, bookingLink: string, niche
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
         <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
           <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block;">
-            <img src="${qrDataUrl}" alt="QR Code for ${businessName}" style="width: 200px; height: 200px; display: block;">
+            <img src="${qrImageUrl}" alt="QR Code for ${businessName}" style="width: 200px; height: 200px; display: block;">
           </div>
           <div style="margin-top: 24px;">
             <div style="color: #f5f5f7; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${businessName}</div>
@@ -562,6 +557,26 @@ function generateRobotsTxt(): string {
 export function registerSeoRoutes(app: Application): void {
   initTools({ headTags, breadcrumbs, wrapPage, utmLink, BRAND, DOMAIN });
 
+  app.get("/api/qr/:slug", async (req: Request, res: Response) => {
+    try {
+      const { slug } = req.params;
+      const bookingUrl = `https://confirmbooking.online/book/${slug}`;
+      const qrBuffer = await QRCode.toBuffer(bookingUrl, {
+        width: 400,
+        margin: 2,
+        color: { dark: "#000000", light: "#ffffff" },
+        errorCorrectionLevel: "M",
+        type: "png" as const
+      });
+      res.set("Content-Type", "image/png");
+      res.set("Cache-Control", "public, max-age=86400");
+      res.send(qrBuffer);
+    } catch (e: any) {
+      console.error("QR generation error:", e);
+      res.status(500).send("QR generation failed");
+    }
+  });
+
   app.get("/internal/outreach", (req: Request, res: Response) => {
     res.send(`<!DOCTYPE html><html><head>
       <meta charset="utf-8">
@@ -673,9 +688,9 @@ export function registerSeoRoutes(app: Application): void {
     
     try {
       const client = new Postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
-      const emailHtml = await getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, niche);
+      const emailHtml = getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, slug, niche);
       await client.sendEmail({
-        From: "hello@confirmbooking.online",
+        From: `BookFlow - ${businessName} <hello@confirmbooking.online>`,
         To: to,
         Subject: `Your Smart Booking Link & QR Code for ${businessName}`,
         HtmlBody: emailHtml,
