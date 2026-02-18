@@ -183,8 +183,12 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
         </div>
       </div>
 
-      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 32px;">
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
         There's no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
+      </p>
+
+      <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 32px; text-align: center; font-weight: 600;">
+        And the best part? All of this costs less than 2 cups of coffee a month. ☕☕
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
