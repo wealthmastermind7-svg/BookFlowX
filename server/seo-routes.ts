@@ -580,6 +580,467 @@ function generateRobotsTxt(): string {
   return `User-agent: *\nAllow: /\nSitemap: ${DOMAIN}/sitemap.xml`;
 }
 
+function outreachPage(): string {
+  return `<!DOCTYPE html><html><head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Outreach Command Center | ${BRAND}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body { background: #000; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+      input, select, textarea { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; }
+      input:focus, select:focus, textarea:focus { border-color: #444 !important; outline: none; }
+      .tab-active { background: #fff; color: #000; }
+      .tab-inactive { background: transparent; color: #666; border: 1px solid #222; }
+      .tab-inactive:hover { color: #fff; border-color: #444; }
+      .lead-row:hover { background: rgba(255,255,255,0.03); }
+      .lead-row.sent { opacity: 0.4; }
+      .progress-bar { transition: width 0.3s ease; }
+      @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+      .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
+    </style>
+  </head>
+  <body class="min-h-screen p-6">
+    <div class="max-w-5xl mx-auto">
+      <div class="mb-8 flex items-center justify-between">
+        <div class="flex items-center gap-4">
+          <img src="/favicon.png" class="w-10 h-10">
+          <div>
+            <h1 class="text-2xl font-bold tracking-tight">Outreach Command Center</h1>
+            <p class="text-gray-500 text-xs mt-1">Generate leads, import lists, send premium booking previews</p>
+          </div>
+        </div>
+        <div id="stats" class="text-right text-xs text-gray-500">
+          <div>Sent this session: <span id="sent-count" class="text-white font-bold">0</span></div>
+          <div>Queue: <span id="queue-count" class="text-white font-bold">0</span></div>
+        </div>
+      </div>
+
+      <div class="flex gap-2 mb-6">
+        <button onclick="switchTab('single')" id="tab-single" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-active">Single Send</button>
+        <button onclick="switchTab('bulk')" id="tab-bulk" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">Bulk Import</button>
+        <button onclick="switchTab('manus')" id="tab-manus" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">Generate Leads</button>
+        <button onclick="switchTab('history')" id="tab-history" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">History</button>
+      </div>
+
+      <!-- SINGLE SEND TAB -->
+      <div id="panel-single" class="panel">
+        <form id="single-form" class="space-y-4 max-w-md">
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Recipient Email</label>
+            <input id="single-email" type="email" placeholder="client@example.com" required class="w-full p-4 rounded-2xl text-base">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Name</label>
+            <input id="single-name" placeholder="Luxury Auto Spa" required class="w-full p-4 rounded-2xl text-base">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Slug</label>
+            <input id="single-slug" placeholder="luxury-auto-spa" required class="w-full p-4 rounded-2xl text-base text-gray-400">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
+            <select id="single-niche" class="w-full p-4 rounded-2xl text-base">
+              <option value="auto-detailing">Auto Detailing</option>
+              <option value="salon">Hair Salon</option>
+              <option value="barbershop">Barbershop</option>
+              <option value="fitness">Fitness / Gym</option>
+              <option value="spa">Spa / Wellness</option>
+              <option value="tattoo">Tattoo Studio</option>
+              <option value="massage">Massage Therapy</option>
+            </select>
+          </div>
+          <button type="submit" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">Send Booking Preview</button>
+        </form>
+        <div id="single-msg" class="mt-6 text-center font-medium min-h-[24px]"></div>
+      </div>
+
+      <!-- BULK IMPORT TAB -->
+      <div id="panel-bulk" class="panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Paste Manus Lead List</label>
+            <textarea id="bulk-input" rows="14" placeholder="Paste the markdown table or CSV from Manus here...
+
+Example:
+| Business Name | Email Address | Phone Number | Address |
+| Organic Spa | organic.spa@gmail.com | (773) 710-7810 | 520 N Michigan Ave |
+..." class="w-full p-4 rounded-2xl text-sm font-mono leading-relaxed resize-none"></textarea>
+            <div class="flex gap-3 mt-3">
+              <div class="flex-1">
+                <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Niche for All</label>
+                <select id="bulk-niche" class="w-full p-3 rounded-xl text-sm">
+                  <option value="auto-detailing">Auto Detailing</option>
+                  <option value="salon">Hair Salon</option>
+                  <option value="barbershop">Barbershop</option>
+                  <option value="fitness">Fitness / Gym</option>
+                  <option value="spa">Spa / Wellness</option>
+                  <option value="tattoo">Tattoo Studio</option>
+                  <option value="massage">Massage Therapy</option>
+                </select>
+              </div>
+              <div class="flex items-end">
+                <button onclick="parseBulkInput()" class="px-6 py-3 rounded-xl bg-white text-black font-bold text-sm hover:scale-[1.02] active:scale-[0.98] transition-transform">Parse Leads</button>
+              </div>
+            </div>
+          </div>
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="text-xs uppercase tracking-widest text-gray-500 ml-1">Parsed Leads (<span id="parsed-count">0</span>)</label>
+              <div class="flex gap-2">
+                <button onclick="selectAllLeads()" class="text-xs text-gray-400 hover:text-white transition-colors">Select All</button>
+                <button onclick="deselectAllLeads()" class="text-xs text-gray-400 hover:text-white transition-colors">Deselect All</button>
+              </div>
+            </div>
+            <div id="parsed-leads" class="border border-gray-800 rounded-2xl overflow-hidden max-h-[400px] overflow-y-auto">
+              <div class="p-8 text-center text-gray-600 text-sm">Paste and parse leads to see them here</div>
+            </div>
+          </div>
+        </div>
+        <div class="mt-6 flex items-center justify-between">
+          <div id="bulk-progress" class="flex-1 mr-4 hidden">
+            <div class="flex items-center gap-3 mb-2">
+              <div class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></div>
+              <span id="bulk-progress-text" class="text-sm text-gray-400">Sending...</span>
+            </div>
+            <div class="w-full bg-gray-800 rounded-full h-2">
+              <div id="bulk-progress-bar" class="bg-white h-2 rounded-full progress-bar" style="width: 0%"></div>
+            </div>
+          </div>
+          <button onclick="sendAllSelected()" id="send-all-btn" class="px-8 py-4 rounded-2xl bg-white text-black font-bold text-base hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl whitespace-nowrap">
+            Send All Selected
+          </button>
+        </div>
+        <div id="bulk-msg" class="mt-4 text-center font-medium min-h-[24px]"></div>
+      </div>
+
+      <!-- GENERATE LEADS TAB (MANUS) -->
+      <div id="panel-manus" class="panel hidden">
+        <div class="max-w-md">
+          <div class="space-y-4">
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
+              <select id="manus-niche" class="w-full p-4 rounded-2xl text-base">
+                <option value="auto-detailing">Auto Detailing</option>
+                <option value="salon">Hair Salon</option>
+                <option value="barbershop">Barbershop</option>
+                <option value="fitness">Fitness / Gym</option>
+                <option value="spa">Spa / Wellness</option>
+                <option value="tattoo">Tattoo Studio</option>
+                <option value="massage">Massage Therapy</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">City</label>
+              <input id="manus-city" placeholder="Chicago, IL" class="w-full p-4 rounded-2xl text-base">
+            </div>
+            <button onclick="generateLeads()" id="generate-btn" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
+              Generate Leads with Manus
+            </button>
+          </div>
+          <div id="manus-status" class="mt-6 min-h-[24px]"></div>
+        </div>
+        <div id="manus-results" class="mt-6 hidden">
+          <div class="flex items-center justify-between mb-3">
+            <label class="text-xs uppercase tracking-widest text-gray-500 ml-1">Generated Leads</label>
+            <button onclick="importManusToQueue()" class="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:scale-[1.02] active:scale-[0.98] transition-transform">Import to Send Queue</button>
+          </div>
+          <div id="manus-leads-list" class="border border-gray-800 rounded-2xl overflow-hidden max-h-[400px] overflow-y-auto"></div>
+        </div>
+      </div>
+
+      <!-- HISTORY TAB -->
+      <div id="panel-history" class="panel hidden">
+        <div class="flex items-center justify-between mb-4">
+          <label class="text-xs uppercase tracking-widest text-gray-500 ml-1">Sent Emails (<span id="history-count">0</span>)</label>
+          <button onclick="clearHistory()" class="text-xs text-gray-500 hover:text-red-400 transition-colors">Clear History</button>
+        </div>
+        <div id="history-list" class="border border-gray-800 rounded-2xl overflow-hidden max-h-[500px] overflow-y-auto">
+          <div class="p-8 text-center text-gray-600 text-sm">No emails sent yet this session</div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let parsedLeads = [];
+      let sentHistory = JSON.parse(localStorage.getItem('outreach_history') || '[]');
+      let sessionSent = 0;
+
+      function toSlug(name) {
+        return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+      }
+
+      function switchTab(tab) {
+        document.querySelectorAll('.panel').forEach(p => p.classList.add('hidden'));
+        document.querySelectorAll('[id^="tab-"]').forEach(t => { t.className = t.className.replace('tab-active', 'tab-inactive'); });
+        document.getElementById('panel-' + tab).classList.remove('hidden');
+        document.getElementById('tab-' + tab).className = document.getElementById('tab-' + tab).className.replace('tab-inactive', 'tab-active');
+        if (tab === 'history') renderHistory();
+      }
+
+      // Auto-slug for single send
+      document.getElementById('single-name').oninput = function() {
+        document.getElementById('single-slug').value = toSlug(this.value);
+      };
+
+      // Single send form
+      document.getElementById('single-form').onsubmit = async (e) => {
+        e.preventDefault();
+        const btn = e.target.querySelector('button');
+        const msg = document.getElementById('single-msg');
+        btn.disabled = true; btn.style.opacity = '0.5';
+        msg.innerText = 'Sending...'; msg.className = 'mt-6 text-center font-medium text-white animate-pulse';
+        try {
+          const r = await fetch('/api/internal/send-outreach', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+              to: document.getElementById('single-email').value,
+              businessName: document.getElementById('single-name').value,
+              slug: document.getElementById('single-slug').value,
+              niche: document.getElementById('single-niche').value
+            })
+          });
+          if (r.ok) {
+            addToHistory(document.getElementById('single-email').value, document.getElementById('single-name').value, document.getElementById('single-niche').value);
+            msg.innerText = 'Sent successfully!'; msg.className = 'mt-6 text-center font-medium text-green-400';
+            e.target.reset();
+          } else {
+            msg.innerText = 'Error: ' + await r.text(); msg.className = 'mt-6 text-center font-medium text-red-400';
+          }
+        } catch(err) {
+          msg.innerText = 'Connection error'; msg.className = 'mt-6 text-center font-medium text-red-400';
+        } finally { btn.disabled = false; btn.style.opacity = '1'; }
+      };
+
+      // Parse bulk input (markdown table or CSV)
+      function parseBulkInput() {
+        const raw = document.getElementById('bulk-input').value.trim();
+        if (!raw) return;
+        const niche = document.getElementById('bulk-niche').value;
+        parsedLeads = [];
+
+        const lines = raw.split('\\n').filter(l => l.trim());
+        for (const line of lines) {
+          if (line.includes('---') || line.toLowerCase().includes('business name') || line.toLowerCase().includes('email address')) continue;
+          
+          let parts;
+          if (line.includes('|')) {
+            parts = line.split('|').map(p => p.trim()).filter(p => p);
+          } else {
+            parts = line.split(',').map(p => p.trim()).filter(p => p);
+          }
+          
+          if (parts.length < 2) continue;
+
+          let name = parts[0].replace(/\\*\\*/g, '').trim();
+          let email = '';
+          let phone = '';
+          let address = '';
+
+          for (const part of parts.slice(1)) {
+            const cleaned = part.trim();
+            if (cleaned.includes('@')) email = cleaned;
+            else if (cleaned.match(/\\(\\d{3}\\)|\\d{3}-/)) phone = cleaned;
+            else if (cleaned !== 'N/A' && cleaned.length > 5) address = cleaned;
+          }
+
+          if (name && email) {
+            const alreadySent = sentHistory.some(h => h.email === email);
+            parsedLeads.push({ name, email, phone, address, niche, slug: toSlug(name), selected: !alreadySent, sent: alreadySent });
+          }
+        }
+
+        renderParsedLeads();
+        updateCounts();
+      }
+
+      function renderParsedLeads() {
+        const container = document.getElementById('parsed-leads');
+        document.getElementById('parsed-count').textContent = parsedLeads.length;
+        
+        if (parsedLeads.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-gray-600 text-sm">No valid leads found. Check your paste format.</div>';
+          return;
+        }
+
+        let html = '<table class="w-full text-xs"><thead><tr class="border-b border-gray-800 text-gray-500 uppercase tracking-widest">';
+        html += '<th class="p-3 text-left w-8"><input type="checkbox" checked onchange="toggleAllLeads(this.checked)"></th>';
+        html += '<th class="p-3 text-left">Business</th><th class="p-3 text-left">Email</th><th class="p-3 text-left">Status</th></tr></thead><tbody>';
+
+        parsedLeads.forEach((lead, i) => {
+          const statusClass = lead.sent ? 'text-yellow-500' : 'text-gray-500';
+          const statusText = lead.sent ? 'Already sent' : 'Ready';
+          html += '<tr class="lead-row border-b border-gray-800/50 ' + (lead.sent ? 'sent' : '') + '">';
+          html += '<td class="p-3"><input type="checkbox" ' + (lead.selected ? 'checked' : '') + ' onchange="parsedLeads[' + i + '].selected=this.checked; updateCounts();" ' + (lead.sent ? 'disabled' : '') + '></td>';
+          html += '<td class="p-3"><div class="font-medium text-white">' + lead.name + '</div><div class="text-gray-600 mt-0.5">' + lead.slug + '</div></td>';
+          html += '<td class="p-3 text-gray-400">' + lead.email + '</td>';
+          html += '<td class="p-3 ' + statusClass + '">' + statusText + '</td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      function selectAllLeads() { parsedLeads.forEach(l => { if (!l.sent) l.selected = true; }); renderParsedLeads(); updateCounts(); }
+      function deselectAllLeads() { parsedLeads.forEach(l => l.selected = false); renderParsedLeads(); updateCounts(); }
+      function toggleAllLeads(checked) { parsedLeads.forEach(l => { if (!l.sent) l.selected = checked; }); renderParsedLeads(); updateCounts(); }
+
+      function updateCounts() {
+        const queued = parsedLeads.filter(l => l.selected && !l.sent).length;
+        document.getElementById('queue-count').textContent = queued;
+        document.getElementById('sent-count').textContent = sessionSent;
+      }
+
+      // Send all selected leads with rate limiting
+      async function sendAllSelected() {
+        const toSend = parsedLeads.filter(l => l.selected && !l.sent);
+        if (toSend.length === 0) return;
+
+        const btn = document.getElementById('send-all-btn');
+        const progress = document.getElementById('bulk-progress');
+        const progressBar = document.getElementById('bulk-progress-bar');
+        const progressText = document.getElementById('bulk-progress-text');
+        const msg = document.getElementById('bulk-msg');
+
+        btn.disabled = true; btn.style.opacity = '0.5';
+        progress.classList.remove('hidden');
+        msg.innerText = '';
+
+        let sent = 0;
+        let failed = 0;
+
+        for (const lead of toSend) {
+          progressText.textContent = 'Sending to ' + lead.name + '... (' + (sent + failed + 1) + '/' + toSend.length + ')';
+          progressBar.style.width = ((sent + failed) / toSend.length * 100) + '%';
+
+          try {
+            const r = await fetch('/api/internal/send-outreach', {
+              method: 'POST', headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ to: lead.email, businessName: lead.name, slug: lead.slug, niche: lead.niche })
+            });
+            if (r.ok) {
+              lead.sent = true;
+              lead.selected = false;
+              sent++;
+              sessionSent++;
+              addToHistory(lead.email, lead.name, lead.niche);
+            } else { failed++; }
+          } catch { failed++; }
+
+          renderParsedLeads();
+          updateCounts();
+
+          // Rate limit: 1.5 second delay between sends
+          if (sent + failed < toSend.length) await new Promise(r => setTimeout(r, 1500));
+        }
+
+        progressBar.style.width = '100%';
+        progressText.textContent = 'Complete!';
+        msg.innerText = sent + ' sent' + (failed > 0 ? ', ' + failed + ' failed' : '');
+        msg.className = 'mt-4 text-center font-medium ' + (failed > 0 ? 'text-yellow-400' : 'text-green-400');
+        btn.disabled = false; btn.style.opacity = '1';
+        setTimeout(() => progress.classList.add('hidden'), 3000);
+      }
+
+      // Manus lead generation
+      async function generateLeads() {
+        const niche = document.getElementById('manus-niche').value;
+        const city = document.getElementById('manus-city').value;
+        if (!city) { document.getElementById('manus-status').innerHTML = '<div class="text-red-400 text-sm">Enter a city</div>'; return; }
+
+        const btn = document.getElementById('generate-btn');
+        const status = document.getElementById('manus-status');
+        btn.disabled = true; btn.style.opacity = '0.5';
+        btn.textContent = 'Starting Manus...';
+        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Creating task...</div>';
+
+        try {
+          const r = await fetch('/api/internal/generate-leads', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ niche, city })
+          });
+          
+          if (!r.ok) {
+            const err = await r.json();
+            status.innerHTML = '<div class="text-red-400 text-sm">' + (err.error || 'Failed') + '</div>';
+            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Generate Leads with Manus';
+            return;
+          }
+
+          const data = await r.json();
+          status.innerHTML = '<div class="space-y-2">' +
+            '<div class="flex items-center gap-2 text-sm text-green-400"><div class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></div>Task created! Manus is researching...</div>' +
+            '<div class="text-xs text-gray-500">Task ID: ' + data.taskId + '</div>' +
+            (data.taskUrl ? '<a href="' + data.taskUrl + '" target="_blank" class="text-xs text-blue-400 hover:underline">View on Manus</a>' : '') +
+            '<div class="text-xs text-gray-500 mt-2">This typically takes 2-5 minutes. You can check the Manus dashboard or paste results in the Bulk Import tab when ready.</div>' +
+            '</div>';
+
+          btn.textContent = 'Generate More Leads';
+          btn.disabled = false; btn.style.opacity = '1';
+        } catch(err) {
+          status.innerHTML = '<div class="text-red-400 text-sm">Connection error</div>';
+          btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Generate Leads with Manus';
+        }
+      }
+
+      // History management
+      function addToHistory(email, name, niche) {
+        const entry = { email, name, niche, timestamp: new Date().toISOString() };
+        sentHistory.unshift(entry);
+        if (sentHistory.length > 500) sentHistory = sentHistory.slice(0, 500);
+        localStorage.setItem('outreach_history', JSON.stringify(sentHistory));
+        sessionSent++;
+        updateCounts();
+      }
+
+      function renderHistory() {
+        const container = document.getElementById('history-list');
+        document.getElementById('history-count').textContent = sentHistory.length;
+
+        if (sentHistory.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-gray-600 text-sm">No emails sent yet</div>';
+          return;
+        }
+
+        let html = '<table class="w-full text-xs"><thead><tr class="border-b border-gray-800 text-gray-500 uppercase tracking-widest">';
+        html += '<th class="p-3 text-left">Business</th><th class="p-3 text-left">Email</th><th class="p-3 text-left">Niche</th><th class="p-3 text-left">Sent</th></tr></thead><tbody>';
+
+        sentHistory.forEach(h => {
+          const time = new Date(h.timestamp).toLocaleString();
+          html += '<tr class="border-b border-gray-800/50">';
+          html += '<td class="p-3 text-white font-medium">' + h.name + '</td>';
+          html += '<td class="p-3 text-gray-400">' + h.email + '</td>';
+          html += '<td class="p-3 text-gray-500">' + h.niche + '</td>';
+          html += '<td class="p-3 text-gray-600">' + time + '</td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      function clearHistory() {
+        if (!confirm('Clear all sent history?')) return;
+        sentHistory = [];
+        localStorage.removeItem('outreach_history');
+        renderHistory();
+        updateCounts();
+      }
+
+      // Import Manus results to bulk queue
+      function importManusToQueue() {
+        switchTab('bulk');
+        document.getElementById('bulk-niche').value = document.getElementById('manus-niche').value;
+      }
+
+      // Init
+      updateCounts();
+    </script>
+  </body></html>`;
+}
+
 export function registerSeoRoutes(app: Application): void {
   initTools({ headTags, breadcrumbs, wrapPage, utmLink, BRAND, DOMAIN });
 
@@ -604,108 +1065,7 @@ export function registerSeoRoutes(app: Application): void {
   });
 
   app.get("/internal/outreach", (req: Request, res: Response) => {
-    res.send(`<!DOCTYPE html><html><head>
-      <meta charset="utf-8">
-      <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      <title>Outreach | ${BRAND}</title>
-      <script src="https://cdn.tailwindcss.com"></script>
-      <style>
-        body { background: #000; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-        input, select { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; }
-        input:focus, select:focus { border-color: #444 !important; outline: none; }
-      </style>
-    </head>
-    <body class="min-h-screen flex items-center justify-center p-6">
-      <div class="w-full max-w-md">
-        <div class="mb-10 text-center">
-          <img src="/favicon.png" class="w-12 h-12 mx-auto mb-4">
-          <h1 class="text-3xl font-semibold tracking-tight">Outreach</h1>
-          <p class="text-gray-500 text-sm mt-2">Generate and send premium booking previews</p>
-        </div>
-        
-        <form id="f" class="space-y-4">
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Recipient Email</label>
-            <input id="t" type="email" placeholder="client@example.com" required class="w-full p-4 rounded-2xl text-base">
-          </div>
-          
-          <div class="grid grid-cols-1 gap-4">
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Name</label>
-              <input id="b" placeholder="Luxury Auto Spa" required class="w-full p-4 rounded-2xl text-base">
-            </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Slug</label>
-              <input id="s" placeholder="luxury-auto-spa" required class="w-full p-4 rounded-2xl text-base text-gray-400">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
-            <select id="n" class="w-full p-4 rounded-2xl text-base appearance-none bg-no-repeat bg-right">
-              <option value="auto-detailing">Auto Detailing</option>
-              <option value="salon">Hair Salon</option>
-              <option value="barbershop">Barbershop</option>
-              <option value="fitness">Fitness / Gym</option>
-              <option value="spa">Spa / Wellness</option>
-              <option value="tattoo">Tattoo Studio</option>
-              <option value="massage">Massage Therapy</option>
-            </select>
-          </div>
-
-          <button class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
-            Send Booking Preview
-          </button>
-        </form>
-        
-        <div id="m" class="mt-8 text-center font-medium min-h-[24px]"></div>
-      </div>
-
-      <script>
-        const nameInput = document.getElementById('b');
-        const slugInput = document.getElementById('s');
-        nameInput.oninput = () => {
-          slugInput.value = nameInput.value.toLowerCase().trim().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
-        };
-        document.getElementById('f').onsubmit=async(e)=>{
-          e.preventDefault();
-          const btn = e.target.querySelector('button');
-          const m=document.getElementById('m');
-          btn.disabled = true;
-          btn.style.opacity = '0.5';
-          m.innerText='Sending premium outreach...';
-          m.className='mt-8 text-center font-medium text-white animate-pulse';
-          
-          try {
-            const r=await fetch('/api/internal/send-outreach',{
-              method:'POST',
-              headers:{'Content-Type':'application/json'},
-              body:JSON.stringify({
-                to:document.getElementById('t').value,
-                businessName:document.getElementById('b').value,
-                slug:document.getElementById('s').value,
-                niche:document.getElementById('n').value
-              })
-            });
-            if(r.ok){
-              m.innerText='Email sent successfully!';
-              m.className='mt-8 text-center font-medium text-green-400';
-              e.target.reset();
-            }else{
-              const t=await r.text();
-              m.innerText='Error: '+t;
-              m.className='mt-8 text-center font-medium text-red-400';
-            }
-          } catch(err) {
-            m.innerText='Connection error';
-            m.className='mt-8 text-center font-medium text-red-400';
-          } finally {
-            btn.disabled = false;
-            btn.style.opacity = '1';
-          }
-        }
-      </script>
-    </body></html>`);
+    res.send(outreachPage());
   });
 
   app.post("/api/internal/send-outreach", async (req: Request, res: Response) => {
@@ -727,6 +1087,88 @@ export function registerSeoRoutes(app: Application): void {
     } catch (e: any) { 
       console.error("Outreach Error:", e);
       res.status(500).send(e.message); 
+    }
+  });
+
+  app.post("/api/internal/generate-leads", async (req: Request, res: Response) => {
+    const { niche, city } = req.body;
+    if (!niche || !city) return res.status(400).json({ error: "Missing niche or city" });
+
+    const apiKey = process.env.MANUS_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "Manus API key not configured" });
+
+    try {
+      const nicheLabels: Record<string, string> = {
+        "auto-detailing": "auto detailing",
+        "salon": "hair salon",
+        "barbershop": "barbershop",
+        "fitness": "fitness and gym",
+        "spa": "spa and wellness",
+        "tattoo": "tattoo studio",
+        "massage": "massage therapy"
+      };
+      const nicheLabel = nicheLabels[niche] || niche;
+
+      const response = await fetch("https://api.manus.ai/v1/tasks", {
+        method: "POST",
+        headers: {
+          "accept": "application/json",
+          "content-type": "application/json",
+          "API_KEY": apiKey
+        },
+        body: JSON.stringify({
+          prompt: `Find ${nicheLabel} businesses in ${city} that use a Gmail address for their primary contact. Return a structured list with columns: Business Name, Email Address, Phone Number, Address. Format as a markdown table. Focus on businesses that would benefit from an online booking system. Find at least 15-25 businesses.`,
+          agentProfile: "manus-1.6"
+        })
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        console.error("Manus API error:", errText);
+        return res.status(response.status).json({ error: "Manus API error", details: errText });
+      }
+
+      const data = await response.json();
+      res.json({ 
+        taskId: data.task_id,
+        taskUrl: data.task_url,
+        shareUrl: data.share_url,
+        title: data.task_title
+      });
+    } catch (e: any) {
+      console.error("Manus lead gen error:", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/internal/manus-task/:taskId", async (req: Request, res: Response) => {
+    const apiKey = process.env.MANUS_API_KEY;
+    if (!apiKey) return res.status(503).json({ error: "Manus API key not configured" });
+
+    try {
+      const response = await fetch(`https://api.manus.ai/v1/tasks?query=${req.params.taskId}&limit=1`, {
+        headers: {
+          "accept": "application/json",
+          "API_KEY": apiKey
+        }
+      });
+
+      if (!response.ok) {
+        return res.status(response.status).json({ error: "Failed to fetch task" });
+      }
+
+      const data = await response.json();
+      const task = data.data?.find((t: any) => t.id === req.params.taskId);
+      if (!task) return res.status(404).json({ error: "Task not found" });
+
+      res.json({
+        status: task.status,
+        output: task.output,
+        title: task.metadata?.task_title
+      });
+    } catch (e: any) {
+      console.error("Manus task fetch error:", e);
+      res.status(500).json({ error: e.message });
     }
   });
 
