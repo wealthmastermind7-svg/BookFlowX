@@ -703,47 +703,6 @@ export function registerSeoRoutes(app: Application): void {
     }
   });
 
-  app.get("/book/:slug", (req: Request, res: Response) => {
-    const { slug } = req.params;
-    const niche = (req.query.niche as string) || "auto-detailing";
-    const businessName = slug.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
-    
-    res.send(`<!DOCTYPE html><html><head>
-      ${headTags(`Book Appointment | ${businessName}`, `Book your next service with ${businessName} online.`, `${DOMAIN}/book/${slug}`, "")}
-      <style>
-        .demo-badge { background: #f5f5f7; color: #000; padding: 4px 12px; border-radius: 100px; font-size: 12px; font-weight: 600; }
-      </style>
-    </head>
-    <body class="bg-black text-white p-8">
-      <div class="max-w-md mx-auto">
-        <div class="flex justify-between items-center mb-8">
-          <h1 class="font-heading text-3xl">${businessName}</h1>
-          <span class="demo-badge">DEMO PREVIEW</span>
-        </div>
-        <div class="glass-card rounded-3xl p-6 mb-6">
-          <h2 class="text-xl font-semibold mb-4">Select Service</h2>
-          <div class="space-y-4">
-            <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
-              <div>
-                <div class="font-medium">Standard Service</div>
-                <div class="text-silver text-sm">45 mins - $80</div>
-              </div>
-              <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
-            </div>
-            <div class="flex justify-between items-center p-4 border border-white/10 rounded-2xl">
-              <div>
-                <div class="font-medium">Premium Package</div>
-                <div class="text-silver text-sm">90 mins - $150</div>
-              </div>
-              <button class="bg-white text-black px-4 py-2 rounded-full text-sm font-bold">Book</button>
-            </div>
-          </div>
-        </div>
-        <p class="text-center text-silver text-xs">Powered by BookFlow - Smart Booking Infrastructure</p>
-      </div>
-    </body></html>`);
-  });
-
   app.get("/seo", (req, res) => res.send(seoHomepage()));
   app.get("/booking-software", (req, res) => res.send(mainDirectoryPage()));
   app.get("/booking-software/:i", (req, res) => res.send(industryDirectoryPage(req.params.i)));
