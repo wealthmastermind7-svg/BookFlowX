@@ -692,7 +692,8 @@ export function registerSeoRoutes(app: Application): void {
     
     try {
       const client = new Postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
-      const emailHtml = getEmailTemplate(businessName, `https://confirmbooking.online/book/${slug}`, slug, niche);
+      const bookingLink = niche ? `https://confirmbooking.online/book/${slug}?niche=${encodeURIComponent(niche)}` : `https://confirmbooking.online/book/${slug}`;
+      const emailHtml = getEmailTemplate(businessName, bookingLink, slug, niche);
       await client.sendEmail({
         From: `BookFlow - ${businessName} <hello@confirmbooking.online>`,
         To: to,

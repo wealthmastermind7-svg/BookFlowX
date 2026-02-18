@@ -1739,8 +1739,124 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       const business = await storage.getBusinessBySlug(req.params.slug);
       if (!business) {
-        console.error(`[Booking] Business not found for slug: ${req.params.slug}`);
-        return res.status(404).json({ error: "Business not found" });
+        const slug = req.params.slug;
+        const businessName = slug.split("-").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ");
+        const niche = (req.query.niche as string) || "";
+        const nicheMap: Record<string, {name: string; duration: string; price: string}[]> = {
+          "auto-detailing": [{name: "Express Wash & Wax", duration: "45 min", price: "$65"}, {name: "Full Interior Detail", duration: "90 min", price: "$150"}, {name: "Premium Ceramic Coating", duration: "3 hrs", price: "$350"}],
+          "salon": [{name: "Haircut & Style", duration: "45 min", price: "$55"}, {name: "Color Treatment", duration: "90 min", price: "$120"}, {name: "Full Makeover Package", duration: "2 hrs", price: "$200"}],
+          "barbershop": [{name: "Classic Haircut", duration: "30 min", price: "$35"}, {name: "Beard Trim & Shape", duration: "20 min", price: "$25"}, {name: "Hot Towel Shave", duration: "45 min", price: "$50"}],
+          "spa": [{name: "Swedish Massage", duration: "60 min", price: "$90"}, {name: "Deep Tissue Massage", duration: "90 min", price: "$130"}, {name: "Couples Spa Package", duration: "2 hrs", price: "$250"}],
+          "fitness": [{name: "Personal Training Session", duration: "60 min", price: "$75"}, {name: "Group Class", duration: "45 min", price: "$25"}, {name: "Monthly Assessment", duration: "30 min", price: "$50"}],
+          "tattoo": [{name: "Small Tattoo", duration: "1 hr", price: "$100"}, {name: "Medium Custom Piece", duration: "3 hrs", price: "$350"}, {name: "Consultation", duration: "30 min", price: "Free"}],
+          "massage": [{name: "Relaxation Massage", duration: "60 min", price: "$85"}, {name: "Sports Recovery", duration: "75 min", price: "$110"}, {name: "Hot Stone Therapy", duration: "90 min", price: "$140"}],
+        };
+        const services = nicheMap[niche] || [{name: "Standard Service", duration: "45 min", price: "$80"}, {name: "Premium Package", duration: "90 min", price: "$150"}, {name: "Consultation", duration: "30 min", price: "Free"}];
+
+        return res.status(200).type("text/html").send(`<!DOCTYPE html>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Book with ${businessName} | BookFlow</title>
+<meta name="description" content="Book your next appointment with ${businessName} online. Instant confirmation, no phone calls needed.">
+<meta property="og:title" content="Book with ${businessName}">
+<meta property="og:description" content="Book your next appointment online. Instant confirmation.">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#000;color:#f5f5f7;font-family:'Inter',sans-serif;min-height:100vh;overflow-x:hidden}
+.container{max-width:480px;margin:0 auto;padding:24px 20px 40px}
+.header{text-align:center;padding:40px 0 32px}
+.demo-badge{display:inline-block;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.12);padding:6px 16px;border-radius:100px;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:#888;margin-bottom:24px}
+.biz-name{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;letter-spacing:-1px;line-height:1.1;margin-bottom:8px}
+.biz-sub{color:#888;font-size:14px}
+.section-label{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:2px;margin-bottom:16px;font-weight:600}
+.service-card{background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.08);border-radius:24px;padding:24px;margin-bottom:12px;transition:all 0.3s ease;cursor:pointer}
+.service-card:hover{background:rgba(255,255,255,0.07);border-color:rgba(255,255,255,0.15);transform:translateY(-2px)}
+.service-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
+.service-name{font-size:18px;font-weight:600;color:#f5f5f7}
+.service-price{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:700;color:#f5f5f7;letter-spacing:-0.5px}
+.service-meta{display:flex;align-items:center;gap:8px;color:#888;font-size:13px}
+.service-dot{width:4px;height:4px;border-radius:50%;background:#444}
+.book-btn{width:100%;padding:16px;background:#f5f5f7;color:#000;border:none;border-radius:100px;font-size:15px;font-weight:700;cursor:pointer;margin-top:16px;transition:all 0.2s ease;font-family:'Inter',sans-serif}
+.book-btn:hover{background:#fff;transform:scale(1.02)}
+.divider{height:1px;background:rgba(255,255,255,0.06);margin:32px 0}
+.cta-section{text-align:center;padding:40px 0 20px}
+.cta-title{font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;margin-bottom:12px;letter-spacing:-0.5px}
+.cta-text{color:#888;font-size:14px;line-height:1.6;margin-bottom:24px}
+.cta-btn{display:inline-block;padding:16px 40px;background:transparent;color:#f5f5f7;border:1px solid rgba(255,255,255,0.2);border-radius:100px;text-decoration:none;font-size:15px;font-weight:600;transition:all 0.2s ease}
+.cta-btn:hover{background:rgba(255,255,255,0.08);border-color:rgba(255,255,255,0.3)}
+.footer{text-align:center;padding-top:32px;border-top:1px solid rgba(255,255,255,0.05)}
+.footer-brand{font-weight:800;font-size:18px;margin-bottom:4px}
+.footer-sub{color:#666;font-size:11px;text-transform:uppercase;letter-spacing:1.5px}
+.confirm-modal{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.85);backdrop-filter:blur(20px);z-index:100;align-items:center;justify-content:center;padding:20px}
+.confirm-modal.active{display:flex}
+.modal-card{background:#111;border:1px solid rgba(255,255,255,0.1);border-radius:32px;padding:40px 32px;max-width:400px;width:100%;text-align:center}
+.modal-check{width:64px;height:64px;border-radius:50%;background:rgba(255,255,255,0.05);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;font-size:28px}
+.modal-title{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;margin-bottom:12px;letter-spacing:-0.5px}
+.modal-text{color:#888;font-size:14px;line-height:1.6;margin-bottom:24px}
+</style>
+</head><body>
+<div class="container">
+  <div class="header">
+    <div class="demo-badge">Live Preview</div>
+    <div class="biz-name">${businessName}</div>
+    <div class="biz-sub">Select a service to book</div>
+  </div>
+
+  <div class="section-label">Available Services</div>
+  ${services.map((s) => `
+  <div class="service-card" onclick="showConfirm('${s.name}', '${s.duration}', '${s.price}')">
+    <div class="service-top">
+      <div class="service-name">${s.name}</div>
+      <div class="service-price">${s.price}</div>
+    </div>
+    <div class="service-meta">
+      <span>${s.duration}</span>
+      <span class="service-dot"></span>
+      <span>Instant confirmation</span>
+    </div>
+    <button class="book-btn">Book Now</button>
+  </div>`).join("")}
+
+  <div class="divider"></div>
+
+  <div class="cta-section">
+    <div class="cta-title">Want this for your business?</div>
+    <div class="cta-text">Give your customers a seamless booking experience. Custom link, QR code, automated reminders — all for less than 2 cups of coffee a month.</div>
+    <a href="https://confirmbooking.online/" class="cta-btn">Get Started Free</a>
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="footer">
+    <div class="footer-brand">BookFlow</div>
+    <div class="footer-sub">Smart Booking for Modern Businesses</div>
+  </div>
+</div>
+
+<div class="confirm-modal" id="modal">
+  <div class="modal-card">
+    <div class="modal-check">&#10003;</div>
+    <div class="modal-title">Booking Preview</div>
+    <div class="modal-text" id="modal-text"></div>
+    <p style="color:#666;font-size:13px;margin-bottom:24px;">This is a demo preview. To enable real bookings for your business, visit our website.</p>
+    <a href="https://confirmbooking.online/" style="display:inline-block;padding:14px 32px;background:#f5f5f7;color:#000;border:none;border-radius:100px;font-size:14px;font-weight:700;text-decoration:none;font-family:'Inter',sans-serif;margin-bottom:12px;">Learn More</a>
+    <br><button style="padding:14px 32px;background:transparent;color:#888;border:1px solid rgba(255,255,255,0.1);border-radius:100px;font-size:14px;font-weight:700;cursor:pointer;font-family:'Inter',sans-serif;margin-top:8px;" onclick="document.getElementById('modal').classList.remove('active')">Close</button>
+  </div>
+</div>
+
+<script>
+function showConfirm(name, dur, price) {
+  document.getElementById('modal-text').innerHTML = 'You selected <strong>' + name + '</strong> (' + dur + ') for <strong>' + price + '</strong>. Your customer would receive an instant confirmation right here.';
+  document.getElementById('modal').classList.add('active');
+}
+document.getElementById('modal').addEventListener('click', function(e) {
+  if (e.target === this) this.classList.remove('active');
+});
+</script>
+</body></html>`);
       }
 
       // Monetization Gate: Check if business is premium or has active voice subscription
