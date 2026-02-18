@@ -58,6 +58,9 @@
         "projectId": "cb4181d2-5ab3-4376-9238-e983cbb85e24"
       }
     },
-    "owner": "cerolauto"
+    "owner": "cerolauto",
+    "cli": {
+      "appVersionSource": "remote"
+    }
   }
 }
