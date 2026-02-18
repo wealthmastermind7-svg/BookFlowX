@@ -8,8 +8,19 @@ const BRAND = "BookFlow";
 const TAGLINE = "Smart Booking For Modern Businesses";
 const DOWNLOAD_LINK = "https://confirmbooking.online";
 
-function renderConfirmationPreview(businessName: string): string {
+function renderConfirmationPreview(businessName: string, niche: string = "auto-detailing"): string {
   const upperName = businessName.toUpperCase();
+  const services: Record<string, { name: string; price: string }> = {
+    "auto-detailing": { name: "Interior Detail", price: "$175.00" },
+    "salon": { name: "Haircut & Style", price: "$55.00" },
+    "barbershop": { name: "Classic Haircut", price: "$35.00" },
+    "spa": { name: "Swedish Massage", price: "$90.00" },
+    "fitness": { name: "Personal Training", price: "$75.00" },
+    "tattoo": { name: "Small Tattoo", price: "$100.00" },
+    "massage": { name: "Deep Tissue", price: "$120.00" }
+  };
+  const service = services[niche] || services["auto-detailing"];
+
   return `
     <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
       <div style="padding: 40px 32px 24px; text-align: center;">
@@ -27,7 +38,7 @@ function renderConfirmationPreview(businessName: string): string {
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
-              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Interior Detail</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.name}</td>
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
@@ -42,7 +53,7 @@ function renderConfirmationPreview(businessName: string): string {
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
-              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">$175.00</td>
+              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.price}</td>
             </tr>
           </table>
         </div>
@@ -56,8 +67,19 @@ function renderConfirmationPreview(businessName: string): string {
     </div>`;
 }
 
-function renderReminderPreview(businessName: string): string {
+function renderReminderPreview(businessName: string, niche: string = "auto-detailing"): string {
   const upperName = businessName.toUpperCase();
+  const services: Record<string, { name: string; price: string }> = {
+    "auto-detailing": { name: "Interior Detail", price: "$175.00" },
+    "salon": { name: "Haircut & Style", price: "$55.00" },
+    "barbershop": { name: "Classic Haircut", price: "$35.00" },
+    "spa": { name: "Swedish Massage", price: "$90.00" },
+    "fitness": { name: "Personal Training", price: "$75.00" },
+    "tattoo": { name: "Small Tattoo", price: "$100.00" },
+    "massage": { name: "Deep Tissue", price: "$120.00" }
+  };
+  const service = services[niche] || services["auto-detailing"];
+
   return `
     <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
       <div style="padding: 40px 32px 24px; text-align: center;">
@@ -75,7 +97,7 @@ function renderReminderPreview(businessName: string): string {
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
-              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Interior Detail</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.name}</td>
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
@@ -90,7 +112,7 @@ function renderReminderPreview(businessName: string): string {
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
-              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">$175.00</td>
+              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.price}</td>
             </tr>
           </table>
         </div>
@@ -174,12 +196,12 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Confirmations</div>
         <div style="margin-bottom: 24px;">
-          ${renderConfirmationPreview(businessName)}
+          ${renderConfirmationPreview(businessName, niche)}
         </div>
 
         <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Automated Reminders</div>
         <div style="margin-bottom: 32px;">
-          ${renderReminderPreview(businessName)}
+          ${renderReminderPreview(businessName, niche)}
         </div>
       </div>
 
