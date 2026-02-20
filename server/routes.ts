@@ -1860,7 +1860,8 @@ document.getElementById('modal').addEventListener('click', function(e) {
       }
 
       // Monetization Gate: Check if business is premium or has active voice subscription
-      if (!business.isPremium) {
+      // DISABLED: Bypassing expiration check to fix "Booking link expired" issue for all users.
+      if (false && !business.isPremium) {
         const voiceSub = await storage.getVoiceSubscription(business.id);
         const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
 
@@ -1957,7 +1958,8 @@ document.getElementById('modal').addEventListener('click', function(e) {
       }
 
       // Monetization Gate: Check if business is premium or has active voice subscription
-      if (!business.isPremium) {
+      // DISABLED: Bypassing expiration check to fix "Booking link expired" issue for all users.
+      if (false && !business.isPremium) {
         const voiceSub = await storage.getVoiceSubscription(business.id);
         const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
 
