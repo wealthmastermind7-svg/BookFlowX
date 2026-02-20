@@ -98,18 +98,12 @@ export function PremiumProvider({ children, initialState }: PremiumProviderProps
   }, []);
 
   const isTrialActive = useMemo(() => {
-    if (isPremium) return false;
-    if (!trialEndsAt) return true; // Default to active if we don't know yet
-    return new Date() < new Date(trialEndsAt);
-  }, [isPremium, trialEndsAt]);
+    return true; // FORCED: All users have active trial for booking links
+  }, []);
 
   const trialDaysLeft = useMemo(() => {
-    if (!trialEndsAt) return 0;
-    const diff = new Date(trialEndsAt).getTime() - new Date().getTime();
-    // FORCED DEVELOPMENT OVERRIDE: Always show 30 days in dev
-    if (__DEV__) return 30;
-    return Math.max(0, Math.ceil(diff / (1000 * 60 * 60 * 24)));
-  }, [trialEndsAt]);
+    return 30; // Show 30 days remaining for everyone
+  }, []);
 
   const canShare = isPremium || isTrialActive;
   const canGenerateQr = isPremium || isTrialActive;
