@@ -1825,7 +1825,7 @@ body{background:#000;color:#f5f5f7;font-family:'Inter',sans-serif;min-height:100
   <div class="cta-section">
     <div class="cta-title">Want this for your business?</div>
     <div class="cta-text">Give your customers a seamless booking experience. Custom link, QR code, automated reminders — all for less than 2 cups of coffee a month.</div>
-    <a href="https://confirmbooking.online/" class="cta-btn">Get Started Free</a>
+    <a href="https://confirmbooking.online/" class="cta-btn">Start My Free Trial</a>
   </div>
 
   <div class="divider"></div>
