@@ -1094,7 +1094,7 @@ export function registerSeoRoutes(app: Application): void {
       await client.sendEmail({
         From: `BookFlow - ${businessName} <hello@confirmbooking.online>`,
         To: to,
-        Subject: `Your Smart Booking Link & QR Code for ${businessName}`,
+        Subject: `How many bookings is ${businessName} missing each week?`,
         HtmlBody: emailHtml,
         MessageStream: "outbound"
       });
