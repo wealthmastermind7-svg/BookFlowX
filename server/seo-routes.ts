@@ -133,28 +133,43 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px; text-align: center;">
         <img src="${DOMAIN}/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Smart Booking Link & QR Code for ${businessName}</h1>
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Custom Booking System for ${businessName}</h1>
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">Hi there,</p>
       
-      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        I noticed <strong>${businessName}</strong> offers services that rely on customer appointments, and I wanted to share something that could immediately help increase confirmed bookings and reduce no-shows.
+      <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
+        Quick question — how many bookings does ${businessName} miss each week because customers can't book instantly?
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        We've created a custom smart booking link and QR code specifically for <strong>${businessName}</strong> that allows customers to:
+        Most appointment-based businesses lose clients when:
       </p>
 
-      <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 1.8;">
-        <li>Book services instantly from their phone</li>
-        <li>Receive automatic confirmations and reminders</li>
-        <li>Avoid double bookings or missed messages</li>
-        <li>Access your services 24/7 without calling</li>
+      <ul style="color: #ccc; padding-left: 20px; margin-bottom: 16px; line-height: 2;">
+        <li>Customers call after hours</li>
+        <li>Messages get missed</li>
+        <li>Back-and-forth takes too long</li>
+        <li>Reminders aren't automated</li>
+      </ul>
+
+      <p style="font-size: 16px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
+        When it's not instant, people book somewhere else.
+      </p>
+
+      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
+        So I created a custom smart booking link and QR code specifically for <strong>${businessName}</strong>. It lets your customers:
+      </p>
+
+      <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 2;">
+        <li>Book instantly from their phone</li>
+        <li>Get automatic confirmations and reminders</li>
+        <li>Avoid double bookings</li>
+        <li>Secure appointments 24/7</li>
       </ul>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        This gives your business a professional, always-on booking system without changing how you currently operate. You simply share the link or print the QR code, and customers handle the rest.
+        No complicated setup. No new systems to learn. You simply share the link or display the QR code. That's it.
       </p>
 
       <div style="margin-bottom: 40px;">
@@ -205,21 +220,21 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
         </div>
       </div>
 
-      <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        There's no complicated setup and you can start seeing results immediately. Many service businesses use this to improve customer convenience and capture bookings they would normally lose outside business hours.
+      <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 12px; font-weight: 600; text-align: center;">
+        If one missed appointment costs you $90, this system pays for itself in days.
       </p>
 
-      <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 32px; text-align: center; font-weight: 600;">
-        And the best part? All of this costs less than 2 cups of coffee a month. ☕☕
+      <p style="font-size: 16px; line-height: 1.6; color: #888; margin-bottom: 32px; text-align: center;">
+        All of this costs less than 2 cups of coffee a month.
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
-        <p style="color: #888; font-size: 14px; margin-bottom: 24px;">Try your custom booking demo:</p>
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 16px;">View Booking Page</a>
+        <p style="color: #ccc; font-size: 14px; margin-bottom: 24px;">Here's your live demo:</p>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 700; display: inline-block; font-size: 16px;">View ${businessName} Booking Page</a>
       </div>
 
-      <p style="font-size: 14px; color: #888; line-height: 1.6;">
-        If you'd like, I can also enable automated reminders and smart follow-ups to further reduce missed appointments.
+      <p style="font-size: 16px; color: #ccc; line-height: 1.6;">
+        Would you like me to activate this for you so you can start capturing bookings right away?
       </p>
 
       <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
