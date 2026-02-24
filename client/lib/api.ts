@@ -81,7 +81,23 @@ async function makeRequest<T>(
 
   if (!res.ok) {
     const text = await res.text();
-    throw new Error(`${res.status}: ${text}`);
+    let errorMessage = `Request failed (${res.status})`;
+    if (text.includes("<!DOCTYPE") || text.includes("<html") || text.includes("<pre>Cannot")) {
+      const cannotMatch = text.match(/Cannot\s+(GET|POST|PUT|DELETE)\s+([^\s<]+)/);
+      if (cannotMatch) {
+        errorMessage = `Route not found: ${cannotMatch[2]}. Server may still be starting.`;
+      } else {
+        errorMessage = `Server returned an unexpected response (${res.status}). Please try again.`;
+      }
+    } else {
+      try {
+        const json = JSON.parse(text);
+        errorMessage = json.error || json.message || errorMessage;
+      } catch {
+        errorMessage = text.length > 200 ? text.substring(0, 200) + "..." : text;
+      }
+    }
+    throw new Error(errorMessage);
   }
 
   if (res.status === 204) {
