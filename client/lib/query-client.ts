@@ -15,9 +15,9 @@ export function getApiUrl(): string {
     const currentHost = window.location.hostname;
     const currentProtocol = window.location.protocol;
     
-    // If running on Replit domain, use port 5000 on the same host
+    // If running on Replit domain, use the same host (Replit proxy routes to port 5000)
     if (currentHost.includes("replit.dev") || currentHost.includes("replit.app")) {
-      return `${currentProtocol}//${currentHost}:5000/`;
+      return `${currentProtocol}//${currentHost}/`;
     }
     
     // If running on custom production domain
@@ -35,7 +35,6 @@ export function getApiUrl(): string {
   // First try expo-constants (works for TestFlight/production builds)
   try {
     const Constants = require("expo-constants").default;
-    // Try multiple paths for different Expo SDK versions
     const apiDomain = 
       Constants?.expoConfig?.extra?.apiDomain ||
       Constants?.manifest?.extra?.apiDomain ||
@@ -43,8 +42,11 @@ export function getApiUrl(): string {
       "";
     
     if (apiDomain && apiDomain.length > 0) {
-      const protocol = apiDomain.includes("localhost") ? "http" : "https";
-      return `${protocol}://${apiDomain}/`;
+      const cleanDomain = apiDomain.replace(/:5000$/, "");
+      const protocol = cleanDomain.includes("localhost") ? "http" : "https";
+      return cleanDomain.includes("localhost") 
+        ? `${protocol}://${cleanDomain}:5000/` 
+        : `${protocol}://${cleanDomain}/`;
     }
   } catch (e) {
     // expo-constants not available
@@ -55,22 +57,24 @@ export function getApiUrl(): string {
   
   // Handle case where env var contains literal $REPLIT_DEV_DOMAIN (not interpolated)
   if (host.includes("$REPLIT_DEV_DOMAIN") || !host) {
-    // For native Expo Go, construct domain from packager hostname if available
     const packagerHostname = process.env.REACT_NATIVE_PACKAGER_HOSTNAME;
     if (packagerHostname && !packagerHostname.includes("$")) {
-      host = `${packagerHostname}:5000`;
+      host = packagerHostname;
     } else {
-      // Final fallback
       host = "localhost:5000";
     }
   }
 
-  // Check if host already has a protocol
+  // Strip :5000 from Replit domains - Replit proxy routes to port 5000 automatically
+  // Only keep :5000 for localhost
+  if (host.includes("replit.dev") || host.includes("replit.app")) {
+    host = host.replace(/:5000$/, "");
+  }
+
   let url: URL;
   if (host.startsWith("http://") || host.startsWith("https://")) {
     url = new URL(host);
   } else {
-    // Assume https for production domains, http for localhost
     const protocol = host.includes("localhost") ? "http" : "https";
     url = new URL(`${protocol}://${host}`);
   }
