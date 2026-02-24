@@ -653,4 +653,119 @@ export async function getUpsellSuggestions(
   }
 }
 
+// ========== KIMI CLAW AI API ==========
+
+export interface PersonaPreset {
+  label: string;
+  description: string;
+}
+
+export interface BusinessPersona {
+  tone: string;
+  greeting: string;
+  signoff: string;
+  sampleMessage: string;
+}
+
+export interface SchedulingInsight {
+  peakHours: string[];
+  slowPeriods: string[];
+  recommendations: string[];
+  optimalSlotSuggestion: string;
+  revenueOpportunity: string;
+}
+
+export interface ReengagementMessage {
+  customerName: string;
+  customerEmail: string;
+  lastBookingDate: string;
+  daysSinceLastVisit: number;
+  suggestedMessage: string;
+  subject: string;
+  urgency: "low" | "medium" | "high";
+}
+
+export interface CompetitorBriefing {
+  summary: string;
+  competitors: Array<{
+    name: string;
+    strength: string;
+    weakness: string;
+    opportunity: string;
+  }>;
+  trendingInNiche: string[];
+  actionItems: string[];
+  generatedAt: string;
+}
+
+export interface ReviewDraft {
+  reviewerName: string;
+  rating: number;
+  originalReview: string;
+  draftResponse: string;
+  tone: string;
+  priority: "urgent" | "normal" | "low";
+}
+
+export interface EmailDraft {
+  category: string;
+  subject: string;
+  fromName: string;
+  summary: string;
+  draftReply: string;
+  priority: "high" | "medium" | "low";
+  suggestedAction: string;
+}
+
+export interface MorningBriefing {
+  greeting: string;
+  todaysSummary: string;
+  bookingsToday: number;
+  revenueToday: string;
+  urgentItems: string[];
+  customerInsight: string;
+  competitorTip: string;
+  motivationalNote: string;
+  generatedAt: string;
+}
+
+export async function getPersonaPresets(): Promise<Record<string, PersonaPreset>> {
+  return makeRequest("GET", "/api/kimi/persona-presets", undefined, false);
+}
+
+export async function generatePersona(businessId: string, presetKey: string): Promise<BusinessPersona> {
+  return makeRequest("POST", `/api/businesses/${businessId}/kimi/persona`, { presetKey });
+}
+
+export async function getSchedulingInsights(businessId: string): Promise<SchedulingInsight> {
+  return makeRequest("GET", `/api/businesses/${businessId}/kimi/scheduling`);
+}
+
+export async function getReengagementSuggestions(businessId: string): Promise<ReengagementMessage[]> {
+  return makeRequest("GET", `/api/businesses/${businessId}/kimi/reengagement`);
+}
+
+export async function getCompetitorRadar(businessId: string, city?: string): Promise<CompetitorBriefing> {
+  const params = city ? `?city=${encodeURIComponent(city)}` : "";
+  return makeRequest("GET", `/api/businesses/${businessId}/kimi/competitor-radar${params}`);
+}
+
+export async function generateReviewResponses(
+  businessId: string,
+  reviews: Array<{ reviewerName: string; rating: number; text: string; platform: string }>
+): Promise<ReviewDraft[]> {
+  return makeRequest("POST", `/api/businesses/${businessId}/kimi/review-responses`, { reviews });
+}
+
+export async function categorizeEmails(
+  businessId: string,
+  emails: Array<{ from: string; subject: string; body: string }>
+): Promise<EmailDraft[]> {
+  return makeRequest("POST", `/api/businesses/${businessId}/kimi/email-management`, { emails });
+}
+
+export async function getMorningBriefing(businessId: string): Promise<MorningBriefing> {
+  return makeRequest("GET", `/api/businesses/${businessId}/kimi/morning-briefing`);
+}
+
 export const api = new ApiClient();

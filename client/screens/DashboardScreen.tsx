@@ -548,6 +548,26 @@ export default function DashboardScreen() {
             <RevenueChart data={graphData} />
           </GlassPanel>
 
+          <Pressable
+            onPress={() => {
+              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
+              (navigation as any).navigate("AIAssistant");
+            }}
+          >
+            <GlassPanel style={styles.aiAssistantCard}>
+              <View style={styles.aiAssistantRow}>
+                <View style={styles.aiAssistantIcon}>
+                  <Feather name="cpu" size={22} color="#FFFFFF" />
+                </View>
+                <View style={{ flex: 1 }}>
+                  <Animated.Text style={styles.aiAssistantTitle}>AI Assistant</Animated.Text>
+                  <Animated.Text style={styles.aiAssistantSubtitle}>Scheduling, competitors, reviews & more</Animated.Text>
+                </View>
+                <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
+              </View>
+            </GlassPanel>
+          </Pressable>
+
           <View style={styles.bookingsSection}>
             <View style={styles.bookingsHeader}>
               <Animated.Text style={styles.bookingsTitle}>{t('dashboard.bookingsAndReminders')}</Animated.Text>
@@ -1000,6 +1020,38 @@ const styles = StyleSheet.create({
     height: 3,
     borderRadius: 2,
     backgroundColor: "rgba(255,255,255,0.3)",
+  },
+  aiAssistantCard: {
+    padding: 20,
+    marginBottom: 24,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(255,255,255,0.03)",
+  },
+  aiAssistantRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 14,
+  },
+  aiAssistantIcon: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    backgroundColor: "rgba(255,255,255,0.08)",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  aiAssistantTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: "rgba(255,255,255,0.9)",
+    letterSpacing: -0.3,
+  },
+  aiAssistantSubtitle: {
+    fontSize: 13,
+    color: "rgba(255,255,255,0.4)",
+    marginTop: 2,
   },
   voiceAspirationalBanner: {
     padding: 24,

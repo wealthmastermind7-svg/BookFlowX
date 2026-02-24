@@ -46,6 +46,16 @@ import {
   hasBusinessCalendar,
   disconnectGoogleCalendar,
 } from "./googleCalendar";
+import {
+  getPersonaPresets,
+  generatePersona,
+  getSchedulingInsights,
+  getReengagementSuggestions,
+  getCompetitorRadar,
+  generateReviewResponses,
+  categorizeAndDraftEmails,
+  getMorningBriefing,
+} from "./kimiClaw";
 import { trainingData, insertTrainingDataSchema } from "@shared/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { db } from "./db";
@@ -3799,6 +3809,105 @@ IMPORTANT:
     } catch (error) {
       console.error("Error getting public booking status:", error);
       res.status(500).json({ error: "Failed to get booking status" });
+    }
+  });
+
+  // ========== KIMI CLAW AI ROUTES ==========
+
+  // Get persona presets
+  app.get("/api/kimi/persona-presets", (_req: Request, res: Response) => {
+    res.json(getPersonaPresets());
+  });
+
+  // Generate persona for business
+  app.post("/api/businesses/:businessId/kimi/persona", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const { businessId } = req.params;
+      const { presetKey } = req.body;
+      if (!presetKey) return res.status(400).json({ error: "presetKey required" });
+      const business = await storage.getBusiness(businessId);
+      if (!business) return res.status(404).json({ error: "Business not found" });
+      const industry = (await import("./context4all")).detectIndustry(business.name, "");
+      const persona = await generatePersona(business.name, industry, presetKey);
+      res.json(persona);
+    } catch (error: any) {
+      console.error("[KimiClaw] Persona error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate persona" });
+    }
+  });
+
+  // Smart scheduling insights
+  app.get("/api/businesses/:businessId/kimi/scheduling", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const insights = await getSchedulingInsights(req.params.businessId);
+      res.json(insights);
+    } catch (error: any) {
+      console.error("[KimiClaw] Scheduling error:", error);
+      res.status(500).json({ error: error.message || "Failed to get scheduling insights" });
+    }
+  });
+
+  // Re-engagement suggestions
+  app.get("/api/businesses/:businessId/kimi/reengagement", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const suggestions = await getReengagementSuggestions(req.params.businessId);
+      res.json(suggestions);
+    } catch (error: any) {
+      console.error("[KimiClaw] Re-engagement error:", error);
+      res.status(500).json({ error: error.message || "Failed to get re-engagement suggestions" });
+    }
+  });
+
+  // Competitor radar
+  app.get("/api/businesses/:businessId/kimi/competitor-radar", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const city = req.query.city as string | undefined;
+      const briefing = await getCompetitorRadar(req.params.businessId, city);
+      res.json(briefing);
+    } catch (error: any) {
+      console.error("[KimiClaw] Competitor radar error:", error);
+      res.status(500).json({ error: error.message || "Failed to get competitor briefing" });
+    }
+  });
+
+  // Review management - draft responses
+  app.post("/api/businesses/:businessId/kimi/review-responses", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const { reviews } = req.body;
+      if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
+        return res.status(400).json({ error: "reviews array required" });
+      }
+      const drafts = await generateReviewResponses(req.params.businessId, reviews);
+      res.json(drafts);
+    } catch (error: any) {
+      console.error("[KimiClaw] Review response error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate review responses" });
+    }
+  });
+
+  // Email management - categorize and draft
+  app.post("/api/businesses/:businessId/kimi/email-management", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const { emails } = req.body;
+      if (!emails || !Array.isArray(emails) || emails.length === 0) {
+        return res.status(400).json({ error: "emails array required" });
+      }
+      const drafts = await categorizeAndDraftEmails(req.params.businessId, emails);
+      res.json(drafts);
+    } catch (error: any) {
+      console.error("[KimiClaw] Email management error:", error);
+      res.status(500).json({ error: error.message || "Failed to process emails" });
+    }
+  });
+
+  // Morning briefing
+  app.get("/api/businesses/:businessId/kimi/morning-briefing", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const briefing = await getMorningBriefing(req.params.businessId);
+      res.json(briefing);
+    } catch (error: any) {
+      console.error("[KimiClaw] Morning briefing error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate morning briefing" });
     }
   });
 
