@@ -8,39 +8,77 @@ interface KimiMessage {
   content: string;
 }
 
-async function kimiChat(messages: KimiMessage[], maxTokens = 2000): Promise<string> {
+async function kimiChat(messages: KimiMessage[], maxTokens = 2000, retries = 1): Promise<string> {
   const apiKey = process.env.MOONSHOT_API_KEY;
   if (!apiKey) throw new Error("MOONSHOT_API_KEY not configured");
 
-  const response = await fetch(`${MOONSHOT_BASE_URL}/chat/completions`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${apiKey}`,
-    },
-    body: JSON.stringify({
-      model: "kimi-k2.5",
-      messages,
-      max_tokens: maxTokens,
-      temperature: 0.7,
-    }),
-  });
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    if (attempt > 0) await new Promise(r => setTimeout(r, 2000));
 
-  if (!response.ok) {
-    const err = await response.text();
-    console.error("[KimiClaw] API error:", err);
-    throw new Error(`Kimi API error: ${response.status}`);
+    const response = await fetch(`${MOONSHOT_BASE_URL}/chat/completions`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify({
+        model: "kimi-k2.5",
+        messages,
+        max_tokens: maxTokens,
+        temperature: 1,
+      }),
+    });
+
+    if (!response.ok) {
+      const err = await response.text();
+      console.error("[KimiClaw] API error (attempt", attempt + 1, "):", err);
+      if (attempt < retries) continue;
+      throw new Error(`Kimi API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    const content = data.choices?.[0]?.message?.content || "";
+    if (!content && attempt < retries) {
+      console.error("[KimiClaw] Empty response, retrying...");
+      continue;
+    }
+    return content;
   }
-
-  const data = await response.json();
-  return data.choices?.[0]?.message?.content || "";
+  return "";
 }
 
 async function kimiChatJSON<T = any>(messages: KimiMessage[], maxTokens = 2000): Promise<T> {
   const raw = await kimiChat(messages, maxTokens);
-  const jsonMatch = raw.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("No JSON found in Kimi response");
-  return JSON.parse(jsonMatch[0]);
+  const attempts: Array<() => T> = [];
+
+  const codeBlockMatch = raw.match(/```(?:json)?\s*\n?([\s\S]*?)\n?```/);
+  if (codeBlockMatch) {
+    attempts.push(() => JSON.parse(codeBlockMatch[1].trim()));
+  }
+  const openCodeBlock = raw.match(/```(?:json)?\s*\n?([\s\S]+)/);
+  if (openCodeBlock) {
+    const content = openCodeBlock[1].replace(/```\s*$/, "").trim();
+    attempts.push(() => JSON.parse(content));
+  }
+
+  const objMatch = raw.match(/(\{[\s\S]*\})/);
+  if (objMatch) {
+    attempts.push(() => JSON.parse(objMatch[1]));
+  }
+
+  const arrayMatch = raw.match(/(\[[\s\S]*\])/);
+  if (arrayMatch) {
+    attempts.push(() => JSON.parse(arrayMatch[1]));
+  }
+
+  attempts.push(() => JSON.parse(raw.trim()));
+
+  for (const attempt of attempts) {
+    try { return attempt(); } catch {}
+  }
+
+  console.error("[KimiClaw] Could not parse JSON from response:", raw.slice(0, 800));
+  throw new Error("No valid JSON found in Kimi response");
 }
 
 // ========== CUSTOM PERSONA ==========
@@ -72,22 +110,14 @@ export async function generatePersona(businessName: string, industry: string, pr
   const result = await kimiChatJSON<BusinessPersona>([
     {
       role: "system",
-      content: `You are a branding expert. Generate a communication persona for a ${industry} business called "${businessName}". 
-The desired tone is: ${preset.label} - ${preset.description}.
-
-Respond in JSON:
-{
-  "tone": "2-3 word tone descriptor",
-  "greeting": "A personalized greeting message this business would use (1 sentence)",
-  "signoff": "A warm sign-off phrase (3-5 words)",
-  "sampleMessage": "A sample booking confirmation message in this persona's voice (2-3 sentences)"
-}`
+      content: `You are a branding expert. Generate a communication persona for a ${industry} business called "${businessName}". Desired tone: ${preset.label} - ${preset.description}. You MUST respond with ONLY a JSON object, no other text. Format:
+{"tone":"tone descriptor","greeting":"greeting message","signoff":"sign-off phrase","sampleMessage":"sample booking confirmation"}`
     },
     {
       role: "user",
       content: `Business: ${businessName}\nIndustry: ${industry}\nTone preset: ${preset.label}`
     }
-  ], 500);
+  ], 1000);
 
   return result;
 }
@@ -123,16 +153,8 @@ export async function getSchedulingInsights(businessId: string): Promise<Schedul
   const result = await kimiChatJSON<SchedulingInsight>([
     {
       role: "system",
-      content: `You are a business scheduling analyst. Analyze booking patterns and provide actionable insights for optimizing appointment schedules.
-
-Respond in JSON:
-{
-  "peakHours": ["array of peak booking hours like '10:00 AM', '2:00 PM'"],
-  "slowPeriods": ["array of underutilized time slots"],
-  "recommendations": ["3-4 specific, actionable recommendations"],
-  "optimalSlotSuggestion": "One key suggestion for adding optimal new slots",
-  "revenueOpportunity": "One sentence about potential revenue increase from optimization"
-}`
+      content: `You are a business scheduling analyst. Analyze booking patterns and provide actionable insights. You MUST respond with ONLY a JSON object, no other text. The JSON format:
+{"peakHours":["10:00 AM","2:00 PM"],"slowPeriods":["8:00 AM","4:00 PM"],"recommendations":["recommendation 1","recommendation 2","recommendation 3"],"optimalSlotSuggestion":"suggestion text","revenueOpportunity":"opportunity text"}`
     },
     {
       role: "user",
@@ -143,7 +165,7 @@ Daily distribution: ${JSON.stringify(dayDistribution)}
 Services: ${services.map(s => `${s.name} ($${(s.price / 100).toFixed(2)}, ${s.duration}min)`).join(", ")}
 Active availability: ${avail.filter(a => a.isActive).map(a => `Day ${a.dayOfWeek}: ${a.startTime}-${a.endTime}`).join(", ")}`
     }
-  ], 800);
+  ], 1500);
 
   return result;
 }
@@ -201,25 +223,8 @@ export async function getReengagementSuggestions(businessId: string): Promise<Re
   const result = await kimiChatJSON<{ messages: ReengagementMessage[] }>([
     {
       role: "system",
-      content: `You are a customer retention specialist for "${business.name}", a ${industry} business.
-Tone: ${industryCtx.tone}
-
-Generate personalized re-engagement messages for inactive customers. Each message should feel personal, not automated.
-
-Respond in JSON:
-{
-  "messages": [
-    {
-      "customerName": "name",
-      "customerEmail": "email",
-      "lastBookingDate": "date",
-      "daysSinceLastVisit": number,
-      "subject": "Email subject line (personal, not salesy)",
-      "suggestedMessage": "2-3 sentence personalized message referencing their last service",
-      "urgency": "low|medium|high"
-    }
-  ]
-}`
+      content: `You are a customer retention specialist for "${business.name}", a ${industry} business. Tone: ${industryCtx.tone}. Generate personalized re-engagement messages for inactive customers. You MUST respond with ONLY a JSON object, no other text. Format:
+{"messages":[{"customerName":"name","customerEmail":"email","lastBookingDate":"2024-01-01","daysSinceLastVisit":30,"subject":"subject line","suggestedMessage":"personalized message","urgency":"medium"}]}`
     },
     {
       role: "user",
@@ -255,25 +260,8 @@ export async function getCompetitorRadar(businessId: string, city?: string): Pro
   const result = await kimiChatJSON<CompetitorBriefing>([
     {
       role: "system",
-      content: `You are a competitive intelligence analyst for service businesses. Provide a morning briefing about the competitive landscape.
-
-Based on general industry knowledge and trends, generate a realistic competitive analysis. Focus on actionable insights, not generic advice.
-
-Respond in JSON:
-{
-  "summary": "2-3 sentence executive summary of the competitive landscape",
-  "competitors": [
-    {
-      "name": "Typical competitor type (e.g., 'Local Premium Detailer')",
-      "strength": "Their key advantage",
-      "weakness": "Where they fall short",
-      "opportunity": "How to win against them"
-    }
-  ],
-  "trendingInNiche": ["3-4 current trends in this industry"],
-  "actionItems": ["3-4 specific things the business should do this week"],
-  "generatedAt": "ISO timestamp"
-}`
+      content: `You are a competitive intelligence analyst. Provide a realistic competitive analysis for a service business. You MUST respond with ONLY a JSON object, no other text. Format:
+{"summary":"executive summary","competitors":[{"name":"competitor type","strength":"advantage","weakness":"weakness","opportunity":"how to win"}],"trendingInNiche":["trend1","trend2","trend3"],"actionItems":["action1","action2","action3"],"generatedAt":"${new Date().toISOString()}"}`
     },
     {
       role: "user",
@@ -314,29 +302,8 @@ export async function generateReviewResponses(
   const result = await kimiChatJSON<{ drafts: ReviewDraft[] }>([
     {
       role: "system",
-      content: `You are a reputation management specialist for "${business.name}", a ${industry} business.
-Tone: ${industryCtx.tone}
-
-Draft professional, personalized responses to customer reviews. Rules:
-- For positive reviews (4-5 stars): Thank them warmly, reference specifics, invite them back
-- For neutral reviews (3 stars): Acknowledge feedback, offer improvement, be humble
-- For negative reviews (1-2 stars): Apologize sincerely, take responsibility, offer to make it right offline
-- Never be defensive or argumentative
-- Keep responses under 80 words
-
-Respond in JSON:
-{
-  "drafts": [
-    {
-      "reviewerName": "name",
-      "rating": number,
-      "originalReview": "their review text",
-      "draftResponse": "your drafted response",
-      "tone": "grateful|empathetic|apologetic|professional",
-      "priority": "urgent|normal|low"
-    }
-  ]
-}`
+      content: `You are a reputation management specialist for "${business.name}", a ${industry} business. Tone: ${industryCtx.tone}. Draft professional responses to customer reviews (under 80 words each). Positive: thank warmly. Neutral: acknowledge, be humble. Negative: apologize, offer to fix offline. You MUST respond with ONLY a JSON object, no other text. Format:
+{"drafts":[{"reviewerName":"name","rating":5,"originalReview":"text","draftResponse":"response","tone":"grateful","priority":"normal"}]}`
     },
     {
       role: "user",
@@ -372,29 +339,8 @@ export async function categorizeAndDraftEmails(
   const result = await kimiChatJSON<{ emails: EmailDraft[] }>([
     {
       role: "system",
-      content: `You are an email management assistant for "${business.name}", a ${industry} business.
-Tone: ${industryCtx.tone}
-
-Categorize incoming emails and draft replies. Rules:
-- Categorize each email as: booking_inquiry, complaint, general, follow_up, or vendor
-- Set priority: high (complaints, urgent bookings), medium (general inquiries), low (vendor/spam)
-- Draft concise, professional replies matching the business tone
-- Suggest a follow-up action for each
-
-Respond in JSON:
-{
-  "emails": [
-    {
-      "category": "category",
-      "subject": "original subject",
-      "fromName": "sender name",
-      "summary": "1 sentence summary",
-      "draftReply": "drafted response (2-3 sentences)",
-      "priority": "high|medium|low",
-      "suggestedAction": "what to do next"
-    }
-  ]
-}`
+      content: `You are an email management assistant for "${business.name}", a ${industry} business. Tone: ${industryCtx.tone}. Categorize emails and draft replies. Categories: booking_inquiry, complaint, general, follow_up, vendor. You MUST respond with ONLY a JSON object, no other text. Format:
+{"emails":[{"category":"booking_inquiry","subject":"subject","fromName":"name","summary":"summary","draftReply":"reply","priority":"medium","suggestedAction":"action"}]}`
     },
     {
       role: "user",
@@ -443,21 +389,8 @@ export async function getMorningBriefing(businessId: string): Promise<MorningBri
   const result = await kimiChatJSON<MorningBriefing>([
     {
       role: "system",
-      content: `You are the AI assistant for "${business.name}", a ${industry} business. Generate a concise, motivating morning briefing.
-Tone: ${industryCtx.tone}
-
-Respond in JSON:
-{
-  "greeting": "Personalized good morning message (1 sentence)",
-  "todaysSummary": "Brief overview of what's ahead today (1-2 sentences)",
-  "bookingsToday": ${todaysBookings.length},
-  "revenueToday": "$${(todaysRevenue / 100).toFixed(2)}",
-  "urgentItems": ["List of things needing immediate attention (max 3)"],
-  "customerInsight": "One interesting insight about customer behavior (1 sentence)",
-  "competitorTip": "One quick tip to stay ahead of competition (1 sentence)",
-  "motivationalNote": "A brief, genuine motivational message (1 sentence)",
-  "generatedAt": "${new Date().toISOString()}"
-}`
+      content: `You are the AI assistant for "${business.name}", a ${industry} business. Tone: ${industryCtx.tone}. Generate a concise morning briefing. You MUST respond with ONLY a JSON object, no other text. Format:
+{"greeting":"morning message","todaysSummary":"overview","bookingsToday":${todaysBookings.length},"revenueToday":"$${(todaysRevenue / 100).toFixed(2)}","urgentItems":["item1","item2"],"customerInsight":"insight","competitorTip":"tip","motivationalNote":"note","generatedAt":"${new Date().toISOString()}"}`
     },
     {
       role: "user",
@@ -470,7 +403,7 @@ Respond in JSON:
 - Services offered: ${services.map(s => s.name).join(", ")}
 - Day: ${new Date().toLocaleDateString("en-US", { weekday: "long" })}`
     }
-  ], 800);
+  ], 1200);
 
   result.generatedAt = new Date().toISOString();
   return result;
