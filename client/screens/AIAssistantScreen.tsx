@@ -108,7 +108,11 @@ export default function AIAssistantScreen() {
   const loadBusinessId = useCallback(async () => {
     try {
       const business = await api.getCurrentBusiness();
-      if (business) setBusinessId(business.id);
+      if (business) {
+        setBusinessId(business.id);
+        // Force sync business ID in api client to prevent 404s
+        await api.setBusinessId(business.id, business.ownerToken || undefined);
+      }
     } catch {}
   }, []);
 

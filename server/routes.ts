@@ -3836,6 +3836,17 @@ IMPORTANT:
     }
   });
 
+  // Morning briefing
+  app.get("/api/businesses/:businessId/kimi/morning-briefing", verifyBusinessOwnership, async (req: Request, res: Response) => {
+    try {
+      const briefing = await getMorningBriefing(req.params.businessId);
+      res.json(briefing);
+    } catch (error: any) {
+      console.error("[KimiClaw] Morning briefing error:", error);
+      res.status(500).json({ error: error.message || "Failed to generate morning briefing" });
+    }
+  });
+
   // Smart scheduling insights
   app.get("/api/businesses/:businessId/kimi/scheduling", verifyBusinessOwnership, async (req: Request, res: Response) => {
     try {
@@ -3867,47 +3878,6 @@ IMPORTANT:
     } catch (error: any) {
       console.error("[KimiClaw] Competitor radar error:", error);
       res.status(500).json({ error: error.message || "Failed to get competitor briefing" });
-    }
-  });
-
-  // Review management - draft responses
-  app.post("/api/businesses/:businessId/kimi/review-responses", verifyBusinessOwnership, async (req: Request, res: Response) => {
-    try {
-      const { reviews } = req.body;
-      if (!reviews || !Array.isArray(reviews) || reviews.length === 0) {
-        return res.status(400).json({ error: "reviews array required" });
-      }
-      const drafts = await generateReviewResponses(req.params.businessId, reviews);
-      res.json(drafts);
-    } catch (error: any) {
-      console.error("[KimiClaw] Review response error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate review responses" });
-    }
-  });
-
-  // Email management - categorize and draft
-  app.post("/api/businesses/:businessId/kimi/email-management", verifyBusinessOwnership, async (req: Request, res: Response) => {
-    try {
-      const { emails } = req.body;
-      if (!emails || !Array.isArray(emails) || emails.length === 0) {
-        return res.status(400).json({ error: "emails array required" });
-      }
-      const drafts = await categorizeAndDraftEmails(req.params.businessId, emails);
-      res.json(drafts);
-    } catch (error: any) {
-      console.error("[KimiClaw] Email management error:", error);
-      res.status(500).json({ error: error.message || "Failed to process emails" });
-    }
-  });
-
-  // Morning briefing
-  app.get("/api/businesses/:businessId/kimi/morning-briefing", verifyBusinessOwnership, async (req: Request, res: Response) => {
-    try {
-      const briefing = await getMorningBriefing(req.params.businessId);
-      res.json(briefing);
-    } catch (error: any) {
-      console.error("[KimiClaw] Morning briefing error:", error);
-      res.status(500).json({ error: error.message || "Failed to generate morning briefing" });
     }
   });
 
