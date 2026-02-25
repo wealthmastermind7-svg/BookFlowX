@@ -1109,12 +1109,16 @@ Example:
         const status = document.getElementById('kimi-status');
         btn.disabled = true; btn.style.opacity = '0.5';
         btn.textContent = 'Running...';
-        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Kimi Claw prospecting + sending...</div>';
+        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Kimi Claw prospecting, verifying emails via SMTP, then sending...</div>';
 
         try {
           const r = await fetch('/api/internal/kimi-outreach', { method: 'POST' });
           const data = await r.json();
-          status.innerHTML = '<div class="text-green-400 text-sm">Done! Sent ' + data.sent + ' emails (' + data.niche + ' in ' + data.city + ')' + (data.failed > 0 ? ', ' + data.failed + ' failed' : '') + '</div>';
+          if (data.leads && data.leads.length > 0) {
+            kimiLeads = data.leads;
+            renderKimiLeads();
+          }
+          status.innerHTML = '<div class="text-green-400 text-sm">Done! Sent ' + data.sent + ' verified emails (' + data.niche + ' in ' + data.city + ')' + (data.failed > 0 ? ', ' + data.failed + ' failed' : '') + '</div>';
         } catch {
           status.innerHTML = '<div class="text-red-400 text-sm">Outreach failed</div>';
         }

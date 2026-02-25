@@ -409,7 +409,7 @@ export async function runDailyOutreach(): Promise<{ sent: number; failed: number
   }
 
   console.log(`[OutreachCron] === Complete === Sent: ${sent}, Failed: ${failed}, Niche: ${niche}, City: ${city}`);
-  return { sent, failed, niche, city };
+  return { sent, failed, niche, city, leads: leads.map(l => ({ ...l, _sent: true })) };
 }
 
 export function getOutreachStats() {
