@@ -53,8 +53,8 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
           assistant: {
             transcriber: { provider: "deepgram", model: "nova-2", language: "multi" },
             model: {
-              provider: "openai",
-              model: "gpt-4o-mini",
+              provider: "moonshot",
+              model: "kimi-k2.5",
               messages: [
                 {
                   role: "system",
@@ -75,8 +75,8 @@ router.post("/api/vapi/server-url", async (req: Request, res: Response) => {
           assistant: {
             transcriber: { provider: "deepgram", model: "nova-2", language: "multi" },
             model: {
-              provider: "openai",
-              model: "gpt-4o-mini",
+              provider: "moonshot",
+              model: "kimi-k2.5",
               messages: [{ role: "system", content: "Trial minutes exhausted. Respond in the same language the caller is speaking." }]
             },
             voice: { provider: "11labs", voiceId: "pNInz6obpgDQGcFmaJgB", model: "eleven_multilingual_v2" },
@@ -192,8 +192,8 @@ IMPORTANT:
           },
           firstMessage: firstMessage,
           model: {
-            provider: "openai",
-            model: "gpt-4o-mini",
+            provider: "moonshot",
+            model: "kimi-k2.5",
             messages: [{ role: "system", content: systemPrompt }],
             tools: [
               {

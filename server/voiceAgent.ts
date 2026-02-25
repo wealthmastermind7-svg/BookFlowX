@@ -122,7 +122,7 @@ export async function* voiceAgentRespond(
 
     yield { type: "user_transcript", data: userText };
 
-    // Step 2: Reasoning with gpt-4o-mini
+    // Step 2: Reasoning with Kimi K2.5
     const reasoningStart = Date.now();
     const systemPrompt = buildVoiceAgentSystemPrompt(config);
     const messages: Array<{ role: "system" | "user" | "assistant"; content: string }> = [
@@ -131,11 +131,16 @@ export async function* voiceAgentRespond(
       { role: "user", content: userText },
     ];
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
+    const moonshot = new OpenAI({
+      apiKey: process.env.MOONSHOT_API_KEY,
+      baseURL: "https://api.moonshot.ai/v1",
+    });
+
+    const completion = await moonshot.chat.completions.create({
+      model: "kimi-k2.5",
       messages,
       max_tokens: 150,
-      temperature: 0.7,
+      temperature: 1.0,
     });
 
     const assistantText = completion.choices[0]?.message?.content?.trim() || "";
