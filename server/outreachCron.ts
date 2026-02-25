@@ -8,27 +8,79 @@ const NICHES = [
   "spa", "tattoo", "massage", "yoga", "therapy", "personal-trainer"
 ];
 
-const CITIES = [
-  "New York, NY", "Los Angeles, CA", "Chicago, IL", "Houston, TX",
-  "Phoenix, AZ", "Philadelphia, PA", "San Antonio, TX", "San Diego, CA",
-  "Dallas, TX", "San Jose, CA", "Austin, TX", "Jacksonville, FL",
-  "Fort Worth, TX", "Columbus, OH", "Charlotte, NC", "Indianapolis, IN",
-  "San Francisco, CA", "Seattle, WA", "Denver, CO", "Nashville, TN",
-  "Miami, FL", "Atlanta, GA", "Portland, OR", "Las Vegas, NV",
-  "Tampa, FL", "Orlando, FL", "Minneapolis, MN", "Raleigh, NC",
-  "Sacramento, CA", "Kansas City, MO"
+const TIER1_US = [
+  "Austin, TX", "Nashville, TN", "Charlotte, NC", "Raleigh, NC",
+  "Tampa, FL", "Orlando, FL", "Jacksonville, FL", "San Antonio, TX",
+  "Phoenix, AZ", "Las Vegas, NV", "Denver, CO", "Portland, OR",
+  "Sacramento, CA", "San Diego, CA", "Fort Worth, TX", "Columbus, OH",
+  "Indianapolis, IN", "Kansas City, MO", "Oklahoma City, OK", "Memphis, TN",
+];
+
+const TIER2_US = [
+  "Boise, ID", "Scottsdale, AZ", "Gilbert, AZ", "Mesa, AZ",
+  "Frisco, TX", "Plano, TX", "McKinney, TX", "Round Rock, TX",
+  "Alpharetta, GA", "Marietta, GA", "Roswell, GA", "Savannah, GA",
+  "Clearwater, FL", "St. Petersburg, FL", "Naples, FL", "Sarasota, FL",
+  "Asheville, NC", "Wilmington, NC", "Durham, NC", "Greenville, SC",
+  "Charleston, SC", "Chattanooga, TN", "Knoxville, TN", "Franklin, TN",
+  "Bend, OR", "Beaverton, OR", "Eugene, OR", "Spokane, WA",
+  "Bellevue, WA", "Tacoma, WA", "Colorado Springs, CO", "Boulder, CO",
+  "Henderson, NV", "Reno, NV", "Omaha, NE", "Des Moines, IA",
+  "Madison, WI", "Ann Arbor, MI", "Grand Rapids, MI",
+  "Richmond, VA", "Virginia Beach, VA", "Chesapeake, VA",
+];
+
+const TIER3_SUBURBS_COUNTIES = [
+  "Orange County, CA", "Westchester County, NY", "Nassau County, NY",
+  "Montgomery County, MD", "Fairfax County, VA", "DuPage County, IL",
+  "Loudoun County, VA", "Collin County, TX", "Williamson County, TX",
+  "Wake County, NC", "Mecklenburg County, NC", "Fulton County, GA",
+  "Maricopa County, AZ", "Clark County, NV", "King County, WA",
+  "Pinellas County, FL", "Palm Beach County, FL", "Broward County, FL",
+  "Bergen County, NJ", "Morris County, NJ", "Monmouth County, NJ",
+];
+
+const INTERNATIONAL = [
+  "Toronto, Canada", "Vancouver, Canada", "Calgary, Canada", "Ottawa, Canada",
+  "Montreal, Canada", "Edmonton, Canada", "Winnipeg, Canada", "Halifax, Canada",
+  "London, UK", "Manchester, UK", "Birmingham, UK", "Bristol, UK",
+  "Edinburgh, UK", "Leeds, UK", "Glasgow, UK", "Brighton, UK",
+  "Sydney, Australia", "Melbourne, Australia", "Brisbane, Australia",
+  "Perth, Australia", "Adelaide, Australia", "Gold Coast, Australia",
+  "Auckland, New Zealand", "Wellington, New Zealand", "Christchurch, New Zealand",
+  "Dublin, Ireland", "Cork, Ireland",
+];
+
+const ALL_LOCATIONS = [
+  ...TIER1_US, ...TIER1_US,
+  ...TIER2_US, ...TIER2_US, ...TIER2_US,
+  ...TIER3_SUBURBS_COUNTIES,
+  ...INTERNATIONAL,
 ];
 
 let rotationIndex = 0;
 const sentEmails = new Set<string>();
+const usedCombos = new Set<string>();
 
 function getNextNicheCity(): { niche: string; city: string } {
-  const totalCombos = NICHES.length * CITIES.length;
-  const idx = rotationIndex % totalCombos;
-  rotationIndex++;
-  const nicheIdx = Math.floor(idx / CITIES.length);
-  const cityIdx = idx % CITIES.length;
-  return { niche: NICHES[nicheIdx], city: CITIES[cityIdx] };
+  const maxAttempts = NICHES.length * ALL_LOCATIONS.length;
+  for (let i = 0; i < maxAttempts; i++) {
+    const totalCombos = NICHES.length * ALL_LOCATIONS.length;
+    const idx = rotationIndex % totalCombos;
+    rotationIndex++;
+
+    const nicheIdx = Math.floor(idx / ALL_LOCATIONS.length);
+    const cityIdx = idx % ALL_LOCATIONS.length;
+    const combo = `${NICHES[nicheIdx]}|${ALL_LOCATIONS[cityIdx]}`;
+
+    if (!usedCombos.has(combo)) {
+      usedCombos.add(combo);
+      return { niche: NICHES[nicheIdx], city: ALL_LOCATIONS[cityIdx] };
+    }
+  }
+
+  usedCombos.clear();
+  return { niche: NICHES[0], city: ALL_LOCATIONS[0] };
 }
 
 function renderConfirmationPreview(businessName: string, niche: string = "auto-detailing"): string {
@@ -257,9 +309,16 @@ export async function runDailyOutreach(): Promise<{ sent: number; failed: number
 }
 
 export function getOutreachStats() {
+  const next = getNextNicheCity();
+  rotationIndex--;
+  usedCombos.delete(`${next.niche}|${next.city}`);
   return {
     totalSent: sentEmails.size,
     rotationIndex,
-    nextCombo: getNextNicheCity(),
+    totalLocations: ALL_LOCATIONS.length,
+    totalNiches: NICHES.length,
+    totalCombos: NICHES.length * ALL_LOCATIONS.length,
+    usedCombos: usedCombos.size,
+    nextCombo: next,
   };
 }

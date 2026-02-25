@@ -1039,14 +1039,14 @@ Example:
         }
 
         let html = '<table class="w-full text-xs"><thead><tr class="border-b border-gray-800 text-gray-500 uppercase tracking-widest">';
-        html += '<th class="p-3 text-left">Business</th><th class="p-3 text-left">Email</th><th class="p-3 text-left">Phone</th><th class="p-3 text-left w-20">Action</th></tr></thead><tbody>';
+        html += '<th class="p-3 text-left">Business</th><th class="p-3 text-left">Email</th><th class="p-3 text-left">Signal</th><th class="p-3 text-left w-20">Action</th></tr></thead><tbody>';
 
         kimiLeads.forEach((lead, i) => {
           const isSent = lead._sent;
           html += '<tr class="lead-row border-b border-gray-800/50 ' + (isSent ? 'sent' : '') + '">';
-          html += '<td class="p-3"><div class="font-medium text-white">' + lead.businessName + '</div><div class="text-gray-600 mt-0.5">' + lead.slug + '</div></td>';
+          html += '<td class="p-3"><div class="font-medium text-white">' + lead.businessName + '</div><div class="text-gray-600 mt-0.5">' + lead.city + '</div></td>';
           html += '<td class="p-3 text-gray-400">' + lead.email + '</td>';
-          html += '<td class="p-3 text-gray-500">' + (lead.phone || '-') + '</td>';
+          html += '<td class="p-3"><span class="text-yellow-500/70">' + (lead.conversionSignal || '-') + '</span></td>';
           html += '<td class="p-3">' + (isSent ? '<span class="text-green-500">Sent</span>' : '<button onclick="kimiSendOne(' + i + ')" class="text-xs px-3 py-1 rounded-lg bg-white text-black font-bold hover:scale-105 transition-transform">Send</button>') + '</td>';
           html += '</tr>';
         });
@@ -1126,7 +1126,14 @@ Example:
         try {
           const r = await fetch('/api/internal/outreach-stats');
           const data = await r.json();
-          document.getElementById('kimi-stats').innerHTML = 'Total emails sent this session: <span class="text-white font-bold">' + data.totalSent + '</span> | Next rotation: <span class="text-white">' + data.nextCombo.niche + '</span> in <span class="text-white">' + data.nextCombo.city + '</span>';
+          document.getElementById('kimi-stats').innerHTML =
+            '<div class="grid grid-cols-2 gap-2 mt-2">' +
+            '<div>Emails sent: <span class="text-white font-bold">' + data.totalSent + '</span></div>' +
+            '<div>Combos used: <span class="text-white font-bold">' + data.usedCombos + '</span> / ' + data.totalCombos + '</div>' +
+            '<div>Locations: <span class="text-white">' + data.totalLocations + '</span> (US + Intl)</div>' +
+            '<div>Niches: <span class="text-white">' + data.totalNiches + '</span></div>' +
+            '</div>' +
+            '<div class="mt-2">Next target: <span class="text-white font-bold">' + data.nextCombo.niche + '</span> in <span class="text-white font-bold">' + data.nextCombo.city + '</span></div>';
         } catch {}
       }
       loadOutreachStats();
