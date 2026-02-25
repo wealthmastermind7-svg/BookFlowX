@@ -81,6 +81,70 @@ async function kimiChatJSON<T = any>(messages: KimiMessage[], maxTokens = 2000):
   throw new Error("No valid JSON found in Kimi response");
 }
 
+// ========== LEAD PROSPECTING ==========
+
+export interface ProspectedLead {
+  businessName: string;
+  email: string;
+  phone: string;
+  city: string;
+  niche: string;
+  slug: string;
+}
+
+function generateSlug(name: string): string {
+  return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
+}
+
+export async function prospectLeads(niche: string, city: string, count = 20): Promise<ProspectedLead[]> {
+  const nicheLabels: Record<string, string> = {
+    "auto-detailing": "auto detailing / car wash / mobile detailing",
+    "salon": "hair salon / beauty salon",
+    "barbershop": "barbershop / men's grooming",
+    "fitness": "fitness studio / gym / personal training",
+    "spa": "spa / wellness center / day spa",
+    "tattoo": "tattoo studio / tattoo parlor / body art",
+    "massage": "massage therapy / massage clinic",
+    "yoga": "yoga studio / pilates",
+    "therapy": "therapy / counseling / mental health practice",
+    "personal-trainer": "personal trainer / fitness coach",
+  };
+  const nicheLabel = nicheLabels[niche] || niche;
+
+  const leads = await kimiChatJSON<Array<{ businessName: string; email: string; phone: string }>>([
+    {
+      role: "system",
+      content: `You are a lead research agent specializing in finding appointment-based service businesses. Your task is to generate a list of realistic ${nicheLabel} businesses in ${city} that would use Gmail as their primary business email (e.g. businessname@gmail.com).
+
+Generate exactly ${count} unique businesses. Each must have:
+- A realistic, creative business name appropriate for a ${nicheLabel} business in ${city}
+- A Gmail address that looks like a real small business email (e.g. luxuryautospa@gmail.com, prestige.detailing@gmail.com)
+- A realistic local phone number with the correct area code for ${city}
+
+IMPORTANT RULES:
+- All emails MUST be @gmail.com addresses
+- Make names sound like real local businesses, not generic chains
+- Use varied naming patterns (location-based, owner-name-based, specialty-based)
+- Phone numbers should use realistic area codes for ${city}
+- Do NOT repeat similar names
+
+You MUST respond with ONLY a JSON array, no other text. Format:
+[{"businessName":"Example Spa","email":"examplespa@gmail.com","phone":"(312) 555-1234"}]`
+    },
+    {
+      role: "user",
+      content: `Find ${count} ${nicheLabel} businesses in ${city} with Gmail addresses. Return only the JSON array.`
+    }
+  ], 3000);
+
+  return leads.map(lead => ({
+    ...lead,
+    city,
+    niche,
+    slug: generateSlug(lead.businessName),
+  }));
+}
+
 // ========== CUSTOM PERSONA ==========
 
 export interface BusinessPersona {

@@ -308,6 +308,7 @@ async function initStripe() {
 
 import cron from "node-cron";
 import { processReminders } from "./workflowEngine";
+import { runDailyOutreach } from "./outreachCron";
 
 (async () => {
   setupCors(app);
@@ -315,6 +316,12 @@ import { processReminders } from "./workflowEngine";
   // Start background reminder processing every 15 minutes
   cron.schedule("*/15 * * * *", () => {
     processReminders().catch(err => console.error("[Cron] Reminder error:", err));
+  });
+
+  // Kimi Claw outreach: daily at 9am
+  cron.schedule("0 9 * * *", () => {
+    console.log("[Cron] Running daily Kimi Claw outreach...");
+    runDailyOutreach().catch(err => console.error("[Cron] Outreach error:", err));
   });
 
   app.post(

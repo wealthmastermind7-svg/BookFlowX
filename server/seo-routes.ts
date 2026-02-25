@@ -635,7 +635,7 @@ function outreachPage(): string {
       <div class="flex gap-2 mb-6">
         <button onclick="switchTab('single')" id="tab-single" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-active">Single Send</button>
         <button onclick="switchTab('bulk')" id="tab-bulk" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">Bulk Import</button>
-        <button onclick="switchTab('manus')" id="tab-manus" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">Generate Leads</button>
+        <button onclick="switchTab('kimi')" id="tab-kimi" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">Kimi Claw</button>
         <button onclick="switchTab('history')" id="tab-history" class="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all tab-inactive">History</button>
       </div>
 
@@ -730,38 +730,69 @@ Example:
         <div id="bulk-msg" class="mt-4 text-center font-medium min-h-[24px]"></div>
       </div>
 
-      <!-- GENERATE LEADS TAB (MANUS) -->
-      <div id="panel-manus" class="panel hidden">
-        <div class="max-w-md">
-          <div class="space-y-4">
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
-              <select id="manus-niche" class="w-full p-4 rounded-2xl text-base">
-                <option value="auto-detailing">Auto Detailing</option>
-                <option value="salon">Hair Salon</option>
-                <option value="barbershop">Barbershop</option>
-                <option value="fitness">Fitness / Gym</option>
-                <option value="spa">Spa / Wellness</option>
-                <option value="tattoo">Tattoo Studio</option>
-                <option value="massage">Massage Therapy</option>
-              </select>
+      <!-- KIMI CLAW TAB -->
+      <div id="panel-kimi" class="panel hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
+                <select id="kimi-niche" class="w-full p-4 rounded-2xl text-base">
+                  <option value="auto-detailing">Auto Detailing</option>
+                  <option value="salon">Hair Salon</option>
+                  <option value="barbershop">Barbershop</option>
+                  <option value="fitness">Fitness / Gym</option>
+                  <option value="spa">Spa / Wellness</option>
+                  <option value="tattoo">Tattoo Studio</option>
+                  <option value="massage">Massage Therapy</option>
+                  <option value="yoga">Yoga Studio</option>
+                  <option value="therapy">Therapy / Counseling</option>
+                  <option value="personal-trainer">Personal Trainer</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">City</label>
+                <input id="kimi-city" placeholder="Chicago, IL" class="w-full p-4 rounded-2xl text-base">
+              </div>
+              <button onclick="kimiProspect()" id="kimi-prospect-btn" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
+                Find Leads with Kimi Claw
+              </button>
+              <div class="border-t border-gray-800 pt-4 mt-4">
+                <button onclick="kimiAutoOutreach()" id="kimi-auto-btn" class="w-full py-4 rounded-2xl bg-transparent text-white font-bold text-base border border-gray-700 hover:border-gray-500 transition-colors">
+                  Run Auto Outreach (Next Rotation)
+                </button>
+                <p class="text-xs text-gray-600 mt-2 text-center">Kimi picks the next niche/city combo, prospects 20 leads, and sends all emails automatically.</p>
+              </div>
             </div>
-            <div>
-              <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">City</label>
-              <input id="manus-city" placeholder="Chicago, IL" class="w-full p-4 rounded-2xl text-base">
-            </div>
-            <button onclick="generateLeads()" id="generate-btn" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
-              Generate Leads with Manus
-            </button>
+            <div id="kimi-status" class="mt-6 min-h-[24px]"></div>
           </div>
-          <div id="manus-status" class="mt-6 min-h-[24px]"></div>
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <label class="text-xs uppercase tracking-widest text-gray-500 ml-1">Prospected Leads (<span id="kimi-lead-count">0</span>)</label>
+              <button onclick="kimiSendAll()" id="kimi-send-all-btn" class="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:scale-[1.02] active:scale-[0.98] transition-transform hidden">Send All via Postmark</button>
+            </div>
+            <div id="kimi-leads-list" class="border border-gray-800 rounded-2xl overflow-hidden max-h-[500px] overflow-y-auto">
+              <div class="p-8 text-center text-gray-600 text-sm">Kimi Claw will find Gmail leads here</div>
+            </div>
+            <div id="kimi-send-progress" class="mt-4 hidden">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></div>
+                <span id="kimi-send-progress-text" class="text-sm text-gray-400">Sending...</span>
+              </div>
+              <div class="w-full bg-gray-800 rounded-full h-2">
+                <div id="kimi-send-progress-bar" class="bg-white h-2 rounded-full progress-bar" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div id="manus-results" class="mt-6 hidden">
-          <div class="flex items-center justify-between mb-3">
-            <label class="text-xs uppercase tracking-widest text-gray-500 ml-1">Generated Leads</label>
-            <button onclick="importManusToQueue()" class="px-4 py-2 rounded-xl bg-white text-black font-bold text-xs hover:scale-[1.02] active:scale-[0.98] transition-transform">Import to Send Queue</button>
+
+        <div class="mt-6 p-4 border border-gray-800 rounded-2xl">
+          <div class="flex items-center gap-3 mb-2">
+            <div class="w-2 h-2 rounded-full bg-blue-400"></div>
+            <span class="text-xs uppercase tracking-widest text-gray-500">Daily Cron Status</span>
           </div>
-          <div id="manus-leads-list" class="border border-gray-800 rounded-2xl overflow-hidden max-h-[400px] overflow-y-auto"></div>
+          <p class="text-sm text-gray-400">Kimi Claw runs automatically every day at <strong class="text-white">9:00 AM</strong>, finding 20 leads and sending outreach emails via Postmark.</p>
+          <div id="kimi-stats" class="mt-3 text-xs text-gray-600"></div>
         </div>
       </div>
 
@@ -959,46 +990,146 @@ Example:
         setTimeout(() => progress.classList.add('hidden'), 3000);
       }
 
-      // Manus lead generation
-      async function generateLeads() {
-        const niche = document.getElementById('manus-niche').value;
-        const city = document.getElementById('manus-city').value;
-        if (!city) { document.getElementById('manus-status').innerHTML = '<div class="text-red-400 text-sm">Enter a city</div>'; return; }
+      let kimiLeads = [];
 
-        const btn = document.getElementById('generate-btn');
-        const status = document.getElementById('manus-status');
+      async function kimiProspect() {
+        const niche = document.getElementById('kimi-niche').value;
+        const city = document.getElementById('kimi-city').value;
+        if (!city) { document.getElementById('kimi-status').innerHTML = '<div class="text-red-400 text-sm">Enter a city</div>'; return; }
+
+        const btn = document.getElementById('kimi-prospect-btn');
+        const status = document.getElementById('kimi-status');
         btn.disabled = true; btn.style.opacity = '0.5';
-        btn.textContent = 'Starting Manus...';
-        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Creating task...</div>';
+        btn.textContent = 'Kimi Claw is researching...';
+        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Finding Gmail leads with Kimi K2.5...</div>';
 
         try {
-          const r = await fetch('/api/internal/generate-leads', {
+          const r = await fetch('/api/internal/kimi-prospect', {
             method: 'POST', headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({ niche, city })
           });
-          
+
           if (!r.ok) {
             const err = await r.json();
             status.innerHTML = '<div class="text-red-400 text-sm">' + (err.error || 'Failed') + '</div>';
-            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Generate Leads with Manus';
+            btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Find Leads with Kimi Claw';
             return;
           }
 
           const data = await r.json();
-          status.innerHTML = '<div class="space-y-2">' +
-            '<div class="flex items-center gap-2 text-sm text-green-400"><div class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></div>Task created! Manus is researching...</div>' +
-            '<div class="text-xs text-gray-500">Task ID: ' + data.taskId + '</div>' +
-            (data.taskUrl ? '<a href="' + data.taskUrl + '" target="_blank" class="text-xs text-blue-400 hover:underline">View on Manus</a>' : '') +
-            '<div class="text-xs text-gray-500 mt-2">This typically takes 2-5 minutes. You can check the Manus dashboard or paste results in the Bulk Import tab when ready.</div>' +
-            '</div>';
-
-          btn.textContent = 'Generate More Leads';
+          kimiLeads = data.leads || [];
+          renderKimiLeads();
+          status.innerHTML = '<div class="text-green-400 text-sm">Found ' + kimiLeads.length + ' Gmail leads</div>';
+          btn.textContent = 'Find More Leads';
           btn.disabled = false; btn.style.opacity = '1';
         } catch(err) {
           status.innerHTML = '<div class="text-red-400 text-sm">Connection error</div>';
-          btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Generate Leads with Manus';
+          btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Find Leads with Kimi Claw';
         }
       }
+
+      function renderKimiLeads() {
+        const container = document.getElementById('kimi-leads-list');
+        document.getElementById('kimi-lead-count').textContent = kimiLeads.length;
+        document.getElementById('kimi-send-all-btn').classList.toggle('hidden', kimiLeads.length === 0);
+
+        if (kimiLeads.length === 0) {
+          container.innerHTML = '<div class="p-8 text-center text-gray-600 text-sm">No leads found</div>';
+          return;
+        }
+
+        let html = '<table class="w-full text-xs"><thead><tr class="border-b border-gray-800 text-gray-500 uppercase tracking-widest">';
+        html += '<th class="p-3 text-left">Business</th><th class="p-3 text-left">Email</th><th class="p-3 text-left">Phone</th><th class="p-3 text-left w-20">Action</th></tr></thead><tbody>';
+
+        kimiLeads.forEach((lead, i) => {
+          const isSent = lead._sent;
+          html += '<tr class="lead-row border-b border-gray-800/50 ' + (isSent ? 'sent' : '') + '">';
+          html += '<td class="p-3"><div class="font-medium text-white">' + lead.businessName + '</div><div class="text-gray-600 mt-0.5">' + lead.slug + '</div></td>';
+          html += '<td class="p-3 text-gray-400">' + lead.email + '</td>';
+          html += '<td class="p-3 text-gray-500">' + (lead.phone || '-') + '</td>';
+          html += '<td class="p-3">' + (isSent ? '<span class="text-green-500">Sent</span>' : '<button onclick="kimiSendOne(' + i + ')" class="text-xs px-3 py-1 rounded-lg bg-white text-black font-bold hover:scale-105 transition-transform">Send</button>') + '</td>';
+          html += '</tr>';
+        });
+
+        html += '</tbody></table>';
+        container.innerHTML = html;
+      }
+
+      async function kimiSendOne(idx) {
+        const lead = kimiLeads[idx];
+        if (!lead || lead._sent) return;
+
+        try {
+          const r = await fetch('/api/internal/send-outreach', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ to: lead.email, businessName: lead.businessName, slug: lead.slug, niche: lead.niche })
+          });
+          if (r.ok) {
+            lead._sent = true;
+            addToHistory(lead.email, lead.businessName, lead.niche);
+            renderKimiLeads();
+          }
+        } catch {}
+      }
+
+      async function kimiSendAll() {
+        const toSend = kimiLeads.filter(l => !l._sent);
+        if (toSend.length === 0) return;
+
+        const progress = document.getElementById('kimi-send-progress');
+        const bar = document.getElementById('kimi-send-progress-bar');
+        const text = document.getElementById('kimi-send-progress-text');
+        progress.classList.remove('hidden');
+
+        let sent = 0, failed = 0;
+        for (const lead of toSend) {
+          text.textContent = 'Sending to ' + lead.businessName + '... (' + (sent + failed + 1) + '/' + toSend.length + ')';
+          bar.style.width = ((sent + failed) / toSend.length * 100) + '%';
+
+          try {
+            const r = await fetch('/api/internal/send-outreach', {
+              method: 'POST', headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ to: lead.email, businessName: lead.businessName, slug: lead.slug, niche: lead.niche })
+            });
+            if (r.ok) { lead._sent = true; sent++; addToHistory(lead.email, lead.businessName, lead.niche); }
+            else { failed++; }
+          } catch { failed++; }
+
+          renderKimiLeads();
+          if (sent + failed < toSend.length) await new Promise(r => setTimeout(r, 1500));
+        }
+
+        bar.style.width = '100%';
+        text.textContent = sent + ' sent' + (failed > 0 ? ', ' + failed + ' failed' : '') + ' — complete!';
+        setTimeout(() => progress.classList.add('hidden'), 5000);
+      }
+
+      async function kimiAutoOutreach() {
+        const btn = document.getElementById('kimi-auto-btn');
+        const status = document.getElementById('kimi-status');
+        btn.disabled = true; btn.style.opacity = '0.5';
+        btn.textContent = 'Running...';
+        status.innerHTML = '<div class="flex items-center gap-2 text-sm text-gray-400"><div class="w-2 h-2 rounded-full bg-blue-400 pulse-dot"></div>Kimi Claw prospecting + sending...</div>';
+
+        try {
+          const r = await fetch('/api/internal/kimi-outreach', { method: 'POST' });
+          const data = await r.json();
+          status.innerHTML = '<div class="text-green-400 text-sm">Done! Sent ' + data.sent + ' emails (' + data.niche + ' in ' + data.city + ')' + (data.failed > 0 ? ', ' + data.failed + ' failed' : '') + '</div>';
+        } catch {
+          status.innerHTML = '<div class="text-red-400 text-sm">Outreach failed</div>';
+        }
+        btn.disabled = false; btn.style.opacity = '1'; btn.textContent = 'Run Auto Outreach (Next Rotation)';
+        loadOutreachStats();
+      }
+
+      async function loadOutreachStats() {
+        try {
+          const r = await fetch('/api/internal/outreach-stats');
+          const data = await r.json();
+          document.getElementById('kimi-stats').innerHTML = 'Total emails sent this session: <span class="text-white font-bold">' + data.totalSent + '</span> | Next rotation: <span class="text-white">' + data.nextCombo.niche + '</span> in <span class="text-white">' + data.nextCombo.city + '</span>';
+        } catch {}
+      }
+      loadOutreachStats();
 
       // History management
       function addToHistory(email, name, niche) {
@@ -1042,12 +1173,6 @@ Example:
         localStorage.removeItem('outreach_history');
         renderHistory();
         updateCounts();
-      }
-
-      // Import Manus results to bulk queue
-      function importManusToQueue() {
-        switchTab('bulk');
-        document.getElementById('bulk-niche').value = document.getElementById('manus-niche').value;
       }
 
       // Init
@@ -1105,84 +1230,36 @@ export function registerSeoRoutes(app: Application): void {
     }
   });
 
-  app.post("/api/internal/generate-leads", async (req: Request, res: Response) => {
+  app.post("/api/internal/kimi-prospect", async (req: Request, res: Response) => {
     const { niche, city } = req.body;
     if (!niche || !city) return res.status(400).json({ error: "Missing niche or city" });
 
-    const apiKey = process.env.MANUS_API_KEY;
-    if (!apiKey) return res.status(503).json({ error: "Manus API key not configured" });
-
     try {
-      const nicheLabels: Record<string, string> = {
-        "auto-detailing": "auto detailing",
-        "salon": "hair salon",
-        "barbershop": "barbershop",
-        "fitness": "fitness and gym",
-        "spa": "spa and wellness",
-        "tattoo": "tattoo studio",
-        "massage": "massage therapy"
-      };
-      const nicheLabel = nicheLabels[niche] || niche;
-
-      const response = await fetch("https://api.manus.ai/v1/tasks", {
-        method: "POST",
-        headers: {
-          "accept": "application/json",
-          "content-type": "application/json",
-          "API_KEY": apiKey
-        },
-        body: JSON.stringify({
-          prompt: `Find ${nicheLabel} businesses in ${city} that use a Gmail address for their primary contact. Return a structured list with columns: Business Name, Email Address, Phone Number, Address. Format as a markdown table. Focus on businesses that would benefit from an online booking system. Find at least 15-25 businesses.`,
-          agentProfile: "manus-1.6"
-        })
-      });
-
-      if (!response.ok) {
-        const errText = await response.text();
-        console.error("Manus API error:", errText);
-        return res.status(response.status).json({ error: "Manus API error", details: errText });
-      }
-
-      const data = await response.json();
-      res.json({ 
-        taskId: data.task_id,
-        taskUrl: data.task_url,
-        shareUrl: data.share_url,
-        title: data.task_title
-      });
+      const { runKimiProspecting } = await import("./outreachCron");
+      const leads = await runKimiProspecting(niche, city);
+      res.json({ leads, count: leads.length });
     } catch (e: any) {
-      console.error("Manus lead gen error:", e);
+      console.error("Kimi prospect error:", e);
       res.status(500).json({ error: e.message });
     }
   });
 
-  app.get("/api/internal/manus-task/:taskId", async (req: Request, res: Response) => {
-    const apiKey = process.env.MANUS_API_KEY;
-    if (!apiKey) return res.status(503).json({ error: "Manus API key not configured" });
-
+  app.post("/api/internal/kimi-outreach", async (req: Request, res: Response) => {
     try {
-      const response = await fetch(`https://api.manus.ai/v1/tasks?query=${req.params.taskId}&limit=1`, {
-        headers: {
-          "accept": "application/json",
-          "API_KEY": apiKey
-        }
-      });
-
-      if (!response.ok) {
-        return res.status(response.status).json({ error: "Failed to fetch task" });
-      }
-
-      const data = await response.json();
-      const task = data.data?.find((t: any) => t.id === req.params.taskId);
-      if (!task) return res.status(404).json({ error: "Task not found" });
-
-      res.json({
-        status: task.status,
-        output: task.output,
-        title: task.metadata?.task_title
-      });
+      const { runDailyOutreach } = await import("./outreachCron");
+      const result = await runDailyOutreach();
+      res.json(result);
     } catch (e: any) {
-      console.error("Manus task fetch error:", e);
+      console.error("Kimi outreach error:", e);
+      res.status(500).json({ error: e.message });
+    }
+  });
+
+  app.get("/api/internal/outreach-stats", async (_req: Request, res: Response) => {
+    try {
+      const { getOutreachStats } = await import("./outreachCron");
+      res.json(getOutreachStats());
+    } catch (e: any) {
       res.status(500).json({ error: e.message });
     }
   });

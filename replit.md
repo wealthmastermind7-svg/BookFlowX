@@ -29,8 +29,9 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
 - **Database**: PostgreSQL with Drizzle ORM, employing a multi-tenant schema for core entities.
 - **Navigation**: `MainTabNavigator` for admin and `BookingFlowNavigator` for public access.
 - **Features**: Dashboard analytics, CRUD for services and customers, a 4-screen public booking flow, QR code generation, and an embeddable booking widget.
-- **AI Integrations**: Smart suggestions for upsells and dynamic messaging via OpenAI, Google Calendar two-way sync, and a Vapi.ai streaming voice agent for booking.
-- **Voice Agent**: Supports real-time streaming voice booking via Vapi.ai with shareable pages and in-app native Expo voice recording. Includes a tiered subscription system for monetization with RevenueCat integration for iOS.
+- **AI Integrations**: Smart suggestions for upsells and dynamic messaging via OpenAI, Google Calendar two-way sync, and a Vapi.ai streaming voice agent for booking. Kimi K2.5 (Moonshot AI) powers business intelligence features (morning briefing, scheduling insights, competitor radar, re-engagement, review responses, email management) and voice agent reasoning.
+- **Voice Agent**: Supports real-time streaming voice booking via Vapi.ai with shareable pages and in-app native Expo voice recording. Voice agent reasoning powered by Kimi K2.5 for cost savings. Includes a tiered subscription system for monetization with RevenueCat integration for iOS.
+- **Kimi Claw Outreach**: Automated daily outreach system (`server/outreachCron.ts`) using Kimi K2.5 agent capabilities to prospect 20 Gmail-based appointment service businesses daily, then send premium outreach emails via Postmark. Runs as a cron job at 9am. Admin UI at `/internal/outreach` (Kimi Claw tab). Rotates through 10 niches × 30 cities.
 - **App Clips (iOS)**: Supports iOS App Clips for quick customer booking or owner actions, with dual modes based on deep links.
 
 ### System Design Choices
@@ -63,9 +64,10 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
 - **PostgreSQL**: Relational database.
 - **Drizzle ORM**: TypeScript ORM for PostgreSQL.
 - **RevenueCat**: In-app purchase and subscription management (for voice agent monetization).
-- **Postmark**: Email service for transactional emails like booking confirmations.
+- **Postmark**: Email service for transactional and outreach emails.
 - **Vapi.ai**: AI voice agent platform for streaming voice interactions.
-- **OpenAI**: Provides AI capabilities for smart suggestions and dynamic messaging.
+- **Moonshot AI (Kimi K2.5)**: Business intelligence, voice agent reasoning, and automated lead prospecting.
+- **OpenAI**: Provides AI capabilities for smart suggestions, TTS, and STT.
 - **Google Calendar API**: For two-way synchronization of business calendars.
 - **expo-av**: For native audio recording in React Native.
 - **react-native-app-clip**: For implementing iOS App Clips.
