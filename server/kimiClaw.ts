@@ -96,7 +96,7 @@ function generateSlug(name: string): string {
   return name.toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "");
 }
 
-export async function prospectLeads(niche: string, city: string, count = 20): Promise<ProspectedLead[]> {
+export async function prospectLeads(niche: string, city: string, count = 5): Promise<ProspectedLead[]> {
   const nicheLabels: Record<string, string> = {
     "auto-detailing": "auto detailing / car wash / mobile detailing",
     "salon": "hair salon / beauty salon",

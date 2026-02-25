@@ -350,7 +350,7 @@ async function sendOutreachEmail(lead: ProspectedLead): Promise<boolean> {
 export async function runKimiProspecting(niche: string, city: string, verify = true): Promise<ProspectedLead[]> {
   console.log(`[OutreachCron] Prospecting ${niche} businesses in ${city}...`);
   try {
-    const leads = await prospectLeads(niche, city, 20);
+    const leads = await prospectLeads(niche, city, 5);
     const gmailOnly = leads.filter(l => l.email.endsWith("@gmail.com") && !sentEmails.has(l.email));
     console.log(`[OutreachCron] Found ${leads.length} leads, ${gmailOnly.length} new Gmail leads`);
 

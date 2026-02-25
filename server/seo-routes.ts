@@ -791,7 +791,7 @@ Example:
             <div class="w-2 h-2 rounded-full bg-blue-400"></div>
             <span class="text-xs uppercase tracking-widest text-gray-500">Daily Cron Status</span>
           </div>
-          <p class="text-sm text-gray-400">Kimi Claw runs automatically every day at <strong class="text-white">9:00 AM</strong>, finding 20 leads and sending outreach emails via Postmark.</p>
+          <p class="text-sm text-gray-400">Kimi Claw runs automatically every day at <strong class="text-white">9:00 AM</strong>, finding 5 leads and sending outreach emails via Postmark.</p>
           <div id="kimi-stats" class="mt-3 text-xs text-gray-600"></div>
         </div>
       </div>
