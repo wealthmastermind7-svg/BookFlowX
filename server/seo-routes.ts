@@ -1019,7 +1019,7 @@ Example:
           const data = await r.json();
           kimiLeads = data.leads || [];
           renderKimiLeads();
-          status.innerHTML = '<div class="text-green-400 text-sm">Found ' + kimiLeads.length + ' Gmail leads</div>';
+          status.innerHTML = '<div class="text-green-400 text-sm">Found ' + kimiLeads.length + ' verified Gmail leads (invalid addresses filtered out)</div>';
           btn.textContent = 'Find More Leads';
           btn.disabled = false; btn.style.opacity = '1';
         } catch(err) {

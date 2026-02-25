@@ -1,5 +1,91 @@
 import Postmark from "postmark";
+import * as net from "net";
+import * as dns from "dns";
+import { promisify } from "util";
 import { prospectLeads, ProspectedLead } from "./kimiClaw";
+
+const resolveMx = promisify(dns.resolveMx);
+
+async function verifyEmailExists(email: string): Promise<boolean> {
+  const domain = email.split("@")[1];
+  if (!domain) return false;
+
+  try {
+    const mxRecords = await resolveMx(domain);
+    if (!mxRecords || mxRecords.length === 0) return false;
+
+    mxRecords.sort((a, b) => a.priority - b.priority);
+    const mxHost = mxRecords[0].exchange;
+
+    return new Promise((resolve) => {
+      const socket = new net.Socket();
+      let step = 0;
+      let response = "";
+      const timeout = setTimeout(() => { socket.destroy(); resolve(false); }, 10000);
+
+      socket.connect(25, mxHost, () => {});
+
+      socket.on("data", (data) => {
+        response = data.toString();
+        const code = parseInt(response.substring(0, 3));
+
+        if (step === 0 && code === 220) {
+          socket.write(`EHLO confirmbooking.online\r\n`);
+          step = 1;
+        } else if (step === 1 && code === 250) {
+          socket.write(`MAIL FROM:<verify@confirmbooking.online>\r\n`);
+          step = 2;
+        } else if (step === 2 && code === 250) {
+          socket.write(`RCPT TO:<${email}>\r\n`);
+          step = 3;
+        } else if (step === 3) {
+          socket.write("QUIT\r\n");
+          clearTimeout(timeout);
+          socket.destroy();
+          resolve(code === 250);
+        } else if (code >= 500) {
+          clearTimeout(timeout);
+          socket.destroy();
+          resolve(false);
+        }
+      });
+
+      socket.on("error", () => { clearTimeout(timeout); resolve(false); });
+      socket.on("timeout", () => { clearTimeout(timeout); socket.destroy(); resolve(false); });
+      socket.setTimeout(10000);
+    });
+  } catch {
+    return false;
+  }
+}
+
+const verifiedEmails = new Map<string, boolean>();
+
+async function isEmailValid(email: string): Promise<boolean> {
+  if (verifiedEmails.has(email)) return verifiedEmails.get(email)!;
+
+  const basicPattern = /^[a-zA-Z0-9._-]+@gmail\.com$/;
+  if (!basicPattern.test(email)) {
+    verifiedEmails.set(email, false);
+    return false;
+  }
+
+  const localPart = email.split("@")[0];
+  if (localPart.length < 3 || localPart.length > 30) {
+    verifiedEmails.set(email, false);
+    return false;
+  }
+
+  if (/^(test|example|demo|fake|noreply|admin|info|hello|contact)/.test(localPart)) {
+    verifiedEmails.set(email, false);
+    return false;
+  }
+
+  const valid = await verifyEmailExists(email);
+  verifiedEmails.set(email, valid);
+  console.log(`[OutreachCron] Email verify: ${email} → ${valid ? "EXISTS" : "INVALID"}`);
+  return valid;
+}
 
 const DOMAIN = "https://confirmbooking.online";
 
@@ -261,13 +347,31 @@ async function sendOutreachEmail(lead: ProspectedLead): Promise<boolean> {
   }
 }
 
-export async function runKimiProspecting(niche: string, city: string): Promise<ProspectedLead[]> {
+export async function runKimiProspecting(niche: string, city: string, verify = true): Promise<ProspectedLead[]> {
   console.log(`[OutreachCron] Prospecting ${niche} businesses in ${city}...`);
   try {
     const leads = await prospectLeads(niche, city, 20);
-    const filtered = leads.filter(l => l.email.endsWith("@gmail.com") && !sentEmails.has(l.email));
-    console.log(`[OutreachCron] Found ${leads.length} leads, ${filtered.length} new Gmail leads`);
-    return filtered;
+    const gmailOnly = leads.filter(l => l.email.endsWith("@gmail.com") && !sentEmails.has(l.email));
+    console.log(`[OutreachCron] Found ${leads.length} leads, ${gmailOnly.length} new Gmail leads`);
+
+    if (!verify) return gmailOnly;
+
+    console.log(`[OutreachCron] Verifying ${gmailOnly.length} emails via SMTP...`);
+    const verified: ProspectedLead[] = [];
+    let invalid = 0;
+
+    for (const lead of gmailOnly) {
+      const valid = await isEmailValid(lead.email);
+      if (valid) {
+        verified.push(lead);
+      } else {
+        invalid++;
+      }
+      await new Promise(r => setTimeout(r, 300));
+    }
+
+    console.log(`[OutreachCron] Verification complete: ${verified.length} valid, ${invalid} invalid`);
+    return verified;
   } catch (err: any) {
     console.error("[OutreachCron] Prospecting failed:", err.message);
     return [];
