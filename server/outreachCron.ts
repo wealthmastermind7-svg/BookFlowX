@@ -90,58 +90,14 @@ async function isEmailValid(email: string): Promise<boolean> {
 const DOMAIN = "https://confirmbooking.online";
 
 const NICHES = [
-  "auto-detailing", "salon", "barbershop", "fitness",
-  "spa", "tattoo", "massage", "yoga", "therapy", "personal-trainer"
-];
-
-const TIER1_US = [
-  "Austin, TX", "Nashville, TN", "Charlotte, NC", "Raleigh, NC",
-  "Tampa, FL", "Orlando, FL", "Jacksonville, FL", "San Antonio, TX",
-  "Phoenix, AZ", "Las Vegas, NV", "Denver, CO", "Portland, OR",
-  "Sacramento, CA", "San Diego, CA", "Fort Worth, TX", "Columbus, OH",
-  "Indianapolis, IN", "Kansas City, MO", "Oklahoma City, OK", "Memphis, TN",
-];
-
-const TIER2_US = [
-  "Boise, ID", "Scottsdale, AZ", "Gilbert, AZ", "Mesa, AZ",
-  "Frisco, TX", "Plano, TX", "McKinney, TX", "Round Rock, TX",
-  "Alpharetta, GA", "Marietta, GA", "Roswell, GA", "Savannah, GA",
-  "Clearwater, FL", "St. Petersburg, FL", "Naples, FL", "Sarasota, FL",
-  "Asheville, NC", "Wilmington, NC", "Durham, NC", "Greenville, SC",
-  "Charleston, SC", "Chattanooga, TN", "Knoxville, TN", "Franklin, TN",
-  "Bend, OR", "Beaverton, OR", "Eugene, OR", "Spokane, WA",
-  "Bellevue, WA", "Tacoma, WA", "Colorado Springs, CO", "Boulder, CO",
-  "Henderson, NV", "Reno, NV", "Omaha, NE", "Des Moines, IA",
-  "Madison, WI", "Ann Arbor, MI", "Grand Rapids, MI",
-  "Richmond, VA", "Virginia Beach, VA", "Chesapeake, VA",
-];
-
-const TIER3_SUBURBS_COUNTIES = [
-  "Orange County, CA", "Westchester County, NY", "Nassau County, NY",
-  "Montgomery County, MD", "Fairfax County, VA", "DuPage County, IL",
-  "Loudoun County, VA", "Collin County, TX", "Williamson County, TX",
-  "Wake County, NC", "Mecklenburg County, NC", "Fulton County, GA",
-  "Maricopa County, AZ", "Clark County, NV", "King County, WA",
-  "Pinellas County, FL", "Palm Beach County, FL", "Broward County, FL",
-  "Bergen County, NJ", "Morris County, NJ", "Monmouth County, NJ",
-];
-
-const INTERNATIONAL = [
-  "Toronto, Canada", "Vancouver, Canada", "Calgary, Canada", "Ottawa, Canada",
-  "Montreal, Canada", "Edmonton, Canada", "Winnipeg, Canada", "Halifax, Canada",
-  "London, UK", "Manchester, UK", "Birmingham, UK", "Bristol, UK",
-  "Edinburgh, UK", "Leeds, UK", "Glasgow, UK", "Brighton, UK",
-  "Sydney, Australia", "Melbourne, Australia", "Brisbane, Australia",
-  "Perth, Australia", "Adelaide, Australia", "Gold Coast, Australia",
-  "Auckland, New Zealand", "Wellington, New Zealand", "Christchurch, New Zealand",
-  "Dublin, Ireland", "Cork, Ireland",
+  "real-estate-agents", "property-managers", "rental-agencies",
+  "landlords", "buyers-agents"
 ];
 
 const ALL_LOCATIONS = [
-  ...TIER1_US, ...TIER1_US,
-  ...TIER2_US, ...TIER2_US, ...TIER2_US,
-  ...TIER3_SUBURBS_COUNTIES,
-  ...INTERNATIONAL,
+  "Auckland, New Zealand", "Sydney, Australia", "Melbourne, Australia",
+  "Brisbane, Australia", "London, UK", "Toronto, Canada",
+  "Vancouver, Canada", "Dubai, UAE",
 ];
 
 let rotationIndex = 0;
@@ -169,38 +125,33 @@ function getNextNicheCity(): { niche: string; city: string } {
   return { niche: NICHES[0], city: ALL_LOCATIONS[0] };
 }
 
-function renderConfirmationPreview(businessName: string, niche: string = "auto-detailing"): string {
+function renderConfirmationPreview(businessName: string, niche: string = "real-estate-agents"): string {
   const upperName = businessName.toUpperCase();
-  const services: Record<string, { name: string; price: string }> = {
-    "auto-detailing": { name: "Interior Detail", price: "$175.00" },
-    "salon": { name: "Haircut & Style", price: "$55.00" },
-    "barbershop": { name: "Classic Haircut", price: "$35.00" },
-    "spa": { name: "Swedish Massage", price: "$90.00" },
-    "fitness": { name: "Personal Training", price: "$75.00" },
-    "tattoo": { name: "Small Tattoo", price: "$100.00" },
-    "massage": { name: "Deep Tissue", price: "$120.00" },
-    "yoga": { name: "Yoga Class", price: "$25.00" },
-    "therapy": { name: "Therapy Session", price: "$150.00" },
-    "personal-trainer": { name: "PT Session", price: "$80.00" },
+  const services: Record<string, string> = {
+    "real-estate-agents": "Property Viewing",
+    "property-managers": "Rental Inspection",
+    "rental-agencies": "Open Home",
+    "landlords": "Rental Inspection",
+    "buyers-agents": "Property Viewing",
   };
-  const service = services[niche] || services["auto-detailing"];
+  const service = services[niche] || services["real-estate-agents"];
 
   return `
     <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
       <div style="padding: 40px 32px 24px; text-align: center;">
         <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px;">${upperName}</div>
-        <div style="font-size: 42px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">CONFIRMED</div>
-        <div style="color: #888; font-size: 14px;">Your booking has been secured</div>
+        <div style="font-size: 36px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">VIEWING CONFIRMED</div>
+        <div style="color: #888; font-size: 14px;">Your property appointment is booked</div>
       </div>
       <div style="padding: 0 32px 32px;">
         <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); border-radius: 20px; padding: 24px;">
           <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <span style="color: #666; font-size: 13px;">Service</span>
-            <span style="color: #f5f5f7; font-size: 13px; font-weight: 600;">${service.name}</span>
+            <span style="color: #666; font-size: 13px;">Viewing type</span>
+            <span style="color: #f5f5f7; font-size: 13px; font-weight: 600;">${service}</span>
           </div>
           <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <span style="color: #666; font-size: 13px;">Total</span>
-            <span style="color: #f5f5f7; font-size: 13px; font-weight: 600;">${service.price}</span>
+            <span style="color: #666; font-size: 13px;">Status</span>
+            <span style="color: #00d4ff; font-size: 13px; font-weight: 600;">Viewing Confirmed</span>
           </div>
         </div>
       </div>
@@ -214,50 +165,50 @@ function buildOutreachEmail(businessName: string, bookingLink: string, slug: str
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px; text-align: center;">
         <img src="${DOMAIN}/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Custom Booking System for ${businessName}</h1>
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Property Viewing Bookings for ${businessName}</h1>
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">Hi there,</p>
       
       <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
-        Quick question — how many bookings does ${businessName} miss each week because customers can't book instantly?
+        How many property viewings is ${businessName} missing each week?
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        Most appointment-based businesses lose clients when:
+        Property professionals lose viewing opportunities when:
       </p>
 
       <ul style="color: #ccc; padding-left: 20px; margin-bottom: 16px; line-height: 2;">
-        <li>Customers call after hours</li>
-        <li>Messages get missed</li>
-        <li>Back-and-forth takes too long</li>
-        <li>Reminders aren't automated</li>
+        <li>Viewing requests arrive after hours and go unanswered</li>
+        <li>Tenants miss scheduled viewings or inspections</li>
+        <li>Scheduling by email and phone takes too much back-and-forth</li>
+        <li>There are no automated reminders before inspections</li>
       </ul>
 
       <p style="font-size: 16px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
-        When it's not instant, people book somewhere else.
+        Buyers and tenants move on when they cannot book a viewing easily.
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        So I created a custom smart booking link and QR code specifically for <strong>${businessName}</strong>. It lets your customers:
+        Here is a property booking link and QR code for <strong>${businessName}</strong>. It helps you:
       </p>
 
       <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 2;">
-        <li>Book instantly from their phone</li>
-        <li>Get automatic confirmations and reminders</li>
-        <li>Avoid double bookings</li>
-        <li>Secure appointments 24/7</li>
+        <li>Accept viewing requests instantly from listing pages</li>
+        <li>Reduce no-shows with automated SMS confirmations and inspection reminders</li>
+        <li>Answer property enquiries 24/7 with AI voice and book viewings</li>
+        <li>Put QR codes on for-lease signs so tenants can book on the spot</li>
       </ul>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        No complicated setup. No new systems to learn. You simply share the link or display the QR code. That's it.
+        Share the booking link from your listings or display the QR code on a for-lease sign.
       </p>
 
       <div style="margin-bottom: 40px;">
-        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Property Viewing Link</div>
         <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 24px;">
           <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 700; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; font-weight: 700; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">BOOK A<br>PROPERTY<br>VIEWING</h2>
             <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
           </div>
           <div style="padding: 24px;">
@@ -269,7 +220,7 @@ function buildOutreachEmail(businessName: string, bookingLink: string, slug: str
               </td>
               <td style="vertical-align: middle; padding-left: 12px;">
                 <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
-                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK A PROPERTY VIEWING</div>
                 <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
               </td>
               <td style="width: 36px; vertical-align: middle; text-align: right;">
@@ -279,14 +230,14 @@ function buildOutreachEmail(businessName: string, bookingLink: string, slug: str
           </div>
         </div>
         
-        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">QR Code for For-Lease Signs</div>
         <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
           <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block;">
             <img src="${qrImageUrl}" alt="QR Code for ${businessName}" style="width: 200px; height: 200px; display: block;">
           </div>
           <div style="margin-top: 24px;">
             <div style="color: #f5f5f7; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${businessName}</div>
-            <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK</div>
+            <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK A VIEWING</div>
           </div>
         </div>
 
@@ -297,25 +248,25 @@ function buildOutreachEmail(businessName: string, bookingLink: string, slug: str
       </div>
 
       <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 12px; font-weight: 600; text-align: center;">
-        If one missed appointment costs you $90, this system pays for itself in days.
+        Capture viewing requests even when you're at another showing.
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #888; margin-bottom: 32px; text-align: center;">
-        All of this costs less than 2 cups of coffee a month.
+        Keep viewing enquiries, confirmations, and reminders in one place.
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
         <p style="color: #ccc; font-size: 14px; margin-bottom: 24px;">Here's your live demo:</p>
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 700; display: inline-block; font-size: 16px;">View ${businessName} Booking Page</a>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 700; display: inline-block; font-size: 16px;">View ${businessName} Viewing Page</a>
       </div>
 
       <p style="font-size: 16px; color: #ccc; line-height: 1.6;">
-        Would you like me to activate this for you so you can start capturing bookings right away?
+        Would you like to start capturing property viewing requests right away?
       </p>
 
       <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
         <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
-        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
+        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Property Professionals</p>
       </div>
     </div>
   `;
@@ -336,7 +287,7 @@ async function sendOutreachEmail(lead: ProspectedLead): Promise<boolean> {
     await client.sendEmail({
       From: `BookFlow - ${lead.businessName} <hello@confirmbooking.online>`,
       To: lead.email,
-      Subject: `How many bookings is ${lead.businessName} missing each week?`,
+      Subject: `How many property viewings is ${lead.businessName} missing each week?`,
       HtmlBody: emailHtml,
       MessageStream: "outbound",
     });

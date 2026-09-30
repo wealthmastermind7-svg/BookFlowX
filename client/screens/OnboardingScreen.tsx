@@ -51,6 +51,7 @@ export async function checkOnboardingComplete(): Promise<boolean> {
 }
 
 const BUSINESS_TYPE_DEMO_MAP: Record<string, string> = {
+  property: "property",
   salon: "salon",
   barbershop: "barbershop",
   spa: "spa",
@@ -87,6 +88,7 @@ interface BusinessType {
 }
 
 const BUSINESS_TYPES: BusinessType[] = [
+  { id: "property", name: "Property & Real Estate", icon: "home", color: "#10B981" },
   { id: "salon", name: "Salons & Beauty", icon: "scissors", color: "#EC4899" },
   { id: "barbershop", name: "Barbershops", icon: "scissors", color: "#A855F7" },
   { id: "spa", name: "Spas & Wellness", icon: "droplet", color: "#EC4899" },
@@ -255,7 +257,7 @@ function Step0BrandIntro({ onNext }: { onNext: () => void }) {
             <View style={styles.mockupHeader}>
               <View style={styles.mockupLogoRow}>
                 <View style={styles.mockupLogoIcon}>
-                  <Feather name="calendar" size={14} color="#000" />
+                  <Feather name="calendar" size={14} color="#00D4FF" />
                 </View>
                 <Text style={styles.mockupLogoText}>BookFlow</Text>
               </View>
@@ -441,8 +443,8 @@ function Step1NicheSelection({
                   {t('businessTypes.' + type.id)}
                 </Text>
                 {selectedType === type.id && (
-                  <View style={[styles.checkBadge, { backgroundColor: '#fff' }]}>
-                    <Feather name="check" size={10} color="#000" />
+                  <View style={[styles.checkBadge, { backgroundColor: '#00D4FF' }]}>
+                    <Feather name="check" size={10} color="#0A0A0F" />
                   </View>
                 )}
               </Pressable>
@@ -457,7 +459,7 @@ function Step1NicheSelection({
           style={[
             styles.primaryButton, 
             { 
-              backgroundColor: '#fff',
+              backgroundColor: '#00D4FF',
             }
           ]}
         >
@@ -571,7 +573,7 @@ function Step2BusinessName({
                 style={[
                   styles.primaryButtonFlex, 
                   { 
-                    backgroundColor: '#fff',
+                    backgroundColor: '#00D4FF',
                   }
                 ]}
                 disabled={!canContinue || isCreating}
@@ -580,8 +582,8 @@ function Step2BusinessName({
                   <ActivityIndicator size="small" color="#000" />
                 ) : (
                   <>
-                    <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('common.continue')}</Text>
-                    <Feather name="arrow-right" size={20} color="#000" />
+                    <Text style={[styles.primaryButtonText, { color: '#0A0A0F' }]}>{t('common.continue')}</Text>
+                    <Feather name="arrow-right" size={20} color="#0A0A0F" />
                   </>
                 )}
               </AnimatedPressable>
@@ -720,12 +722,12 @@ function Step3AssetPreviews({
             style={[
               styles.primaryButtonFlex, 
               { 
-                backgroundColor: '#fff',
+                backgroundColor: '#00D4FF',
               }
             ]}
           >
-            <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('common.continue')}</Text>
-            <Feather name="arrow-right" size={20} color="#000" />
+            <Text style={[styles.primaryButtonText, { color: '#0A0A0F' }]}>{t('common.continue')}</Text>
+            <Feather name="arrow-right" size={20} color="#0A0A0F" />
           </AnimatedPressable>
         </View>
       </View>
@@ -791,8 +793,8 @@ function Step4VoicePreview({
 
         <Animated.View entering={FadeInUp.delay(100)} style={styles.voicePreviewContainer}>
           <View style={[styles.voiceCard, { backgroundColor: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.1)', borderWidth: 1 }]}>
-            <View style={[styles.voiceIconCircle, { backgroundColor: '#fff' }]}>
-              <Feather name="mic" size={32} color="#000" />
+            <View style={[styles.voiceIconCircle, { backgroundColor: 'rgba(0,212,255,0.14)' }]}>
+              <Feather name="mic" size={32} color="#00D4FF" />
             </View>
             
             <Text style={[styles.voiceCardTitle, { color: '#fff' }]}>
@@ -831,12 +833,12 @@ function Step4VoicePreview({
           style={[
             styles.primaryButton, 
             { 
-              backgroundColor: '#fff',
+              backgroundColor: '#00D4FF',
             }
           ]}
         >
-          <Text style={[styles.primaryButtonText, { color: '#000' }]}>{t('onboarding.testAssistantNow')}</Text>
-          <Feather name="arrow-right" size={20} color="#000" />
+          <Text style={[styles.primaryButtonText, { color: '#0A0A0F' }]}>{t('onboarding.testAssistantNow')}</Text>
+          <Feather name="arrow-right" size={20} color="#0A0A0F" />
         </AnimatedPressable>
         
         <View style={[styles.bottomActionsRow, { marginTop: Spacing.md }]}>
@@ -872,7 +874,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
   const insets = useSafeAreaInsets();
   
   const [currentStep, setCurrentStep] = useState(0);
-  const [selectedBusinessType, setSelectedBusinessType] = useState("salon");
+  const [selectedBusinessType, setSelectedBusinessType] = useState("property");
   const [businessName, setBusinessName] = useState("");
   const [isCreating, setIsCreating] = useState(false);
   const [businessSlug, setBusinessSlug] = useState("");
@@ -907,7 +909,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
         console.warn("Failed to detect timezone:", tzError);
       }
       
-      const demoType = BUSINESS_TYPE_DEMO_MAP[selectedBusinessType] || "salon";
+      const demoType = BUSINESS_TYPE_DEMO_MAP[selectedBusinessType] || "property";
       await api.initializeDemoData(demoType);
       
       const updatedBiz = await api.getOrCreateBusiness();
@@ -991,7 +993,7 @@ export default function OnboardingScreen({ onComplete }: OnboardingScreenProps) 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000',
+    backgroundColor: '#0A0A0F',
   },
   header: {
     position: 'absolute',
@@ -1026,7 +1028,7 @@ const styles = StyleSheet.create({
     lineHeight: 46,
     letterSpacing: -1,
     marginBottom: Spacing.sm,
-    fontFamily: 'CormorantGaramond_700Bold',
+    fontFamily: 'Inter_700Bold',
   },
   stepSubtitle: {
     fontSize: 18,
@@ -1176,11 +1178,11 @@ const styles = StyleSheet.create({
   },
   qrCardContainer: {
     width: '100%',
-    backgroundColor: '#1a1a1a',
+    backgroundColor: '#111827',
     borderRadius: 32,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(0,212,255,0.18)',
   },
   qrCardTitle: {
     fontSize: 22,
@@ -1250,14 +1252,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   qrShareButton: {
-    backgroundColor: '#000',
+    backgroundColor: '#0D0D1A',
     width: '100%',
     height: 56,
     borderRadius: 28,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(0,212,255,0.3)',
   },
   qrShareButtonText: {
     color: '#fff',
@@ -1310,7 +1312,7 @@ const styles = StyleSheet.create({
   },
   voiceCardTitle: {
     fontSize: 28,
-    fontFamily: 'CormorantGaramond_700Bold',
+    fontFamily: 'Inter_600SemiBold',
     marginBottom: Spacing.sm,
   },
   voiceCardDescription: {
@@ -1365,7 +1367,7 @@ const styles = StyleSheet.create({
     left: -100,
     right: -100,
     height: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(0,212,255,0.38)",
     transform: [{ rotate: "25deg" }],
   },
   shadowColumn: {
@@ -1457,7 +1459,7 @@ const styles = StyleSheet.create({
   },
   brandMockupCard: {
     width: '92%',
-    backgroundColor: 'rgba(255,255,255,0.85)',
+    backgroundColor: '#111827',
     borderRadius: 28,
     padding: 20,
     shadowColor: '#000',
@@ -1481,20 +1483,20 @@ const styles = StyleSheet.create({
     width: 28,
     height: 28,
     borderRadius: 8,
-    backgroundColor: 'rgba(0,0,0,0.06)',
+    backgroundColor: 'rgba(0,212,255,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   mockupLogoText: {
     fontSize: 14,
     fontWeight: '700',
-    color: '#000',
+    color: '#F8FAFC',
     fontFamily: 'Inter_700Bold',
   },
   mockupHeaderLabel: {
     fontSize: 9,
     letterSpacing: 1.5,
-    color: '#999',
+    color: '#94A3B8',
     fontWeight: '600',
   },
   mockupDotsButton: {
@@ -1516,20 +1518,20 @@ const styles = StyleSheet.create({
     height: 90,
     borderRadius: 45,
     borderWidth: 4,
-    borderColor: '#000',
+    borderColor: '#00D4FF',
     alignItems: 'center',
     justifyContent: 'center',
   },
   mockupCirclePercent: {
     fontSize: 22,
     fontWeight: '800',
-    color: '#000',
+    color: '#F8FAFC',
     fontFamily: 'Inter_900Black',
   },
   mockupCircleLabel: {
     fontSize: 8,
     letterSpacing: 1.5,
-    color: '#666',
+    color: '#94A3B8',
     fontWeight: '600',
     marginTop: -2,
   },
@@ -1537,7 +1539,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: 'rgba(0,0,0,0.04)',
+    backgroundColor: '#16213E',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1545,7 +1547,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.9)',
+    backgroundColor: '#16213E',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
@@ -1561,7 +1563,7 @@ const styles = StyleSheet.create({
   mockupClientText: {
     fontSize: 12,
     fontWeight: '600',
-    color: '#000',
+    color: '#F8FAFC',
     fontFamily: 'Inter_600SemiBold',
   },
   mockupListItem: {
@@ -1575,7 +1577,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: 'rgba(0,0,0,0.05)',
+    backgroundColor: 'rgba(148,163,184,0.12)',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -1585,7 +1587,7 @@ const styles = StyleSheet.create({
   mockupLine: {
     height: 6,
     borderRadius: 3,
-    backgroundColor: 'rgba(0,0,0,0.08)',
+    backgroundColor: 'rgba(148,163,184,0.2)',
   },
   mockupCheckCircle: {
     width: 22,
@@ -1604,13 +1606,13 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     paddingHorizontal: 6,
     borderRadius: 14,
-    backgroundColor: 'rgba(0,0,0,0.03)',
+    backgroundColor: '#16213E',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
   },
   mockupIndustryChipActive: {
-    backgroundColor: '#fff',
+    backgroundColor: '#00D4FF',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.06,
@@ -1619,13 +1621,13 @@ const styles = StyleSheet.create({
   },
   mockupIndustryChipText: {
     fontSize: 9,
-    color: '#999',
+    color: '#94A3B8',
     textAlign: 'center',
     fontFamily: 'Inter_500Medium',
   },
   mockupIndustryChipTextActive: {
     fontSize: 9,
-    color: '#000',
+    color: '#0A0A0F',
     textAlign: 'center',
     fontWeight: '600',
     fontFamily: 'Inter_600SemiBold',
@@ -1639,11 +1641,11 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(0,0,0,0.15)',
+    backgroundColor: 'rgba(148,163,184,0.24)',
   },
   brandDotActive: {
     width: 20,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: '#00D4FF',
   },
   brandTextSection: {
     alignItems: 'center',
@@ -1653,19 +1655,19 @@ const styles = StyleSheet.create({
   brandHeading: {
     fontSize: 36,
     fontWeight: '700',
-    color: '#000',
+    color: '#F8FAFC',
     textAlign: 'center',
-    fontFamily: 'CormorantGaramond_700Bold',
+    fontFamily: 'Inter_600SemiBold',
     lineHeight: 42,
     marginBottom: 12,
   },
   brandHeadingItalic: {
     fontStyle: 'italic',
-    fontFamily: 'CormorantGaramond_500Medium',
+    fontFamily: 'Inter_400Regular',
   },
   brandDescription: {
     fontSize: 16,
-    color: 'rgba(0,0,0,0.5)',
+    color: '#94A3B8',
     textAlign: 'center',
     lineHeight: 24,
     fontFamily: 'Inter_400Regular',
@@ -1682,8 +1684,8 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: 'rgba(0,0,0,0.1)',
-    backgroundColor: '#fff',
+    borderColor: 'rgba(0,212,255,0.2)',
+    backgroundColor: '#111827',
   },
   brandPillText: {
     fontSize: 14,
@@ -1697,13 +1699,13 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     height: 64,
     borderRadius: 32,
-    backgroundColor: '#000',
+    backgroundColor: '#00D4FF',
     gap: Spacing.sm,
   },
   brandGetStartedText: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#fff',
+    color: '#0A0A0F',
     fontFamily: 'Inter_600SemiBold',
   },
 });

@@ -53,7 +53,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
             {t('voiceAssistant.webNotice')}
           </ThemedText>
           <Pressable
-            style={[styles.openButton, { backgroundColor: theme.text }]}
+            style={[styles.openButton, { backgroundColor: theme.accent }]}
             onPress={() => window.open(voiceUrl, "_blank")}
           >
             <Feather name="external-link" size={18} color={theme.backgroundRoot} />
@@ -78,7 +78,7 @@ export default function VoiceBookingScreen({ route, navigation }: Props) {
             Unable to load voice assistant. Please check your connection.
           </ThemedText>
           <Pressable
-            style={[styles.retryButton, { backgroundColor: theme.text }]}
+            style={[styles.retryButton, { backgroundColor: theme.accent }]}
             onPress={handleRetry}
           >
             <Feather name="refresh-cw" size={18} color={theme.backgroundRoot} />
@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   loadingOverlay: {
     ...StyleSheet.absoluteFillObject,

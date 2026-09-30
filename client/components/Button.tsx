@@ -63,7 +63,7 @@ export function Button({
         style={[
           styles.button,
           {
-            backgroundColor: theme.link,
+            backgroundColor: theme.accent,
             opacity: disabled ? 0.5 : 1,
           },
           style,
@@ -87,6 +87,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     paddingHorizontal: Spacing.lg,
+    shadowColor: "#00D4FF",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.2,
+    shadowRadius: 12,
+    elevation: 4,
   },
   buttonText: {
     fontWeight: "600",

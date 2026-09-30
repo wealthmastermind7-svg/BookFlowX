@@ -82,6 +82,58 @@
             -webkit-text-fill-color: transparent;
             animation: shimmer 4s linear infinite;
         }
+        :root {
+            color-scheme: dark;
+            --bf-ink:#0a0a0f;
+            --bf-deep:#0d0d1a;
+            --bf-panel:#111827;
+            --bf-cyan:#00d4ff;
+            --bf-violet:#7c3aed;
+            --bf-copy:#94a3b8;
+        }
+        html { background:var(--bf-ink); scroll-behavior:smooth; }
+        body { background:var(--bf-ink) !important; color:#f8fafc !important; }
+        .hero-mesh {
+            background:
+                radial-gradient(ellipse at 50% 42%,rgba(124,58,237,.18),transparent 36%),
+                radial-gradient(ellipse at 76% 75%,rgba(0,212,255,.12),transparent 34%),
+                linear-gradient(145deg,#0a0a0f,#0d0d1a 60%,#111827) !important;
+        }
+        nav { background:rgba(10,10,15,.84) !important; border-color:rgba(0,212,255,.16) !important; }
+        nav .font-display { font-family:Inter,sans-serif !important; }
+        nav a:hover { color:var(--bf-cyan) !important; }
+        .text-gold, .btn-premium-gold {
+            background-image:linear-gradient(105deg,#fff 4%,#00d4ff 55%,#a78bfa 98%) !important;
+        }
+        .text-gold { -webkit-background-clip:text !important; background-clip:text !important; }
+        .btn-premium-gold {
+            color:#041018 !important;
+            background:linear-gradient(110deg,#00d4ff,#86edff) !important;
+            box-shadow:0 0 30px rgba(0,212,255,.22);
+        }
+        .btn-premium-gold:hover { box-shadow:0 0 38px rgba(0,212,255,.42) !important; }
+        .text-accent { color:var(--bf-cyan) !important; }
+        .bg-accent, .bg-accent\/20 { background-color:rgba(0,212,255,.18) !important; }
+        .border-accent\/20, .border-accent\/30, .border-accent\/40 { border-color:rgba(0,212,255,.28) !important; }
+        .glass-card {
+            background:linear-gradient(145deg,rgba(26,26,46,.86),rgba(22,33,62,.68)) !important;
+            border:1px solid rgba(0,212,255,.17) !important;
+            box-shadow:0 18px 55px rgba(0,0,0,.22),inset 0 1px rgba(255,255,255,.035);
+            transition:transform .32s ease,border-color .32s ease,box-shadow .32s ease;
+        }
+        .glass-card:hover { transform:translateY(-4px); border-color:rgba(0,212,255,.45) !important; box-shadow:0 18px 55px rgba(0,212,255,.08); }
+        .iphone-bezel { border-color:#161a2b !important; box-shadow:0 0 0 2px rgba(0,212,255,.15),0 50px 100px -20px rgba(0,0,0,.65) !important; }
+        section#features, section#pricing { background-color:#0d0d1a !important; }
+        section:nth-of-type(3), section:nth-of-type(5) { background-color:#0a0a0f !important; }
+        .bg-charcoal { background-color:#0d0d1a !important; }
+        .bg-secondary { background-color:#111827 !important; }
+        .text-slate-400, .text-slate-500 { color:#94a3b8 !important; }
+        footer { border-color:rgba(0,212,255,.14) !important; }
+        @media(max-width:767px) {
+            .iphone-bezel { width:min(280px,82vw); }
+            section { overflow:hidden; }
+        }
+        @media(prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:.01ms !important; transition-duration:.01ms !important; } }
     </style>
 </head>
 <body class="bg-primary text-slate-100 font-sans selection:bg-accent selection:text-primary overflow-x-hidden">

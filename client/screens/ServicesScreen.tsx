@@ -562,7 +562,7 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -605,12 +605,12 @@ const styles = StyleSheet.create({
   glassCard: {
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(0,212,255,0.18)",
     padding: 24,
     overflow: "hidden",
   },
   glassCardAndroid: {
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "#111827",
   },
   cardContent: {
     flexDirection: "row",
@@ -665,10 +665,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#fff",
+    shadowColor: "#00D4FF",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 15,
@@ -696,14 +696,14 @@ const styles = StyleSheet.create({
   aiSetupButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 30,
     gap: 8,
   },
   aiSetupText: {
-    color: "#000",
+    color: "#0A0A0F",
     fontSize: 16,
     fontWeight: "700",
   },
@@ -795,13 +795,13 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingVertical: 16,
     borderRadius: 16,
     gap: 8,
   },
   aiGenerateText: {
-    color: "#000",
+    color: "#0A0A0F",
     fontSize: 16,
     fontWeight: "700",
   },
@@ -859,13 +859,13 @@ const styles = StyleSheet.create({
   },
   aiConfirmButton: {
     flex: 2,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
   },
   aiConfirmText: {
-    color: "#000",
+    color: "#0A0A0F",
     fontSize: 16,
     fontWeight: "700",
   },

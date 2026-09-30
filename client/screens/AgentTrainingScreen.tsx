@@ -279,7 +279,7 @@ export default function AgentTrainingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   backgroundWrapper: {
     ...StyleSheet.absoluteFillObject,
@@ -289,18 +289,18 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.85)",
+    backgroundColor: "rgba(10,10,15,0.86)",
   },
   glassCard: {
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "#111827",
     borderRadius: BorderRadius.xl,
     padding: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "rgba(0,212,255,0.16)",
   },
   headerCard: {
     marginBottom: 32,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#16213E",
   },
   headerTitle: {
     fontSize: 24,
@@ -342,14 +342,16 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 48,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#0D0D1A",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.28)",
     borderRadius: BorderRadius.lg,
     paddingHorizontal: 16,
     color: "#fff",
     fontSize: 15,
   },
   crawlButton: {
-    backgroundColor: "#2563EB",
+    backgroundColor: "#00D4FF",
     borderRadius: BorderRadius.lg,
     paddingHorizontal: 16,
     justifyContent: "center",
@@ -362,13 +364,15 @@ const styles = StyleSheet.create({
   addLink: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#2563EB",
+    color: "#00D4FF",
   },
   qaInputCard: {
     gap: 12,
   },
   qaInput: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#0D0D1A",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.24)",
     borderRadius: BorderRadius.lg,
     padding: 16,
     color: "#fff",
@@ -411,7 +415,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#16213E",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -435,7 +439,7 @@ const styles = StyleSheet.create({
   },
   addButton: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: BorderRadius.lg,
     paddingVertical: 14,
     alignItems: "center",
@@ -444,6 +448,6 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#000",
+    color: "#0A0A0F",
   },
 });

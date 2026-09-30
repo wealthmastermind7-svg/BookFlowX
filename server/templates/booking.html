@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Book Appointment</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     
@@ -643,6 +646,55 @@
         font-size: 14px;
       }
     }
+    :root {
+      --black:#0a0a0f;
+      --charcoal:#0d0d1a;
+      --graphite:#111827;
+      --carbon:#1a1a2e;
+      --smoke:#64748b;
+      --silver:#94a3b8;
+      --pearl:#eaf7ff;
+      --white:#f8fafc;
+      --glass-bg:rgba(26,26,46,.76);
+      --glass-border:rgba(0,212,255,.17);
+      --glass-hover:rgba(22,33,62,.92);
+    }
+    body { font-family:Inter, sans-serif; background:radial-gradient(ellipse at 15% 10%,rgba(124,58,237,.16),transparent 32%),radial-gradient(ellipse at 90% 60%,rgba(0,212,255,.1),transparent 36%),var(--black); }
+    .smoke-wisp:nth-child(1) { background:radial-gradient(ellipse,rgba(0,212,255,.15),transparent 70%); }
+    .smoke-wisp:nth-child(2) { background:radial-gradient(ellipse,rgba(124,58,237,.15),transparent 70%); }
+    .container { max-width:540px; }
+    .header h1 { letter-spacing:-.065em; }
+    .header p { color:var(--silver); }
+    .section-label { color:#8ea4bb; letter-spacing:2.4px; }
+    .glass-card {
+      background:linear-gradient(145deg,rgba(26,26,46,.84),rgba(22,33,62,.72));
+      border-color:rgba(0,212,255,.17);
+      box-shadow:0 20px 60px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.035);
+    }
+    .glass-card:hover { border-color:rgba(0,212,255,.42); }
+    .glass-card.selected,.addon-item.selected { border-color:rgba(0,212,255,.64); background:rgba(0,212,255,.1); }
+    .time-slot:hover:not(.unavailable),.addon-item:hover { border-color:rgba(0,212,255,.38); }
+    .time-slot.selected,.btn,.header-voice-btn {
+      background:linear-gradient(110deg,#00d4ff,#7cecff);
+      color:#06121c;
+      box-shadow:0 8px 32px rgba(0,212,255,.2);
+    }
+    .btn { border:1px solid rgba(127,236,255,.65); }
+    .btn:hover { box-shadow:0 12px 38px rgba(0,212,255,.3); }
+    .btn-secondary { background:rgba(17,24,39,.52); color:#dbeafe; border:1px solid rgba(148,163,184,.24); box-shadow:none; }
+    .btn-secondary:hover { background:rgba(22,33,62,.86); border-color:rgba(0,212,255,.4); }
+    .header-voice-btn { text-decoration:none; }
+    .voice-link { background:rgba(17,24,39,.66); border-color:rgba(0,212,255,.17); }
+    .voice-link:hover { border-color:rgba(0,212,255,.48); }
+    .voice-icon { background:rgba(0,212,255,.12); color:var(--bf-cyan,#00d4ff); }
+    .loading-overlay { background:var(--black); }
+    .loading-text { color:#eaf7ff; }
+    .loading-bar::after { background:#00d4ff; }
+    .checkmark-ring { background:linear-gradient(145deg,#00d4ff,#7c3aed); box-shadow:0 18px 60px rgba(0,212,255,.2); }
+    .checkmark-ring svg { color:#06121c; }
+    .input-group input,.date-input-wrapper input { background:rgba(17,24,39,.74); border-color:rgba(148,163,184,.18); }
+    .input-group input:focus,.date-input-wrapper input:focus { border-color:rgba(0,212,255,.7); box-shadow:0 0 0 3px rgba(0,212,255,.1); }
+    @media (max-width:520px) { .container { padding:24px 18px; } .header h1 { font-size:clamp(38px,12vw,54px); } }
   </style>
 </head>
 <body>

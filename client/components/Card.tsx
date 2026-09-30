@@ -79,6 +79,8 @@ export function Card({
           styles.card,
           {
             backgroundColor: cardBackgroundColor,
+            borderWidth: 1,
+            borderColor: theme.borderLight,
           },
           style,
         ]}
@@ -103,6 +105,11 @@ const styles = StyleSheet.create({
   card: {
     padding: Spacing.xl,
     borderRadius: BorderRadius["2xl"],
+    shadowColor: "#00D4FF",
+    shadowOffset: { width: 0, height: 5 },
+    shadowOpacity: 0.06,
+    shadowRadius: 14,
+    elevation: 2,
   },
   cardTitle: {
     marginBottom: Spacing.sm,

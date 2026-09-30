@@ -309,7 +309,7 @@ export default function WorkflowsScreen() {
       >
         <View style={styles.modalOverlay}>
           <Pressable style={styles.modalBackdrop} onPress={() => setPreviewModalVisible(false)} />
-          <View style={[styles.previewContent, { backgroundColor: "#000" }]}>
+          <View style={[styles.previewContent, { backgroundColor: "#0D0D1A" }]}>
             <View style={styles.headerImgPlaceholder}>
               <View style={styles.headerOverlay}>
                 <ThemedText style={styles.previewStatus}>{statusLabel}</ThemedText>
@@ -380,7 +380,7 @@ export default function WorkflowsScreen() {
   return (
     <View style={styles.container}>
       <ImageBackground source={silkBackground} style={styles.overlay}>
-        <View style={{ flex: 1, backgroundColor: "rgba(0,0,0,0.85)" }}>
+        <View style={{ flex: 1, backgroundColor: "rgba(10,10,15,0.9)" }}>
           <ScrollView
             showsVerticalScrollIndicator={false}
             contentContainerStyle={{
@@ -443,13 +443,13 @@ export default function WorkflowsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: "#0A0A0F" },
   overlay: { flex: 1 },
   headerRow: { flexDirection: "column", gap: 16, marginBottom: 40 },
   title: { fontSize: 40, fontWeight: "800", color: "#fff", letterSpacing: -2 },
-  addBtn: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: "#fff", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
-  addBtnText: { color: "#000", fontWeight: "700", fontSize: 14 },
-  glassCard: { backgroundColor: "rgba(255,255,255,0.03)", borderRadius: 32, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)", marginBottom: 16, overflow: "hidden" },
+  addBtn: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: "#00D4FF", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
+  addBtnText: { color: "#0A0A0F", fontWeight: "700", fontSize: 14 },
+  glassCard: { backgroundColor: "#111827", borderRadius: 24, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)", marginBottom: 16, overflow: "hidden" },
   workflowCard: { padding: 24 },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   triggerBadge: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
@@ -474,7 +474,7 @@ const styles = StyleSheet.create({
   emptyTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginTop: 24, marginBottom: 8 },
   emptyDesc: { fontSize: 16, color: "rgba(255,255,255,0.4)", textAlign: "center", marginBottom: 32 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.9)", justifyContent: "center", padding: 24 },
-  modalContent: { backgroundColor: "#111", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  modalContent: { backgroundColor: "#111827", borderRadius: 24, padding: 24, borderWidth: 1, borderColor: "rgba(0,212,255,0.22)" },
   modalHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 24 },
   modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff" },
   blueprintItem: { flexDirection: "row", alignItems: "center", gap: 16, padding: 20, borderRadius: 20, borderWidth: 1, borderColor: "rgba(255,255,255,0.05)", marginBottom: 12 },
@@ -492,8 +492,8 @@ const styles = StyleSheet.create({
   previewInfoRow: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 16 },
   previewInfoLabel: { fontSize: 10, textTransform: "uppercase", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
   previewInfoValue: { fontSize: 14, fontWeight: "600", color: "#fff" },
-  previewButton: { width: "100%", backgroundColor: "#fff", height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginBottom: 32 },
-  previewButtonText: { color: "#000", fontWeight: "700", textTransform: "uppercase", letterSpacing: 2, fontSize: 13 },
+  previewButton: { width: "100%", backgroundColor: "#00D4FF", height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginBottom: 32 },
+  previewButtonText: { color: "#0A0A0F", fontWeight: "700", textTransform: "uppercase", letterSpacing: 2, fontSize: 13 },
   previewFooterNote: { fontSize: 11, textAlign: "center", color: "rgba(255,255,255,0.4)", fontStyle: "italic", lineHeight: 18, marginBottom: 32 },
   previewBranding: { fontSize: 9, textAlign: "center", textTransform: "uppercase", letterSpacing: 4, color: "rgba(255,255,255,0.2)" },
   previewClose: { position: "absolute", top: 20, right: 20, width: 40, height: 40, alignItems: "center", justifyContent: "center" },

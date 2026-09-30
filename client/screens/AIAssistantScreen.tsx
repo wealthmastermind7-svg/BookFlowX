@@ -476,7 +476,7 @@ export default function AIAssistantScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { marginBottom: Spacing.xl },
-  headerTitle: { fontSize: 36, fontFamily: "CormorantGaramond-Bold", letterSpacing: -1 },
+  headerTitle: { fontSize: 36, fontFamily: "Inter-SemiBold", letterSpacing: -1 },
   headerSubtitle: { fontSize: 14, fontFamily: "Inter-Regular", marginTop: 4 },
   glassCard: {
     borderRadius: BorderRadius.md,

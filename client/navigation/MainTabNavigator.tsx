@@ -58,14 +58,18 @@ export default function MainTabNavigator() {
             ios: "transparent",
             android: theme.backgroundRoot,
           }),
-          borderTopWidth: 0,
+          borderTopWidth: 1,
+          borderTopColor: "rgba(0,212,255,0.16)",
           elevation: 0,
+          height: 66,
+          paddingTop: 8,
+          paddingBottom: Platform.OS === "ios" ? 18 : 8,
         },
         tabBarBackground: () =>
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint={isDark ? "dark" : "light"}
+              tint="dark"
               style={StyleSheet.absoluteFill}
             />
           ) : null,

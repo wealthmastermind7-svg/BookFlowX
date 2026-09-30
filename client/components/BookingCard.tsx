@@ -90,7 +90,7 @@ export function BookingCard({
         onPressOut={handlePressOut}
         style={[
           styles.card,
-          { backgroundColor: theme.backgroundDefault },
+          { backgroundColor: theme.backgroundDefault, borderColor: theme.borderLight },
         ]}
       >
       <View style={styles.header}>
@@ -155,6 +155,7 @@ const styles = StyleSheet.create({
   card: {
     padding: Spacing["2xl"],
     borderRadius: BorderRadius.lg,
+    borderWidth: 1,
   },
   header: {
     flexDirection: "row",
@@ -197,7 +198,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     paddingTop: Spacing.md,
     borderTopWidth: 1,
-    borderTopColor: "rgba(0,0,0,0.05)",
+    borderTopColor: "rgba(148,163,184,0.14)",
   },
   progressItem: {
     flexDirection: "row",
@@ -212,10 +213,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressTickActive: {
-    backgroundColor: "#22C55E",
+    backgroundColor: "#00D4FF",
   },
   progressTickInactive: {
-    backgroundColor: "rgba(0,0,0,0.1)",
+    backgroundColor: "rgba(148,163,184,0.12)",
   },
   progressLabel: {
     opacity: 0.5,

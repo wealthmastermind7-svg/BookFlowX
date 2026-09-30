@@ -319,7 +319,7 @@ export default function AvailabilityEditorScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   container: {
     flex: 1,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   scrollView: {
     flex: 1,
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: "rgba(255, 255, 255, 0.4)",
+    borderColor: "rgba(0,212,255,0.2)",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(0, 0, 0, 0.4)",
+    backgroundColor: "#111827",
   },
   dayCard: {
     marginBottom: 20,
@@ -416,14 +416,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.2)",
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255, 255, 255, 0.05)",
+    backgroundColor: "#111827",
+    borderColor: "rgba(0,212,255,0.26)",
   },
   timeButtonActive: {
-    backgroundColor: "#fff",
-    borderColor: "#fff",
+    backgroundColor: "#00D4FF",
+    borderColor: "#00D4FF",
   },
   timeButtonText: {
     fontSize: 13,
@@ -431,7 +431,7 @@ const styles = StyleSheet.create({
     color: "rgba(255, 255, 255, 0.8)",
   },
   timeButtonTextActive: {
-    color: "#000",
+    color: "#0A0A0F",
     fontWeight: "700",
   },
   footer: {
@@ -444,13 +444,13 @@ const styles = StyleSheet.create({
     borderRadius: 0,
     borderTopWidth: 1,
     borderColor: "rgba(255, 255, 255, 0.1)",
-    backgroundColor: "rgba(0, 0, 0, 0.8)",
+    backgroundColor: "rgba(10,10,15,0.94)",
   },
   saveButton: {
     height: 64,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
   },
   saveButtonDisabled: {
     opacity: 0.3,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#000",
+    color: "#0A0A0F",
     letterSpacing: 2,
   },
 });

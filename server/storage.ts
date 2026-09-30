@@ -788,7 +788,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Demo Data
-  async initializeDemoData(businessId: string, businessType: string = "salon"): Promise<void> {
+  async initializeDemoData(businessId: string, businessType: string = "property"): Promise<void> {
     // Clear existing demo data before loading new type
     const existingServices = await this.getServices(businessId);
     if (existingServices.length > 0) {
@@ -812,6 +812,20 @@ export class DatabaseStorage implements IStorage {
     }
 
     const demoDataTemplates: Record<string, { name: string; services: any[]; customers: any[] }> = {
+      property: {
+        name: "Oak Street Property Group",
+        services: [
+          { name: "Property Viewing", duration: 30, price: 0, description: "Guided viewing for prospective tenants and buyers" },
+          { name: "Rental Inspection", duration: 45, price: 0, description: "Rental property inspection walkthrough" },
+          { name: "Open Home Session", duration: 60, price: 0, description: "Scheduled open home visit" },
+          { name: "Tenant Move-In Walkthrough", duration: 45, price: 0, description: "Move-in condition walkthrough with new tenants" },
+        ],
+        customers: [
+          { name: "Taylor Morgan", email: "delivered+taylor@resend.dev", phone: "555-2101" },
+          { name: "Jordan Ellis", email: "delivered+jordan@resend.dev", phone: "555-2102" },
+          { name: "Casey Bennett", email: "delivered+casey@resend.dev", phone: "555-2103" },
+        ],
+      },
       salon: {
         name: "Signature Salon",
         services: [
@@ -1114,15 +1128,45 @@ export class DatabaseStorage implements IStorage {
       },
     };
 
-    const template = demoDataTemplates[businessType] || demoDataTemplates.salon;
+    const template = demoDataTemplates[businessType] || demoDataTemplates.property;
 
     // Create services and default availability
+    const createdServices: Service[] = [];
     for (const svc of template.services) {
-      await this.createService({ ...svc, businessId });
+      createdServices.push(await this.createService({ ...svc, businessId }));
     }
 
+    const createdCustomers: Customer[] = [];
     for (const cust of template.customers) {
-      await this.createCustomer({ ...cust, businessId });
+      createdCustomers.push(await this.createCustomer({ ...cust, businessId }));
+    }
+
+    if (businessType === "property") {
+      const today = new Date();
+      const demoBookings = [
+        { customerIndex: 0, serviceIndex: 0, time: "10:00", notes: "2BR apartment viewing" },
+        { customerIndex: 1, serviceIndex: 0, time: "14:00", notes: "Interested in the 3-bed on Oak Street." },
+        { customerIndex: 2, serviceIndex: 3, time: "11:00", notes: "Tenant move-in walkthrough" },
+      ];
+      const nextDemoDate = new Date(today);
+      nextDemoDate.setUTCHours(12, 0, 0, 0);
+      nextDemoDate.setUTCDate(nextDemoDate.getUTCDate() + 1);
+      for (const demoBooking of demoBookings) {
+        while (nextDemoDate.getUTCDay() === 0 || nextDemoDate.getUTCDay() === 6) {
+          nextDemoDate.setUTCDate(nextDemoDate.getUTCDate() + 1);
+        }
+        await this.createBooking({
+          businessId,
+          customerId: createdCustomers[demoBooking.customerIndex].id,
+          serviceId: createdServices[demoBooking.serviceIndex].id,
+          date: nextDemoDate.toISOString().slice(0, 10),
+          time: demoBooking.time,
+          status: "confirmed",
+          totalPrice: 0,
+          notes: demoBooking.notes,
+        });
+        nextDemoDate.setUTCDate(nextDemoDate.getUTCDate() + 1);
+      }
     }
 
     // Create default availability (Mon-Fri 9-5, Sat 10-2)

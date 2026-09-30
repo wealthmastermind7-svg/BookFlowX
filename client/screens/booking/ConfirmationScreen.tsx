@@ -202,21 +202,21 @@ export default function ConfirmationScreen() {
         ]}
       >
         {isPolling ? (
-          <View style={[styles.checkmarkContainer, { backgroundColor: isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.05)" }]}>
-            <ActivityIndicator size="large" color={theme.text} />
+          <View style={[styles.checkmarkContainer, { backgroundColor: "rgba(0,212,255,0.12)" }]}>
+            <ActivityIndicator size="large" color={theme.accent} />
           </View>
         ) : (
           <Animated.View
             style={[
               styles.checkmarkContainer,
               checkAnimatedStyle,
-              { backgroundColor: paymentStatus === "cancelled" ? (isDark ? "#662222" : "#ffdddd") : theme.text },
+              { backgroundColor: paymentStatus === "cancelled" ? "#662222" : theme.accent },
             ]}
           >
             <Feather
               name={statusConfig.icon || "check"}
               size={48}
-              color={paymentStatus === "cancelled" ? (isDark ? "#ff6666" : "#cc0000") : theme.buttonText}
+              color={paymentStatus === "cancelled" ? "#FB7185" : theme.buttonText}
             />
           </Animated.View>
         )}
@@ -238,17 +238,17 @@ export default function ConfirmationScreen() {
           style={[
             styles.detailsCard,
             {
-              backgroundColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.03)",
-              borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.05)",
+              backgroundColor: "#111827",
+              borderColor: "rgba(0,212,255,0.18)",
             },
           ]}
         >
-          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+          <View style={[styles.detailRow, { borderBottomColor: "rgba(148,163,184,0.12)" }]}>
             <ThemedText style={styles.detailLabel}>{t('dashboard.service')}</ThemedText>
             <ThemedText style={styles.detailValue}>{booking?.serviceName || "--"}</ThemedText>
           </View>
 
-          <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+          <View style={[styles.detailRow, { borderBottomColor: "rgba(148,163,184,0.12)" }]}>
             <ThemedText style={styles.detailLabel}>{t('dashboard.date')} & {t('dashboard.time')}</ThemedText>
             <ThemedText style={styles.detailValue}>
               {formatDate()} {"\u2022"} {booking?.time || "--"}
@@ -256,7 +256,7 @@ export default function ConfirmationScreen() {
           </View>
 
           {requiresPayment ? (
-            <View style={[styles.detailRow, { borderBottomColor: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.05)" }]}>
+            <View style={[styles.detailRow, { borderBottomColor: "rgba(148,163,184,0.12)" }]}>
               <ThemedText style={styles.detailLabel}>{t('booking.paymentStatusLabel') || "Payment"}</ThemedText>
               <View style={styles.paymentBadge}>
                 <View style={[
@@ -288,7 +288,7 @@ export default function ConfirmationScreen() {
           styles.bottomSection,
           {
             paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+            backgroundColor: "rgba(10,10,15,0.96)",
           },
         ]}
       >
@@ -298,7 +298,7 @@ export default function ConfirmationScreen() {
         >
           <Pressable
             onPress={handleDone}
-            style={[styles.doneButton, { backgroundColor: theme.text }]}
+            style={[styles.doneButton, { backgroundColor: theme.accent }]}
           >
             <ThemedText style={[styles.doneButtonText, { color: theme.buttonText }]}>
               {t('common.done')}

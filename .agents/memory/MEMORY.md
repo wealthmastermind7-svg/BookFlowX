@@ -1,0 +1,1 @@
+- [Property positioning and existing customers](property-positioning.md) — keep the property-first message for new users without rewriting existing businesses' data.

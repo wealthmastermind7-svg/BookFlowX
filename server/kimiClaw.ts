@@ -98,45 +98,41 @@ function generateSlug(name: string): string {
 
 export async function prospectLeads(niche: string, city: string, count = 5): Promise<ProspectedLead[]> {
   const nicheLabels: Record<string, string> = {
-    "auto-detailing": "auto detailing / car wash / mobile detailing",
-    "salon": "hair salon / beauty salon",
-    "barbershop": "barbershop / men's grooming",
-    "fitness": "fitness studio / gym / personal training",
-    "spa": "spa / wellness center / day spa",
-    "tattoo": "tattoo studio / tattoo parlor / body art",
-    "massage": "massage therapy / massage clinic",
-    "yoga": "yoga studio / pilates",
-    "therapy": "therapy / counseling / mental health practice",
-    "personal-trainer": "personal trainer / fitness coach",
+    "real-estate-agents": "independent real estate agents / small real estate agencies",
+    "property-managers": "residential property managers",
+    "rental-agencies": "rental and letting agencies",
+    "landlords": "independent landlords / property investors",
+    "buyers-agents": "independent buyers agents",
+    "strata-managers": "strata / body corporate managers",
   };
   const nicheLabel = nicheLabels[niche] || niche;
 
   const leads = await kimiChatJSON<Array<{ businessName: string; email: string; phone: string; conversionSignal: string }>>([
     {
       role: "system",
-      content: `You are an elite B2B lead research agent specializing in appointment-based service businesses. You find HIGH-CONVERTING leads — small businesses most likely to need and adopt online booking software.
+      content: `You are a B2B lead research agent specializing in property professionals who schedule viewings, inspections, and tenant appointments. Find small property businesses likely to benefit from booking software.
 
 TARGET: ${nicheLabel} businesses in ${city}
 
 Generate exactly ${count} unique businesses. For each, provide:
-- businessName: A realistic, creative name for a local ${nicheLabel} business
-- email: A Gmail address (must be @gmail.com) — this is CRITICAL because Gmail-primary businesses are small operations without custom domains, meaning they're underserved and more likely to convert
+- businessName: The name of a local ${nicheLabel} business
+- email: A Gmail address (must be @gmail.com)
 - phone: A realistic local phone number with the correct area code for ${city}
-- conversionSignal: One phrase explaining WHY this lead would convert (e.g. "phone-only booking", "no website", "Instagram-only presence", "walk-ins only", "uses paper calendar")
+- conversionSignal: One phrase explaining WHY this lead would benefit from online viewing bookings (e.g. "viewing requests by phone", "manual inspection scheduling", "no online viewing link")
 
 HIGH-CONVERSION TARGETING RULES:
-1. Focus on solo operators and small teams (1-5 staff) — they need automation most
-2. Target businesses that appear to rely on phone/DM/walk-in booking — no existing booking software
-3. Prioritize businesses in neighborhoods and suburbs, NOT downtown chains
-4. Include a mix of: established businesses needing modernization AND newer businesses that haven't set up systems yet
-5. Gmail addresses should look authentic: owner names (e.g. mike.barber@gmail.com), business names (e.g. prestige.detailing@gmail.com), or combos (e.g. jaysalon.houston@gmail.com)
-6. AVOID: franchises, multi-location chains, businesses that likely already use Vagaro/Fresha/Mindbody
+1. Focus on independent agents and small property teams (1-5 staff)
+2. Target firms that appear to schedule viewings manually by phone or email
+3. Prioritize neighborhood agencies and independent managers over large chains
+4. Include both established agencies and newer property professionals
+5. Gmail addresses should be associated with the business; do not use unrelated contacts
+6. Avoid large franchises and companies already using a dedicated property viewing scheduler
 
 NAMING PATTERNS (vary these):
-- Location-based: "Westside Auto Spa", "Brookhaven Barbers"
-- Owner-name-based: "Maria's Hair Studio", "Jake's Mobile Detail"
-- Specialty-based: "Precision Paint Correction", "Deep Roots Massage"
-- Trendy/modern: "The Grooming Co.", "Glow Wellness"
+- Location-based: "Harbour Property Group", "Northside Rentals"
+- Owner-name-based: "Taylor Property Management", "Lee Real Estate"
+- Specialty-based: "City Lettings", "First Home Buyers Agency"
+- Modern: "The Property Collective", "Keyside Realty"
 
 You MUST respond with ONLY a JSON array, no other text. Format:
 [{"businessName":"Example","email":"example@gmail.com","phone":"(312) 555-1234","conversionSignal":"phone-only booking"}]`

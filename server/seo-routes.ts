@@ -5,28 +5,29 @@ import QRCode from "qrcode";
 
 const DOMAIN = "https://confirmbooking.online";
 const BRAND = "BookFlow";
-const TAGLINE = "Smart Booking For Modern Businesses";
+const TAGLINE = "Smart Booking for Property Professionals";
 const DOWNLOAD_LINK = "https://confirmbooking.online";
 
-function renderConfirmationPreview(businessName: string, niche: string = "auto-detailing"): string {
+function renderConfirmationPreview(businessName: string, niche: string = "real-estate-agents"): string {
   const upperName = businessName.toUpperCase();
-  const services: Record<string, { name: string; price: string }> = {
-    "auto-detailing": { name: "Interior Detail", price: "$175.00" },
-    "salon": { name: "Haircut & Style", price: "$55.00" },
-    "barbershop": { name: "Classic Haircut", price: "$35.00" },
-    "spa": { name: "Swedish Massage", price: "$90.00" },
-    "fitness": { name: "Personal Training", price: "$75.00" },
-    "tattoo": { name: "Small Tattoo", price: "$100.00" },
-    "massage": { name: "Deep Tissue", price: "$120.00" }
+  const services: Record<string, string> = {
+    "real-estate-agents": "Property Viewing",
+    "property-managers": "Rental Inspection",
+    "landlords": "Rental Inspection",
+    "rental-agencies": "Open Home",
+    "commercial-property": "Property Viewing",
+    "buyers-agents": "Property Viewing",
+    "strata-managers": "Rental Inspection",
+    "building-managers": "Rental Inspection",
   };
-  const service = services[niche] || services["auto-detailing"];
+  const service = services[niche] || services["real-estate-agents"];
 
   return `
     <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
       <div style="padding: 40px 32px 24px; text-align: center;">
         <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; font-family: 'Inter', sans-serif;">${upperName}</div>
-        <div style="font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">CONFIRMED</div>
-        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your booking has been secured</div>
+        <div style="font-family: 'Inter', sans-serif; font-size: 36px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">VIEWING CONFIRMED</div>
+        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your property appointment is booked</div>
       </div>
       <div style="padding: 24px 32px;">
         <div style="color: #f5f5f7; font-size: 20px; font-family: 'Inter', sans-serif; margin-bottom: 20px;">Hi John Smith,</div>
@@ -37,8 +38,8 @@ function renderConfirmationPreview(businessName: string, niche: string = "auto-d
               <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">B7E6AD10</td>
             </tr>
             <tr>
-              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
-              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.name}</td>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">VIEWING TYPE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service}</td>
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
@@ -52,8 +53,7 @@ function renderConfirmationPreview(businessName: string, niche: string = "auto-d
               <td colspan="2" style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);"></td>
             </tr>
             <tr>
-              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
-              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.price}</td>
+              <td colspan="2" style="color: #00d4ff; font-size: 15px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Viewing Confirmed</td>
             </tr>
           </table>
         </div>
@@ -67,25 +67,26 @@ function renderConfirmationPreview(businessName: string, niche: string = "auto-d
     </div>`;
 }
 
-function renderReminderPreview(businessName: string, niche: string = "auto-detailing"): string {
+function renderReminderPreview(businessName: string, niche: string = "real-estate-agents"): string {
   const upperName = businessName.toUpperCase();
-  const services: Record<string, { name: string; price: string }> = {
-    "auto-detailing": { name: "Interior Detail", price: "$175.00" },
-    "salon": { name: "Haircut & Style", price: "$55.00" },
-    "barbershop": { name: "Classic Haircut", price: "$35.00" },
-    "spa": { name: "Swedish Massage", price: "$90.00" },
-    "fitness": { name: "Personal Training", price: "$75.00" },
-    "tattoo": { name: "Small Tattoo", price: "$100.00" },
-    "massage": { name: "Deep Tissue", price: "$120.00" }
+  const services: Record<string, string> = {
+    "real-estate-agents": "Property Viewing",
+    "property-managers": "Rental Inspection",
+    "landlords": "Rental Inspection",
+    "rental-agencies": "Open Home",
+    "commercial-property": "Property Viewing",
+    "buyers-agents": "Property Viewing",
+    "strata-managers": "Rental Inspection",
+    "building-managers": "Rental Inspection",
   };
-  const service = services[niche] || services["auto-detailing"];
+  const service = services[niche] || services["real-estate-agents"];
 
   return `
     <div style="background: linear-gradient(180deg, #1a1a1a 0%, #000 40%, #000 100%); border-radius: 32px; overflow: hidden; border: 1px solid rgba(255,255,255,0.08); max-width: 400px; margin: 0 auto;">
       <div style="padding: 40px 32px 24px; text-align: center;">
         <div style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 3px; margin-bottom: 16px; font-family: 'Inter', sans-serif;">${upperName}</div>
         <div style="font-family: 'Inter', sans-serif; font-size: 42px; font-weight: 800; color: #f5f5f7; letter-spacing: -1px; margin-bottom: 12px;">REMINDER</div>
-        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your appointment is coming up soon</div>
+        <div style="color: #888; font-size: 14px; font-family: 'Inter', sans-serif;">Your property viewing is coming up soon</div>
       </div>
       <div style="padding: 24px 32px;">
         <div style="color: #f5f5f7; font-size: 20px; font-family: 'Inter', sans-serif; margin-bottom: 20px;">Hi John Smith,</div>
@@ -96,8 +97,8 @@ function renderReminderPreview(businessName: string, niche: string = "auto-detai
               <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">B7E6AD10</td>
             </tr>
             <tr>
-              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">SERVICE</td>
-              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.name}</td>
+              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">VIEWING TYPE</td>
+              <td style="color: #f5f5f7; font-size: 16px; font-weight: 700; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service}</td>
             </tr>
             <tr>
               <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">DATE</td>
@@ -111,8 +112,7 @@ function renderReminderPreview(businessName: string, niche: string = "auto-detai
               <td colspan="2" style="padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);"></td>
             </tr>
             <tr>
-              <td style="color: #888; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; padding: 8px 0; font-family: 'Inter', sans-serif; vertical-align: top;">TOTAL</td>
-              <td style="color: #f5f5f7; font-size: 28px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">${service.price}</td>
+              <td colspan="2" style="color: #00d4ff; font-size: 15px; font-weight: 800; text-align: right; padding: 8px 0; font-family: 'Inter', sans-serif;">Viewing Reminder</td>
             </tr>
           </table>
         </div>
@@ -126,57 +126,57 @@ function renderReminderPreview(businessName: string, niche: string = "auto-detai
     </div>`;
 }
 
-function getEmailTemplate(businessName: string, bookingLink: string, slug: string, niche: string = "auto-detailing"): string {
+function getEmailTemplate(businessName: string, bookingLink: string, slug: string, niche: string = "real-estate-agents"): string {
   const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}`;
 
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
       <div style="margin-bottom: 32px; text-align: center;">
         <img src="${DOMAIN}/favicon.png" style="width: 48px; height: 48px; margin-bottom: 16px;">
-        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Your Custom Booking System for ${businessName}</h1>
+        <h1 style="color: #f5f5f7; font-size: 32px; margin: 8px 0; font-family: 'Cormorant Garamond', serif;">Property Viewing Bookings for ${businessName}</h1>
       </div>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">Hi there,</p>
       
       <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
-        Quick question — how many bookings does ${businessName} miss each week because customers can't book instantly?
+        How many property viewings is ${businessName} missing each week?
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        Most appointment-based businesses lose clients when:
+        Property professionals lose viewing opportunities when:
       </p>
 
       <ul style="color: #ccc; padding-left: 20px; margin-bottom: 16px; line-height: 2;">
-        <li>Customers call after hours</li>
-        <li>Messages get missed</li>
-        <li>Back-and-forth takes too long</li>
-        <li>Reminders aren't automated</li>
+        <li>Viewing requests arrive after hours and go unanswered</li>
+        <li>Tenants miss scheduled viewings or inspections</li>
+        <li>Scheduling by email and phone takes too much back-and-forth</li>
+        <li>There are no automated reminders before inspections</li>
       </ul>
 
       <p style="font-size: 16px; line-height: 1.6; color: #f5f5f7; margin-bottom: 24px; font-weight: 600;">
-        When it's not instant, people book somewhere else.
+        Buyers and tenants move on when they cannot book a viewing easily.
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 16px;">
-        So I created a custom smart booking link and QR code specifically for <strong>${businessName}</strong>. It lets your customers:
+        Here is a property booking link and QR code for <strong>${businessName}</strong>. It helps you:
       </p>
 
       <ul style="color: #ccc; padding-left: 20px; margin-bottom: 24px; line-height: 2;">
-        <li>Book instantly from their phone</li>
-        <li>Get automatic confirmations and reminders</li>
-        <li>Avoid double bookings</li>
-        <li>Secure appointments 24/7</li>
+        <li>Accept viewing requests instantly from listing pages</li>
+        <li>Reduce no-shows with automated SMS confirmations and inspection reminders</li>
+        <li>Answer property enquiries 24/7 with AI voice and book viewings</li>
+        <li>Put QR codes on for-lease signs so tenants can book on the spot</li>
       </ul>
 
       <p style="font-size: 16px; line-height: 1.6; color: #ccc; margin-bottom: 24px;">
-        No complicated setup. No new systems to learn. You simply share the link or display the QR code. That's it.
+        Share the booking link from your listings or display the QR code on a for-lease sign.
       </p>
 
       <div style="margin-bottom: 40px;">
-        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Custom Booking Link</div>
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Property Viewing Link</div>
         <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; overflow: hidden; margin-bottom: 24px;">
           <div style="background: #111; padding: 40px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.05);">
-            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">RESERVE<br>YOUR<br>SPACE</h2>
+            <h2 style="font-family: 'Cormorant Garamond', serif; font-size: 48px; line-height: 1; margin: 0; color: #f5f5f7; letter-spacing: -1px;">BOOK A<br>PROPERTY<br>VIEWING</h2>
             <div style="width: 60px; height: 2px; background: #444; margin: 24px auto 0;"></div>
           </div>
           <div style="padding: 24px;">
@@ -188,7 +188,7 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
               </td>
               <td style="vertical-align: middle; padding-left: 12px;">
                 <div style="color: #f5f5f7; font-weight: 600; font-size: 18px;">${businessName}</div>
-                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK YOUR APPOINTMENT</div>
+                <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">BOOK A PROPERTY VIEWING</div>
                 <div style="color: #444; font-size: 12px;">CONFIRMBOOKING.ONLINE</div>
               </td>
               <td style="width: 36px; vertical-align: middle; text-align: right;">
@@ -198,14 +198,14 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
           </div>
         </div>
         
-        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">Your Smart QR Code</div>
+        <div style="color: #888; text-transform: uppercase; letter-spacing: 2px; font-size: 12px; margin-bottom: 16px;">QR Code for For-Lease Signs</div>
         <div style="background: #111; padding: 40px; border-radius: 32px; text-align: center; border: 1px solid rgba(255,255,255,0.1); margin-bottom: 24px;">
           <div style="background: #fff; padding: 24px; border-radius: 24px; display: inline-block;">
             <img src="${qrImageUrl}" alt="QR Code for ${businessName}" style="width: 200px; height: 200px; display: block;">
           </div>
           <div style="margin-top: 24px;">
             <div style="color: #f5f5f7; font-family: 'Cormorant Garamond', serif; font-size: 32px; font-weight: 600; letter-spacing: -0.5px;">${businessName}</div>
-            <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK</div>
+            <div style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 3px; margin-top: 8px;">SCAN TO BOOK A VIEWING</div>
           </div>
         </div>
 
@@ -221,25 +221,25 @@ function getEmailTemplate(businessName: string, bookingLink: string, slug: strin
       </div>
 
       <p style="font-size: 18px; line-height: 1.6; color: #f5f5f7; margin-bottom: 12px; font-weight: 600; text-align: center;">
-        If one missed appointment costs you $90, this system pays for itself in days.
+        Capture viewing requests even when you're at another showing.
       </p>
 
       <p style="font-size: 16px; line-height: 1.6; color: #888; margin-bottom: 32px; text-align: center;">
-        All of this costs less than 2 cups of coffee a month.
+        Keep viewing enquiries, confirmations, and reminders in one place.
       </p>
 
       <div style="text-align: center; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 32px; margin-bottom: 32px;">
         <p style="color: #ccc; font-size: 14px; margin-bottom: 24px;">Here's your live demo:</p>
-        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 700; display: inline-block; font-size: 16px;">View ${businessName} Booking Page</a>
+        <a href="${bookingLink}" style="background: #f5f5f7; color: #000; padding: 18px 48px; border-radius: 100px; text-decoration: none; font-weight: 700; display: inline-block; font-size: 16px;">View ${businessName} Viewing Page</a>
       </div>
 
       <p style="font-size: 16px; color: #ccc; line-height: 1.6;">
-        Would you like me to activate this for you so you can start capturing bookings right away?
+        Would you like to start capturing property viewing requests right away?
       </p>
 
       <div style="margin-top: 40px; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05);">
         <p style="color: #f5f5f7; font-weight: 600; margin-bottom: 4px;">BookFlow</p>
-        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">Smart Booking for Service Businesses</p>
+        <p style="color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: 1px;">${TAGLINE}</p>
       </div>
     </div>
   `;
@@ -279,12 +279,12 @@ function headTags(title: string, description: string, canonical: string, keyword
         theme: {
           extend: {
             colors: {
-              'pure-black': '#000',
-              'charcoal': '#111',
-              'graphite': '#222',
-              'smoke': '#444',
-              'silver': '#888',
-              'pearl': '#f5f5f7',
+              'pure-black': '#0a0a0f',
+              'charcoal': '#0d0d1a',
+              'graphite': '#111827',
+              'smoke': '#52627a',
+              'silver': '#94a3b8',
+              'pearl': '#f8fafc',
             },
             fontFamily: {
               heading: ['"Cormorant Garamond"', 'serif'],
@@ -296,57 +296,130 @@ function headTags(title: string, description: string, canonical: string, keyword
     </script>
     <style>
       :root {
-        --pure-black: #000;
-        --charcoal: #111;
-        --graphite: #222;
-        --smoke: #444;
-        --silver: #888;
-        --pearl: #f5f5f7;
+        color-scheme: dark;
+        --pure-black: #0a0a0f;
+        --charcoal: #0d0d1a;
+        --graphite: #111827;
+        --smoke: #52627a;
+        --silver: #94a3b8;
+        --pearl: #f8fafc;
+        --cyan: #00d4ff;
+        --violet: #7c3aed;
       }
       body {
-        background-color: var(--pure-black);
+        background:
+          radial-gradient(ellipse at 84% 0%, rgba(124,58,237,.13), transparent 35%),
+          radial-gradient(ellipse at 10% 56%, rgba(0,212,255,.07), transparent 31%),
+          var(--pure-black) !important;
         color: var(--pearl);
         font-family: 'Inter', sans-serif;
         -webkit-font-smoothing: antialiased;
+        min-height: 100vh;
+      }
+      nav[aria-label="Breadcrumb"] { color:var(--silver); }
+      nav[aria-label="Breadcrumb"] a:hover { color:var(--cyan); }
+      body > nav:not([aria-label="Breadcrumb"]) {
+        background:rgba(10,10,15,.82) !important;
+        border-color:rgba(0,212,255,.16) !important;
+        backdrop-filter:blur(20px);
+      }
+      body > nav:not([aria-label="Breadcrumb"]) img { box-shadow:0 0 24px rgba(0,212,255,.12); }
+      body > nav:not([aria-label="Breadcrumb"]) .font-heading { font-family:'Inter',sans-serif; }
+      body > nav:not([aria-label="Breadcrumb"]) a:not(.cta-btn):hover { color:var(--cyan) !important; }
+      main { min-height:55vh; }
+      main > section:first-child {
+        background:
+          radial-gradient(ellipse at 52% 42%,rgba(124,58,237,.16),transparent 35%),
+          radial-gradient(ellipse at 74% 75%,rgba(0,212,255,.11),transparent 35%),
+          linear-gradient(145deg,#0a0a0f,#0d0d1a 58%,#111827) !important;
+      }
+      main > section:first-child > div:first-child { display:none; }
+      main h1 {
+        color:#f8fafc;
+        font-family:'Inter',sans-serif;
+        font-weight:800;
+        letter-spacing:-.065em;
+        line-height:.98;
+        background:linear-gradient(100deg,#fff 3%,#00d4ff 58%,#a78bfa 100%);
+        -webkit-background-clip:text;
+        background-clip:text;
+      }
+      main h1 span { color:#00d4ff !important; }
+      main h2, main h3 { font-family:'Inter',sans-serif; letter-spacing:-.035em; }
+      main p { color:#94a3b8; }
+      main > div.max-w-7xl, main > div.max-w-4xl {
+        position:relative;
+        isolation:isolate;
+      }
+      main > div.max-w-7xl::before, main > div.max-w-4xl::before {
+        content:"";
+        position:absolute;
+        z-index:-1;
+        inset:3rem -2rem auto;
+        height:220px;
+        border-radius:50%;
+        background:radial-gradient(ellipse,rgba(0,212,255,.08),transparent 68%);
+        pointer-events:none;
       }
       .glass-card {
-        background: rgba(255,255,255,0.03);
-        border: 1px solid rgba(255,255,255,0.08);
-        transition: all 0.3s ease;
+        background:linear-gradient(145deg,rgba(26,26,46,.9),rgba(22,33,62,.72)) !important;
+        border:1px solid rgba(0,212,255,.17) !important;
+        box-shadow:0 14px 44px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.035);
+        transition:transform .32s ease,border-color .32s ease,box-shadow .32s ease,background .32s ease;
+        color:#f8fafc;
       }
       .glass-card:hover {
-        background: rgba(255,255,255,0.06);
-        border-color: rgba(255,255,255,0.15);
-        transform: translateY(-2px);
+        background:linear-gradient(145deg,rgba(26,26,46,.98),rgba(22,33,62,.9)) !important;
+        border-color:rgba(0,212,255,.48) !important;
+        transform:translateY(-3px);
+        box-shadow:0 18px 48px rgba(0,212,255,.08);
       }
       .cta-btn {
         display: inline-block;
-        background: var(--pearl);
-        color: var(--pure-black);
+        background:linear-gradient(110deg,#00d4ff,#85edff);
+        color:#06121c;
         padding: 16px 40px;
         border-radius: 100px;
         font-weight: 600;
         text-decoration: none;
         letter-spacing: 0.5px;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        border:1px solid rgba(159,242,255,.55);
+        box-shadow:0 8px 30px rgba(0,212,255,.16);
+        transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;
       }
       .cta-btn:hover {
-        transform: scale(1.05);
-        box-shadow: 0 8px 30px rgba(245,245,247,0.15);
+        transform:translateY(-2px);
+        box-shadow:0 12px 36px rgba(0,212,255,.32);
+        filter:saturate(1.1);
       }
       .cta-btn-outline {
         display: inline-block;
-        border: 1px solid var(--pearl);
-        color: var(--pearl);
+        border: 1px solid rgba(0,212,255,.34);
+        color: #eaf7ff;
         padding: 14px 36px;
         border-radius: 100px;
         font-weight: 500;
         text-decoration: none;
-        transition: all 0.3s ease;
+        background:rgba(17,24,39,.62);
+        transition:transform .3s ease,border-color .3s ease,background .3s ease;
       }
       .cta-btn-outline:hover {
-        background: var(--pearl);
-        color: var(--pure-black);
+        background:rgba(0,212,255,.1);
+        color:#fff;
+        border-color:#00d4ff;
+        transform:translateY(-2px);
+      }
+      .text-silver { color:#94a3b8 !important; }
+      .text-smoke { color:#64748b !important; }
+      footer { background:rgba(8,8,13,.8); border-color:rgba(0,212,255,.14) !important; }
+      footer a:hover { color:#00d4ff !important; }
+      @media(max-width:640px) {
+        main > div.max-w-7xl, main > div.max-w-4xl { padding-top:2rem; }
+        main h1 { font-size:clamp(2.65rem,13vw,4rem); }
+        .cta-btn,.cta-btn-outline { padding:13px 22px; }
+      }
+      @media(prefers-reduced-motion:reduce) {
+        *,*::before,*::after { scroll-behavior:auto !important; animation-duration:.01ms !important; transition-duration:.01ms !important; }
       }
     </style>`;
 }
@@ -384,7 +457,7 @@ function footer(): string {
             <img src="/assets/images/logo.png" alt="${BRAND}" class="w-6 h-6 rounded-md opacity-80">
             <span class="font-heading text-xl font-semibold text-pearl">${BRAND}</span>
           </div>
-          <p class="text-silver text-sm leading-relaxed">${TAGLINE}. Trusted by thousands of service professionals to manage their bookings efficiently.</p>
+        <p class="text-silver text-sm leading-relaxed">${TAGLINE}. Keep viewings, inspections, and tenant appointments organized in one place.</p>
         </div>
         <div>
           <h4 class="text-pearl font-semibold text-sm mb-4 uppercase tracking-wider">Industries</h4>
@@ -413,7 +486,7 @@ function footer(): string {
       </div>
       <div class="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center">
         <p class="text-smoke text-xs">&copy; ${new Date().getFullYear()} ${BRAND}. All rights reserved.</p>
-        <p class="text-smoke text-xs mt-2 md:mt-0">Powering bookings for modern service businesses worldwide.</p>
+        <p class="text-smoke text-xs mt-2 md:mt-0">Powering property viewings and inspections worldwide.</p>
       </div>
     </div>
   </footer>`;
@@ -460,26 +533,64 @@ ${footer()}
 function seoHomepage(): string {
   const head = headTags(
     `${BRAND} | ${TAGLINE}`,
-    `${BRAND} is the modern booking platform for service businesses. Reduce no-shows, automate reminders, and let clients book 24/7 online.`,
+    `${BRAND} helps real estate agents and property managers automate viewings, inspections and tenant appointments with AI voice, SMS and email in one place.`,
     DOMAIN,
-    "booking software, appointment scheduling, online booking, service business, reduce no-shows, automated reminders"
+    "property viewing booking software, real estate scheduling, rental inspection booking, tenant appointments, AI voice, SMS confirmations"
   );
 
   const body = `
-  <section class="relative min-h-screen flex items-center justify-center px-4 sm:px-6 overflow-hidden">
+  <section class="relative min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-24 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-charcoal/50 via-pure-black to-pure-black"></div>
     <div class="relative z-10 max-w-5xl mx-auto text-center">
-      <p class="text-silver text-sm uppercase tracking-[0.3em] mb-6 font-medium">The future of appointment management</p>
-      <h1 class="font-heading text-5xl sm:text-7xl lg:text-8xl font-semibold mb-8 leading-[0.95] tracking-tight">
-        ${TAGLINE.split(" ").slice(0, 2).join(" ")}<br>
-        <span class="text-silver">${TAGLINE.split(" ").slice(2).join(" ")}</span>
+      <p class="text-[#00d4ff] text-xs sm:text-sm uppercase tracking-[0.25em] mb-6 font-bold">Smart booking for property professionals</p>
+      <h1 class="font-sans text-5xl sm:text-7xl lg:text-8xl font-extrabold mb-8 leading-[0.95] tracking-tight">
+        Never Miss a Property<br>
+        <span class="text-[#00d4ff]">Viewing Again</span>
       </h1>
-      <p class="text-silver text-lg sm:text-xl max-w-2xl mx-auto mb-12 leading-relaxed font-light">
-        ${BRAND} helps service professionals accept bookings online, reduce no-shows with automated reminders, and grow revenue with smart scheduling tools.
+      <p class="text-silver text-lg sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
+        BookFlow helps real estate agents and property managers automate viewings, inspections, and tenant appointments — with AI voice, SMS, and email all in one place.
       </p>
+      <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10" aria-label="Booking channels">
+        <span class="glass-card rounded-full px-4 py-2 text-sm font-semibold">🏠 Viewing Bookings</span>
+        <span class="glass-card rounded-full px-4 py-2 text-sm font-semibold">📱 SMS Confirmations</span>
+        <span class="glass-card rounded-full px-4 py-2 text-sm font-semibold">📞 Voice AI</span>
+        <span class="glass-card rounded-full px-4 py-2 text-sm font-semibold">📧 Automated Reminders</span>
+      </div>
       <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="${utmLink("seo", "organic", "homepage-hero")}" class="cta-btn text-base">Start Free Today</a>
-        <a href="/booking-software" class="cta-btn-outline text-base">Explore Industries</a>
+        <a href="${utmLink("seo", "organic", "homepage-hero")}" class="cta-btn text-base">Start Booking Viewings Free</a>
+        <a href="/booking-software" class="cta-btn-outline text-base">Explore Property Roles</a>
+      </div>
+      <p class="text-silver text-sm mt-10">Built for real estate agents, property managers, and landlords.</p>
+    </div>
+  </section>
+  <section class="px-4 sm:px-6 py-20 sm:py-28 bg-[#0d0d1a] border-y border-[#00d4ff]/10" aria-labelledby="omnichannel-heading">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-12">
+        <p class="text-[#00d4ff] text-xs font-bold uppercase tracking-[0.25em] mb-4">Every property enquiry can become a viewing</p>
+        <h2 id="omnichannel-heading" class="font-sans text-4xl sm:text-6xl font-extrabold text-pearl mb-5">Meet Customers Where They Are</h2>
+        <p class="text-silver text-lg max-w-2xl mx-auto">Manage viewing requests across the channels tenants and buyers already use.</p>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        <div class="glass-card rounded-2xl p-7">
+          <span class="text-3xl block mb-6" aria-hidden="true">📱</span>
+          <h3 class="text-pearl text-xl font-bold mb-3">SMS</h3>
+          <p class="text-silver leading-relaxed">Instant viewing confirmations &amp; inspection reminders sent directly to tenants and buyers.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-7">
+          <span class="text-3xl block mb-6" aria-hidden="true">📞</span>
+          <h3 class="text-pearl text-xl font-bold mb-3">Voice AI</h3>
+          <p class="text-silver leading-relaxed">AI answers property enquiries and books viewings 24/7 — even when you're at another showing.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-7">
+          <span class="text-3xl block mb-6" aria-hidden="true">📧</span>
+          <h3 class="text-pearl text-xl font-bold mb-3">Email</h3>
+          <p class="text-silver leading-relaxed">Automated follow-ups, viewing confirmations, and move-in reminders delivered to the inbox.</p>
+        </div>
+        <div class="glass-card rounded-2xl p-7">
+          <span class="text-3xl block mb-6" aria-hidden="true">💬</span>
+          <h3 class="text-pearl text-xl font-bold mb-3">Chat</h3>
+          <p class="text-silver leading-relaxed">Website chat widget that books property viewings directly from your listings page.</p>
+        </div>
       </div>
     </div>
   </section>`;
@@ -489,8 +600,8 @@ function seoHomepage(): string {
 
 function comparisonPage(competitor: string): string {
   const compName = formatCompetitorName(competitor);
-  const title = `${BRAND} vs ${compName} | Better Booking Software for Service Businesses`;
-  const description = `Comparing ${BRAND} vs ${compName}? See why service professionals are switching to ${BRAND}.`;
+  const title = `${BRAND} vs ${compName} | Property Viewing Booking Software`;
+  const description = `Comparing ${BRAND} vs ${compName}? Explore booking software for property viewings and inspections.`;
   const canonical = `${DOMAIN}/compare/${competitor}`;
   const keywords = `${BRAND} vs ${competitor}, alternative`;
   const ctaUrl = utmLink("seo", "comparison", competitor);
@@ -553,10 +664,10 @@ function compareDirectoryPage(): string {
 }
 
 function mainDirectoryPage(): string {
-  const head = headTags(`Booking Software by Industry | ${BRAND}`, "", `${DOMAIN}/booking-software`, "");
+  const head = headTags(`Booking Software for Property Professionals | ${BRAND}`, "", `${DOMAIN}/booking-software`, "");
   const body = `
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-    <h1 class="font-heading text-5xl font-semibold mb-8">Booking Software by Industry</h1>
+    <h1 class="font-heading text-5xl font-semibold mb-8">Booking Software for Property Professionals</h1>
     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
       ${INDUSTRIES.map(i => `<a href="/booking-software/${i}" class="glass-card rounded-2xl p-8 block group">${formatIndustryName(i)}</a>`).join("")}
     </div>
@@ -603,15 +714,39 @@ function outreachPage(): string {
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-      body { background: #000; color: #fff; font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
-      input, select, textarea { background: #111 !important; border: 1px solid #222 !important; color: #fff !important; }
-      input:focus, select:focus, textarea:focus { border-color: #444 !important; outline: none; }
-      .tab-active { background: #fff; color: #000; }
-      .tab-inactive { background: transparent; color: #666; border: 1px solid #222; }
-      .tab-inactive:hover { color: #fff; border-color: #444; }
-      .lead-row:hover { background: rgba(255,255,255,0.03); }
+      :root { color-scheme:dark; --ink:#0a0a0f; --deep:#0d0d1a; --panel:#111827; --card:#1a1a2e; --cyan:#00d4ff; --violet:#7c3aed; --copy:#94a3b8; }
+      body {
+        background:
+          radial-gradient(ellipse at 78% 0%,rgba(124,58,237,.16),transparent 34%),
+          radial-gradient(ellipse at 8% 45%,rgba(0,212,255,.09),transparent 30%),
+          var(--ink);
+        color:#f8fafc;
+        font-family:'Inter',sans-serif;
+        -webkit-font-smoothing:antialiased;
+      }
+      input,select,textarea {
+        background:rgba(17,24,39,.9) !important;
+        border:1px solid rgba(148,163,184,.2) !important;
+        color:#f8fafc !important;
+        transition:border-color .2s ease,box-shadow .2s ease;
+      }
+      input::placeholder,textarea::placeholder { color:#52627a; }
+      input:focus,select:focus,textarea:focus { border-color:var(--cyan) !important; outline:none; box-shadow:0 0 0 3px rgba(0,212,255,.1); }
+      .tab-active { background:linear-gradient(110deg,#00d4ff,#85edff); color:#06121c; box-shadow:0 6px 24px rgba(0,212,255,.16); }
+      .tab-inactive { background:rgba(17,24,39,.62); color:#94a3b8; border:1px solid rgba(148,163,184,.18); }
+      .tab-inactive:hover { color:#fff; border-color:rgba(0,212,255,.42); }
+      .lead-row:hover { background:rgba(0,212,255,.06); }
       .lead-row.sent { opacity: 0.4; }
       .progress-bar { transition: width 0.3s ease; }
+      body > div { max-width:100%; }
+      body > div > div:first-child { border:1px solid rgba(0,212,255,.12); border-radius:24px; padding:24px; background:rgba(17,24,39,.42); box-shadow:0 18px 54px rgba(0,0,0,.2); }
+      button:not(.tab-inactive) { transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease; }
+      button.bg-white,button[type="submit"] { background:linear-gradient(110deg,#00d4ff,#85edff) !important; color:#06121c !important; box-shadow:0 8px 28px rgba(0,212,255,.15); }
+      button.bg-white:hover,button[type="submit"]:hover { box-shadow:0 12px 32px rgba(0,212,255,.26); }
+      [class*="border-gray-800"],[class*="border-gray-700"] { border-color:rgba(0,212,255,.14) !important; }
+      [class*="bg-gray-800"] { background-color:#111827 !important; }
+      [class*="text-gray-500"],[class*="text-gray-600"] { color:#71839a !important; }
+      [class*="text-gray-400"] { color:#94a3b8 !important; }
       @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
       .pulse-dot { animation: pulse-dot 1.5s ease-in-out infinite; }
     </style>
@@ -648,22 +783,21 @@ function outreachPage(): string {
           </div>
           <div>
             <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Name</label>
-            <input id="single-name" placeholder="Luxury Auto Spa" required class="w-full p-4 rounded-2xl text-base">
+            <input id="single-name" placeholder="Harbour Property Group" required class="w-full p-4 rounded-2xl text-base">
           </div>
           <div>
             <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Business Slug</label>
-            <input id="single-slug" placeholder="luxury-auto-spa" required class="w-full p-4 rounded-2xl text-base text-gray-400">
+            <input id="single-slug" placeholder="harbour-property-group" required class="w-full p-4 rounded-2xl text-base text-gray-400">
           </div>
           <div>
             <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
             <select id="single-niche" class="w-full p-4 rounded-2xl text-base">
-              <option value="auto-detailing">Auto Detailing</option>
-              <option value="salon">Hair Salon</option>
-              <option value="barbershop">Barbershop</option>
-              <option value="fitness">Fitness / Gym</option>
-              <option value="spa">Spa / Wellness</option>
-              <option value="tattoo">Tattoo Studio</option>
-              <option value="massage">Massage Therapy</option>
+              <option value="real-estate-agents">Real Estate Agents</option>
+              <option value="property-managers">Property Managers</option>
+              <option value="rental-agencies">Rental Agencies</option>
+              <option value="landlords">Landlords / Investors</option>
+              <option value="buyers-agents">Buyers Agents</option>
+              <option value="strata-managers">Strata / Body Corporate</option>
             </select>
           </div>
           <button type="submit" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">Send Booking Preview</button>
@@ -680,19 +814,18 @@ function outreachPage(): string {
 
 Example:
 | Business Name | Email Address | Phone Number | Address |
-| Organic Spa | organic.spa@gmail.com | (773) 710-7810 | 520 N Michigan Ave |
+ | Harbour Property Group | hello@example.com | (02) 5550 0101 | Sydney, NSW |
 ..." class="w-full p-4 rounded-2xl text-sm font-mono leading-relaxed resize-none"></textarea>
             <div class="flex gap-3 mt-3">
               <div class="flex-1">
                 <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Niche for All</label>
                 <select id="bulk-niche" class="w-full p-3 rounded-xl text-sm">
-                  <option value="auto-detailing">Auto Detailing</option>
-                  <option value="salon">Hair Salon</option>
-                  <option value="barbershop">Barbershop</option>
-                  <option value="fitness">Fitness / Gym</option>
-                  <option value="spa">Spa / Wellness</option>
-                  <option value="tattoo">Tattoo Studio</option>
-                  <option value="massage">Massage Therapy</option>
+                  <option value="real-estate-agents">Real Estate Agents</option>
+                  <option value="property-managers">Property Managers</option>
+                  <option value="rental-agencies">Rental Agencies</option>
+                  <option value="landlords">Landlords / Investors</option>
+                  <option value="buyers-agents">Buyers Agents</option>
+                  <option value="strata-managers">Strata / Body Corporate</option>
                 </select>
               </div>
               <div class="flex items-end">
@@ -738,21 +871,17 @@ Example:
               <div>
                 <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">Industry Niche</label>
                 <select id="kimi-niche" class="w-full p-4 rounded-2xl text-base">
-                  <option value="auto-detailing">Auto Detailing</option>
-                  <option value="salon">Hair Salon</option>
-                  <option value="barbershop">Barbershop</option>
-                  <option value="fitness">Fitness / Gym</option>
-                  <option value="spa">Spa / Wellness</option>
-                  <option value="tattoo">Tattoo Studio</option>
-                  <option value="massage">Massage Therapy</option>
-                  <option value="yoga">Yoga Studio</option>
-                  <option value="therapy">Therapy / Counseling</option>
-                  <option value="personal-trainer">Personal Trainer</option>
+                  <option value="real-estate-agents">Real Estate Agents</option>
+                  <option value="property-managers">Property Managers</option>
+                  <option value="rental-agencies">Rental Agencies</option>
+                  <option value="landlords">Landlords / Investors</option>
+                  <option value="buyers-agents">Buyers Agents</option>
+                  <option value="strata-managers">Strata / Body Corporate</option>
                 </select>
               </div>
               <div>
                 <label class="block text-xs uppercase tracking-widest text-gray-500 mb-2 ml-1">City</label>
-                <input id="kimi-city" placeholder="Chicago, IL" class="w-full p-4 rounded-2xl text-base">
+                <input id="kimi-city" placeholder="Auckland, New Zealand" class="w-full p-4 rounded-2xl text-base">
               </div>
               <button onclick="kimiProspect()" id="kimi-prospect-btn" class="w-full py-5 mt-4 rounded-2xl bg-white text-black font-bold text-lg hover:scale-[1.02] active:scale-[0.98] transition-transform shadow-xl">
                 Find Leads with Kimi Claw
@@ -1230,7 +1359,7 @@ export function registerSeoRoutes(app: Application): void {
       await client.sendEmail({
         From: `BookFlow - ${businessName} <hello@confirmbooking.online>`,
         To: to,
-        Subject: `How many bookings is ${businessName} missing each week?`,
+        Subject: `How many property viewings is ${businessName} missing each week?`,
         HtmlBody: emailHtml,
         MessageStream: "outbound"
       });
@@ -1297,6 +1426,6 @@ function formatIndustryName(i: string) { return i.split("-").map(w => w.charAt(0
 function formatCompetitorName(c: string) { return c.charAt(0).toUpperCase() + c.slice(1); }
 function formatLocationName(l: string) { return l.split("-").map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(" "); }
 
-const INDUSTRIES = ["salon", "barbershop", "fitness", "spa", "tattoo", "massage", "auto-detailing", "personal-trainer", "yoga", "therapy"];
-const COMPETITORS = ["calendly", "acuity", "vagaro", "mindbody", "fresha"];
-const LOCATIONS = ["new-york", "los-angeles", "chicago", "houston", "phoenix", "philadelphia", "san-antonio", "san-diego", "dallas", "san-jose"];
+const INDUSTRIES = ["real-estate-agents", "property-managers", "landlords", "rental-agencies", "commercial-property", "buyers-agents", "strata-managers", "building-managers"];
+const COMPETITORS = ["calendly", "rex-software", "propertybase", "acuity", "landlordstudio"];
+const LOCATIONS = ["auckland", "sydney", "melbourne", "brisbane", "london", "new-york", "los-angeles", "toronto", "dubai", "singapore"];

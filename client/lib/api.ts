@@ -178,6 +178,7 @@ export interface Booking {
   updatedAt?: string | null;
   customerName?: string;
   serviceName?: string;
+  channel?: "sms" | "voice" | "email" | "chat" | "web" | null;
 }
 
 export interface DashboardStats {
@@ -462,7 +463,7 @@ class ApiClient {
     }
   }
 
-  async initializeDemoData(businessType: string = "salon"): Promise<void> {
+  async initializeDemoData(businessType: string = "property"): Promise<void> {
     await makeRequest<void>("POST", `${this.getBusinessPath()}/demo-data`, { businessType });
   }
 

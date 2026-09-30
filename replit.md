@@ -9,7 +9,7 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
 - **Workflow**: I prefer an iterative development approach.
 - **Interaction**: Ask before making major architectural changes or introducing new dependencies.
 - **Codebase Changes**:
-    - Do not change the fundamental premium black & white color scheme.
+    - Keep the bold dark navy/black, electric cyan, and violet premium color scheme across the website and owner app.
     - Prioritize robust error handling and graceful fallbacks.
     - Ensure new features integrate seamlessly with existing haptic feedback patterns.
     - When updating dependencies, prioritize stability and production readiness.
@@ -17,8 +17,8 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
 ## System Architecture
 
 ### UI/UX Decisions
-- **Color Palette**: Premium black & white (`Pure Black`, `Charcoal`, `Graphite`, `Smoke`, `Silver`, `Pearl`).
-- **Typography**: Oversized hierarchy (`Display 72-96px`, `H1 48-56px`, `Body 18-24px`), using Cormorant Garamond for headings and Inter for body/navigation.
+- **Color Palette**: Deep navy/near-black (`#0a0a0f`, `#0d0d1a`, `#111827`), electric cyan (`#00d4ff`) and violet (`#7c3aed`), with white headings, slate body text, and dark cards with subtle accent borders.
+- **Typography**: Bold, modern Inter headings and body copy, with oversized display headlines and occasional cyan/violet gradient text.
 - **Animation**: Spring physics with cinematic transitions (400ms ease-out).
 - **Components**: Custom Circular Meters, Animated Cards, Line Graphs with Bezier curves.
 - **Haptic Feedback**: Comprehensive haptic feedback (Light, Medium, Heavy) on all interactive elements.
@@ -55,7 +55,7 @@ BookFlow is a scalable multi-tenant booking platform designed for businesses, of
   - `/sitemap.xml` - Full sitemap (1,055 URLs)
   - `/robots.txt` - Crawler instructions
 - **SEO Features**: Meta tags, Open Graph, JSON-LD structured data, breadcrumbs, UTM tracking on all CTAs
-- **Design**: Dark theme matching app aesthetic (Cormorant Garamond + Inter, Tailwind CDN)
+- **Design**: Dark navy theme matching the app aesthetic (Inter, cyan/violet accents, Tailwind CDN)
 - **Branding Rule**: Use "Voice Assistant" or "Informational Assistant" only — NO "AI" or "Voice Booking"
 
 ## External Dependencies

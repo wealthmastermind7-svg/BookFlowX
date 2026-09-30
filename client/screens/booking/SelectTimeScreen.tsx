@@ -4,7 +4,6 @@ import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import Animated, {
   useAnimatedStyle,
@@ -65,7 +64,7 @@ function ProgressRing({ step, total }: { step: number; total: number }) {
           cx={24}
           cy={24}
           r={radius}
-          stroke={theme.text}
+          stroke={theme.accent}
           strokeWidth={strokeWidth}
           fill="transparent"
           strokeDasharray={circumference}
@@ -87,7 +86,6 @@ interface DateCardProps {
 }
 
 function DateCard({ date, isSelected, onPress }: DateCardProps) {
-  const { theme, isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -120,7 +118,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         style={[
           styles.datePickerItem,
           isSelected
-            ? { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
+            ? { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
             : {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 borderColor: "rgba(255,255,255,0.15)",
@@ -131,7 +129,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerMonth,
-            { color: "#FFF" },
+            { color: isSelected ? "#0A0A0F" : "#F8FAFC" },
           ]}
         >
           {monthName}
@@ -139,7 +137,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerDay,
-            { color: "#FFF" },
+            { color: isSelected ? "#0A0A0F" : "#F8FAFC" },
           ]}
         >
           {dayNum}
@@ -147,7 +145,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerDayName,
-            { color: "#FFF" },
+            { color: isSelected ? "#0A0A0F" : "#94A3B8" },
           ]}
         >
           {dayName}
@@ -164,7 +162,6 @@ interface TimeSlotProps {
 }
 
 function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
-  const { theme, isDark } = useTheme();
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -195,7 +192,7 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
         style={[
           styles.timeSlot,
           isSelected
-            ? { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
+            ? { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
             : {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 borderColor: "rgba(255,255,255,0.15)",
@@ -207,22 +204,20 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
           style={[
             styles.timeSlotText,
             {
-              color: "#FFF",
+              color: isSelected ? "#0A0A0F" : "#F8FAFC",
               fontWeight: isSelected ? "700" : "300",
             },
           ]}
         >
           {timeVal}
         </ThemedText>
-        <ThemedText style={styles.timeSlotAmPm}>{ampm}</ThemedText>
+        <ThemedText style={[styles.timeSlotAmPm, isSelected && { color: "rgba(10,10,15,0.7)" }]}>{ampm}</ThemedText>
       </Pressable>
     </Animated.View>
   );
 }
 
 function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[], selectedDate: Date, onDateChange: (date: Date) => void }) {
-  const { theme, isDark } = useTheme();
-  
   const handleScroll = (event: any) => {
     const x = event.nativeEvent.contentOffset.x;
     const index = Math.round(x / 96); // 80 width + 16 gap
@@ -257,16 +252,16 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
               }}
               style={[
                 styles.datePickerItem,
-                isSelected && { backgroundColor: "rgba(255,255,255,0.25)", borderColor: "#FFF", borderWidth: 2 }
+                 isSelected && { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
               ]}
             >
-              <ThemedText style={[styles.datePickerMonth, { color: "#FFF" }]}>
+              <ThemedText style={[styles.datePickerMonth, { color: isSelected ? "#0A0A0F" : "#F8FAFC" }]}>
                 {date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
               </ThemedText>
-              <ThemedText style={[styles.datePickerDay, { color: "#FFF" }]}>
+              <ThemedText style={[styles.datePickerDay, { color: isSelected ? "#0A0A0F" : "#F8FAFC" }]}>
                 {date.getDate()}
               </ThemedText>
-              <ThemedText style={[styles.datePickerDayName, { color: "#FFF" }]}>
+              <ThemedText style={[styles.datePickerDayName, { color: isSelected ? "rgba(10,10,15,0.72)" : "#94A3B8" }]}>
                 {date.toLocaleDateString("en-US", { weekday: "short" }).toUpperCase()}
               </ThemedText>
             </Pressable>
@@ -404,14 +399,13 @@ export default function SelectTimeScreen() {
           style={[
             styles.mainButton,
             {
-              backgroundColor: "rgba(0, 0, 0, 0.6)",
-              borderColor: "rgba(255, 255, 255, 0.4)",
+              backgroundColor: "#00D4FF",
+              borderColor: "rgba(0,212,255,0.8)",
               opacity: selectedTime ? 1 : 0.5,
             },
           ]}
         >
-          <BlurView intensity={20} style={StyleSheet.absoluteFill} tint="dark" />
-          <ThemedText style={styles.mainButtonText}>{t('common.continue').toUpperCase()}</ThemedText>
+          <ThemedText style={[styles.mainButtonText, { color: "#0A0A0F" }]}>{t('common.continue').toUpperCase()}</ThemedText>
         </Pressable>
 
         <Pressable onPress={handleBack} style={styles.backButtonLarge}>
@@ -425,7 +419,7 @@ export default function SelectTimeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   oversizedTextContainer: {
     position: "absolute",
@@ -437,7 +431,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
   },
   oversizedText: {
-    fontFamily: "CormorantGaramond-Bold",
+    fontFamily: "Inter-SemiBold",
     fontSize: 120,
     letterSpacing: -5,
     lineHeight: 120,
@@ -473,7 +467,7 @@ const styles = StyleSheet.create({
     marginBottom: 40,
   },
   heroTitle: {
-    fontFamily: "CormorantGaramond-Regular",
+    fontFamily: "Inter-SemiBold",
     fontSize: 72,
     letterSpacing: -2,
     textAlign: "center",

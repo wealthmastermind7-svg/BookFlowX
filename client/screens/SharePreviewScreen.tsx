@@ -273,11 +273,11 @@ export default function SharePreviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.7)",
+    backgroundColor: "rgba(10,10,15,0.72)",
   },
   heroSection: {
     alignItems: "center",
@@ -312,7 +312,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   messageBubble: {
-    backgroundColor: "#007AFF",
+    backgroundColor: "#00D4FF",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 18,
@@ -354,7 +354,7 @@ const styles = StyleSheet.create({
     left: -100,
     right: -100,
     height: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(0,212,255,0.38)",
     transform: [{ rotate: "25deg" }],
   },
   shadowColumn: {
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   glassFooter: {
-    backgroundColor: "rgba(20,20,20,0.9)",
+    backgroundColor: "rgba(13,13,26,0.96)",
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingBottom: 20,
@@ -465,13 +465,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 56,
     borderRadius: 16,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     gap: 10,
   },
   primaryButtonText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#000",
+    color: "#0A0A0F",
   },
   secondaryButton: {
     flexDirection: "row",
@@ -479,9 +479,9 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 56,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#16213E",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(0,212,255,0.22)",
     gap: 10,
   },
   secondaryButtonText: {
@@ -510,9 +510,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(22,33,62,0.92)",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.18)",
   },
   platformText: {
     fontSize: 12,
@@ -522,9 +522,9 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.18)",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(30,30,30,0.9)",
+    backgroundColor: "#111827",
   },
 });

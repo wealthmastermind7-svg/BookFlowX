@@ -167,6 +167,7 @@ export default function SettingsScreen() {
   const [calendarConnecting, setCalendarConnecting] = useState(false);
 
   const DEMO_TYPES = [
+    { id: "property", label: "Property & Real Estate", description: "Viewings, inspections & move-ins" },
     { id: "salon", label: "Salon", description: "Hair & beauty services" },
     { id: "barbershop", label: "Barbershop", description: "Haircuts & grooming" },
     { id: "spa", label: "Spa", description: "Relaxation & wellness" },
@@ -437,8 +438,8 @@ export default function SettingsScreen() {
       style={({ pressed }) => [
         styles.glassCard, 
         { 
-          backgroundColor: highlight ? "rgba(255,255,255,0.06)" : "rgba(255,255,255,0.03)", 
-          borderColor: highlight ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.08)" 
+          backgroundColor: highlight ? "#16213E" : "#111827",
+          borderColor: highlight ? "rgba(0,212,255,0.34)" : "rgba(0,212,255,0.14)"
         }, 
         style, 
         pressed && onPress && { opacity: 0.85, transform: [{ scale: 0.99 }] }
@@ -934,22 +935,22 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#000" },
+  container: { flex: 1, backgroundColor: "#0A0A0F" },
   backgroundWrapper: { ...StyleSheet.absoluteFillObject },
   backgroundImage: { flex: 1 },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(10,10,15,0.56)",
   },
   sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12, flexWrap: 'wrap', gap: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: 'wrap', gap: 12 },
-  sectionTitle: { fontSize: 56, fontFamily: Platform.OS === "ios" ? "Georgia" : "serif", fontWeight: "800", color: "#fff", letterSpacing: -2.5 },
+  sectionTitle: { fontSize: 34, fontFamily: "Inter-Bold", fontWeight: "800", color: "#F8FAFC", letterSpacing: -1.2 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
-  glassCard: { borderRadius: 32, borderWidth: 1, overflow: "hidden" },
+  glassCard: { borderRadius: 24, borderWidth: 1, borderColor: "rgba(0,212,255,0.18)", overflow: "hidden", backgroundColor: "#111827" },
   premiumBanner: { padding: 28, marginBottom: 12 },
   premiumBannerHeader: { flexDirection: "row", alignItems: "center" },
-  premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center" },
+  premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "rgba(0,212,255,0.12)", alignItems: "center", justifyContent: "center" },
   premiumBannerTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 4 },
   premiumBannerSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
   premiumFeatures: { marginTop: 24, marginBottom: 20 },
@@ -989,9 +990,9 @@ const styles = StyleSheet.create({
   copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
   bookingActions: { flexDirection: "row", gap: 12 },
   shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#000", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#fff", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#00D4FF", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
   shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
-  shareQrText: { fontSize: 15, fontWeight: "700", color: "#000" },
+  shareQrText: { fontSize: 15, fontWeight: "700", color: "#0A0A0F" },
   voiceCard: { padding: 32, marginTop: 12, borderRadius: 32 },
   voiceIconGroup: { flexDirection: "row", gap: 12 },
   voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
@@ -1005,7 +1006,7 @@ const styles = StyleSheet.create({
   usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
   usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },
   progressBarBg: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" },
-  progressBarFill: { height: "100%", backgroundColor: "#fff", borderRadius: 3 },
+  progressBarFill: { height: "100%", backgroundColor: "#00D4FF", borderRadius: 3 },
   securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
   securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
   securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },

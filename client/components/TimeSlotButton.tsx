@@ -51,6 +51,8 @@ export function TimeSlotButton({
           styles.button,
           {
             backgroundColor: selected ? theme.accent : theme.backgroundDefault,
+            borderWidth: 1,
+            borderColor: selected ? theme.accent : theme.borderLight,
             opacity: disabled ? 0.4 : 1,
           },
         ]}
@@ -77,6 +79,10 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minWidth: 100,
+    shadowColor: "#00D4FF",
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
+    elevation: 2,
   },
   text: {
     fontWeight: "500",

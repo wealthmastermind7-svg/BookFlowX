@@ -783,11 +783,11 @@ export default function ServiceEditorScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: "rgba(10,10,15,0.6)",
   },
   container: {
     flex: 1,
@@ -799,7 +799,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   header: {
     flexDirection: "row",
@@ -857,8 +857,10 @@ const styles = StyleSheet.create({
     marginLeft: 4,
   },
   inputPrimary: {
-    backgroundColor: "#fff",
-    color: "#000",
+    backgroundColor: "#111827",
+    color: "#F8FAFC",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.3)",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -866,8 +868,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   inputSecondary: {
-    backgroundColor: "rgba(255,255,255,0.15)",
+    backgroundColor: "#16213E",
     color: "#fff",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.2)",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -883,11 +887,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(0,212,255,0.18)",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#111827",
   },
   linkCard: {
     padding: 24,
@@ -947,12 +951,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 16,
     gap: 16,
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: "rgba(10,10,15,0.94)",
   },
   cancelButton: {
     flex: 1,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(148,163,184,0.24)",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
@@ -964,11 +968,11 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: "#fff",
+    shadowColor: "#00D4FF",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -976,7 +980,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#000",
+    color: "#0A0A0F",
   },
   modalOverlay: {
     flex: 1,
@@ -986,14 +990,14 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   qrModalContent: {
-    backgroundColor: "rgba(30,30,30,0.95)",
+    backgroundColor: "#111827",
     borderRadius: 32,
     padding: 24,
     width: "100%",
     maxWidth: 340,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.2)",
   },
   qrModalHeader: {
     flexDirection: "row",
@@ -1022,7 +1026,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   downloadButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 32,
@@ -1032,7 +1036,7 @@ const styles = StyleSheet.create({
   downloadButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#000",
+    color: "#0A0A0F",
   },
   labelRow: {
     flexDirection: "row",
@@ -1044,7 +1048,7 @@ const styles = StyleSheet.create({
   aiUpsellTrigger: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(0,212,255,0.12)",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1059,7 +1063,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   upsellModalContent: {
-    backgroundColor: "#111",
+    backgroundColor: "#111827",
     borderTopLeftRadius: 32,
     borderTopRightRadius: 32,
     padding: 24,
@@ -1096,11 +1100,11 @@ const styles = StyleSheet.create({
   upsellCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#16213E",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.16)",
   },
   upsellCardInfo: {
     flex: 1,
@@ -1126,7 +1130,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1154,11 +1158,11 @@ const styles = StyleSheet.create({
   savedUpsellCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#16213E",
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.16)",
   },
   savedUpsellInfo: {
     flex: 1,
@@ -1189,7 +1193,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(0,212,255,0.12)",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1203,7 +1207,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   doneEditButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: 12,
     paddingVertical: 10,
     alignItems: "center",
@@ -1211,7 +1215,7 @@ const styles = StyleSheet.create({
   doneEditButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#000",
+    color: "#0A0A0F",
   },
   assistantContextText: {
     fontSize: 12,

@@ -376,13 +376,16 @@ import { runDailyOutreach } from "./outreachCron";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Privacy Policy | BookFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #fff; }
-        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2rem; }
-        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; }
-        p { margin-bottom: 1rem; color: #4a4a4a; }
-        .back-link { display: inline-block; margin-bottom: 2rem; color: #000; text-decoration: none; font-weight: 600; }
-        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9rem; color: #888; }
+        body { font-family: Inter, "Segoe UI", sans-serif; line-height: 1.75; color: #eaf2ff; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: radial-gradient(ellipse at 90% 0%,rgba(124,58,237,.15),transparent 38%),#0a0a0f; }
+        h1 { font-size: clamp(2.8rem,8vw,4rem); font-weight: 800; letter-spacing: -0.065em; margin-bottom: 2rem; background:linear-gradient(100deg,#fff,#00d4ff 70%,#a78bfa); -webkit-background-clip:text; color:transparent; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; color:#f8fafc; letter-spacing:-.03em; }
+        p,li { margin-bottom: 1rem; color: #94a3b8; }
+        .back-link { display: inline-block; margin-bottom: 2rem; color: #00d4ff; text-decoration: none; font-weight: 600; }
+        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,212,255,.18); font-size: 0.9rem; color: #64748b; }
     </style>
 </head>
 <body>
@@ -408,13 +411,16 @@ import { runDailyOutreach } from "./outreachCron";
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Terms of Service | BookFlow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; color: #1a1a1a; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: #fff; }
-        h1 { font-size: 2.5rem; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 2rem; }
-        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; }
-        p { margin-bottom: 1rem; color: #4a4a4a; }
-        .back-link { display: inline-block; margin-bottom: 2rem; color: #000; text-decoration: none; font-weight: 600; }
-        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid #eee; font-size: 0.9rem; color: #888; }
+        body { font-family: Inter, "Segoe UI", sans-serif; line-height: 1.75; color: #eaf2ff; max-width: 800px; margin: 0 auto; padding: 40px 20px; background: radial-gradient(ellipse at 90% 0%,rgba(124,58,237,.15),transparent 38%),#0a0a0f; }
+        h1 { font-size: clamp(2.8rem,8vw,4rem); font-weight: 800; letter-spacing: -0.065em; margin-bottom: 2rem; background:linear-gradient(100deg,#fff,#00d4ff 70%,#a78bfa); -webkit-background-clip:text; color:transparent; }
+        h2 { font-size: 1.5rem; font-weight: 700; margin-top: 2rem; color:#f8fafc; letter-spacing:-.03em; }
+        p,li { margin-bottom: 1rem; color: #94a3b8; }
+        .back-link { display: inline-block; margin-bottom: 2rem; color: #00d4ff; text-decoration: none; font-weight: 600; }
+        footer { margin-top: 40px; padding-top: 20px; border-top: 1px solid rgba(0,212,255,.18); font-size: 0.9rem; color: #64748b; }
     </style>
 </head>
 <body>
@@ -451,16 +457,16 @@ import { runDailyOutreach } from "./outreachCron";
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         :root {
-            --pure-black: #000000;
-            --charcoal: #111111;
-            --graphite: #222222;
-            --smoke: #444444;
-            --silver: #888888;
-            --pearl: #f5f5f7;
-            --accent: #ffffff;
-            --glass: rgba(255, 255, 255, 0.03);
-            --glass-border: rgba(255, 255, 255, 0.08);
-            --glass-hover: rgba(255, 255, 255, 0.06);
+            --pure-black: #0a0a0f;
+            --charcoal: #0d0d1a;
+            --graphite: #111827;
+            --smoke: #52627a;
+            --silver: #94a3b8;
+            --pearl: #f8fafc;
+            --accent: #00d4ff;
+            --glass: rgba(26, 26, 46, 0.78);
+            --glass-border: rgba(0, 212, 255, 0.18);
+            --glass-hover: rgba(22, 33, 62, 0.92);
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -482,7 +488,7 @@ import { runDailyOutreach } from "./outreachCron";
             height: 100%;
             z-index: -1;
             opacity: 0.4;
-            background: radial-gradient(circle at 50% 50%, #111 0%, #000 100%);
+            background: radial-gradient(ellipse at 48% 44%, rgba(124,58,237,.16) 0%, rgba(10,10,15,1) 68%);
         }
 
         .container {
@@ -548,12 +554,13 @@ import { runDailyOutreach } from "./outreachCron";
 
         .card:hover {
             background: var(--glass-hover);
-            border-color: rgba(255,255,255,0.15);
-            transform: translateY(-10px) scale(1.02);
+            border-color: rgba(0,212,255,.48);
+            transform: translateY(-6px);
+            box-shadow: 0 20px 60px rgba(0,212,255,.08);
         }
 
         .card h2 {
-            font-family: 'Cormorant Garamond', serif;
+            font-family: 'Inter', sans-serif;
             font-size: 32px;
             font-weight: 500;
             margin-bottom: 16px;
@@ -656,6 +663,15 @@ import { runDailyOutreach } from "./outreachCron";
             h1 { font-size: 72px; }
             .comparison-grid { grid-template-columns: 1fr; }
         }
+        html { color-scheme:dark; background:#0a0a0f; }
+        h1 { background:linear-gradient(100deg,#fff 5%,#00d4ff 58%,#a78bfa); -webkit-background-clip:text; color:transparent; }
+        h2,h3 { font-family:Inter,sans-serif; letter-spacing:-.04em; }
+        .card { box-shadow:0 18px 54px rgba(0,0,0,.24); }
+        .circular-meter { border-color:rgba(0,212,255,.2); }
+        .circular-meter::after { border-color:#00d4ff; }
+        .meter-val,.vs-link { color:#00d4ff; }
+        .back-link:hover { color:#00d4ff; }
+        footer { border-color:rgba(0,212,255,.16); }
     </style>
 </head>
 <body>
@@ -732,11 +748,15 @@ import { runDailyOutreach } from "./outreachCron";
       <html>
       <head>
         <title>BookFlowX Support</title>
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
         <style>
-          body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.6; max-width: 600px; margin: 40px auto; padding: 20px; color: #333; }
-          h1 { border-bottom: 1px solid #eee; padding-bottom: 10px; }
-          .contact { background: #f9f9f9; padding: 20px; border-radius: 8px; border: 1px solid #eee; margin-top: 20px; }
-          .email { font-weight: bold; color: #007AFF; }
+          body { font-family: Inter, "Segoe UI", sans-serif; line-height: 1.7; max-width: 680px; min-height:100vh; margin: 40px auto; padding: 36px 24px; color: #f8fafc; background: radial-gradient(ellipse at 90% 0%,rgba(124,58,237,.16),transparent 40%),#0a0a0f; }
+          h1 { border-bottom: 1px solid rgba(0,212,255,.22); padding-bottom: 16px; letter-spacing:-.055em; font-size:clamp(2.4rem,8vw,3.6rem); background:linear-gradient(100deg,#fff,#00d4ff 68%,#a78bfa); -webkit-background-clip:text; color:transparent; }
+          p { color:#94a3b8; }
+          .contact { background:linear-gradient(145deg,rgba(26,26,46,.9),rgba(22,33,62,.78)); padding: 24px; border-radius: 18px; border: 1px solid rgba(0,212,255,.22); margin-top: 20px; box-shadow:0 20px 58px rgba(0,0,0,.25); }
+          .email { font-weight: bold; color: #00d4ff; }
         </style>
       </head>
       <body>

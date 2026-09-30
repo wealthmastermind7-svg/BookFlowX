@@ -45,6 +45,13 @@ const smokeBackground = require("../assets/stock_images/abstract_dark_fluid__e11
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 const AnimatedPath = Animated.createAnimatedComponent(Path);
+const CHANNEL_SOURCES = {
+  voice: { icon: "phone", color: "#A78BFA", label: "Voice" },
+  sms: { icon: "message-circle", color: "#00D4FF", label: "SMS" },
+  email: { icon: "mail", color: "#60A5FA", label: "Email" },
+  chat: { icon: "message-square", color: "#34D399", label: "Chat" },
+  web: { icon: "globe", color: "#94A3B8", label: "Web or unrecorded" },
+} as const;
 
 function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
   if (Platform.OS === "ios") {
@@ -102,7 +109,7 @@ function CircularMeterGlass({
             cx="50"
             cy="50"
             r={radius}
-            stroke="white"
+            stroke="#00D4FF"
             strokeWidth={3}
             fill="transparent"
             strokeDasharray={circumference}
@@ -169,9 +176,9 @@ function RevenueChart({ data }: { data: { label: string; value: number }[] }) {
       <Svg width={graphWidth} height={graphHeight + 10} style={{ overflow: "visible" }}>
         <Defs>
           <LinearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <Stop offset="0%" stopColor="rgba(255,255,255,0.4)" />
-            <Stop offset="50%" stopColor="white" />
-            <Stop offset="100%" stopColor="rgba(255,255,255,0.8)" />
+            <Stop offset="0%" stopColor="rgba(0,212,255,0.45)" />
+            <Stop offset="50%" stopColor="#00D4FF" />
+            <Stop offset="100%" stopColor="rgba(124,58,237,0.8)" />
           </LinearGradient>
           <LinearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <Stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
@@ -182,7 +189,7 @@ function RevenueChart({ data }: { data: { label: string; value: number }[] }) {
         <AnimatedPath
           d={pathData}
           fill="none"
-          stroke="white"
+          stroke="#00D4FF"
           strokeWidth={4}
           strokeLinecap="round"
           strokeDasharray={pathLength}
@@ -198,6 +205,7 @@ function BookingCardGlass({
   serviceName,
   date,
   time,
+  channel,
   isPremium,
   status,
   confirmationSentAt,
@@ -209,6 +217,7 @@ function BookingCardGlass({
   serviceName: string;
   date: string;
   time: string;
+  channel?: Booking["channel"];
   isPremium?: boolean;
   status: string;
   confirmationSentAt?: string | null;
@@ -217,6 +226,7 @@ function BookingCardGlass({
   onPress?: () => void;
 }) {
   const { theme } = useTheme();
+  const source = CHANNEL_SOURCES[channel ?? "web"] ?? CHANNEL_SOURCES.web;
   const handlePress = () => {
     try {
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -228,8 +238,17 @@ function BookingCardGlass({
     <Pressable onPress={handlePress}>
       <GlassPanel style={styles.bookingCard}>
         <View style={styles.bookingHeader}>
-          <View style={styles.bookingAvatar}>
-            <Feather name="user" size={14} color="white" />
+          <View style={styles.bookingAvatarWrap}>
+            <View style={styles.bookingAvatar}>
+              <Feather name="user" size={14} color="white" />
+            </View>
+            <View
+              style={[styles.bookingChannelBadge, { borderColor: source.color, backgroundColor: "#111827" }]}
+              accessible
+              accessibilityLabel={`Booking source: ${source.label}`}
+            >
+              <Feather name={source.icon} size={10} color={source.color} />
+            </View>
           </View>
           <View style={styles.bookingInfo}>
             <Animated.Text style={styles.bookingName}>{customerName}</Animated.Text>
@@ -470,6 +489,19 @@ export default function DashboardScreen() {
           <View style={styles.headerRow}>
             <Animated.Text style={styles.headerTitle}>BookFlow</Animated.Text>
           </View>
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={styles.channelScroll}
+            contentContainerStyle={styles.channelPills}
+            accessibilityLabel="Booking channels: SMS, Voice, Email and Chat"
+          >
+            {["📱 SMS", "📞 Voice", "📧 Email", "💬 Chat"].map(label => (
+              <View key={label} style={styles.channelPill}>
+                <ThemedText style={styles.channelPillText}>{label}</ThemedText>
+              </View>
+            ))}
+          </ScrollView>
 
           <GlassPanel style={styles.revenueCard}>
             <Animated.Text style={styles.revenueLabel}>{t('dashboard.totalRevenue')}</Animated.Text>
@@ -512,18 +544,19 @@ export default function DashboardScreen() {
               <GlassPanel style={styles.voiceAspirationalBanner}>
                 <View style={styles.voiceAspirationalHeader}>
                   <View style={styles.voiceIconStack}>
-                    <Feather name="mic" size={16} color={isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.5)"} />
-                    <ThemedText style={{ fontSize: 10, fontWeight: "800", color: isExhausted ? "#EF4444" : percentUsed > 0.8 ? "#F59E0B" : "rgba(255,255,255,0.4)", marginLeft: 8 }}>
+                    <Feather name="mic" size={16} color="#00D4FF" />
+                    <ThemedText style={styles.voiceUsageLabel}>
                       {isExhausted ? "LIMIT REACHED" : `${remainingMinutes} MIN LEFT`}
                     </ThemedText>
                   </View>
-                  <Animated.Text style={styles.voiceAspirationalTitle}>Elevate to Voice Assistant</Animated.Text>
                 </View>
+                <Animated.Text style={styles.voiceAspirationalTitle}>AI Voice for Property Enquiries</Animated.Text>
                 <Animated.Text style={styles.voiceAspirationalDesc}>
-                  {isExhausted 
-                    ? "Your limit has been reached. Upgrade to continue assisting customers."
-                    : "Let your business breathe with an Informational Assistant that handles calls naturally."}
+                  Tenants and buyers call after hours. Your AI voice assistant answers, qualifies, and books viewings automatically.
                 </Animated.Text>
+                <View style={styles.voiceUsageTrack} accessibilityLabel={`${Math.round(percentUsed)} percent of voice minutes used`}>
+                  <View style={[styles.voiceUsageFill, { width: `${Math.min(100, Math.max(0, percentUsed))}%` }]} />
+                </View>
                 <View style={styles.voiceAspirationalAction}>
                   <Animated.Text style={styles.voiceAspirationalLink}>
                     {isExhausted ? t('dashboard.upgradeNow') : t('dashboard.previewExperience')}
@@ -596,6 +629,7 @@ export default function DashboardScreen() {
                     serviceName={booking.serviceName || t('dashboard.service')}
                     date={booking.date}
                     time={booking.time}
+                    channel={booking.channel}
                     status={booking.status}
                     isPremium={booking.status === "confirmed"}
                     confirmationSentAt={booking.confirmationSentAt}
@@ -878,7 +912,7 @@ export default function DashboardScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   backgroundImage: {
     position: "absolute",
@@ -889,7 +923,7 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(10,10,15,0.52)",
   },
   container: {
     flex: 1,
@@ -932,22 +966,45 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     color: "#fff",
     textAlign: "center",
-    textShadowColor: "rgba(255,255,255,0.3)",
+    textShadowColor: "rgba(0,212,255,0.32)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 8,
     letterSpacing: -1.5,
   },
+  channelScroll: {
+    marginTop: -10,
+    marginBottom: 4,
+    marginHorizontal: -20,
+  },
+  channelPills: {
+    paddingHorizontal: 20,
+    gap: 8,
+  },
+  channelPill: {
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.4)",
+    backgroundColor: "rgba(0,212,255,0.08)",
+  },
+  channelPillText: {
+    color: "#D7F8FF",
+    fontSize: 11,
+    fontWeight: "700",
+  },
   glassPanel: {
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.18)",
+    backgroundColor: "rgba(17,24,39,0.82)",
     overflow: "hidden",
   },
   glassPanelInner: {
     padding: 0,
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "#111827",
   },
   revenueCard: {
     padding: 32,
@@ -963,8 +1020,8 @@ const styles = StyleSheet.create({
   revenueValue: {
     fontSize: 56,
     fontWeight: "800",
-    color: "#fff",
-    textShadowColor: "rgba(255,255,255,0.4)",
+    color: "#00D4FF",
+    textShadowColor: "rgba(0,212,255,0.38)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 12,
     letterSpacing: -2,
@@ -1058,8 +1115,8 @@ const styles = StyleSheet.create({
     marginBottom: 24,
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.05)",
-    backgroundColor: "rgba(255,255,255,0.01)",
+    borderColor: "rgba(0,212,255,0.28)",
+    backgroundColor: "rgba(22,33,62,0.72)",
   },
   voiceAspirationalHeader: {
     flexDirection: "row",
@@ -1071,17 +1128,36 @@ const styles = StyleSheet.create({
     alignItems: "center",
     marginRight: 12,
   },
+  voiceUsageLabel: {
+    color: "#94A3B8",
+    fontSize: 10,
+    fontWeight: "800",
+    marginLeft: 8,
+  },
   voiceAspirationalTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
+    color: "#F8FAFC",
     letterSpacing: -0.5,
+    marginBottom: 8,
   },
   voiceAspirationalDesc: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#94A3B8",
     lineHeight: 20,
+    marginBottom: 12,
+  },
+  voiceUsageTrack: {
+    height: 4,
+    borderRadius: 4,
+    backgroundColor: "rgba(148,163,184,0.22)",
+    overflow: "hidden",
     marginBottom: 16,
+  },
+  voiceUsageFill: {
+    height: "100%",
+    borderRadius: 4,
+    backgroundColor: "#00D4FF",
   },
   voiceAspirationalAction: {
     flexDirection: "row",
@@ -1186,6 +1262,22 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
+  },
+  bookingAvatarWrap: {
+    width: 36,
+    height: 36,
+    justifyContent: "center",
+  },
+  bookingChannelBadge: {
+    position: "absolute",
+    right: -5,
+    bottom: -4,
+    width: 18,
+    height: 18,
+    borderWidth: 1,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
   },
   bookingInfo: {
     flex: 1,
@@ -1474,7 +1566,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingVertical: 14,
     borderRadius: 12,
     marginTop: 16,

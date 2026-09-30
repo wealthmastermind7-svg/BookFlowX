@@ -38,7 +38,7 @@ function BackgroundOverlay() {
     <View 
       style={{
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0,0,0,0.15)",
+        backgroundColor: "rgba(10,10,15,0.5)",
         zIndex: -1,
       }} 
     />
@@ -341,7 +341,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   container: {
     flex: 1,
@@ -367,7 +367,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#111827",
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.16)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -468,11 +470,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dayCircleSelected: {
-    backgroundColor: "white",
+    backgroundColor: "#00D4FF",
+    shadowColor: "#00D4FF",
+    shadowOpacity: 0.32,
+    shadowRadius: 12,
+    elevation: 5,
   },
   dayCircleHasBooking: {
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(0,212,255,0.42)",
   },
   dayText: {
     fontSize: 18,
@@ -482,7 +488,7 @@ const styles = StyleSheet.create({
     textShadowRadius: 3,
   },
   dayTextSelected: {
-    color: "black",
+    color: "#0A0A0F",
     fontWeight: "600",
   },
   bookingsHeader: {
@@ -508,11 +514,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.15)",
+    borderColor: "rgba(0,212,255,0.18)",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#111827",
   },
   bookingCard: {
     padding: 20,
@@ -537,7 +543,7 @@ const styles = StyleSheet.create({
     width: 32,
     height: 32,
     borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.8)",
+    backgroundColor: "#00D4FF",
     justifyContent: "center",
     alignItems: "center",
   },

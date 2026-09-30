@@ -282,10 +282,10 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#fff",
+    shadowColor: "#00D4FF",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.4,
     shadowRadius: 12,
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    backgroundColor: "rgba(0,212,255,0.18)",
     zIndex: -1,
   },
   sailContainer: {
@@ -373,13 +373,13 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   tipContainer: {
-    backgroundColor: "#1a1a1a",
+    backgroundColor: "#111827",
     borderRadius: 24,
     padding: 28,
     maxWidth: 340,
     width: "100%",
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.2)",
   },
   tipHeader: {
     flexDirection: "row",
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "rgba(0,212,255,0.12)",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   gotItButton: {
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: "center",
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   gotItText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#000",
+    color: "#0A0A0F",
   },
   tipsFooter: {
     gap: 16,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 20,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: 3,
   },
 });

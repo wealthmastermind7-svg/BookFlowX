@@ -270,7 +270,7 @@ export default function CheckoutScreen() {
           <View style={styles.progressBar}>
             <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
             <View style={[styles.progressSegment, { backgroundColor: isDark ? "rgba(255,255,255,0.2)" : "rgba(0,0,0,0.2)" }]} />
-            <View style={[styles.progressSegment, styles.progressSegmentActive, { backgroundColor: theme.text }]} />
+          <View style={[styles.progressSegment, styles.progressSegmentActive, { backgroundColor: theme.accent }]} />
           </View>
         </Animated.View>
 
@@ -289,7 +289,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+                  borderBottomColor: "rgba(0,212,255,0.32)",
                 },
               ]}
               placeholder={t('booking.namePlaceholder')}
@@ -307,7 +307,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+                  borderBottomColor: "rgba(0,212,255,0.32)",
                 },
               ]}
               placeholder={t('booking.emailPlaceholder')}
@@ -326,7 +326,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: isDark ? "rgba(255,255,255,0.15)" : "rgba(0,0,0,0.1)",
+                  borderBottomColor: "rgba(0,212,255,0.32)",
                 },
               ]}
               placeholder={t('booking.phonePlaceholder')}
@@ -341,7 +341,7 @@ export default function CheckoutScreen() {
         {(loadingUpsells || upsellSuggestions.length > 0) && (
           <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
             <View style={styles.upsellHeader}>
-              <Feather name="zap" size={16} color={isDark ? "#FFD700" : "#D4A017"} />
+              <Feather name="zap" size={16} color="#7C3AED" />
               <ThemedText style={styles.upsellTitle}>{t('booking.enhanceBooking')}</ThemedText>
             </View>
             <ThemedText style={styles.upsellSubtitle}>{t('booking.optionalAddons')}</ThemedText>
@@ -360,17 +360,17 @@ export default function CheckoutScreen() {
                       styles.addonCard,
                       {
                         borderColor: selectedAddons.has(index)
-                          ? (isDark ? "#FFD700" : "#D4A017")
-                          : (isDark ? "rgba(255,255,255,0.1)" : "rgba(0,0,0,0.08)"),
+                          ? "#7C3AED"
+                          : "rgba(0,212,255,0.16)",
                         backgroundColor: selectedAddons.has(index)
-                          ? (isDark ? "rgba(255,215,0,0.1)" : "rgba(212,160,23,0.08)")
-                          : (isDark ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.02)"),
+                          ? "rgba(124,58,237,0.14)"
+                          : "rgba(17,24,39,0.86)",
                       },
                     ]}
                   >
                     <View style={styles.addonCheckbox}>
                       {selectedAddons.has(index) ? (
-                        <Feather name="check-circle" size={20} color={isDark ? "#FFD700" : "#D4A017"} />
+                        <Feather name="check-circle" size={20} color="#7C3AED" />
                       ) : (
                         <Feather name="circle" size={20} color={theme.textTertiary} />
                       )}
@@ -396,8 +396,8 @@ export default function CheckoutScreen() {
             style={[
               styles.summaryCard,
               {
-                borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.06)",
-                backgroundColor: isDark ? "rgba(30,30,30,0.8)" : "rgba(255,255,255,0.9)",
+                borderColor: "rgba(0,212,255,0.18)",
+                backgroundColor: "rgba(17,24,39,0.94)",
               },
             ]}
           >
@@ -442,7 +442,7 @@ export default function CheckoutScreen() {
           styles.bottomGradient,
           {
             paddingBottom: insets.bottom + Spacing.lg,
-            backgroundColor: isDark ? "rgba(0,0,0,0.95)" : "rgba(255,255,255,0.95)",
+            backgroundColor: "rgba(10,10,15,0.96)",
           },
         ]}
       >
@@ -452,7 +452,7 @@ export default function CheckoutScreen() {
           style={[
             styles.confirmButton,
             {
-              backgroundColor: theme.text,
+              backgroundColor: theme.accent,
               opacity: customerName.trim() && customerEmail.trim() && isValidEmail(customerEmail) && !isSubmitting ? 1 : 0.4,
             },
           ]}

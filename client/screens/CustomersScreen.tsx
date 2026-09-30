@@ -275,7 +275,7 @@ export default function CustomersScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0a0a0a",
+    backgroundColor: "#0A0A0F",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
@@ -289,25 +289,25 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   hugeTitle: {
-    fontSize: 72,
+    fontSize: 44,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: -3,
-    lineHeight: 88,
+    lineHeight: 54,
     paddingBottom: 8,
-    textShadowColor: "rgba(255,255,255,0.4)",
+    textShadowColor: "rgba(0,212,255,0.3)",
     textShadowOffset: { width: 0, height: 0 },
     textShadowRadius: 30,
   },
   glassCard: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "rgba(0,212,255,0.18)",
     padding: 16,
     overflow: "hidden",
   },
   glassCardAndroid: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#111827",
   },
   cardContent: {
     flexDirection: "row",
@@ -318,8 +318,8 @@ const styles = StyleSheet.create({
     height: 48,
     borderRadius: 24,
     borderWidth: 2,
-    borderColor: "#fff",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.45)",
+    backgroundColor: "rgba(0,212,255,0.1)",
     justifyContent: "center",
     alignItems: "center",
   },

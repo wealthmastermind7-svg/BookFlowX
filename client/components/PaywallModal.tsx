@@ -252,7 +252,7 @@ export function PaywallModal({
                     selectedPlan === "yearly" && styles.planCardSelected,
                     { 
                       backgroundColor: selectedPlan === "yearly" ? colors.backgroundSecondary : "transparent",
-                      borderColor: selectedPlan === "yearly" ? colors.text : colors.border,
+                       borderColor: selectedPlan === "yearly" ? colors.accent : colors.border,
                       borderWidth: selectedPlan === "yearly" ? 2 : 1,
                     },
                   ]}
@@ -263,7 +263,7 @@ export function PaywallModal({
                       <Text style={[styles.planName, { color: colors.text }]}>
                         Yearly Access
                       </Text>
-                      <View style={[styles.bestValueBadge, { backgroundColor: colors.text }]}>
+                      <View style={[styles.bestValueBadge, { backgroundColor: colors.accent }]}>
                         <Text style={[styles.bestValueText, { color: colors.backgroundRoot }]}>BEST VALUE</Text>
                       </View>
                     </View>
@@ -282,7 +282,7 @@ export function PaywallModal({
                     selectedPlan === "monthly" && styles.planCardSelected,
                     { 
                       backgroundColor: selectedPlan === "monthly" ? colors.backgroundSecondary : "transparent",
-                      borderColor: selectedPlan === "monthly" ? colors.text : colors.border,
+                       borderColor: selectedPlan === "monthly" ? colors.accent : colors.border,
                       borderWidth: selectedPlan === "monthly" ? 2 : 1,
                     },
                   ]}
@@ -307,7 +307,7 @@ export function PaywallModal({
                     selectedPlan === "lifetime" && styles.planCardSelected,
                     { 
                       backgroundColor: selectedPlan === "lifetime" ? colors.backgroundSecondary : "transparent",
-                      borderColor: selectedPlan === "lifetime" ? colors.text : colors.border,
+                       borderColor: selectedPlan === "lifetime" ? colors.accent : colors.border,
                       borderWidth: selectedPlan === "lifetime" ? 2 : 1,
                     },
                   ]}
@@ -332,7 +332,7 @@ export function PaywallModal({
                   styles.ctaButton, 
                   { 
                     opacity: isLoading ? 0.7 : 1,
-                    backgroundColor: colors.text,
+                    backgroundColor: colors.accent,
                   }
                 ]}
                 onPress={handleUpgrade}
@@ -342,7 +342,7 @@ export function PaywallModal({
                   <ActivityIndicator color={colors.backgroundRoot} size="small" />
                 ) : (
                   <View style={styles.ctaContent}>
-                    <Text style={[styles.ctaText, { color: colors.backgroundRoot }]}>{getCtaText()}</Text>
+                    <Text style={[styles.ctaText, { color: colors.buttonText }]}>{getCtaText()}</Text>
                     <Feather name="arrow-right" size={18} color={colors.backgroundRoot} style={{ marginLeft: 8 }} />
                   </View>
                 )}

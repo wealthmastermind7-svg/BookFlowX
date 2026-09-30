@@ -272,7 +272,7 @@ export default function BlockedSlotsScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   container: {
     flex: 1,
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   scrollView: {
     flex: 1,
@@ -343,25 +343,25 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: "rgba(255,255,255,0.4)",
+    borderColor: "rgba(0,212,255,0.2)",
     overflow: "hidden",
   },
   glassPanelBlocked: {
-    backgroundColor: "rgba(0,0,0,0.9)",
-    borderColor: "rgba(255,255,255,0.2)",
+    backgroundColor: "#0D0D1A",
+    borderColor: "rgba(124,58,237,0.35)",
   },
   glassPanelBooked: {
-    backgroundColor: "rgba(255,255,255,0.05)",
-    borderColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#111827",
+    borderColor: "rgba(0,212,255,0.16)",
   },
   glassPanelAndroid: {
-    backgroundColor: "rgba(0,0,0,0.6)",
+    backgroundColor: "#111827",
   },
   glassPanelBlockedAndroid: {
-    backgroundColor: "rgba(0,0,0,0.95)",
+    backgroundColor: "#0D0D1A",
   },
   glassPanelBookedAndroid: {
-    backgroundColor: "rgba(0,0,0,0.8)",
+    backgroundColor: "#111827",
   },
   slotTime: {
     fontSize: 28,

@@ -34,6 +34,12 @@ export default function App() {
           "CormorantGaramond-SemiBold": "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmZ5slBy45EDMId_3S6v7X_bdN_W5beV_W7Vf.ttf",
           "Inter-Regular": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZJhjp-EkQ.ttf",
           "Inter-SemiBold": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
+          "Inter_400Regular": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuLyfAZJhjp-EkQ.ttf",
+          "Inter_500Medium": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
+          "Inter_600SemiBold": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
+          "Inter_700Bold": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
+          "Inter_900Black": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
+          "Inter-Bold": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuGKYAZJhjp-EkQ.ttf",
           "Inter-Light": "https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_fvQtMwCp50KnMw2boKoduKmMEVuEOTAZJhjp-EkQ.ttf",
           "JetBrainsMono-Regular": "https://fonts.gstatic.com/s/jetbrainsmono/v18/t64v84mS_S4oY6F9YI3PZ_W_V-3N9S0-9Lw.ttf",
         });
@@ -72,7 +78,7 @@ export default function App() {
                   </NavigationContainer>
                 </PremiumProvider>
               </I18nProvider>
-              <StatusBar style="auto" />
+              <StatusBar style="light" />
             </KeyboardProvider>
           </GestureHandlerRootView>
         </SafeAreaProvider>

@@ -167,7 +167,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           </View>
           
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${Math.min((minutesUsed/minutesLimit) * 100, 100)}%`, backgroundColor: isExhausted ? "#EF4444" : "#fff" }]} />
+            <View style={[styles.progressFill, { width: `${Math.min((minutesUsed/minutesLimit) * 100, 100)}%`, backgroundColor: isExhausted ? "#FB7185" : "#00D4FF" }]} />
           </View>
 
           {isExhausted ? (
@@ -303,7 +303,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
+    backgroundColor: "#0A0A0F",
   },
   header: {
     flexDirection: "row",
@@ -354,11 +354,11 @@ const styles = StyleSheet.create({
     maxWidth: 300,
   },
   trialStatusCard: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#111827",
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.18)",
   },
   trialInfo: {
     flexDirection: "row",
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   previewBtn: {
     height: 56,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   previewBtnText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#000",
+    color: "#0A0A0F",
   },
   sectionLabel: {
     fontSize: 12,
@@ -429,27 +429,27 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   tierCard: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#111827",
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "rgba(0,212,255,0.18)",
   },
   popularCard: {
-    borderColor: "#fff",
-    backgroundColor: "rgba(255,255,255,0.08)",
+    borderColor: "#00D4FF",
+    backgroundColor: "rgba(0,212,255,0.08)",
   },
   popularBadge: {
     position: "absolute",
     top: -12,
     right: 24,
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   popularBadgeText: {
-    color: "#000",
+    color: "#0A0A0F",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
@@ -505,7 +505,7 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   popularBtn: {
-    backgroundColor: "#fff",
+    backgroundColor: "#00D4FF",
   },
   subscribeBtnText: {
     fontSize: 16,
@@ -513,7 +513,7 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   popularBtnText: {
-    color: "#000",
+    color: "#0A0A0F",
   },
   currentTierCard: {
     borderColor: "#22C55E",
