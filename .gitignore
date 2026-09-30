@@ -50,3 +50,5 @@ attached_assets/
 *.log
 *.zip
 xcode-build-*.log
+/static-build/
+/server_dist/
