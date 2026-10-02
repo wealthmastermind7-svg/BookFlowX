@@ -222,6 +222,8 @@ export default function ServicesScreen() {
       currency={business?.currency || "USD"}
       isActive={item.isActive}
       description={item.description}
+      photos={item.photos}
+      agent={business?.name}
       onPress={() => handleSelectService(item.id)}
     />
   );

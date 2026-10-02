@@ -46,6 +46,13 @@
           }
         }
       ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "BookFlowX needs photo access to add property listings and inspection evidence.",
+          "cameraPermission": "BookFlowX needs camera access to capture property inspection evidence."
+        }
+      ],
       "expo-web-browser",
       "expo-secure-store"
     ],

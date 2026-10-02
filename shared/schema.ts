@@ -1,5 +1,5 @@
 import { sql, relations } from "drizzle-orm";
-import { pgTable, text, varchar, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable, text, varchar, integer, timestamp, boolean, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema, createSelectSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -60,8 +60,77 @@ export const services = pgTable("services", {
   duration: integer("duration").notNull(),
   price: integer("price").notNull(),
   upsells: text("upsells"), // JSON array of {name, description, price}
+  photos: text("photos").array().notNull().default(sql`'{}'::text[]`),
   isActive: boolean("is_active").default(true),
   createdAt: timestamp("created_at").defaultNow(),
+});
+
+export type InspectionCondition = "good" | "fair" | "poor";
+export type RentalStatus = "active" | "vacant" | "inspection_due";
+export type InspectionType = "move_in" | "routine" | "move_out";
+export type InspectionStatus = "draft" | "complete";
+
+export interface InspectionRoom {
+  id: string;
+  name: string;
+  condition: InspectionCondition;
+  notes: string;
+  photos: string[];
+  photoTimestamps: string[];
+}
+
+export interface RentalProperty {
+  id: string;
+  businessId: string;
+  address: string;
+  tenantName?: string;
+  tenantEmail?: string;
+  tenantPhone?: string;
+  moveInDate?: string;
+  leaseEndDate?: string;
+  status: RentalStatus;
+  notes?: string;
+  photos: string[];
+  createdAt: string;
+}
+
+export interface InspectionReport {
+  id: string;
+  propertyId: string;
+  businessId: string;
+  type: InspectionType;
+  date: string;
+  status: InspectionStatus;
+  rooms: InspectionRoom[];
+  createdAt: string;
+}
+
+export const rentalProperties = pgTable("rental_properties", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  address: text("address").notNull(),
+  tenantName: text("tenant_name"),
+  tenantEmail: text("tenant_email"),
+  tenantPhone: text("tenant_phone"),
+  moveInDate: text("move_in_date"),
+  leaseEndDate: text("lease_end_date"),
+  status: text("status").$type<RentalStatus>().notNull().default("active"),
+  notes: text("notes"),
+  photos: text("photos").array().notNull().default(sql`'{}'::text[]`),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+});
+
+export const inspectionReports = pgTable("inspection_reports", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  businessId: varchar("business_id").notNull().references(() => businesses.id, { onDelete: "cascade" }),
+  propertyId: varchar("property_id").notNull().references(() => rentalProperties.id, { onDelete: "cascade" }),
+  type: text("type").$type<InspectionType>().notNull(),
+  date: text("date").notNull(),
+  status: text("status").$type<InspectionStatus>().notNull().default("draft"),
+  rooms: jsonb("rooms").notNull().$type<InspectionRoom[]>(),
+  createdAt: timestamp("created_at").notNull().defaultNow(),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
 // Customers table
@@ -342,6 +411,27 @@ export const businessesRelations = relations(businesses, ({ many, one }) => ({
   voiceCallLogs: many(voiceCallLogs),
   googleCalendarToken: one(googleCalendarTokens),
   trainingData: many(trainingData),
+  rentalProperties: many(rentalProperties),
+  inspectionReports: many(inspectionReports),
+}));
+
+export const rentalPropertiesRelations = relations(rentalProperties, ({ one, many }) => ({
+  business: one(businesses, {
+    fields: [rentalProperties.businessId],
+    references: [businesses.id],
+  }),
+  inspections: many(inspectionReports),
+}));
+
+export const inspectionReportsRelations = relations(inspectionReports, ({ one }) => ({
+  business: one(businesses, {
+    fields: [inspectionReports.businessId],
+    references: [businesses.id],
+  }),
+  property: one(rentalProperties, {
+    fields: [inspectionReports.propertyId],
+    references: [rentalProperties.id],
+  }),
 }));
 
 export const trainingDataRelations = relations(trainingData, ({ one }) => ({
@@ -495,7 +585,86 @@ export const insertBusinessSchema = createInsertSchema(businesses).omit({
 export const insertServiceSchema = createInsertSchema(services).omit({
   id: true,
   createdAt: true,
+}).extend({
+  photos: z.array(z.string().refine(isAllowedPhoto, "Photo must be an HTTPS URL or a persistent base64 image data URI no larger than 3 MB")).max(6).default([]),
 });
+
+function isAllowedPhoto(value: string): boolean {
+  if (value.startsWith("data:")) {
+    const match = /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,([A-Za-z0-9+/]+={0,2})$/.exec(value);
+    if (!match || match[1].length % 4 !== 0) return false;
+    const padding = match[1].endsWith("==") ? 2 : match[1].endsWith("=") ? 1 : 0;
+    const bytes = (match[1].length / 4) * 3 - padding;
+    return bytes > 0 && bytes <= 3 * 1024 * 1024;
+  }
+  try {
+    return new URL(value).protocol === "https:";
+  } catch {
+    return false;
+  }
+}
+
+export const rentalPhotoSchema = z.string().refine(
+  isAllowedPhoto,
+  "Photo must be an HTTPS URL or a persistent base64 image data URI no larger than 3 MB",
+);
+
+export const inspectionRoomSchema: z.ZodType<InspectionRoom> = z.object({
+  id: z.string().min(1).max(200),
+  name: z.string().trim().min(1).max(100),
+  condition: z.enum(["good", "fair", "poor"]),
+  notes: z.string().max(5000),
+  photos: z.array(rentalPhotoSchema).max(20),
+  photoTimestamps: z.array(z.string().datetime({ offset: true })),
+}).strict().superRefine((room, ctx) => {
+  if (room.photoTimestamps.length !== room.photos.length) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["photoTimestamps"],
+      message: "photoTimestamps must have the same length as photos",
+    });
+  }
+});
+
+function isIsoCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  if (month < 1 || month > 12) return false;
+  const leapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [31, leapYear ? 29 : 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  return day >= 1 && day <= daysInMonth[month - 1];
+}
+
+const requiredIsoDateSchema = z.string().refine(isIsoCalendarDate, "Must be a valid ISO date (YYYY-MM-DD)");
+const optionalIsoDateSchema = z.union([z.literal(""), requiredIsoDateSchema]).nullable().optional();
+
+const rentalFieldsSchema = {
+  address: z.string().trim().min(1).max(1000),
+  tenantName: z.string().max(200).nullable().optional(),
+  tenantEmail: z.union([z.string().email().max(320), z.literal("")]).nullable().optional(),
+  tenantPhone: z.string().max(100).nullable().optional(),
+  moveInDate: optionalIsoDateSchema,
+  leaseEndDate: optionalIsoDateSchema,
+  status: z.enum(["active", "vacant", "inspection_due"]).default("active"),
+  notes: z.string().max(10000).nullable().optional(),
+  photos: z.array(rentalPhotoSchema).max(6).default([]),
+};
+
+export const insertRentalPropertySchema = z.object(rentalFieldsSchema).strict();
+export const updateRentalPropertySchema = z.object(rentalFieldsSchema).partial().strict();
+
+const inspectionFieldsSchema = {
+  type: z.enum(["move_in", "routine", "move_out"]),
+  date: requiredIsoDateSchema,
+  status: z.enum(["draft", "complete"]).default("draft"),
+  rooms: z.array(inspectionRoomSchema).max(50),
+};
+
+export const insertInspectionReportSchema = z.object(inspectionFieldsSchema).strict();
+export const updateInspectionReportSchema = z.object(inspectionFieldsSchema).partial().strict();
 
 export const insertCustomerSchema = createInsertSchema(customers).omit({
   id: true,
@@ -575,6 +744,10 @@ export type Business = typeof businesses.$inferSelect;
 export type InsertBusiness = z.infer<typeof insertBusinessSchema>;
 export type Service = typeof services.$inferSelect;
 export type InsertService = z.infer<typeof insertServiceSchema>;
+export type InsertRentalProperty = z.infer<typeof insertRentalPropertySchema>;
+export type UpdateRentalProperty = z.infer<typeof updateRentalPropertySchema>;
+export type InsertInspectionReport = z.infer<typeof insertInspectionReportSchema>;
+export type UpdateInspectionReport = z.infer<typeof updateInspectionReportSchema>;
 export type Customer = typeof customers.$inferSelect;
 export type InsertCustomer = z.infer<typeof insertCustomerSchema>;
 export type Booking = typeof bookings.$inferSelect;

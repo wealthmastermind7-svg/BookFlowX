@@ -15,6 +15,8 @@ import {
   voiceSubscriptions,
   voiceCallLogs,
   trainingData,
+  rentalProperties,
+  inspectionReports,
   type User,
   type InsertUser,
   type Business,
@@ -47,11 +49,27 @@ import {
   type InsertVoiceCallLog,
   type TrainingData,
   type InsertTrainingData,
+  type RentalProperty,
+  type InspectionReport,
+  type InsertRentalProperty,
+  type UpdateRentalProperty,
+  type InsertInspectionReport,
+  type UpdateInspectionReport,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, and, desc, sql } from "drizzle-orm";
 
 export interface IStorage {
+  // Rental properties and inspections
+  getRentalProperties(businessId: string): Promise<RentalProperty[]>;
+  getRentalProperty(id: string): Promise<RentalProperty | undefined>;
+  createRentalProperty(property: InsertRentalProperty & { businessId: string }): Promise<RentalProperty>;
+  updateRentalProperty(id: string, updates: UpdateRentalProperty): Promise<RentalProperty | undefined>;
+  getInspectionReports(propertyId: string): Promise<InspectionReport[]>;
+  getInspectionReport(id: string): Promise<InspectionReport | undefined>;
+  createInspectionReport(report: InsertInspectionReport & { businessId: string; propertyId: string }): Promise<InspectionReport>;
+  updateInspectionReport(id: string, updates: UpdateInspectionReport): Promise<InspectionReport | undefined>;
+
   // Users
   getUser(id: string): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
@@ -160,6 +178,84 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  private rentalPropertyModel(row: typeof rentalProperties.$inferSelect): RentalProperty {
+    return {
+      id: row.id,
+      businessId: row.businessId,
+      address: row.address,
+      ...(row.tenantName !== null ? { tenantName: row.tenantName } : {}),
+      ...(row.tenantEmail !== null ? { tenantEmail: row.tenantEmail } : {}),
+      ...(row.tenantPhone !== null ? { tenantPhone: row.tenantPhone } : {}),
+      ...(row.moveInDate !== null ? { moveInDate: row.moveInDate } : {}),
+      ...(row.leaseEndDate !== null ? { leaseEndDate: row.leaseEndDate } : {}),
+      status: row.status,
+      ...(row.notes !== null ? { notes: row.notes } : {}),
+      photos: row.photos,
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  private inspectionReportModel(row: typeof inspectionReports.$inferSelect): InspectionReport {
+    return {
+      id: row.id,
+      propertyId: row.propertyId,
+      businessId: row.businessId,
+      type: row.type,
+      date: row.date,
+      status: row.status,
+      rooms: row.rooms as InspectionReport["rooms"],
+      createdAt: row.createdAt.toISOString(),
+    };
+  }
+
+  async getRentalProperties(businessId: string): Promise<RentalProperty[]> {
+    const rows = await db.select().from(rentalProperties).where(eq(rentalProperties.businessId, businessId)).orderBy(desc(rentalProperties.createdAt));
+    return rows.map(row => this.rentalPropertyModel(row));
+  }
+
+  async getRentalProperty(id: string): Promise<RentalProperty | undefined> {
+    const [row] = await db.select().from(rentalProperties).where(eq(rentalProperties.id, id));
+    return row ? this.rentalPropertyModel(row) : undefined;
+  }
+
+  async createRentalProperty(property: InsertRentalProperty & { businessId: string }): Promise<RentalProperty> {
+    const [row] = await db.insert(rentalProperties).values(property).returning();
+    return this.rentalPropertyModel(row);
+  }
+
+  async updateRentalProperty(id: string, updates: UpdateRentalProperty): Promise<RentalProperty | undefined> {
+    const [row] = await db.update(rentalProperties)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(rentalProperties.id, id))
+      .returning();
+    return row ? this.rentalPropertyModel(row) : undefined;
+  }
+
+  async getInspectionReports(propertyId: string): Promise<InspectionReport[]> {
+    const rows = await db.select().from(inspectionReports)
+      .where(eq(inspectionReports.propertyId, propertyId))
+      .orderBy(desc(inspectionReports.createdAt));
+    return rows.map(row => this.inspectionReportModel(row));
+  }
+
+  async getInspectionReport(id: string): Promise<InspectionReport | undefined> {
+    const [row] = await db.select().from(inspectionReports).where(eq(inspectionReports.id, id));
+    return row ? this.inspectionReportModel(row) : undefined;
+  }
+
+  async createInspectionReport(report: InsertInspectionReport & { businessId: string; propertyId: string }): Promise<InspectionReport> {
+    const [row] = await db.insert(inspectionReports).values(report).returning();
+    return this.inspectionReportModel(row);
+  }
+
+  async updateInspectionReport(id: string, updates: UpdateInspectionReport): Promise<InspectionReport | undefined> {
+    const [row] = await db.update(inspectionReports)
+      .set({ ...updates, updatedAt: new Date() })
+      .where(eq(inspectionReports.id, id))
+      .returning();
+    return row ? this.inspectionReportModel(row) : undefined;
+  }
+
   // Users
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));

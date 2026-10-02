@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { View, StyleSheet, ScrollView, Pressable, Dimensions, Platform, Linking } from "react-native";
+import { View, StyleSheet, ScrollView, Pressable, Dimensions, Platform, Linking, Image } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useNavigation, useRoute } from "@react-navigation/native";
@@ -23,6 +23,7 @@ import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
 import { formatPrice } from "@/lib/currency";
 import { getApiUrl } from "@/lib/query-client";
 import { useI18n } from "@/contexts/I18nContext";
+import { parsePropertyDetails } from "@/lib/property-details";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
@@ -34,6 +35,7 @@ const toBookingService = (service: ApiService): Service => ({
   duration: service.duration,
   price: service.price,
   description: service.description ?? undefined,
+  photos: service.photos || [],
   upsells: service.upsells ?? undefined,
 });
 
@@ -221,6 +223,7 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
             },
           ]}
         >
+          {service.photos?.[0] ? <Image source={{ uri: service.photos[0] }} resizeMode="cover" style={styles.listingCover} accessibilityLabel={`${service.name} cover photo`} /> : <View style={[styles.listingCover, styles.listingPlaceholder]}><Feather name="home" size={36} color="#C17F3E" /></View>}
           {isPopular && (
             <View style={[styles.popularBadge, { backgroundColor: theme.text }]}>
               <ThemedText style={[styles.popularBadgeText, { color: theme.buttonText }]}>
@@ -239,6 +242,11 @@ function CinematicServiceCard({ service, index, isPopular, onPress }: ServiceCar
               </View>
 
               <ThemedText style={styles.serviceName}>{service.name}</ThemedText>
+              {parsePropertyDetails(service.description).agent ? <ThemedText style={styles.serviceDescription}>Agent: {parsePropertyDetails(service.description).agent}</ThemedText> : null}
+              <View style={styles.propertyBadges}>
+                {Object.entries(parsePropertyDetails(service.description)).filter(([key, value]) => key !== "agent" && value !== null).map(([key, value]) => <ThemedText style={styles.propertyBadge} key={key}>{value} {key === "beds" ? "bed" : key === "baths" ? "bath" : "park"}</ThemedText>)}
+                <ThemedText style={styles.availabilityBadge}>Available</ThemedText>
+              </View>
 
               {service.description && (
                 <ThemedText style={styles.serviceDescription} numberOfLines={2}>
@@ -454,9 +462,13 @@ const styles = StyleSheet.create({
   serviceCard: {
     borderRadius: 20,
     borderWidth: 1,
-    padding: Spacing.lg,
     overflow: "hidden",
   },
+  listingCover: { width: "100%", height: 160, borderTopLeftRadius: 16, borderTopRightRadius: 16 },
+  listingPlaceholder: { alignItems: "center", justifyContent: "center", backgroundColor: "#F5EFE6" },
+  propertyBadges: { flexDirection: "row", flexWrap: "wrap", gap: 5, marginVertical: 7 },
+  propertyBadge: { backgroundColor: "#F5EFE6", borderRadius: 10, paddingHorizontal: 7, paddingVertical: 3, fontSize: 11, color: "#6B5744" },
+  availabilityBadge: { backgroundColor: "#EFF5EF", color: "#4A7C59", borderRadius: 10, paddingHorizontal: 7, paddingVertical: 3, fontSize: 11 },
   popularBadge: {
     position: "absolute",
     top: 0,
@@ -472,6 +484,7 @@ const styles = StyleSheet.create({
     letterSpacing: 0.5,
   },
   serviceCardContent: {
+    padding: Spacing.lg,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "flex-end",

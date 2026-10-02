@@ -65,6 +65,7 @@ import express from "express";
 import { convertWebmToWav } from "./replit_integrations/audio/client";
 import { getUncachableStripeClient } from "./stripeClient";
 import { stripeService } from "./stripeService";
+import { registerRentalRoutes } from "./rentalRoutes";
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -230,6 +231,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await loadEmbedHtml();
   await loadEmbedJs();
   await loadVoiceAgentHtml();
+
+  registerRentalRoutes(app, storage);
 
   // === WORKFLOWS API ===
   

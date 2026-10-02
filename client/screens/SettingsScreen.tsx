@@ -539,9 +539,15 @@ export default function SettingsScreen() {
           <SectionTitle>Workspace tools</SectionTitle>
           <View style={{ gap: 10 }}>
             <SettingsRow
+              icon="users"
+              title="Clients"
+              subtitle="Manage your viewing contacts"
+              onPress={() => navigation.navigate("Customers")}
+            />
+            <SettingsRow
               icon="home"
-              title="Viewing types"
-              subtitle="Edit services, durations and prices"
+              title="Listings & services"
+              subtitle="Manage property offerings, services, durations and prices"
               onPress={() => navigation.navigate("Services")}
             />
             <SettingsRow

@@ -13,6 +13,8 @@ import {
   Alert,
   Modal,
   ImageBackground,
+  Image,
+  ScrollView,
   Linking,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -39,6 +41,7 @@ import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollV
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
 import QRCode from "react-native-qrcode-svg";
+import { pickPropertyPhotos } from "@/lib/property-photos";
 
 import { usePremium } from "@/contexts/PremiumContext";
 
@@ -78,11 +81,13 @@ export default function ServiceEditorScreen() {
     duration: 30,
     price: 0,
     description: "",
+    photos: [],
   });
 
   const [activeTab, setActiveTab] = useState<"details" | "upsells" | "links">("details");
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [addingPhotos, setAddingPhotos] = useState(false);
   const [businessReady, setBusinessReady] = useState(!!api.getBusinessId());
   const [currencySymbol, setCurrencySymbol] = useState("$");
   const [business, setBusiness] = useState<Business | null>(null);
@@ -95,6 +100,21 @@ export default function ServiceEditorScreen() {
   const qrRef = useRef<any>(null);
 
   const serviceId = (route.params as any)?.serviceId;
+
+  const addPhotos = async () => {
+    setAddingPhotos(true);
+    try {
+      const added = await pickPropertyPhotos(6 - (service.photos?.length || 0));
+      setService(previous => ({
+        ...previous,
+        photos: [...(previous.photos || []), ...added.map(photo => photo.uri)].slice(0, 6),
+      }));
+    } catch (error) {
+      alert((error as Error).message);
+    } finally {
+      setAddingPhotos(false);
+    }
+  };
 
   const handleGetUpsells = async () => {
     if (!service.name) return;
@@ -356,6 +376,7 @@ export default function ServiceEditorScreen() {
           duration: service.duration,
           price: service.price || 0,
           description: service.description,
+          photos: service.photos || [],
           upsells: upsellsJson,
         });
       } else {
@@ -364,6 +385,7 @@ export default function ServiceEditorScreen() {
           duration: service.duration,
           price: service.price || 0,
           description: service.description,
+          photos: service.photos || [],
           upsells: upsellsJson,
         });
       }
@@ -443,6 +465,54 @@ export default function ServiceEditorScreen() {
             contentContainerStyle={{ paddingBottom: insets.bottom + 120 }}
             showsVerticalScrollIndicator={false}
           >
+            <View style={styles.photosSection}>
+              <View style={styles.photosHeading}>
+                <View>
+                  <Text style={styles.photosTitle}>Property photos</Text>
+                  <Text style={styles.photosHint}>First photo is the cover · Up to 6 photos</Text>
+                </View>
+                <Pressable
+                  onPress={addPhotos}
+                  disabled={addingPhotos || saving || (service.photos?.length || 0) >= 6}
+                  accessibilityRole="button"
+                  style={[styles.addPhotosButton, ((service.photos?.length || 0) >= 6 || addingPhotos) && { opacity: 0.5 }]}
+                >
+                  {addingPhotos ? <ActivityIndicator color="#FFFFFF" /> : <Feather name="camera" size={16} color="#FFFFFF" />}
+                  <Text style={styles.addPhotosText}>Add Photos</Text>
+                </Pressable>
+              </View>
+              <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ gap: 12 }}>
+                {(service.photos || []).map((uri, index) => (
+                  <View key={`${index}-${uri.slice(-32)}`} style={styles.photoThumbnail}>
+                    <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode="cover" accessibilityLabel={`Property photo ${index + 1}`} />
+                    {index === 0 ? <Text style={styles.coverLabel}>Cover</Text> : (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Make photo ${index + 1} the cover`}
+                        style={styles.coverLabel}
+                        onPress={() => setService(previous => {
+                          const photos = [...(previous.photos || [])];
+                          const [cover] = photos.splice(index, 1);
+                          return { ...previous, photos: [cover, ...photos] };
+                        })}
+                      ><Text style={{ fontSize: 10, color: "#FFFFFF" }}>Make cover</Text></Pressable>
+                    )}
+                    <Pressable
+                      onPress={() => setService(previous => ({ ...previous, photos: (previous.photos || []).filter((_, i) => i !== index) }))}
+                      accessibilityRole="button"
+                      accessibilityLabel={`Remove photo ${index + 1}`}
+                      disabled={saving}
+                      style={styles.removePhotoButton}
+                    ><Feather name="x" color="#FFFFFF" size={16} /></Pressable>
+                  </View>
+                ))}
+                {!service.photos?.length ? (
+                  <View style={[styles.photoThumbnail, { alignItems: "center", justifyContent: "center" }]}>
+                    <Feather name="home" color="#C17F3E" size={30} />
+                  </View>
+                ) : null}
+              </ScrollView>
+            </View>
             {activeTab === "details" && (
               <View style={styles.formContainer}>
                 <View style={styles.inputGroup}>
@@ -1233,4 +1303,13 @@ const styles = StyleSheet.create({
     lineHeight: 16,
     fontStyle: "italic",
   },
+  photosSection: { marginHorizontal: 24, marginBottom: 24, padding: 16, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E8DDD0", borderRadius: 16 },
+  photosHeading: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" },
+  photosTitle: { color: "#1C1410", fontSize: 16, fontWeight: "700" },
+  photosHint: { color: "#6B5744", fontSize: 11, marginTop: 4 },
+  addPhotosButton: { backgroundColor: "#C17F3E", padding: 10, borderRadius: 10, flexDirection: "row", alignItems: "center", gap: 6 },
+  addPhotosText: { color: "#FFFFFF", fontSize: 12, fontWeight: "700" },
+  photoThumbnail: { width: 112, height: 100, borderRadius: 12, borderWidth: 1, borderColor: "#E8DDD0", backgroundColor: "#F5EFE6", overflow: "hidden" },
+  removePhotoButton: { position: "absolute", right: 4, top: 4, backgroundColor: "rgba(0,0,0,0.6)", width: 28, height: 28, borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  coverLabel: { position: "absolute", bottom: 5, left: 5, backgroundColor: "rgba(0,0,0,0.6)", paddingHorizontal: 6, paddingVertical: 4, borderRadius: 6, color: "#FFFFFF", fontSize: 10 },
 });

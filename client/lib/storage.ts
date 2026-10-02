@@ -19,6 +19,7 @@ export interface Service {
   duration: number;
   price: number;
   description?: string;
+  photos?: string[];
   links?: ServiceLink[];
   upsells?: string; // JSON array of ServiceUpsell objects
 }

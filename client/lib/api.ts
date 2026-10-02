@@ -136,6 +136,7 @@ export interface Service {
   id: string;
   businessId: string;
   name: string;
+  photos?: string[];
   slug?: string | null;
   description?: string | null;
   duration: number;

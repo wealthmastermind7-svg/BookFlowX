@@ -3,3 +3,4 @@
 - [Owner navigation and booking links](owner-ui-decisions.md) — five owner tabs; Assistant lives in Settings; cosmetic short links must not replace live booking destinations.
 - [Expo preview routing](expo-preview-routing.md) — the Expo web preview origin is distinct from Express; verify same-origin API forwarding rather than assume port 5000.
 - [HTML-only restyling](html-restyling-contract.md) — preserve inline-script and DOM contracts; replace legacy CSS rather than layering themes over hidden-state styles.
+- [Rental inspection evidence](rental-evidence.md) — preserve tenancy evidence; incomplete drafts must not invent ratings; use storage suitable for large photo sets.

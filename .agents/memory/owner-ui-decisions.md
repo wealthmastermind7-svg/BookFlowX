@@ -3,9 +3,9 @@ name: Owner navigation and booking links
 description: User-selected navigation scope and the distinction between short-link presentation and live booking destinations.
 ---
 
-The owner app should keep exactly five bottom tabs: Home, Calendar, New, Clients, Settings. New is the quick-add action. AI Assistant has its own screen reached from Settings rather than a sixth bottom tab. Viewing-type management remains available from Settings.
+The owner app should keep exactly five bottom tabs: Home, Calendar, New, Rentals, Settings. New is the quick-add action. Clients and viewing-type management remain available from Settings. AI Assistant has its own screen reached from Settings rather than a sixth bottom tab.
 
-**Why:** The user resolved the conflict between five bottom tabs and a dedicated Assistant tab by choosing five tabs with Assistant in Settings.
+**Why:** The user first chose five tabs with Assistant in Settings, then explicitly requested Rentals in place of Clients and Clients moved into Settings.
 
 **How to apply:** Preserve this navigation scope during future owner-app changes unless the user explicitly changes it.
 

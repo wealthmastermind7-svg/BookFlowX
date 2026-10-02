@@ -7,7 +7,7 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import DashboardStackNavigator from "@/navigation/DashboardStackNavigator";
 import CalendarStackNavigator from "@/navigation/CalendarStackNavigator";
 import ServicesStackNavigator from "@/navigation/ServicesStackNavigator";
-import CustomersStackNavigator from "@/navigation/CustomersStackNavigator";
+import RentalsStackNavigator from "@/navigation/RentalsStackNavigator";
 import SettingsStackNavigator from "@/navigation/SettingsStackNavigator";
 import { useTheme } from "@/hooks/useTheme";
 
@@ -15,7 +15,7 @@ export type MainTabParamList = {
   DashboardTab: undefined;
   CalendarTab: undefined;
   ServicesTab: undefined;
-  CustomersTab: undefined;
+  RentalsTab: undefined;
   SettingsTab: undefined;
 };
 
@@ -92,12 +92,12 @@ export default function MainTabNavigator() {
         }}
       />
       <Tab.Screen
-        name="CustomersTab"
-        component={CustomersStackNavigator}
+        name="RentalsTab"
+        component={RentalsStackNavigator}
         options={{
-           title: "Clients",
+           title: "Rentals",
           tabBarIcon: ({ color, size }) => (
-            <Feather name="users" size={size} color={color} />
+             <Feather name="home" size={size} color={color} />
           ),
         }}
       />

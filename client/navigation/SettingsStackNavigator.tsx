@@ -5,6 +5,7 @@ import SharePreviewScreen from "@/screens/SharePreviewScreen";
 import WorkflowsScreen from "@/screens/WorkflowsScreen";
 import AIAssistantScreen from "@/screens/AIAssistantScreen";
 import ServicesScreen from "@/screens/ServicesScreen";
+import CustomersScreen from "@/screens/CustomersScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type SettingsStackParamList = {
@@ -17,6 +18,7 @@ export type SettingsStackParamList = {
   Workflows: undefined;
   AIAssistant: undefined;
   Services: undefined;
+  Customers: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -49,6 +51,7 @@ export default function SettingsStackNavigator() {
       />
       <Stack.Screen name="AIAssistant" component={AIAssistantScreen} options={{ headerTitle: "AI Assistant" }} />
       <Stack.Screen name="Services" component={ServicesScreen} options={{ headerTitle: "Viewing types" }} />
+      <Stack.Screen name="Customers" component={CustomersScreen} options={{ headerTitle: "Clients" }} />
     </Stack.Navigator>
   );
 }

@@ -42,6 +42,14 @@
       /* Compatibility aliases referenced by dynamically rendered content. */
       --smoke: #6B5744;
     }
+    .listing-card { overflow: hidden; padding: 0 !important; }
+    .listing-cover { display: block; width: 100%; height: 180px; object-fit: cover; background: #F5EFE6; border-radius: 16px 16px 0 0; }
+    .listing-placeholder { display: flex; align-items: center; justify-content: center; color: #C17F3E; }
+    .listing-content { padding: 20px; }
+    .listing-agent { font-size: 12px; color: #6B5744; margin-top: 6px; }
+    .listing-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 12px; }
+    .listing-badge { background: #F5EFE6; color: #6B5744; padding: 5px 9px; border-radius: 12px; font-size: 11px; }
+    .listing-available { background: #EFF5EF; color: #4A7C59; margin-left: auto; }
     body {
       font-family: 'Inter', system-ui, sans-serif;
       background: var(--cream);
@@ -541,16 +549,43 @@
       }
     }
 
+    function escapeListingText(value) {
+      return String(value ?? '').replace(/[&<>"']/g, char => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+    }
+
+    function listingPhoto(photo) {
+      if (typeof photo !== 'string') return '';
+      if (/^https:\/\//i.test(photo) || /^data:image\/(?:jpeg|jpg|png|webp|gif);base64,[A-Za-z0-9+/=]+$/.test(photo)) return escapeListingText(photo);
+      return '';
+    }
+
+    function listingBadges(service) {
+      const description = service.description || '';
+      return [
+        [/\b(\d+)\s*bed(?:room)?s?\b/i, 'bed'],
+        [/\b(\d+)\s*bath(?:room)?s?\b/i, 'bath'],
+        [/\b(\d+)\s*(?:car\s*parks?|parks?|parking\s*(?:spaces?)?|garages?)\b/i, 'park'],
+      ].map(([pattern, label]) => {
+        const match = description.match(pattern);
+        return match ? `<span class="listing-badge">${match[1]} ${label}</span>` : '';
+      }).join('');
+    }
+
     function renderServices() {
       const list = document.getElementById('services-list');
       list.innerHTML = services.map(s => `
-        <div class="glass-card" onclick="selectService('${s.id}')">
-          <div class="service-name">${s.name}</div>
+        <div class="glass-card listing-card" onclick="selectService('${s.id}')">
+          ${listingPhoto(s.photos?.[0]) ? `<img class="listing-cover" src="${listingPhoto(s.photos[0])}" alt="${escapeListingText(s.name)}" loading="lazy">` : '<div class="listing-cover listing-placeholder"><svg width="42" height="42" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-label="Property"><path d="M3 10l9-7 9 7v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M9 21v-9h6v9"/></svg></div>'}
+          <div class="listing-content">
+          <div class="service-name">${escapeListingText(s.name)}</div>
+          <div class="listing-agent">${escapeListingText((s.description || '').match(/(?:agent|listed by)\s*:\s*([^\n;|]+)/i)?.[1]?.trim() || business.name)}</div>
+          <div class="listing-badges">${listingBadges(s)}<span class="listing-badge listing-available">Available</span></div>
           <div class="service-meta">
             <div class="service-price">$${(s.price / 100).toFixed(2)}</div>
             <div class="service-duration">${s.duration} min</div>
           </div>
-          ${s.description ? `<div class="service-desc">${s.description}</div>` : ''}
+          ${s.description ? `<div class="service-desc">${escapeListingText(s.description)}</div>` : ''}
+          </div>
         </div>
       `).join('');
     }
