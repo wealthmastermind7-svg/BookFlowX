@@ -2,3 +2,4 @@
 - [Stripe credential scoping](stripe-credentials.md) — keep connector-managed dev/live credentials separate; development authentication does not establish production readiness.
 - [Owner navigation and booking links](owner-ui-decisions.md) — five owner tabs; Assistant lives in Settings; cosmetic short links must not replace live booking destinations.
 - [Expo preview routing](expo-preview-routing.md) — the Expo web preview origin is distinct from Express; verify same-origin API forwarding rather than assume port 5000.
+- [HTML-only restyling](html-restyling-contract.md) — preserve inline-script and DOM contracts; replace legacy CSS rather than layering themes over hidden-state styles.
