@@ -70,17 +70,17 @@ export default function DashboardScreen() {
     <View style={styles.background}>
       <ScrollView showsVerticalScrollIndicator={false}
         contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: tabBarHeight + 24 }]}
-        refreshControl={<RefreshControl refreshing={refreshing} tintColor="#00D4FF" onRefresh={() => { setRefreshing(true); void loadData(); }} />}>
+        refreshControl={<RefreshControl refreshing={refreshing} tintColor="#C17F3E" onRefresh={() => { setRefreshing(true); void loadData(); }} />}>
         <View style={styles.header}>
-          <Text style={styles.greeting}>{overview.greeting} 👋</Text>
+          <Text style={styles.greeting}>{overview.greeting}</Text>
           <Text style={styles.businessName}>{business?.name || "Your agency"}</Text>
           <View style={styles.badge}>
-            <View style={[styles.dot, { backgroundColor: voiceLimited ? "#FBBF24" : business ? "#34D399" : "#64748B" }]} />
+            <View style={[styles.dot, { backgroundColor: voiceLimited ? "#B87831" : business ? "#4A7C59" : "#8B6F47" }]} />
             <Text style={styles.badgeText}>{voiceInactive ? "Omnichannel · Voice not active" : voiceLimited ? "Omnichannel · Voice limit reached" : "Omnichannel Active"}</Text>
           </View>
         </View>
 
-        {loading ? <ActivityIndicator size="large" color="#00D4FF" style={styles.loading} /> : <>
+        {loading ? <ActivityIndicator size="large" color="#C17F3E" style={styles.loading} /> : <>
           {error ? <OwnerGlassCard><Text style={styles.error} accessibilityRole="alert">{error}</Text></OwnerGlassCard> : null}
           <OwnerGlassCard>
             <Text style={styles.title}>Today at a glance</Text>
@@ -99,9 +99,9 @@ export default function DashboardScreen() {
 
           <View style={styles.statusRow}>
             {[
-              { label: "Confirmed", count: overview.statuses.confirmed, color: "#34D399" },
-              { label: "Pending", count: overview.statuses.pending, color: "#FBBF24" },
-              { label: "Completed", count: overview.statuses.completed, color: "#60A5FA" },
+              { label: "Confirmed", count: overview.statuses.confirmed, color: "#4A7C59" },
+              { label: "Pending", count: overview.statuses.pending, color: "#B87831" },
+              { label: "Completed", count: overview.statuses.completed, color: "#8B6F47" },
             ].map((status) => <View key={status.label} style={styles.statusItem}>
               <View style={[styles.dot, { backgroundColor: status.color }]} />
               <Text style={styles.statusText}><Text style={styles.statusNumber}>{status.count}</Text> {status.label}</Text>
@@ -143,10 +143,10 @@ export default function DashboardScreen() {
             {visibleBookings.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.bookingStrip}>
               {visibleBookings.map((booking) => <ViewingBookingCard key={booking.id} booking={booking} onPress={() => setSelectedBooking(booking)} />)}
             </ScrollView> : <OwnerGlassCard>
-              <Feather name="calendar" size={22} color="#00D4FF" />
+              <Feather name="calendar" size={22} color="#C17F3E" />
               <Text style={[styles.body, { marginTop: 12 }]}>No upcoming viewings</Text>
               <Text style={[styles.label, { marginTop: 4 }]}>New bookings will appear here with their source channel.</Text>
-              <Pressable style={styles.emptyAction} onPress={() => navigation.navigate("BookingFlow")} accessibilityRole="button"><Text style={styles.link}>Create a viewing</Text><Feather name="arrow-right" size={16} color="#00D4FF" /></Pressable>
+              <Pressable style={styles.emptyAction} onPress={() => navigation.navigate("BookingFlow")} accessibilityRole="button"><Text style={styles.link}>Create a viewing</Text><Feather name="arrow-right" size={16} color="#C17F3E" /></Pressable>
             </OwnerGlassCard>}
           </View>
         </>}
@@ -157,37 +157,37 @@ export default function DashboardScreen() {
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, backgroundColor: "#0A0A0F" },
+  background: { flex: 1, backgroundColor: "#FAF7F2" },
   content: { paddingHorizontal: 20, gap: 24, width: "100%", maxWidth: 900, alignSelf: "center" },
   header: { gap: 6 },
-  greeting: { color: "#F8FAFC", fontSize: 20, fontWeight: "700" },
-  businessName: { color: "#94A3B8", fontSize: 14 },
-  badge: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderColor: "rgba(52,211,153,0.2)", backgroundColor: "rgba(52,211,153,0.07)", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
-  badgeText: { color: "#CBD5E1", fontSize: 12 },
+  greeting: { color: "#1C1410", fontSize: 30, fontWeight: "700", fontFamily: "PlayfairDisplay-Bold" },
+  businessName: { color: "#6B5744", fontSize: 14 },
+  badge: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderColor: "#D7E5D9", backgroundColor: "#EFF5EF", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
+  badgeText: { color: "#4A7C59", fontSize: 12 },
   dot: { width: 6, height: 6, borderRadius: 3 },
   loading: { paddingVertical: 48 },
-  title: { fontSize: 20, fontWeight: "700", color: "#F8FAFC" },
+  title: { fontSize: 20, fontWeight: "700", color: "#1C1410", fontFamily: "PlayfairDisplay-Bold" },
   stats: { flexDirection: "row", marginTop: 20 },
   stat: { flex: 1, gap: 6, paddingHorizontal: 8 },
   statDivider: { borderLeftWidth: 1, borderLeftColor: "rgba(148,163,184,0.16)" },
-  statValue: { fontSize: 20, fontWeight: "700", color: "#00D4FF" },
-  label: { fontSize: 12, color: "#94A3B8", lineHeight: 18 },
-  scope: { fontSize: 12, color: "#64748B", marginTop: 12, lineHeight: 18 },
+  statValue: { fontSize: 20, fontWeight: "700", color: "#A8662F" },
+  label: { fontSize: 12, color: "#8B6F47", lineHeight: 18 },
+  scope: { fontSize: 12, color: "#8B6F47", marginTop: 12, lineHeight: 18 },
   statusRow: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
   statusItem: { flexDirection: "row", alignItems: "center", gap: 6 },
-  statusText: { color: "#94A3B8", fontSize: 12 },
-  statusNumber: { color: "#F8FAFC", fontWeight: "700" },
-  subtitle: { fontSize: 12, color: "#94A3B8", marginTop: 6, marginBottom: 20, lineHeight: 18 },
-  eyebrow: { color: "#00D4FF", fontSize: 12, fontWeight: "600", letterSpacing: 1, marginBottom: 8 },
+  statusText: { color: "#6B5744", fontSize: 12 },
+  statusNumber: { color: "#1C1410", fontWeight: "700" },
+  subtitle: { fontSize: 12, color: "#8B6F47", marginTop: 6, marginBottom: 20, lineHeight: 18 },
+  eyebrow: { color: "#A8662F", fontSize: 12, fontWeight: "600", letterSpacing: 1, marginBottom: 8 },
   channelRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 },
-  channelBorder: { borderTopWidth: 1, borderTopColor: "rgba(148,163,184,0.1)" },
+  channelBorder: { borderTopWidth: 1, borderTopColor: "#E8DDD0" },
   channelIcon: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
   channelInfo: { flex: 1 },
-  body: { fontSize: 14, color: "#F8FAFC", lineHeight: 20 },
+  body: { fontSize: 14, color: "#1C1410", lineHeight: 20 },
   channelCount: { fontSize: 20, fontWeight: "700" },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16 },
-  link: { fontSize: 14, color: "#00D4FF", fontWeight: "600" },
+  link: { fontSize: 14, color: "#A8662F", fontWeight: "600" },
   bookingStrip: { gap: 12, paddingBottom: 2 },
   emptyAction: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16, paddingVertical: 8 },
-  error: { color: "#FB7185", fontSize: 14 },
+  error: { color: "#B74E42", fontSize: 14 },
 });

@@ -792,11 +792,11 @@ export default function ServiceEditorScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,10,15,0.6)",
+    backgroundColor: "transparent",
   },
   container: {
     flex: 1,
@@ -808,7 +808,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   header: {
     flexDirection: "row",
@@ -826,7 +826,7 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
     textAlign: "center",
   },
   headerSpacer: {
@@ -844,12 +844,12 @@ const styles = StyleSheet.create({
   },
   carouselItemActive: {
     fontSize: 16,
-    color: "#fff",
+    color: "#A8662F",
     fontWeight: "600",
   },
   carouselItemInactive: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     fontWeight: "600",
   },
   formContainer: {
@@ -861,15 +861,15 @@ const styles = StyleSheet.create({
   inputLabel: {
     fontSize: 12,
     fontWeight: "500",
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     marginBottom: 8,
     marginLeft: 4,
   },
   inputPrimary: {
-    backgroundColor: "#111827",
-    color: "#F8FAFC",
+    backgroundColor: "#FFFFFF",
+    color: "#1C1410",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.3)",
+    borderColor: "#E8DDD0",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -877,10 +877,10 @@ const styles = StyleSheet.create({
     fontWeight: "500",
   },
   inputSecondary: {
-    backgroundColor: "#16213E",
-    color: "#fff",
+    backgroundColor: "#FFFFFF",
+    color: "#1C1410",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
@@ -896,11 +896,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   linkCard: {
     padding: 16,
@@ -977,11 +977,11 @@ const styles = StyleSheet.create({
   },
   saveButton: {
     flex: 1,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: 16,
     paddingVertical: 16,
     alignItems: "center",
-    shadowColor: "#00D4FF",
+    shadowColor: "#6B5744",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 10,
@@ -989,7 +989,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   modalOverlay: {
     flex: 1,
@@ -1006,7 +1006,7 @@ const styles = StyleSheet.create({
     maxWidth: 340,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
   },
   qrModalHeader: {
     flexDirection: "row",
@@ -1035,7 +1035,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   downloadButton: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: 16,
     paddingVertical: 14,
     paddingHorizontal: 32,
@@ -1045,7 +1045,7 @@ const styles = StyleSheet.create({
   downloadButtonText: {
     fontSize: 16,
     fontWeight: "600",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   labelRow: {
     flexDirection: "row",
@@ -1057,7 +1057,7 @@ const styles = StyleSheet.create({
   aiUpsellTrigger: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(0,212,255,0.12)",
+    backgroundColor: "#F4EEE6",
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
@@ -1113,7 +1113,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.16)",
+    borderColor: "#E8DDD0",
   },
   upsellCardInfo: {
     flex: 1,
@@ -1139,7 +1139,7 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 20,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1171,7 +1171,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.16)",
+    borderColor: "#E8DDD0",
   },
   savedUpsellInfo: {
     flex: 1,
@@ -1202,7 +1202,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: "rgba(0,212,255,0.12)",
+    backgroundColor: "#F4EEE6",
     justifyContent: "center",
     alignItems: "center",
   },
@@ -1216,7 +1216,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   doneEditButton: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: 12,
     paddingVertical: 10,
     alignItems: "center",
@@ -1224,7 +1224,7 @@ const styles = StyleSheet.create({
   doneEditButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   assistantContextText: {
     fontSize: 12,

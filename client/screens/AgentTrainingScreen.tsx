@@ -267,7 +267,7 @@ export default function AgentTrainingScreen() {
             <ActivityIndicator style={{ marginTop: 20 }} color="#fff" />
           ) : loadError ? (
             <Pressable onPress={loadTrainingData} style={[styles.glassCard, styles.emptyCard]}>
-              <Feather name="refresh-cw" size={24} color="#00D4FF" />
+              <Feather name="refresh-cw" size={24} color="#C17F3E" />
               <ThemedText style={styles.emptyText}>Could not load training data. Tap to try again.</ThemedText>
             </Pressable>
           ) : trainingData.length === 0 ? (
@@ -287,7 +287,7 @@ export default function AgentTrainingScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   backgroundWrapper: {
     ...StyleSheet.absoluteFillObject,
@@ -297,28 +297,28 @@ const styles = StyleSheet.create({
   },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,10,15,0.86)",
+    backgroundColor: "rgba(250,247,242,0.94)",
   },
   glassCard: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 16,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.16)",
+    borderColor: "#E8DDD0",
   },
   headerCard: {
     marginBottom: 24,
-    backgroundColor: "#16213E",
+    backgroundColor: "#F4EEE6",
   },
   headerTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 8,
   },
   headerSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     lineHeight: 20,
   },
   section: {
@@ -333,14 +333,14 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   crawlCard: {
     gap: 16,
   },
   cardInfo: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.5)",
+    color: "#8B6F47",
     lineHeight: 20,
   },
   inputRow: {
@@ -350,16 +350,16 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     height: 48,
-    backgroundColor: "#0D0D1A",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.28)",
+    borderColor: "#E8DDD0",
     borderRadius: BorderRadius.lg,
     paddingHorizontal: 16,
-    color: "#fff",
+    color: "#1C1410",
     fontSize: 15,
   },
   crawlButton: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: BorderRadius.lg,
     paddingHorizontal: 16,
     justifyContent: "center",
@@ -367,23 +367,23 @@ const styles = StyleSheet.create({
   crawlButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#fff",
+    color: "#FFFFFF",
   },
   addLink: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#00D4FF",
+    color: "#A8662F",
   },
   qaInputCard: {
     gap: 12,
   },
   qaInput: {
-    backgroundColor: "#0D0D1A",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.24)",
+    borderColor: "#E8DDD0",
     borderRadius: BorderRadius.lg,
     padding: 16,
-    color: "#fff",
+    color: "#1C1410",
     fontSize: 15,
     minHeight: 48,
   },
@@ -394,7 +394,7 @@ const styles = StyleSheet.create({
     marginTop: 8,
   },
   badge: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#F4EEE6",
     paddingHorizontal: 8,
     paddingVertical: 2,
     borderRadius: 10,
@@ -402,7 +402,7 @@ const styles = StyleSheet.create({
   badgeText: {
     fontSize: 12,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
   },
   emptyCard: {
     alignItems: "center",
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
   },
   itemCard: {
     flexDirection: "row",
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 10,
-    backgroundColor: "#16213E",
+    backgroundColor: "#F4EEE6",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -435,19 +435,19 @@ const styles = StyleSheet.create({
   itemTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 2,
   },
   itemSubtitle: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
   },
   deleteButton: {
     padding: 8,
   },
   addButton: {
     flex: 1,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: BorderRadius.lg,
     paddingVertical: 14,
     alignItems: "center",
@@ -456,6 +456,6 @@ const styles = StyleSheet.create({
   addButtonText: {
     fontSize: 15,
     fontWeight: "600",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
 });

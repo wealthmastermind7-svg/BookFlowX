@@ -79,7 +79,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     minWidth: 100,
-    shadowColor: "#00D4FF",
+    shadowColor: "#6B5744",
     shadowOpacity: 0.14,
     shadowRadius: 10,
     elevation: 2,

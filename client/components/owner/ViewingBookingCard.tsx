@@ -43,9 +43,9 @@ const styles = StyleSheet.create({
   channel: { flexDirection: "row", alignItems: "center", gap: 6, paddingHorizontal: 10, paddingVertical: 6, borderRadius: 99 },
   channelText: { fontSize: 12, fontWeight: "600" },
   status: { fontSize: 12, textTransform: "capitalize" },
-  name: { fontSize: 18, fontWeight: "700", color: "#F8FAFC", marginTop: 16, marginBottom: 4 },
-  body: { fontSize: 14, color: "#CBD5E1", lineHeight: 20 },
+  name: { fontSize: 18, fontWeight: "700", color: "#1C1410", marginTop: 16, marginBottom: 4, fontFamily: "PlayfairDisplay-Bold" },
+  body: { fontSize: 14, color: "#6B5744", lineHeight: 20 },
   details: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16 },
-  confirmation: { flexDirection: "row", alignItems: "center", gap: 6, borderTopWidth: 1, borderTopColor: "rgba(148,163,184,0.12)", marginTop: 12, paddingTop: 12 },
-  label: { fontSize: 12, color: "#94A3B8" },
+  confirmation: { flexDirection: "row", alignItems: "center", gap: 6, borderTopWidth: 1, borderTopColor: "#E8DDD0", marginTop: 12, paddingTop: 12 },
+  label: { fontSize: 12, color: "#8B6F47" },
 });

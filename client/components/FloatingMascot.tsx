@@ -282,13 +282,13 @@ const styles = StyleSheet.create({
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     alignItems: "center",
     justifyContent: "center",
-    shadowColor: "#00D4FF",
+    shadowColor: "#6B5744",
     shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
+    shadowOpacity: 0.14,
+    shadowRadius: 10,
     elevation: 8,
   },
   mascotPressed: {
@@ -338,7 +338,7 @@ const styles = StyleSheet.create({
     width: 54,
     height: 54,
     borderRadius: 27,
-    backgroundColor: "rgba(0,212,255,0.18)",
+    backgroundColor: "rgba(193,127,62,0.16)",
     zIndex: -1,
   },
   sailContainer: {
@@ -373,13 +373,13 @@ const styles = StyleSheet.create({
     padding: 24,
   },
   tipContainer: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 28,
     maxWidth: 340,
     width: "100%",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
   },
   tipHeader: {
     flexDirection: "row",
@@ -391,14 +391,14 @@ const styles = StyleSheet.create({
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: "rgba(0,212,255,0.12)",
+    backgroundColor: "#F4EEE6",
     alignItems: "center",
     justifyContent: "center",
   },
   tipTitle: {
     fontSize: 22,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     flex: 1,
   },
   tipMessage: {
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   gotItButton: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingVertical: 14,
     borderRadius: 16,
     alignItems: "center",
@@ -416,7 +416,7 @@ const styles = StyleSheet.create({
   gotItText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   tipsFooter: {
     gap: 16,
@@ -435,7 +435,7 @@ const styles = StyleSheet.create({
   },
   dotActive: {
     width: 20,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: 3,
   },
 });

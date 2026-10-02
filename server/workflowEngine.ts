@@ -1,5 +1,5 @@
 import { storage } from "./storage";
-import { sendBookingConfirmation } from "./email";
+import { sendBookingConfirmation, isBlockedBookingRecipient } from "./email";
 import type { Booking, Service, Customer, Business, Workflow } from "@shared/schema";
 import { db } from "./db";
 import { businesses, workflowLogs, bookings } from "@shared/schema";
@@ -304,6 +304,14 @@ async function executeEmailAction(
   }
 
   try {
+    const isConfirmation = delayMinutes === 0 || delayMinutes === undefined;
+    if (isConfirmation) {
+      const currentBooking = await storage.getBooking(context.booking.id);
+      if (context.booking.confirmationSentAt || currentBooking?.confirmationSentAt) {
+        return { success: true, message: "Email already sent by main route" };
+      }
+    }
+
     let addons: { name: string; price: number }[] | undefined;
     if (context.booking.addons) {
       try {
@@ -316,7 +324,7 @@ async function executeEmailAction(
       console.log(`[Workflow] No addons found for booking ${context.booking.id}`);
     }
 
-    await sendBookingConfirmation({
+    const sent = await sendBookingConfirmation({
       businessName: context.business.name,
       customerName: context.customer.name,
       customerEmail: context.customer.email,
@@ -335,14 +343,16 @@ async function executeEmailAction(
       throw err;
     });
 
+    if (!sent) {
+      return { success: false, message: "Email delivery failed" };
+    }
+    if (isBlockedBookingRecipient(context.customer.email)) {
+      return { success: true, message: "Test recipient blocked; no email delivered" };
+    }
+
     // Mark email sent timestamp on booking based on reminder timing
     const now = new Date();
     if (delayMinutes === 0 || delayMinutes === undefined) {
-      // Fetch fresh booking to check if confirmation was already sent by main route
-      const currentBooking = await storage.getBooking(context.booking.id);
-      if (currentBooking?.confirmationSentAt) {
-        return { success: true, message: "Email already sent by main route" };
-      }
       // Confirmation email (no delay or immediate send)
       await db.update(bookings).set({ confirmationSentAt: now }).where(eq(bookings.id, context.booking.id));
       console.log(`[Workflow] Marked confirmationSentAt for booking ${context.booking.id}`);

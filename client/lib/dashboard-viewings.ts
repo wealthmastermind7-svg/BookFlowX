@@ -1,7 +1,7 @@
 import type { Booking } from "./api";
 
 export const VIEWING_CHANNELS = [
-  { key: "sms", label: "SMS", icon: "message-circle", color: "#00D4FF" },
+  { key: "sms", label: "SMS", icon: "message-circle", color: "#C17F3E" },
   { key: "voice", label: "Voice", icon: "phone", color: "#A78BFA" },
   { key: "email", label: "Email", icon: "mail", color: "#60A5FA" },
   { key: "chat", label: "Chat", icon: "message-square", color: "#34D399" },

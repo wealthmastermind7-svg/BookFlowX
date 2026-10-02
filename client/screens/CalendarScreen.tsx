@@ -33,7 +33,7 @@ function BackgroundOverlay() {
     <View 
       style={{
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(10,10,15,0.5)",
+        backgroundColor: "transparent",
         zIndex: -1,
       }} 
     />
@@ -51,7 +51,7 @@ function getChannelPresentation(channel: Booking["channel"]) {
 function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
   if (Platform.OS === "ios") {
     return (
-      <BlurView intensity={20} tint="dark" style={[styles.glassPanel, style]}>
+      <BlurView intensity={20} tint="light" style={[styles.glassPanel, style]}>
         {children}
       </BlurView>
     );
@@ -229,21 +229,21 @@ export default function CalendarScreen() {
             <View style={styles.headerTitleRow}>
               <View style={styles.monthNavRow}>
                 <Pressable onPress={goToPreviousMonth} style={styles.navArrow}>
-                  <Feather name="chevron-left" size={28} color="rgba(255,255,255,0.6)" />
+                  <Feather name="chevron-left" size={28} color="#8B6F47" />
                 </Pressable>
                 <View style={styles.monthTextContainer}>
                   <Animated.Text style={styles.giantMonth} numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.5}>{monthName}</Animated.Text>
                   <Animated.Text style={styles.hugeYear} numberOfLines={1}>{yearName}</Animated.Text>
                 </View>
                 <Pressable onPress={goToNextMonth} style={styles.navArrow}>
-                  <Feather name="chevron-right" size={28} color="rgba(255,255,255,0.6)" />
+                  <Feather name="chevron-right" size={28} color="#8B6F47" />
                 </Pressable>
               </View>
             </View>
             <View style={styles.headerControls}>
               <Animated.Text style={styles.setupText}>Swipe to change months</Animated.Text>
               <Pressable onPress={handleOpenAvailability} style={styles.glassButtonSmall}>
-                <Feather name="clock" size={14} color="white" />
+                <Feather name="clock" size={14} color="#A8662F" />
                 <Animated.Text style={styles.buttonTextSmall}>{t('calendar.setHours')}</Animated.Text>
               </Pressable>
             </View>
@@ -272,7 +272,7 @@ export default function CalendarScreen() {
               </Animated.Text>
             </View>
             <Pressable onPress={handleOpenBlockedSlots} style={styles.glassButtonSmall}>
-              <Feather name="slash" size={14} color="rgba(255,255,255,0.6)" />
+              <Feather name="slash" size={14} color="#8B6F47" />
               <Animated.Text style={styles.buttonTextSmall}>{t('calendar.blockTimes')}</Animated.Text>
             </Pressable>
           </View>
@@ -296,17 +296,17 @@ export default function CalendarScreen() {
                   </View>
                   <View style={styles.bookingCardDetails}>
                     <View style={styles.detailItem}>
-                      <Feather name="calendar" size={14} color="rgba(255,255,255,0.6)" />
+                      <Feather name="calendar" size={14} color="#8B6F47" />
                       <Animated.Text style={styles.detailText}>{item.date}</Animated.Text>
                     </View>
                     <View style={styles.detailItem}>
-                      <Feather name="clock" size={14} color="rgba(255,255,255,0.6)" />
+                      <Feather name="clock" size={14} color="#8B6F47" />
                       <Animated.Text style={styles.detailText}>{item.time}</Animated.Text>
                     </View>
                   </View>
                   <View style={styles.bookingCardFooter}>
                     <View style={styles.footerItem}>
-                      <Feather name={item.confirmationSentAt ? "check-circle" : "clock"} size={15} color={item.confirmationSentAt ? "#34D399" : "#FBBF24"} />
+                    <Feather name={item.confirmationSentAt ? "check-circle" : "clock"} size={15} color={item.confirmationSentAt ? "#4A7C59" : "#B87831"} />
                       <Animated.Text style={styles.footerText}>{item.confirmationSentAt ? "Confirmation sent" : "Confirmation pending"}</Animated.Text>
                     </View>
                   </View>
@@ -328,7 +328,7 @@ export default function CalendarScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   container: {
     flex: 1,
@@ -354,9 +354,9 @@ const styles = StyleSheet.create({
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.16)",
+    borderColor: "#E8DDD0",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -367,7 +367,7 @@ const styles = StyleSheet.create({
   giantMonth: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#F2F6FC",
+    color: "#1C1410",
     letterSpacing: -0.6,
     lineHeight: 24,
     textTransform: "capitalize",
@@ -376,7 +376,7 @@ const styles = StyleSheet.create({
   hugeYear: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#8190A5",
+    color: "#8B6F47",
     letterSpacing: 1,
     marginTop: 2,
   },
@@ -388,23 +388,23 @@ const styles = StyleSheet.create({
   },
   setupText: {
     fontSize: 12,
-    color: "#8291A7",
+    color: "#8B6F47",
   },
   glassButtonSmall: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 12,
     paddingVertical: 9,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
   },
   buttonTextSmall: {
     fontSize: 12,
     fontWeight: "600",
-    color: "#DCE5F1",
+    color: "#6B5744",
   },
   calendarGrid: {
     marginBottom: 24,
@@ -418,7 +418,7 @@ const styles = StyleSheet.create({
     width: "14.28%",
     textAlign: "center",
     fontSize: 12,
-    color: "#718097",
+    color: "#8B6F47",
     fontWeight: "600",
   },
   datesGrid: {
@@ -440,25 +440,25 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dayCircleSelected: {
-    backgroundColor: "#00D4FF",
-    shadowColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
+    shadowColor: "#C17F3E",
     shadowOpacity: 0.32,
     shadowRadius: 12,
     elevation: 5,
   },
   dayCircleHasBooking: {
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.42)",
+    borderColor: "#C17F3E",
   },
   dayText: {
     fontSize: 18,
-    color: "white",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
+    color: "#1C1410",
+    textShadowColor: "transparent",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   dayTextSelected: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontWeight: "600",
   },
   bookingsHeader: {
@@ -470,12 +470,12 @@ const styles = StyleSheet.create({
   bookingsCount: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#F2F6FC",
+    color: "#1C1410",
     letterSpacing: -0.3,
   },
   selectedDateSub: {
     fontSize: 14,
-    color: "#8291A7",
+    color: "#8B6F47",
     marginTop: 4,
   },
   bookingsList: {
@@ -484,11 +484,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   bookingCard: {
     padding: 16,
@@ -502,11 +502,11 @@ const styles = StyleSheet.create({
   customerName: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#F2F6FC",
+    color: "#1C1410",
   },
   serviceName: {
     fontSize: 14,
-    color: "#8B99AE",
+    color: "#6B5744",
     marginTop: 2,
   },
   channelBadge: { flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 7 },
@@ -523,7 +523,7 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: "#D9E2EF",
+    color: "#6B5744",
     fontWeight: "500",
   },
   bookingCardFooter: {
@@ -531,7 +531,7 @@ const styles = StyleSheet.create({
     justifyContent: "space-between",
     paddingTop: 16,
     borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
+    borderTopColor: "#E8DDD0",
   },
   footerItem: {
     flexDirection: "row",
@@ -540,7 +540,7 @@ const styles = StyleSheet.create({
   },
   footerText: {
     fontSize: 14,
-    color: "#DCE5F1",
+    color: "#6B5744",
     fontWeight: "600",
   },
   emptyCard: {
@@ -549,7 +549,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     textAlign: "center",
   },
 });

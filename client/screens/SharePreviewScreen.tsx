@@ -72,7 +72,7 @@ function AnimatedPressable({
 function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
   if (Platform.OS === "ios") {
     return (
-      <BlurView intensity={40} tint="dark" style={[styles.glassPanel, style]}>
+      <BlurView intensity={40} tint="light" style={[styles.glassPanel, style]}>
         {children}
       </BlurView>
     );
@@ -102,7 +102,7 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
   return (
     <View style={styles.cinematicCard}>
       <LinearGradient
-        colors={['#16213E', '#0A0A0F', '#111827']}
+        colors={['#F7F0E7', '#EDE0D0', '#E6D5C1']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.cinematicGradient}
@@ -137,7 +137,7 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
             <ThemedText style={styles.subtitleText}>ARRANGE A PROPERTY VIEWING</ThemedText>
           </View>
           <View style={styles.arrowCircle}>
-            <Feather name="arrow-up-right" size={14} color="rgba(255,255,255,0.6)" />
+            <Feather name="arrow-up-right" size={14} color="#8B6F47" />
           </View>
         </View>
         <ThemedText style={styles.domainText}>{domain.toUpperCase()}</ThemedText>
@@ -228,7 +228,7 @@ export default function SharePreviewScreen() {
         <Animated.View entering={FadeIn.duration(600).delay(400)} style={styles.infoSection}>
           <GlassPanel style={styles.infoCard}>
             <View style={styles.infoRow}>
-              <Feather name="link" size={18} color="rgba(255,255,255,0.6)" />
+              <Feather name="link" size={18} color="#8B6F47" />
               <View style={styles.infoContent}>
                 <ThemedText style={styles.infoLabel}>{t('sharePreview.yourBookingUrl')}</ThemedText>
                 <ThemedText style={styles.infoValue} numberOfLines={1}>{bookingUrl}</ThemedText>
@@ -239,14 +239,14 @@ export default function SharePreviewScreen() {
 
         <Animated.View entering={FadeIn.duration(600).delay(500)} style={styles.actionsContainer}>
           <AnimatedPressable onPress={handleCopyLink} style={styles.primaryButton}>
-            <Feather name={copied ? "check" : "copy"} size={20} color="#000" />
+            <Feather name={copied ? "check" : "copy"} size={20} color="#FFFFFF" />
             <ThemedText style={styles.primaryButtonText}>
               {copied ? t('common.copied') : t('sharePreview.copyLink')}
             </ThemedText>
           </AnimatedPressable>
 
           <AnimatedPressable onPress={handleShare} style={styles.secondaryButton}>
-            <Feather name="share-2" size={20} color="#fff" />
+            <Feather name="share-2" size={20} color="#A8662F" />
             <ThemedText style={styles.secondaryButtonText}>{t('sharePreview.shareNow')}</ThemedText>
           </AnimatedPressable>
         </Animated.View>
@@ -255,15 +255,15 @@ export default function SharePreviewScreen() {
           <ThemedText style={styles.platformsTitle}>{t('sharePreview.worksOn')}</ThemedText>
           <View style={styles.platformsRow}>
             <View style={styles.platformBadge}>
-              <Feather name="message-circle" size={16} color="rgba(255,255,255,0.8)" />
+              <Feather name="message-circle" size={16} color="#6B5744" />
               <ThemedText style={styles.platformText}>iMessage</ThemedText>
             </View>
             <View style={styles.platformBadge}>
-              <Feather name="phone" size={16} color="rgba(255,255,255,0.8)" />
+              <Feather name="phone" size={16} color="#6B5744" />
               <ThemedText style={styles.platformText}>WhatsApp</ThemedText>
             </View>
             <View style={styles.platformBadge}>
-              <Feather name="linkedin" size={16} color="rgba(255,255,255,0.8)" />
+              <Feather name="linkedin" size={16} color="#6B5744" />
               <ThemedText style={styles.platformText}>LinkedIn</ThemedText>
             </View>
           </View>
@@ -276,11 +276,11 @@ export default function SharePreviewScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,10,15,0.72)",
+    backgroundColor: "rgba(250,247,242,0.93)",
   },
   heroSection: {
     alignItems: "center",
@@ -289,14 +289,15 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 28,
     fontWeight: "800",
-    color: "#fff",
+    color: "#1C1410",
+    fontFamily: "PlayfairDisplay-Bold",
     letterSpacing: -2,
     textAlign: "center",
     marginBottom: Spacing.sm,
   },
   heroSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.5)",
+    color: "#6B5744",
     textAlign: "center",
     maxWidth: 300,
     lineHeight: 24,
@@ -308,14 +309,14 @@ const styles = StyleSheet.create({
     fontSize: 11,
     fontWeight: "600",
     letterSpacing: 2,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     marginBottom: Spacing.md,
   },
   messageContainer: {
     alignItems: "flex-end",
   },
   messageBubble: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingHorizontal: 16,
     paddingVertical: 10,
     borderRadius: 18,
@@ -324,7 +325,7 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
   },
   messageText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontSize: 14,
   },
   linkCardWrapper: {
@@ -335,7 +336,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 11,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
     marginTop: 8,
   },
   cinematicCard: {
@@ -357,7 +358,7 @@ const styles = StyleSheet.create({
     left: -100,
     right: -100,
     height: 1,
-    backgroundColor: "rgba(0,212,255,0.38)",
+    backgroundColor: "rgba(193,127,62,0.30)",
     transform: [{ rotate: "25deg" }],
   },
   shadowColumn: {
@@ -366,7 +367,7 @@ const styles = StyleSheet.create({
     top: 0,
     bottom: 0,
     width: 80,
-    backgroundColor: "rgba(0,0,0,0.4)",
+    backgroundColor: "rgba(107,87,68,0.10)",
     transform: [{ skewX: "-10deg" }],
   },
   cinematicContent: {
@@ -377,18 +378,19 @@ const styles = StyleSheet.create({
   cinematicTitle: {
     fontSize: 30,
     fontWeight: "800",
-    color: "rgba(255,255,255,0.95)",
+    color: "#1C1410",
+    fontFamily: "PlayfairDisplay-Bold",
     letterSpacing: -2,
     lineHeight: 46,
   },
   accentBar: {
     width: 60,
     height: 3,
-    backgroundColor: "rgba(255,255,255,0.5)",
+    backgroundColor: "#C17F3E",
     marginTop: 12,
   },
   glassFooter: {
-    backgroundColor: "rgba(13,13,26,0.96)",
+    backgroundColor: "rgba(255,255,255,0.96)",
     paddingHorizontal: 20,
     paddingVertical: 16,
     paddingBottom: 20,
@@ -399,7 +401,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     height: 1,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#E8DDD0",
   },
   footerContent: {
     flexDirection: "row",
@@ -412,12 +414,12 @@ const styles = StyleSheet.create({
   businessNameText: {
     fontSize: 18,
     fontWeight: "500",
-    color: "#fff",
+    color: "#1C1410",
     letterSpacing: 0.5,
   },
   subtitleText: {
     fontSize: 10,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     letterSpacing: 2,
     marginTop: 4,
   },
@@ -431,7 +433,7 @@ const styles = StyleSheet.create({
   },
   domainText: {
     fontSize: 9,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
     letterSpacing: 2,
     marginTop: 12,
   },
@@ -451,12 +453,12 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
+    color: "#8B6F47",
     marginBottom: 4,
   },
   infoValue: {
     fontSize: 14,
-    color: "#fff",
+    color: "#1C1410",
   },
   actionsContainer: {
     gap: Spacing.md,
@@ -468,13 +470,13 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 56,
     borderRadius: 16,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     gap: 10,
   },
   primaryButtonText: {
     fontSize: 17,
     fontWeight: "700",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   secondaryButton: {
     flexDirection: "row",
@@ -482,15 +484,15 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     height: 56,
     borderRadius: 16,
-    backgroundColor: "#16213E",
+    backgroundColor: "#FFFFFF",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.22)",
+    borderColor: "#E8DDD0",
     gap: 10,
   },
   secondaryButtonText: {
     fontSize: 17,
     fontWeight: "600",
-    color: "#fff",
+    color: "#A8662F",
   },
   platformsSection: {
     alignItems: "center",
@@ -499,7 +501,7 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: "600",
     letterSpacing: 2,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
     marginBottom: Spacing.md,
   },
   platformsRow: {
@@ -513,21 +515,21 @@ const styles = StyleSheet.create({
     paddingHorizontal: 12,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: "rgba(22,33,62,0.92)",
+    backgroundColor: "#F4EEE6",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
   },
   platformText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
   },
   glassPanel: {
     borderRadius: 16,
     overflow: "hidden",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
   },
   glassPanelAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
 });

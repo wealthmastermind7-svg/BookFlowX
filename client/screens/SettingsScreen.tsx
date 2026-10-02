@@ -44,8 +44,8 @@ type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & Roo
 const CircularMeter = ({ value, label }: { value: number; label: string }) => {
   return (
     <View style={{ alignItems: "flex-start", flex: 1 }}>
-      <ThemedText style={{ fontSize: 20, fontWeight: "700", color: "#F2F6FC" }}>{value}</ThemedText>
-      <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#8291A7", letterSpacing: 0.8, marginTop: 5 }}>{label}</ThemedText>
+      <ThemedText style={{ fontSize: 20, fontWeight: "700", color: "#1C1410" }}>{value}</ThemedText>
+      <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#8B6F47", letterSpacing: 0.8, marginTop: 5 }}>{label}</ThemedText>
     </View>
   );
 };
@@ -69,7 +69,7 @@ const ParallaxIcon = ({ name, delay = 0 }: { name: any; delay?: number }) => {
   return (
     <Animated.View style={{ transform: [{ translateY }] }}>
       <View style={styles.parallaxIconBox}>
-        <Feather name={name} size={24} color="#fff" />
+        <Feather name={name} size={24} color="#A8662F" />
       </View>
     </Animated.View>
   );
@@ -399,8 +399,8 @@ export default function SettingsScreen() {
       style={({ pressed }) => [
         styles.glassCard, 
         { 
-          backgroundColor: highlight ? "#16213E" : "#111827",
-          borderColor: highlight ? "rgba(0,212,255,0.34)" : "rgba(0,212,255,0.14)"
+          backgroundColor: "#FFFFFF",
+          borderColor: "#E8DDD0"
         }, 
         style, 
         pressed && onPress && { opacity: 0.85, transform: [{ scale: 0.99 }] }
@@ -414,7 +414,7 @@ export default function SettingsScreen() {
     <View style={styles.sectionTitleRow}>
       <View>
         <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
-        {label && <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.55)", letterSpacing: 1.2, marginTop: 4 }}>{label}</ThemedText>}
+        {label && <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#8B6F47", letterSpacing: 1.2, marginTop: 4 }}>{label}</ThemedText>}
       </View>
     </View>
   );
@@ -422,29 +422,29 @@ export default function SettingsScreen() {
   const SectionTitle = ({ children, badge }: any) => (
     <View style={styles.sectionTitleRow}>
       <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
-      {badge && <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>{badge}</ThemedText></View>}
+      {badge && <View style={[styles.badge, { borderColor: "#E8DDD0" }]}><ThemedText style={styles.badgeText}>{badge}</ThemedText></View>}
     </View>
   );
 
   const CompactRow = ({ icon, title, subtitle, onPress, destructive }: any) => (
     <Pressable onPress={onPress} style={styles.compactRow}>
-      <Feather name={icon} size={20} color={destructive ? "#EF4444" : "#fff"} />
+      <Feather name={icon} size={20} color={destructive ? "#B74E42" : "#A8662F"} />
       <View style={{ flex: 1, marginLeft: 16 }}>
         <ThemedText style={[styles.compactRowTitle, destructive && { color: "#EF4444" }]}>{title}</ThemedText>
         {subtitle && <ThemedText style={styles.compactRowSubtitle}>{subtitle}</ThemedText>}
       </View>
-      <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
+      <Feather name="chevron-right" size={18} color="#8B6F47" />
     </Pressable>
   );
 
   const InfoRow = ({ icon, label, value, onPress }: any) => (
     <Pressable onPress={onPress} style={styles.infoRow}>
-      <Feather name={icon} size={18} color="rgba(255,255,255,0.6)" />
+      <Feather name={icon} size={18} color="#8B6F47" />
       <View style={{ flex: 1, marginLeft: 16 }}>
         <ThemedText style={styles.infoLabel}>{label}</ThemedText>
         <ThemedText style={styles.infoValue}>{value}</ThemedText>
       </View>
-      <Feather name="edit-2" size={14} color="rgba(255,255,255,0.4)" />
+      <Feather name="edit-2" size={14} color="#8B6F47" />
     </Pressable>
   );
 
@@ -459,18 +459,18 @@ export default function SettingsScreen() {
               {isPremium ? "Booking Premium" : "Booking Plan"}
             </ThemedText>
             {isPremium ? (
-              <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>PREMIUM</ThemedText></View>
+              <View style={[styles.badge, { borderColor: "#E8DDD0" }]}><ThemedText style={styles.badgeText}>PREMIUM</ThemedText></View>
             ) : isTrialActive ? (
-              <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>TRIAL</ThemedText></View>
+              <View style={[styles.badge, { borderColor: "#E8DDD0" }]}><ThemedText style={styles.badgeText}>TRIAL</ThemedText></View>
             ) : (
-              <View style={[styles.badge, { borderColor: "rgba(255,255,255,0.2)" }]}><ThemedText style={styles.badgeText}>BASIC</ThemedText></View>
+              <View style={[styles.badge, { borderColor: "#E8DDD0" }]}><ThemedText style={styles.badgeText}>BASIC</ThemedText></View>
             )}
           </View>
           
           <GlassCard style={styles.premiumBanner} onPress={() => showPaywall("soft_upsell")} highlight>
             <View style={styles.premiumBannerHeader}>
               <View style={styles.premiumIconGlow}>
-                <Feather name="zap" size={28} color="#fff" />
+                <Feather name="zap" size={28} color="#A8662F" />
               </View>
               <View style={{ flex: 1, marginLeft: 20 }}>
                  <ThemedText style={styles.premiumBannerTitle}>
@@ -480,24 +480,24 @@ export default function SettingsScreen() {
                   {isPremium ? "Advanced automation active" : "Smart automation & unlimited tools"}
                 </ThemedText>
               </View>
-              <Feather name="chevron-right" size={24} color="rgba(255,255,255,0.5)" />
+              <Feather name="chevron-right" size={24} color="#8B6F47" />
             </View>
             
             <View style={styles.premiumFeatures}>
               <View style={styles.featureRow}>
-                <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                <Feather name="check" size={16} color="#4A7C59" />
                 <ThemedText style={styles.featureText}>Smart reminders that reduce no-shows</ThemedText>
               </View>
               <View style={styles.featureRow}>
-                <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                <Feather name="check" size={16} color="#4A7C59" />
                 <ThemedText style={styles.featureText}>Smart service setup in seconds</ThemedText>
               </View>
               <View style={styles.featureRow}>
-                <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                <Feather name="check" size={16} color="#4A7C59" />
                 <ThemedText style={styles.featureText}>Intelligent upsell suggestions</ThemedText>
               </View>
               <View style={styles.featureRow}>
-                <Feather name="check" size={16} color="rgba(255,255,255,0.6)" />
+                <Feather name="check" size={16} color="#4A7C59" />
                 <ThemedText style={styles.featureText}>Unlimited booking links & QR codes</ThemedText>
               </View>
               <View style={{ height: 12 }} />
@@ -521,8 +521,8 @@ export default function SettingsScreen() {
             )}
             
             {!isPremium && isTrialActive && (
-              <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.1)' }}>
-                <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', textAlign: 'center' }}>
+              <View style={{ marginTop: 16, paddingTop: 16, borderTopWidth: 1, borderTopColor: "#E8DDD0" }}>
+                <ThemedText style={{ fontSize: 12, color: "#8B6F47", textAlign: 'center' }}>
                   Includes 7-day free trial for booking links and QR codes.
                 </ThemedText>
               </View>
@@ -530,9 +530,9 @@ export default function SettingsScreen() {
           </GlassCard>
           
           <GlassCard style={styles.restoreRow} onPress={handleRestorePurchases}>
-            <Feather name="refresh-cw" size={18} color="rgba(255,255,255,0.5)" />
+            <Feather name="refresh-cw" size={18} color="#8B6F47" />
             <ThemedText style={styles.restoreText}>{t('settings.restorePurchases')}</ThemedText>
-            {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
+            {restoreLoading && <ActivityIndicator size="small" color="#C17F3E" />}
           </GlassCard>
 
           <View style={{ height: 24 }} />
@@ -557,7 +557,7 @@ export default function SettingsScreen() {
           <GlassCard style={styles.voiceCard} onPress={() => setVoicePaywallVisible(true)} highlight>
             <View style={styles.voiceHeader}>
               <View style={styles.voiceIconBox}>
-                <Feather name="mic" size={24} color="#fff" />
+                <Feather name="mic" size={24} color="#A8662F" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
                  <ThemedText style={styles.voiceTitle} numberOfLines={1} adjustsFontSizeToFit>Informational Assistant</ThemedText>
@@ -565,15 +565,15 @@ export default function SettingsScreen() {
               </View>
               <Button 
                 onPress={handleOpenAgentTraining}
-                style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 36, paddingHorizontal: 12 }}
+                style={{ backgroundColor: "#F4EEE6", borderColor: "#E8DDD0", height: 36, paddingHorizontal: 12 }}
               >
-                <ThemedText style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>{t('settings.trainAgent')}</ThemedText>
+                <ThemedText style={{ fontSize: 14, fontWeight: "600", color: "#A8662F" }}>{t('settings.trainAgent')}</ThemedText>
               </Button>
             </View>
             <View style={styles.voiceIconGroup}>
-              <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#fff" /></View>
-              <View style={styles.voiceIconBox}><Feather name="message-square" size={20} color="#fff" /></View>
-              <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#fff" /></View>
+              <View style={styles.voiceIconBox}><Feather name="mic" size={20} color="#A8662F" /></View>
+              <View style={styles.voiceIconBox}><Feather name="message-square" size={20} color="#A8662F" /></View>
+              <View style={styles.voiceIconBox}><Feather name="volume-2" size={20} color="#A8662F" /></View>
             </View>
             <View style={{ marginTop: 24 }}>
               <ThemedText style={styles.voiceCardTitle}>{t('settings.voiceAssistant')}</ThemedText>
@@ -581,7 +581,7 @@ export default function SettingsScreen() {
             </View>
             <View style={styles.previewContainer}>
               <Pressable style={styles.previewLink} onPress={() => navigation.navigate("VoiceBooking", { businessSlug: business?.slug || "" })}>
-                <Feather name="play-circle" size={18} color="rgba(255,255,255,0.4)" />
+                <Feather name="play-circle" size={18} color="#8B6F47" />
                 <ThemedText style={styles.previewText}>QUICK PREVIEW</ThemedText>
               </Pressable>
               <ThemedText style={[styles.featureText, { fontSize: 12, marginTop: 12, fontStyle: 'italic', opacity: 0.6 }]}>
@@ -608,7 +608,7 @@ export default function SettingsScreen() {
                   Limit reached — upgrade to continue assisting customers
                 </ThemedText>
               ) : voiceSub?.subscription.tier === 'free' ? (
-                <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 8 }}>
+                <ThemedText style={{ fontSize: 12, color: "#8B6F47", marginTop: 8 }}>
                   {voiceSub.usage.remaining} minutes remaining — one-time trial
                 </ThemedText>
               ) : percentUsed > 80 ? (
@@ -637,12 +637,12 @@ export default function SettingsScreen() {
                 <ThemedText style={styles.bookingTitle}>Share Booking Page</ThemedText>
                 <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{business?.slug ? getCustomerBookingUrl(business.slug) : ""}</ThemedText>
               </View>
-              <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={18} color="rgba(255,255,255,0.6)" /></Pressable>
+              <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={18} color="#8B6F47" /></Pressable>
             </View>
             <ThemedText style={styles.qrPlacementHint}>Place QR codes at checkout or in windows</ThemedText>
             <View style={styles.bookingActions}>
-              <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#fff" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
-              <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="maximize" size={18} color="#000" /><ThemedText style={styles.shareQrText}>Show QR</ThemedText></Pressable>
+              <Pressable onPress={handleOpenSharePreview} style={styles.shareLinkBtn}><Feather name="share-2" size={18} color="#A8662F" /><ThemedText style={styles.shareBtnText}>Share Link</ThemedText></Pressable>
+              <Pressable onPress={handleShowQRCode} style={styles.shareQrBtn}><Feather name="maximize" size={18} color="#FFFFFF" /><ThemedText style={styles.shareQrText}>Show QR</ThemedText></Pressable>
             </View>
           </GlassCard>
 
@@ -651,20 +651,20 @@ export default function SettingsScreen() {
           <View style={{ gap: 12 }}>
             <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => showPaywall("soft_upsell")}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="link" size={14} color="#fff" /></View>
+                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="link" size={14} color="#A8662F" /></View>
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Booking Links</ThemedText>
               </View>
-              <View style={{ backgroundColor: isPremium ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isPremium ? '#22C55E' : 'rgba(255,255,255,0.55)' }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
+              <View style={{ backgroundColor: isPremium ? "#EFF5EF" : "#F4EEE6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isPremium ? "#4A7C59" : "#8B6F47" }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
             <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="mic" size={14} color="#fff" /></View>
+                <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16 }]}><Feather name="mic" size={14} color="#A8662F" /></View>
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Agent</ThemedText>
               </View>
-              <View style={{ backgroundColor: isVoiceExhausted ? 'rgba(239, 68, 68, 0.2)' : voiceSub?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSub?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.55)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSub?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
+              <View style={{ backgroundColor: isVoiceExhausted ? "#FAEFED" : voiceSub?.subscription.tier !== 'free' ? "#EFF5EF" : "#F4EEE6", paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
+                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isVoiceExhausted ? "#B74E42" : voiceSub?.subscription.tier !== 'free' ? "#4A7C59" : "#8B6F47" }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSub?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
           </View>
@@ -704,18 +704,18 @@ export default function SettingsScreen() {
             }}
           >
             <View style={{ flexDirection: 'row', alignItems: 'center', flex: 1 }}>
-              <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16, backgroundColor: isCalendarConnected ? 'rgba(34, 197, 94, 0.3)' : 'rgba(255,255,255,0.1)' }]}>
+              <View style={[styles.gridIconCircle, { width: 32, height: 32, borderRadius: 16, backgroundColor: isCalendarConnected ? "#EFF5EF" : "#F4EEE6" }]}>
                 <Feather name="calendar" size={14} color={isCalendarConnected ? "#22C55E" : "#fff"} />
               </View>
               <View style={{ marginLeft: 12, flex: 1 }}>
                 <ThemedText style={[styles.gridLabel, { marginTop: 0 }]}>Google Calendar</ThemedText>
                 {isCalendarConnected && calendarEmail && (
-                  <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }} numberOfLines={1}>{calendarEmail}</ThemedText>
+                  <ThemedText style={{ fontSize: 12, color: "#8B6F47", marginTop: 2 }} numberOfLines={1}>{calendarEmail}</ThemedText>
                 )}
               </View>
             </View>
             {calendarLoading || calendarConnecting ? (
-              <ActivityIndicator size="small" color="#fff" />
+              <ActivityIndicator size="small" color="#C17F3E" />
             ) : (
               <View style={{ backgroundColor: isCalendarConnected ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
                 <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isCalendarConnected ? '#22C55E' : '#3B82F6' }}>
@@ -724,7 +724,7 @@ export default function SettingsScreen() {
               </View>
             )}
           </GlassCard>
-          <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 8, paddingHorizontal: 4 }}>
+          <ThemedText style={{ fontSize: 12, color: "#8B6F47", marginTop: 8, paddingHorizontal: 4 }}>
             Sync bookings to your calendar and prevent double-booking
           </ThemedText>
           */}
@@ -740,17 +740,17 @@ export default function SettingsScreen() {
             />
           </GlassCard>
           <View style={styles.gridRow}>
-            <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}><View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>BUSINESS NAME</ThemedText><ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText></GlassCard>
-            <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}><View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#fff" /></View><ThemedText style={styles.gridLabel}>{t('settings.currency').toUpperCase()}</ThemedText><ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText></GlassCard>
+            <GlassCard style={styles.gridCard} onPress={() => handleEditBusinessField("name")}><View style={styles.gridIconCircle}><Feather name="briefcase" size={16} color="#A8662F" /></View><ThemedText style={styles.gridLabel}>BUSINESS NAME</ThemedText><ThemedText style={styles.gridValue} numberOfLines={1}>{business?.name || "My Business"}</ThemedText></GlassCard>
+            <GlassCard style={styles.gridCard} onPress={() => setCurrencyModalVisible(true)}><View style={styles.gridIconCircle}><Feather name="dollar-sign" size={16} color="#A8662F" /></View><ThemedText style={styles.gridLabel}>{t('settings.currency').toUpperCase()}</ThemedText><ThemedText style={styles.gridValue}>{getCurrentCurrencyShort()}</ThemedText></GlassCard>
           </View>
           <GlassCard style={{ marginTop: 12, marginBottom: 12 }}>
             <Pressable onPress={() => setLanguageModalVisible(true)} style={styles.infoRow}>
-              <Feather name="globe" size={18} color="rgba(255,255,255,0.6)" />
+              <Feather name="globe" size={18} color="#8B6F47" />
               <View style={{ flex: 1, marginLeft: 16 }}>
                 <ThemedText style={styles.infoLabel}>{t('settings.language').toUpperCase()}</ThemedText>
                 <ThemedText style={styles.infoValue}>{languages.find(l => l.code === lang)?.nativeName || 'English'}</ThemedText>
               </View>
-              <Feather name="chevron-right" size={18} color="rgba(255,255,255,0.3)" />
+              <Feather name="chevron-right" size={18} color="#8B6F47" />
             </Pressable>
           </GlassCard>
           <GlassCard style={[styles.multiRowCard, { marginTop: 0 }]}><InfoRow icon="globe" label={t('settings.publicWebsite')} value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} /><View style={styles.rowDivider} /><InfoRow icon="phone" label={t('settings.publicSupportLine')} value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} /></GlassCard>
@@ -761,13 +761,13 @@ export default function SettingsScreen() {
             <View style={styles.automationHeader}><ParallaxIcon name="cpu" delay={0} /><ParallaxIcon name="zap" delay={300} /><ParallaxIcon name="bell" delay={600} /></View>
             <ThemedText style={styles.automationTitle}>Workflows</ThemedText>
             <ThemedText style={styles.automationDesc}>Intelligent reminders & confirmation sequences that work quietly in the background.</ThemedText>
-            <View style={styles.automationActionRow}><ThemedText style={styles.automationAction}>CONFIGURE</ThemedText><Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" /></View>
+            <View style={styles.automationActionRow}><ThemedText style={styles.automationAction}>CONFIGURE</ThemedText><Feather name="arrow-right" size={14} color="#A8662F" /></View>
           </GlassCard>
 
           <View style={{ height: 24 }} />
           <SectionTitle>{t('settings.data')}</SectionTitle>
           <View style={styles.gridRow}>
-            <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#fff" /><ThemedText style={styles.securityTitle}>{t('settings.demoData')}</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
+            <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#A8662F" /><ThemedText style={styles.securityTitle}>{t('settings.demoData')}</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
             <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}><Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} /><ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Reset Data</ThemedText><ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText></GlassCard>
           </View>
 
@@ -785,7 +785,7 @@ export default function SettingsScreen() {
 
       <Modal visible={qrModalVisible} transparent animationType="fade" onRequestClose={() => setQrModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#FAF7F2" }]}>
             <ThemedText style={styles.modalTitle}>Booking QR Code</ThemedText>
             {qrCode && (
               <Pressable 
@@ -803,7 +803,7 @@ export default function SettingsScreen() {
                   </View>
                 </ViewShot>
                 <View style={styles.qrHintContainer}>
-                  <Feather name="external-link" size={14} color="rgba(255,255,255,0.4)" />
+                  <Feather name="external-link" size={14} color="#8B6F47" />
                   <ThemedText style={styles.qrHint}>Tap to open link</ThemedText>
                 </View>
               </Pressable>
@@ -818,7 +818,7 @@ export default function SettingsScreen() {
 
       <Modal visible={editModalVisible} transparent animationType="fade" onRequestClose={() => setEditModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#FAF7F2" }]}>
             <ThemedText style={styles.modalTitle}>
               {editingField === "timezone" ? "Select Timezone" : `Edit ${editingField}`}
             </ThemedText>
@@ -831,25 +831,25 @@ export default function SettingsScreen() {
                       key={tz.value}
                       style={[
                         styles.timezoneOption,
-                        editValue === tz.value && { backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.3)' }
+                        editValue === tz.value && { backgroundColor: "#F4EEE6", borderColor: "#C17F3E" }
                       ]}
                       onPress={() => setEditValue(tz.value)}
                     >
                       <ThemedText style={[styles.timezoneOptionText, editValue === tz.value && { color: '#fff' }]}>
                         {tz.label}
                       </ThemedText>
-                      {editValue === tz.value && <Feather name="check" size={16} color="#fff" />}
+                      {editValue === tz.value && <Feather name="check" size={16} color="#C17F3E" />}
                     </Pressable>
                   ))}
                 </View>
               </ScrollView>
             ) : (
-              <TextInput 
-                style={[styles.editInput, { color: "#fff", borderColor: "rgba(255,255,255,0.1)" }]} 
-                value={editValue} 
-                onChangeText={setEditValue} 
-                placeholder={`Enter ${editingField}`} 
-                placeholderTextColor="#666" 
+              <TextInput
+                style={[styles.editInput, { color: "#1C1410", borderColor: "#E8DDD0" }]}
+                value={editValue}
+                onChangeText={setEditValue}
+                placeholder={`Enter ${editingField}`}
+                placeholderTextColor="#666"
               />
             )}
             
@@ -864,16 +864,16 @@ export default function SettingsScreen() {
       </Modal>
 
       <Modal visible={demoTypeModalVisible} transparent animationType="slide" onRequestClose={() => setDemoTypeModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>{t('settings.chooseDemoType')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{DEMO_TYPES.map(dt => (<Pressable key={dt.id} onPress={() => handleInitializeDemoData(dt.id)} style={styles.demoTypeButton}><ThemedText style={styles.demoTypeLabel}>{t('businessTypes.' + dt.id) || dt.label}</ThemedText></Pressable>))}</ScrollView><Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>{t('common.cancel')}</ThemedText></Pressable></View></View>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#FAF7F2" }]}><ThemedText style={styles.modalTitle}>{t('settings.chooseDemoType')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{DEMO_TYPES.map(dt => (<Pressable key={dt.id} onPress={() => handleInitializeDemoData(dt.id)} style={styles.demoTypeButton}><ThemedText style={styles.demoTypeLabel}>{t('businessTypes.' + dt.id) || dt.label}</ThemedText></Pressable>))}</ScrollView><Pressable onPress={() => setDemoTypeModalVisible(false)} style={styles.secondaryButton}><ThemedText style={styles.secondaryButtonText}>{t('common.cancel')}</ThemedText></Pressable></View></View>
       </Modal>
 
       <Modal visible={currencyModalVisible} transparent animationType="slide" onRequestClose={() => setCurrencyModalVisible(false)}>
-        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#111" }]}><ThemedText style={styles.modalTitle}>{t('settings.selectCurrency')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{CURRENCY_OPTIONS.map(c => (<Pressable key={c.id} onPress={() => handleSelectCurrency(c.id)} style={styles.currencyRow}><ThemedText style={styles.currencyLabel}>{c.label} ({c.symbol})</ThemedText></Pressable>))}</ScrollView></View></View>
+        <View style={styles.modalOverlay}><View style={[styles.modalContent, { backgroundColor: "#FAF7F2" }]}><ThemedText style={styles.modalTitle}>{t('settings.selectCurrency')}</ThemedText><ScrollView style={{ maxHeight: 300 }}>{CURRENCY_OPTIONS.map(c => (<Pressable key={c.id} onPress={() => handleSelectCurrency(c.id)} style={styles.currencyRow}><ThemedText style={styles.currencyLabel}>{c.label} ({c.symbol})</ThemedText></Pressable>))}</ScrollView></View></View>
       </Modal>
 
       <Modal visible={languageModalVisible} transparent animationType="slide" onRequestClose={() => setLanguageModalVisible(false)}>
         <View style={styles.modalOverlay}>
-          <View style={[styles.modalContent, { backgroundColor: "#111" }]}>
+          <View style={[styles.modalContent, { backgroundColor: "#FAF7F2" }]}>
             <ThemedText style={styles.modalTitle}>{t('settings.selectLanguage')}</ThemedText>
             <ScrollView style={{ maxHeight: 400 }} showsVerticalScrollIndicator={false}>
               {languages.map(l => (
@@ -890,14 +890,14 @@ export default function SettingsScreen() {
                       console.error("Error updating business language:", error);
                     }
                   }}
-                  style={[styles.currencyRow, lang === l.code && { backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                  style={[styles.currencyRow, lang === l.code && { backgroundColor: "#F4EEE6" }]}
                 >
                   <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
                     <View>
                       <ThemedText style={[styles.currencyLabel, { fontWeight: lang === l.code ? '700' : '400' }]}>{l.nativeName}</ThemedText>
-                      <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginTop: 2 }}>{l.name}</ThemedText>
+                      <ThemedText style={{ fontSize: 12, color: "#8B6F47", marginTop: 2 }}>{l.name}</ThemedText>
                     </View>
-                    {lang === l.code && <Feather name="check" size={18} color="#fff" />}
+                    {lang === l.code && <Feather name="check" size={18} color="#C17F3E" />}
                   </View>
                 </Pressable>
               ))}
@@ -913,81 +913,81 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0A0A0F" },
+  container: { flex: 1, backgroundColor: "#FAF7F2" },
   backgroundWrapper: { ...StyleSheet.absoluteFillObject },
   backgroundImage: { flex: 1 },
   backgroundOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,10,15,0.56)",
+    backgroundColor: "rgba(250,247,242,0.96)",
   },
   sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 4, flexWrap: 'wrap', gap: 12 },
   sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: 'wrap', gap: 12 },
-  sectionTitle: { fontSize: 20, fontWeight: "700", color: "#F2F6FC", letterSpacing: -0.2 },
+  sectionTitle: { fontSize: 22, fontWeight: "700", color: "#1C1410", letterSpacing: -0.2, fontFamily: "PlayfairDisplay-Bold" },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
-  badgeText: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "#fff" },
-  glassCard: { borderRadius: 20, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)", overflow: "hidden", backgroundColor: "#111827" },
+  badgeText: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "#A8662F" },
+  glassCard: { borderRadius: 20, borderWidth: 1, borderColor: "#E8DDD0", overflow: "hidden", backgroundColor: "#FFFFFF" },
   premiumBanner: { padding: 16, marginBottom: 12 },
   premiumBannerHeader: { flexDirection: "row", alignItems: "center" },
-  premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "rgba(0,212,255,0.12)", alignItems: "center", justifyContent: "center" },
-  premiumBannerTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 4 },
-  premiumBannerSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+  premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "#F4EEE6", alignItems: "center", justifyContent: "center" },
+  premiumBannerTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", marginBottom: 4, fontFamily: "PlayfairDisplay-Bold" },
+  premiumBannerSubtitle: { fontSize: 14, color: "#6B5744" },
   premiumFeatures: { marginTop: 24, marginBottom: 20 },
   featureRow: { flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 12 },
-  featureText: { fontSize: 14, color: "rgba(255,255,255,0.7)" },
-  pricingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingTop: 20, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
+  featureText: { fontSize: 14, color: "#6B5744" },
+  pricingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingTop: 20, borderTopWidth: 1, borderTopColor: "#E8DDD0" },
   priceOption: { alignItems: "center" },
-  priceAmount: { fontSize: 20, fontWeight: "800", color: "#fff" },
-  pricePeriod: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
-  priceDivider: { width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.1)" },
+  priceAmount: { fontSize: 20, fontWeight: "800", color: "#1C1410" },
+  pricePeriod: { fontSize: 12, color: "#8B6F47", marginTop: 2 },
+  priceDivider: { width: 1, height: 36, backgroundColor: "#E8DDD0" },
   restoreRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, gap: 10 },
-  restoreText: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
+  restoreText: { fontSize: 14, color: "#6B5744" },
   metersCard: { padding: 16 },
   metersRow: { flexDirection: "row", justifyContent: "space-around", alignItems: "center" },
   gridRow: { flexDirection: "row", gap: 12 },
   gridCard: { flex: 1, padding: 16, alignItems: "center", justifyContent: "center" },
-  gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
-  gridLabel: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.6)", letterSpacing: 1.2, marginBottom: 4 },
-  gridValue: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#F4EEE6", alignItems: "center", justifyContent: "center", marginBottom: 24 },
+  gridLabel: { fontSize: 12, fontWeight: "700", color: "#8B6F47", letterSpacing: 1.2, marginBottom: 4 },
+  gridValue: { fontSize: 14, fontWeight: "700", color: "#1C1410" },
   multiRowCard: { paddingVertical: 8 },
   infoRow: { flexDirection: "row", alignItems: "center", padding: 16 },
-  rowDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginHorizontal: 24 },
-  infoLabel: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.6)", letterSpacing: 1.2 },
-  infoValue: { fontSize: 14, fontWeight: "600", color: "#fff", marginTop: 2 },
-  parallaxIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
+  rowDivider: { height: 1, backgroundColor: "#E8DDD0", marginHorizontal: 24 },
+  infoLabel: { fontSize: 12, fontWeight: "700", color: "#8B6F47", letterSpacing: 1.2 },
+  infoValue: { fontSize: 14, fontWeight: "600", color: "#1C1410", marginTop: 2 },
+  parallaxIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "#F4EEE6", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E8DDD0" },
   automationCard: { padding: 16 },
   automationHeader: { flexDirection: "row", gap: 16, marginBottom: 28 },
-  automationTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 12 },
-  automationDesc: { fontSize: 14, color: "#92A0B4", lineHeight: 21, marginBottom: 24 },
+  automationTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", marginBottom: 12, fontFamily: "PlayfairDisplay-Bold" },
+  automationDesc: { fontSize: 14, color: "#6B5744", lineHeight: 21, marginBottom: 24 },
   automationActionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  automationAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1.4, color: "rgba(255,255,255,0.55)" },
+  automationAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1.4, color: "#A8662F" },
   bookingCard: { padding: 16 },
   bookingHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  bookingTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 4 },
-  bookingLinkText: { fontSize: 12, color: "rgba(255,255,255,0.3)" },
-  qrPlacementHint: { fontSize: 12, color: "rgba(255,255,255,0.3)", marginBottom: 20, fontStyle: "italic" },
-  copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
+  bookingTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", marginBottom: 4, fontFamily: "PlayfairDisplay-Bold" },
+  bookingLinkText: { fontSize: 12, color: "#8B6F47" },
+  qrPlacementHint: { fontSize: 12, color: "#8B6F47", marginBottom: 20, fontStyle: "italic" },
+  copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "#F4EEE6", alignItems: "center", justifyContent: "center" },
   bookingActions: { flexDirection: "row", gap: 12 },
-  shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#000", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#00D4FF", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  shareBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
-  shareQrText: { fontSize: 14, fontWeight: "700", color: "#0A0A0F" },
+  shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#FFFFFF", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "#E8DDD0" },
+  shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#C17F3E", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
+  shareBtnText: { fontSize: 14, fontWeight: "700", color: "#A8662F" },
+  shareQrText: { fontSize: 14, fontWeight: "700", color: "#FFFFFF" },
   voiceCard: { padding: 16, marginTop: 12, borderRadius: 20 },
   voiceIconGroup: { flexDirection: "row", gap: 12 },
-  voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  voiceCardTitle: { fontSize: 20, fontWeight: "700", color: "#F2F6FC", letterSpacing: -0.2, marginBottom: 10 },
-  voiceCardDesc: { fontSize: 14, color: "#92A0B4", lineHeight: 21, fontWeight: "400" },
+  voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "#F4EEE6", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "#E8DDD0" },
+  voiceCardTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", letterSpacing: -0.2, marginBottom: 10, fontFamily: "PlayfairDisplay-Bold" },
+  voiceCardDesc: { fontSize: 14, color: "#6B5744", lineHeight: 21, fontWeight: "400" },
   previewContainer: { marginTop: 24 },
   previewLink: { flexDirection: "row", alignItems: "center", gap: 12 },
-  previewText: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.55)", letterSpacing: 1.4 },
-  usageContainer: { marginTop: 24, paddingTop: 24, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
+  previewText: { fontSize: 12, fontWeight: "700", color: "#A8662F", letterSpacing: 1.4 },
+  usageContainer: { marginTop: 24, paddingTop: 24, borderTopWidth: 1, borderTopColor: "#E8DDD0" },
   usageHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
-  usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },
-  progressBarBg: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" },
-  progressBarFill: { height: "100%", backgroundColor: "#00D4FF", borderRadius: 3 },
+  usageLabel: { fontSize: 12, color: "#8B6F47" },
+  usageValue: { fontSize: 12, color: "#1C1410", fontWeight: "600" },
+  progressBarBg: { height: 6, backgroundColor: "#E8DDD0", borderRadius: 3, overflow: "hidden" },
+  progressBarFill: { height: "100%", backgroundColor: "#C17F3E", borderRadius: 3 },
   securityGridCard: { flex: 1, padding: 16, alignItems: "flex-start" },
-  securityTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
-  securityAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "rgba(255,255,255,0.55)" },
+  securityTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", marginTop: 16, marginBottom: 4, fontFamily: "PlayfairDisplay-Bold" },
+  securityAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "#A8662F" },
   voiceHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -997,27 +997,27 @@ const styles = StyleSheet.create({
   voiceTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   voiceSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     marginTop: 2,
   },
   footer: { marginTop: 56, alignItems: "center" },
-  footerText: { fontSize: 12, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.28)" },
-  footerVersion: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.28)", marginTop: 4 },
-  modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
-  modalContent: { width: "100%", borderRadius: 20, padding: 16, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
-  modalTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 24 },
+  footerText: { fontSize: 12, fontWeight: "800", letterSpacing: 2, color: "#8B6F47" },
+  footerVersion: { fontSize: 12, fontWeight: "600", color: "#8B6F47", marginTop: 4 },
+  modalOverlay: { flex: 1, backgroundColor: "rgba(48,35,25,0.38)", justifyContent: "center", alignItems: "center", padding: 20 },
+  modalContent: { width: "100%", borderRadius: 20, padding: 16, borderWidth: 1, borderColor: "#E8DDD0", backgroundColor: "#FAF7F2" },
+  modalTitle: { fontSize: 20, fontWeight: "700", color: "#1C1410", marginBottom: 24, fontFamily: "PlayfairDisplay-Bold" },
   qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center" },
   qrPressable: {
     padding: 16,
-    backgroundColor: "rgba(255,255,255,0.03)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     marginBottom: 24,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
+    borderColor: "#E8DDD0",
   },
   qrImageContainer: {
     position: 'relative',
@@ -1034,13 +1034,13 @@ const styles = StyleSheet.create({
     paddingVertical: 2,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#000',
+    borderColor: '#E8DDD0',
     maxWidth: 80,
   },
   qrCenterText: {
     fontSize: 12,
     fontWeight: '900',
-    color: '#000',
+    color: '#1C1410',
     textAlign: 'center',
   },
   qrHintContainer: {
@@ -1052,13 +1052,13 @@ const styles = StyleSheet.create({
   },
   qrHint: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     fontWeight: "600",
     letterSpacing: 0.5,
   },
   secondaryButton: { height: 56, borderRadius: 16, alignItems: "center", justifyContent: "center", marginTop: 12 },
   secondaryButtonText: {
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     fontSize: 14,
     fontWeight: "600",
   },
@@ -1069,12 +1069,12 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.05)',
-    backgroundColor: 'rgba(255,255,255,0.02)',
+    borderColor: '#E8DDD0',
+    backgroundColor: '#FFFFFF',
   },
   timezoneOptionText: {
     fontSize: 14,
-    color: 'rgba(255,255,255,0.6)',
+    color: '#6B5744',
   },
   editInput: {
     height: 56,
@@ -1083,8 +1083,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     borderWidth: 1,
     marginBottom: 24,
-    color: "#fff",
-    borderColor: "rgba(255,255,255,0.1)",
+    color: "#1C1410",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8DDD0",
   },
   compactRow: {
     flexDirection: "row",
@@ -1094,24 +1095,24 @@ const styles = StyleSheet.create({
   compactRowTitle: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
   },
   compactRowSubtitle: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     marginTop: 2,
   },
   demoTypeButton: {
     padding: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "#E8DDD0",
     marginBottom: 8,
   },
   demoTypeLabel: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   currencyRow: {
     padding: 16,
@@ -1119,6 +1120,6 @@ const styles = StyleSheet.create({
   },
   currencyLabel: {
     fontSize: 14,
-    color: "#fff",
+    color: "#1C1410",
   },
 });

@@ -228,13 +228,13 @@ export default function ServicesScreen() {
 
   const renderEmptyState = () => (
     <View style={styles.emptyState}>
-      <Feather name="layers" size={48} color="rgba(255,255,255,0.2)" />
+      <Feather name="layers" size={48} color="#CDB99F" />
       <Text style={styles.emptyTitle}>{t('services.noServices')}</Text>
       <Text style={styles.emptyMessage}>
         {t('services.noServicesSubtitle')}
       </Text>
       <Pressable style={styles.aiSetupButton} onPress={handleAISetup}>
-        <Feather name="zap" size={18} color="#000" />
+        <Feather name="zap" size={18} color="#FFFFFF" />
         <Text style={styles.aiSetupText}>Quick Setup</Text>
       </Pressable>
       <Text style={styles.orText}>or tap + to add manually</Text>
@@ -255,7 +255,7 @@ export default function ServicesScreen() {
               {aiStep === "input" ? "Service Setup" : "Review Services"}
             </Text>
             <Pressable onPress={() => setAiModalVisible(false)} hitSlop={12}>
-              <Feather name="x" size={24} color="#fff" />
+              <Feather name="x" size={24} color="#6B5744" />
             </Pressable>
           </View>
 
@@ -267,7 +267,7 @@ export default function ServicesScreen() {
               <TextInput
                 style={styles.aiInput}
                 placeholder="For example: weekday rental viewings, 30 minutes each; open-home inspections on Saturday..."
-                placeholderTextColor="rgba(255,255,255,0.4)"
+                placeholderTextColor="#8B6F47"
                 multiline
                 numberOfLines={4}
                 value={aiDescription}
@@ -283,7 +283,7 @@ export default function ServicesScreen() {
                   <ActivityIndicator color="#000" />
                 ) : (
                   <>
-                    <Feather name="zap" size={18} color="#000" />
+                    <Feather name="zap" size={18} color="#FFFFFF" />
                     <Text style={styles.aiGenerateText}>Generate</Text>
                   </>
                 )}
@@ -328,7 +328,7 @@ export default function ServicesScreen() {
                     {aiAddons.map((addon, idx) => (
                       <View key={`addon-${idx}`} style={styles.aiAddonCard}>
                         <View style={styles.addonHeader}>
-                          <Feather name="plus-circle" size={14} color="#4ade80" style={{ marginRight: 8 }} />
+                          <Feather name="plus-circle" size={14} color="#4A7C59" style={{ marginRight: 8 }} />
                           <Text style={styles.aiAddonName}>{addon.name}</Text>
                         </View>
                         <Text style={styles.aiAddonDesc}>{addon.description}</Text>
@@ -421,11 +421,11 @@ export default function ServicesScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   gradientOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.15)",
+    backgroundColor: "transparent",
   },
   container: {
     flex: 1,
@@ -437,7 +437,7 @@ const styles = StyleSheet.create({
   hugeTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     letterSpacing: -0.4,
     flex: 1,
   },
@@ -456,17 +456,17 @@ const styles = StyleSheet.create({
     height: 40,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#F4EEE6",
   },
   glassCard: {
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
     padding: 16,
     overflow: "hidden",
   },
   glassCardAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   cardContent: {
     flexDirection: "row",
@@ -479,7 +479,7 @@ const styles = StyleSheet.create({
   serviceName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 8,
     lineHeight: 22,
   },
@@ -490,18 +490,18 @@ const styles = StyleSheet.create({
   },
   durationText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.7)",
+    color: "#6B5744",
     fontWeight: "500",
   },
   dotSeparator: {
     width: 4,
     height: 4,
     borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.3)",
+    backgroundColor: "#E8DDD0",
   },
   priceText: {
     fontSize: 14,
-    color: "#4ade80",
+    color: "#4A7C59",
     fontWeight: "500",
   },
   meterContainer: {
@@ -521,10 +521,10 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     justifyContent: "center",
     alignItems: "center",
-    shadowColor: "#00D4FF",
+    shadowColor: "#6B5744",
     shadowOffset: { width: 0, height: 0 },
     shadowOpacity: 0.15,
     shadowRadius: 15,
@@ -539,45 +539,45 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 20,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessage: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     textAlign: "center",
     marginBottom: 24,
   },
   aiSetupButton: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingHorizontal: 24,
     paddingVertical: 14,
     borderRadius: 30,
     gap: 8,
   },
   aiSetupText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "700",
   },
   orText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     marginTop: 16,
   },
   modalOverlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.85)",
+    backgroundColor: "rgba(48,35,25,0.38)",
     justifyContent: "flex-end",
   },
   modalDismiss: {
     flex: 1,
   },
   modalContent: {
-    backgroundColor: "#111",
+    backgroundColor: "#FAF7F2",
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 16,
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   noServicesText: {
-    color: "rgba(255,255,255,0.5)",
+    color: "#8B6F47",
     fontSize: 14,
     textAlign: "center",
     padding: 24,
@@ -612,52 +612,52 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   assistantContextContainer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#FFFFFF",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "#E8DDD0",
   },
   assistantContextText: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     marginRight: 8,
     fontWeight: "600",
   },
   modalSubtitle: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     marginBottom: 20,
   },
   aiInput: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 16,
     padding: 16,
-    color: "#fff",
+    color: "#1C1410",
     fontSize: 14,
     minHeight: 180,
     maxHeight: 300,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "#E8DDD0",
     marginBottom: 20,
   },
   aiGenerateButton: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingVertical: 16,
     borderRadius: 16,
     gap: 8,
   },
   aiGenerateText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "700",
   },
@@ -665,22 +665,22 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   aiServiceCard: {
-    backgroundColor: "rgba(255,255,255,0.05)",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
+    borderColor: "#E8DDD0",
   },
   aiServiceName: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 4,
   },
   aiServiceDesc: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     marginBottom: 12,
   },
   aiServiceDetails: {
@@ -689,12 +689,12 @@ const styles = StyleSheet.create({
   },
   aiServiceDuration: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.5)",
+    color: "#8B6F47",
   },
   aiServicePrice: {
     fontSize: 14,
     fontWeight: "700",
-    color: "#4ade80",
+    color: "#4A7C59",
   },
   aiButtonRow: {
     flexDirection: "row",
@@ -705,37 +705,37 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     borderRadius: 16,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.2)",
+    borderColor: "#E8DDD0",
     alignItems: "center",
   },
   aiBackText: {
-    color: "#fff",
+    color: "#6B5744",
     fontSize: 14,
     fontWeight: "600",
   },
   aiConfirmButton: {
     flex: 2,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingVertical: 16,
     borderRadius: 16,
     alignItems: "center",
   },
   aiConfirmText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontSize: 14,
     fontWeight: "700",
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: "600",
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     textTransform: "uppercase",
     letterSpacing: 1,
     marginBottom: 12,
   },
   addonNote: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     marginBottom: 12,
     fontStyle: "italic",
   },
@@ -755,18 +755,18 @@ const styles = StyleSheet.create({
   aiAddonName: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
   },
   aiAddonDesc: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
+    color: "#8B6F47",
     marginBottom: 6,
     marginLeft: 22,
   },
   aiAddonPrice: {
     fontSize: 14,
     fontWeight: "600",
-    color: "#4ade80",
+    color: "#4A7C59",
     marginLeft: 22,
   },
 });

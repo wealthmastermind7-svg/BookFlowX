@@ -16,7 +16,7 @@ import path from "path";
 import fs from "fs";
 import QRCode from "qrcode";
 import sharp from "sharp";
-import { sendBookingConfirmation } from "./email";
+import { sendBookingConfirmation, isBlockedBookingRecipient } from "./email";
 import { sendBookingNotification, sendTestNotification } from "./notifications";
 import { 
   verifyBusinessOwnership, 
@@ -781,8 +781,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const serviceName = service?.name || "Service";
       const customerName = req.body.customerName || customer?.name || "Customer";
       
-      // Note: Email confirmation is handled by workflow engine via triggerWorkflows("booking_created")
-      // This prevents duplicate emails that were occurring when both routes.ts AND workflowEngine.ts sent emails
+      // Immediate confirmation email; workflows remain a fallback if delivery fails.
+      try {
+        if (customer?.email && service && business) {
+          let addons: { name: string; price: number | string }[] | undefined;
+          if (booking.addons) {
+            try {
+              addons = JSON.parse(booking.addons);
+            } catch (error) {
+              console.error("[Email] Could not parse booking add-ons:", error);
+            }
+          }
+          const sent = await sendBookingConfirmation({
+            customerName: customer.name,
+            customerEmail: customer.email,
+            serviceName: service.name,
+            date: booking.date,
+            time: booking.time,
+            price: booking.totalPrice || 0,
+            confirmationNumber: booking.id.substring(0, 8).toUpperCase(),
+            businessName: business.name,
+            currency: business.currency || "USD",
+            isReminder: false,
+            businessPhone: business.phone || "",
+            businessWebsite: business.website || "",
+            addons,
+          });
+          if (sent && !isBlockedBookingRecipient(customer.email)) {
+            // Drizzle's timestamp field expects a Date, not an ISO string.
+            booking.confirmationSentAt = new Date();
+            await storage.updateBooking(booking.id, { confirmationSentAt: booking.confirmationSentAt });
+            console.log(`[Email] Confirmation sent to ${customer.email}`);
+          } else if (!sent) {
+            console.error(`[Email] Confirmation failed for booking ${booking.id}`);
+          }
+        }
+      } catch (emailError) {
+        console.error("[Email] Confirmation failed:", emailError);
+      }
       
       // Send push notification to business owner (if notifications are enabled)
       if (business?.notificationsEnabled) {

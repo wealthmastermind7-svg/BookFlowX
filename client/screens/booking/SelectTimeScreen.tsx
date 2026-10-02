@@ -120,7 +120,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         style={[
           styles.datePickerItem,
           isSelected
-            ? { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
+            ? { backgroundColor: "#C17F3E", borderColor: "#C17F3E", borderWidth: 2 }
             : {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 borderColor: "rgba(255,255,255,0.15)",
@@ -131,7 +131,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerMonth,
-            { color: isSelected ? "#0A0A0F" : "#F8FAFC" },
+            { color: isSelected ? "#FFFFFF" : "#1C1410" },
           ]}
         >
           {monthName}
@@ -139,7 +139,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerDay,
-            { color: isSelected ? "#0A0A0F" : "#F8FAFC" },
+            { color: isSelected ? "#FFFFFF" : "#1C1410" },
           ]}
         >
           {dayNum}
@@ -147,7 +147,7 @@ function DateCard({ date, isSelected, onPress }: DateCardProps) {
         <ThemedText
           style={[
             styles.datePickerDayName,
-            { color: isSelected ? "#0A0A0F" : "#94A3B8" },
+            { color: isSelected ? "#FFFFFF" : "#8B6F47" },
           ]}
         >
           {dayName}
@@ -194,7 +194,7 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
         style={[
           styles.timeSlot,
           isSelected
-            ? { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
+            ? { backgroundColor: "#C17F3E", borderColor: "#C17F3E", borderWidth: 2 }
             : {
                 backgroundColor: "rgba(255,255,255,0.05)",
                 borderColor: "rgba(255,255,255,0.15)",
@@ -206,7 +206,7 @@ function TimeSlotButton({ time, isSelected, onPress }: TimeSlotProps) {
           style={[
             styles.timeSlotText,
             {
-              color: isSelected ? "#0A0A0F" : "#F8FAFC",
+              color: isSelected ? "#FFFFFF" : "#1C1410",
               fontWeight: isSelected ? "700" : "300",
             },
           ]}
@@ -254,13 +254,13 @@ function DateScrollPicker({ dates, selectedDate, onDateChange }: { dates: Date[]
               }}
               style={[
                 styles.datePickerItem,
-                 isSelected && { backgroundColor: "#00D4FF", borderColor: "#00D4FF", borderWidth: 2 }
+                 isSelected && { backgroundColor: "#C17F3E", borderColor: "#C17F3E", borderWidth: 2 }
               ]}
             >
-              <ThemedText style={[styles.datePickerMonth, { color: isSelected ? "#0A0A0F" : "#F8FAFC" }]}>
+              <ThemedText style={[styles.datePickerMonth, { color: isSelected ? "#FFFFFF" : "#1C1410" }]}>
                 {date.toLocaleDateString("en-US", { month: "short" }).toUpperCase()}
               </ThemedText>
-              <ThemedText style={[styles.datePickerDay, { color: isSelected ? "#0A0A0F" : "#F8FAFC" }]}>
+              <ThemedText style={[styles.datePickerDay, { color: isSelected ? "#FFFFFF" : "#1C1410" }]}>
                 {date.getDate()}
               </ThemedText>
               <ThemedText style={[styles.datePickerDayName, { color: isSelected ? "rgba(10,10,15,0.72)" : "#94A3B8" }]}>
@@ -486,13 +486,13 @@ export default function SelectTimeScreen() {
           style={[
             styles.mainButton,
             {
-              backgroundColor: "#00D4FF",
-              borderColor: "rgba(0,212,255,0.8)",
+              backgroundColor: "#C17F3E",
+              borderColor: "#C17F3E",
               opacity: selectedTime ? 1 : 0.5,
             },
           ]}
         >
-          <ThemedText style={[styles.mainButtonText, { color: "#0A0A0F" }]}>{t('common.continue').toUpperCase()}</ThemedText>
+          <ThemedText style={[styles.mainButtonText, { color: "#FFFFFF" }]}>{t('common.continue').toUpperCase()}</ThemedText>
         </Pressable>
 
         <Pressable onPress={handleBack} style={styles.backButtonLarge}>
@@ -506,7 +506,7 @@ export default function SelectTimeScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   oversizedTextContainer: {
     position: "absolute",
@@ -595,7 +595,7 @@ const styles = StyleSheet.create({
   selectedDateLabel: {
     fontFamily: "Inter-SemiBold",
     fontSize: 14,
-    color: "#00D4FF",
+    color: "#A8662F",
   },
   datePickerContainer: {
     height: 90,
@@ -644,7 +644,7 @@ const styles = StyleSheet.create({
     marginTop: Spacing.md,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
     backgroundColor: "#111827",
   },
   slotsMessageText: {

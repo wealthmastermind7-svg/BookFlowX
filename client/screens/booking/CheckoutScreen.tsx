@@ -326,7 +326,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: "rgba(0,212,255,0.32)",
+                  borderBottomColor: "#E8DDD0",
                 },
               ]}
               placeholder={t('booking.namePlaceholder')}
@@ -344,7 +344,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: "rgba(0,212,255,0.32)",
+                  borderBottomColor: "#E8DDD0",
                 },
               ]}
               placeholder={t('booking.emailPlaceholder')}
@@ -363,7 +363,7 @@ export default function CheckoutScreen() {
                 styles.input,
                 {
                   color: theme.text,
-                  borderBottomColor: "rgba(0,212,255,0.32)",
+                  borderBottomColor: "#E8DDD0",
                 },
               ]}
               placeholder={t('booking.phonePlaceholder')}
@@ -378,7 +378,7 @@ export default function CheckoutScreen() {
         {(loadingUpsells || upsellSuggestions.length > 0) && (
           <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
             <View style={styles.upsellHeader}>
-              <Feather name="zap" size={16} color="#00D4FF" />
+              <Feather name="zap" size={16} color="#C17F3E" />
               <ThemedText style={styles.upsellTitle}>{t('booking.enhanceBooking')}</ThemedText>
             </View>
             <ThemedText style={styles.upsellSubtitle}>{t('booking.optionalAddons')}</ThemedText>
@@ -397,17 +397,17 @@ export default function CheckoutScreen() {
                       styles.addonCard,
                       {
                         borderColor: selectedAddons.has(index)
-                          ? "#00D4FF"
-                          : "rgba(0,212,255,0.16)",
+                          ? "#C17F3E"
+                          : "#E8DDD0",
                         backgroundColor: selectedAddons.has(index)
-                          ? "rgba(0,212,255,0.12)"
+                          ? "#F4EEE6"
                           : "rgba(17,24,39,0.86)",
                       },
                     ]}
                   >
                     <View style={styles.addonCheckbox}>
                       {selectedAddons.has(index) ? (
-                        <Feather name="check-circle" size={20} color="#00D4FF" />
+                        <Feather name="check-circle" size={20} color="#C17F3E" />
                       ) : (
                         <Feather name="circle" size={20} color={theme.textTertiary} />
                       )}
@@ -433,7 +433,7 @@ export default function CheckoutScreen() {
             style={[
               styles.summaryCard,
               {
-                borderColor: "rgba(0,212,255,0.18)",
+                borderColor: "#E8DDD0",
                 backgroundColor: "rgba(17,24,39,0.94)",
               },
             ]}
@@ -574,7 +574,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["2xl"],
     borderRadius: BorderRadius.lg,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.24)",
+    borderColor: "#E8DDD0",
     backgroundColor: "rgba(17,24,39,0.94)",
   },
   serviceStatusText: {

@@ -1,8 +1,8 @@
 import { Colors } from "@/constants/theme";
 export function useTheme() {
-  // BookFlowX uses a deliberately dark owner workspace in every system mode.
-  const isDark = true;
-  const theme = Colors.dark;
+  // The owner workspace stays in its warm cream palette in every system mode.
+  const isDark = false;
+  const theme = Colors.light;
 
   return {
     theme,

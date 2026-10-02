@@ -273,22 +273,22 @@ function headTags(title: string, description: string, canonical: string, keyword
     <meta name="twitter:image" content="${DOMAIN}/favicon.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwind.config = {
         theme: {
           extend: {
             colors: {
-              'pure-black': '#0a0a0f',
-              'charcoal': '#0d0d1a',
-              'graphite': '#111827',
-              'smoke': '#52627a',
-              'silver': '#94a3b8',
-              'pearl': '#f8fafc',
+              'pure-black': '#FAF7F2',
+              'charcoal': '#FFF8F0',
+              'graphite': '#FFFFFF',
+              'smoke': '#8B6F47',
+              'silver': '#6B5744',
+              'pearl': '#1C1410',
             },
             fontFamily: {
-              heading: ['"Cormorant Garamond"', 'serif'],
+              heading: ['"Playfair Display"', 'Georgia', 'serif'],
               body: ['Inter', 'sans-serif'],
             },
           },
@@ -297,57 +297,47 @@ function headTags(title: string, description: string, canonical: string, keyword
     </script>
     <style>
       :root {
-        color-scheme: dark;
-        --pure-black: #0a0a0f;
-        --charcoal: #0d0d1a;
-        --graphite: #111827;
-        --smoke: #52627a;
-        --silver: #94a3b8;
-        --pearl: #f8fafc;
-        --cyan: #00d4ff;
-        --violet: #7c3aed;
+        color-scheme: light;
+        --pure-black: #FAF7F2;
+        --charcoal: #FFF8F0;
+        --graphite: #FFFFFF;
+        --smoke: #8B6F47;
+        --silver: #6B5744;
+        --pearl: #1C1410;
+        --amber: #C17F3E;
+        --border: #E8DDD0;
       }
       body {
-        background:
-          radial-gradient(ellipse at 84% 0%, rgba(124,58,237,.13), transparent 35%),
-          radial-gradient(ellipse at 10% 56%, rgba(0,212,255,.07), transparent 31%),
-          var(--pure-black) !important;
+        background: var(--pure-black) !important;
         color: var(--pearl);
         font-family: 'Inter', sans-serif;
         -webkit-font-smoothing: antialiased;
         min-height: 100vh;
       }
       nav[aria-label="Breadcrumb"] { color:var(--silver); }
-      nav[aria-label="Breadcrumb"] a:hover { color:var(--cyan); }
+      nav[aria-label="Breadcrumb"] a:hover { color:var(--amber); }
       body > nav:not([aria-label="Breadcrumb"]) {
-        background:rgba(10,10,15,.82) !important;
-        border-color:rgba(0,212,255,.16) !important;
+        background:rgba(250,247,242,.94) !important;
+        border-color:var(--border) !important;
         backdrop-filter:blur(20px);
       }
-      body > nav:not([aria-label="Breadcrumb"]) img { box-shadow:0 0 24px rgba(0,212,255,.12); }
-      body > nav:not([aria-label="Breadcrumb"]) .font-heading { font-family:'Inter',sans-serif; }
-      body > nav:not([aria-label="Breadcrumb"]) a:not(.cta-btn):hover { color:var(--cyan) !important; }
+      body > nav:not([aria-label="Breadcrumb"]) img { box-shadow:0 4px 14px rgba(139,111,71,.1); }
+      body > nav:not([aria-label="Breadcrumb"]) a:not(.cta-btn):hover { color:var(--amber) !important; }
       main { min-height:55vh; }
       main > section:first-child {
-        background:
-          radial-gradient(ellipse at 52% 42%,rgba(124,58,237,.16),transparent 35%),
-          radial-gradient(ellipse at 74% 75%,rgba(0,212,255,.11),transparent 35%),
-          linear-gradient(145deg,#0a0a0f,#0d0d1a 58%,#111827) !important;
+        background:var(--pure-black) !important;
       }
       main > section:first-child > div:first-child { display:none; }
       main h1 {
-        color:#f8fafc;
-        font-family:'Inter',sans-serif;
-        font-weight:800;
-        letter-spacing:-.065em;
-        line-height:.98;
-        background:linear-gradient(100deg,#fff 3%,#00d4ff 58%,#a78bfa 100%);
-        -webkit-background-clip:text;
-        background-clip:text;
+        color:var(--pearl);
+        font-family:'Playfair Display',Georgia,serif;
+        font-weight:700;
+        letter-spacing:-.04em;
+        line-height:1.08;
       }
-      main h1 span { color:#00d4ff !important; }
-      main h2, main h3 { font-family:'Inter',sans-serif; letter-spacing:-.035em; }
-      main p { color:#94a3b8; }
+      main h1 span { color:var(--amber) !important; font-style:italic; }
+      main h2, main h3 { font-family:'Playfair Display',Georgia,serif; letter-spacing:-.025em; color:var(--pearl); }
+      main p { color:var(--silver); }
       main > div.max-w-7xl, main > div.max-w-4xl {
         position:relative;
         isolation:isolate;
@@ -359,61 +349,63 @@ function headTags(title: string, description: string, canonical: string, keyword
         inset:3rem -2rem auto;
         height:220px;
         border-radius:50%;
-        background:radial-gradient(ellipse,rgba(0,212,255,.08),transparent 68%);
+        background:radial-gradient(ellipse,rgba(193,127,62,.06),transparent 68%);
         pointer-events:none;
       }
       .glass-card {
-        background:linear-gradient(145deg,rgba(26,26,46,.9),rgba(22,33,62,.72)) !important;
-        border:1px solid rgba(0,212,255,.17) !important;
-        box-shadow:0 14px 44px rgba(0,0,0,.2),inset 0 1px rgba(255,255,255,.035);
+        background:#FFFFFF !important;
+        border:1px solid var(--border) !important;
+        box-shadow:0 8px 24px rgba(139,111,71,.1);
         transition:transform .32s ease,border-color .32s ease,box-shadow .32s ease,background .32s ease;
-        color:#f8fafc;
+        color:var(--pearl);
       }
       .glass-card:hover {
-        background:linear-gradient(145deg,rgba(26,26,46,.98),rgba(22,33,62,.9)) !important;
-        border-color:rgba(0,212,255,.48) !important;
+        background:#FFF8F0 !important;
+        border-color:rgba(193,127,62,.48) !important;
         transform:translateY(-3px);
-        box-shadow:0 18px 48px rgba(0,212,255,.08);
+        box-shadow:0 12px 28px rgba(139,111,71,.13);
       }
       .cta-btn {
         display: inline-block;
-        background:linear-gradient(110deg,#00d4ff,#85edff);
-        color:#06121c;
+        background:var(--amber);
+        color:#FFFFFF;
         padding: 16px 40px;
         border-radius: 100px;
         font-weight: 600;
         text-decoration: none;
         letter-spacing: 0.5px;
-        border:1px solid rgba(159,242,255,.55);
-        box-shadow:0 8px 30px rgba(0,212,255,.16);
+        border:1px solid var(--amber);
+        box-shadow:0 8px 24px rgba(193,127,62,.2);
         transition:transform .3s ease,box-shadow .3s ease,filter .3s ease;
       }
       .cta-btn:hover {
         transform:translateY(-2px);
-        box-shadow:0 12px 36px rgba(0,212,255,.32);
+        box-shadow:0 12px 28px rgba(193,127,62,.25);
         filter:saturate(1.1);
       }
       .cta-btn-outline {
         display: inline-block;
-        border: 1px solid rgba(0,212,255,.34);
-        color: #eaf7ff;
+        border: 1px solid var(--border);
+        color: var(--silver);
         padding: 14px 36px;
         border-radius: 100px;
         font-weight: 500;
         text-decoration: none;
-        background:rgba(17,24,39,.62);
+        background:transparent;
         transition:transform .3s ease,border-color .3s ease,background .3s ease;
       }
       .cta-btn-outline:hover {
-        background:rgba(0,212,255,.1);
-        color:#fff;
-        border-color:#00d4ff;
+        background:#FFF8F0;
+        color:var(--pearl);
+        border-color:var(--amber);
         transform:translateY(-2px);
       }
-      .text-silver { color:#94a3b8 !important; }
-      .text-smoke { color:#64748b !important; }
-      footer { background:rgba(8,8,13,.8); border-color:rgba(0,212,255,.14) !important; }
-      footer a:hover { color:#00d4ff !important; }
+      .text-silver { color:var(--silver) !important; }
+      .text-smoke { color:var(--smoke) !important; }
+      [class~="border-white/5"], [class~="border-white/10"] { border-color:var(--border) !important; }
+      [class~="bg-white/5"] { background:#FFF8F0 !important; }
+      footer { background:#FFF8F0; border-color:var(--border) !important; }
+      footer a:hover { color:var(--amber) !important; }
       @media(max-width:640px) {
         main > div.max-w-7xl, main > div.max-w-4xl { padding-top:2rem; }
         main h1 { font-size:clamp(2.65rem,13vw,4rem); }
@@ -543,10 +535,10 @@ function seoHomepage(): string {
   <section class="relative min-h-[85vh] flex items-center justify-center px-4 sm:px-6 py-24 overflow-hidden">
     <div class="absolute inset-0 bg-gradient-to-b from-charcoal/50 via-pure-black to-pure-black"></div>
     <div class="relative z-10 max-w-5xl mx-auto text-center">
-      <p class="text-[#00d4ff] text-xs sm:text-sm uppercase tracking-[0.25em] mb-6 font-bold">Smart booking for property professionals</p>
-      <h1 class="font-sans text-5xl sm:text-7xl lg:text-8xl font-extrabold mb-8 leading-[0.95] tracking-tight">
+      <p class="text-[#C17F3E] text-xs sm:text-sm uppercase tracking-[0.25em] mb-6 font-bold">Smart booking for property professionals</p>
+      <h1 class="font-heading text-5xl sm:text-7xl lg:text-8xl font-bold mb-8 leading-[1.08] tracking-tight">
         Never Miss a Property<br>
-        <span class="text-[#00d4ff]">Viewing Again</span>
+        <span class="text-[#C17F3E]">Viewing Again</span>
       </h1>
       <p class="text-silver text-lg sm:text-xl max-w-2xl mx-auto mb-8 leading-relaxed">
         BookFlow helps real estate agents and property managers automate viewings, inspections, and tenant appointments — with AI voice, SMS, and email all in one place.
@@ -564,11 +556,11 @@ function seoHomepage(): string {
       <p class="text-silver text-sm mt-10">Built for real estate agents, property managers, and landlords.</p>
     </div>
   </section>
-  <section class="px-4 sm:px-6 py-20 sm:py-28 bg-[#0d0d1a] border-y border-[#00d4ff]/10" aria-labelledby="omnichannel-heading">
+  <section class="px-4 sm:px-6 py-20 sm:py-28 bg-[#FFF8F0] border-y border-[#E8DDD0]" aria-labelledby="omnichannel-heading">
     <div class="max-w-7xl mx-auto">
       <div class="text-center mb-12">
-        <p class="text-[#00d4ff] text-xs font-bold uppercase tracking-[0.25em] mb-4">Every property enquiry can become a viewing</p>
-        <h2 id="omnichannel-heading" class="font-sans text-4xl sm:text-6xl font-extrabold text-pearl mb-5">Meet Customers Where They Are</h2>
+        <p class="text-[#C17F3E] text-xs font-bold uppercase tracking-[0.25em] mb-4">Every property enquiry can become a viewing</p>
+        <h2 id="omnichannel-heading" class="font-heading text-4xl sm:text-6xl font-bold text-pearl mb-5">Meet Customers Where They Are</h2>
         <p class="text-silver text-lg max-w-2xl mx-auto">Manage viewing requests across the channels tenants and buyers already use.</p>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">

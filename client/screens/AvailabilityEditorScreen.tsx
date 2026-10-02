@@ -319,7 +319,7 @@ export default function AvailabilityEditorScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   container: {
     flex: 1,
@@ -328,7 +328,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   scrollView: {
     flex: 1,
@@ -360,7 +360,7 @@ const styles = StyleSheet.create({
   hugeTitle: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     letterSpacing: -2,
     lineHeight: 34,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
@@ -371,11 +371,11 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 24,
     borderWidth: 1.5,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
     overflow: "hidden",
   },
   glassPanelAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   dayCard: {
     marginBottom: 16,
@@ -389,7 +389,7 @@ const styles = StyleSheet.create({
   dayName: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     letterSpacing: -1,
   },
   timeSection: {
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   timeLabel: {
     fontSize: 12,
     fontWeight: "700",
-    color: "rgba(255, 255, 255, 0.6)",
+    color: "#8B6F47",
     letterSpacing: 1,
     marginBottom: 12,
   },
@@ -418,20 +418,20 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#111827",
-    borderColor: "rgba(0,212,255,0.26)",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8DDD0",
   },
   timeButtonActive: {
-    backgroundColor: "#00D4FF",
-    borderColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
+    borderColor: "#C17F3E",
   },
   timeButtonText: {
     fontSize: 13,
     fontWeight: "500",
-    color: "rgba(255, 255, 255, 0.8)",
+    color: "#6B5744",
   },
   timeButtonTextActive: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontWeight: "700",
   },
   footer: {
@@ -443,14 +443,14 @@ const styles = StyleSheet.create({
   footerInner: {
     borderRadius: 0,
     borderTopWidth: 1,
-    borderColor: "rgba(255, 255, 255, 0.1)",
-    backgroundColor: "rgba(10,10,15,0.94)",
+    borderColor: "#E8DDD0",
+    backgroundColor: "rgba(250,247,242,0.96)",
   },
   saveButton: {
     height: 64,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
   },
   saveButtonDisabled: {
     opacity: 0.3,
@@ -458,7 +458,7 @@ const styles = StyleSheet.create({
   saveButtonText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     letterSpacing: 2,
   },
 });

@@ -55,6 +55,7 @@
     .screen { display: none; animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1); }
     .screen.active { display: block; }
     .header h1 {
+      font-family: 'Playfair Display', Georgia, serif;
       color: var(--primarytext);
       font-size: 40px;
       line-height: 1.12;
@@ -68,6 +69,7 @@
       letter-spacing: .1px;
     }
     .brand-mark {
+      font-family: 'Playfair Display', Georgia, serif;
       display: inline-block;
       margin-bottom: 14px;
       font-size: 15px;
@@ -122,6 +124,7 @@
       text-transform: uppercase;
     }
     .screen > .section-label:first-child {
+      font-family: 'Playfair Display', Georgia, serif;
       color: var(--primarytext);
       font-size: 23px;
       font-weight: 700;
@@ -154,7 +157,7 @@
       border-color: var(--amber);
       box-shadow: 0 0 0 2px rgba(193,127,62,.10), 0 8px 22px var(--warmshadow);
     }
-    .service-name { color: var(--primarytext); font-size: 22px; font-weight: 700; margin-bottom: 12px; letter-spacing: -.3px; }
+    .service-name { font-family: 'Playfair Display', Georgia, serif; color: var(--primarytext); font-size: 22px; font-weight: 700; margin-bottom: 12px; letter-spacing: -.3px; }
     .service-meta { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
     .service-price { color: var(--amber); font-size: 28px; font-weight: 600; letter-spacing: -.6px; }
     .service-duration {
@@ -179,10 +182,10 @@
       font-size: 13px;
       font-weight: 600;
     }
-    .time-slot:hover:not(.unavailable) { background: #FFF8F0; border-color: rgba(193,127,62,.65); }
+    .time-slot:hover:not(.unavailable):not(.selected) { background: #FFF8F0; border-color: rgba(193,127,62,.65); }
     .time-slot.selected {
-      background: #FFF5E9;
-      color: var(--primarytext);
+      background: var(--amber);
+      color: #fff;
       border: 1px solid var(--amber);
       font-weight: 700;
     }
@@ -287,9 +290,13 @@
       box-shadow: 0 0 0 10px rgba(193,127,62,.11), 0 12px 28px rgba(139,111,71,.18);
     }
     .checkmark-ring svg { width: 48px; height: 48px; color: #fff; }
-    .confirmation-hero h2 { color: var(--primarytext); font-size: 34px; font-weight: 700; letter-spacing: -.8px; margin-bottom: 10px; }
+    .confirmation-hero h2 { font-family: 'Playfair Display', Georgia, serif; color: var(--primarytext); font-size: 34px; font-weight: 700; letter-spacing: -.8px; margin-bottom: 10px; }
     .confirmation-hero p { max-width: 360px; margin: 0 auto; color: var(--secondarytext); font-size: 15px; font-weight: 400; line-height: 1.55; }
     .confirmation-channels {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 8px;
       padding: 18px 20px;
       margin: 0 0 14px;
       border: 1px solid rgba(193,127,62,.24);
@@ -298,10 +305,10 @@
       text-align: center;
       box-shadow: 0 8px 24px var(--warmshadow);
     }
-    .confirmation-channels .channel-icons { color: #8B6F47; font-size: 14px; font-weight: 600; line-height: 1.6; }
-    .confirmation-channels .channel-caption { margin-top: 5px; color: var(--secondarytext); font-size: 13px; }
+    .channel-pill { border: 1px solid var(--border); border-radius: 100px; padding: 8px 12px; background: #fff; color: var(--secondarytext); font-size: 12px; font-weight: 600; }
+    .confirmation-channels .channel-caption { width: 100%; margin-top: 5px; color: var(--secondarytext); font-size: 13px; }
     .loading-overlay { position: fixed; inset: 0; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; background: var(--cream); }
-    .loading-text { color: var(--primarytext); font-size: 25px; font-weight: 700; letter-spacing: -.5px; animation: fadeIn 1s ease; }
+    .loading-text { font-family: 'Playfair Display', Georgia, serif; color: var(--primarytext); font-size: 25px; font-weight: 700; letter-spacing: -.5px; animation: fadeIn 1s ease; }
     .loading-bar { width: 132px; height: 3px; margin-top: 22px; background: #E8DDD0; border-radius: 100px; overflow: hidden; }
     .loading-bar::after { content: ''; display: block; width: 40%; height: 100%; background: var(--amber); border-radius: 100px; animation: loadingSlide 1.5s ease-in-out infinite; }
     .trust-strip {

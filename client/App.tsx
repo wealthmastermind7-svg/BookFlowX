@@ -29,6 +29,7 @@ export default function App() {
       try {
         // Load fonts
         await Font.loadAsync({
+          "PlayfairDisplay-Bold": "https://fonts.gstatic.com/s/playfairdisplay/v40/nuFvD-vYSZviVYUb_rj3ij__anPXJzDwcbmjWBN2PKeiukDQ.ttf",
           "CormorantGaramond-Bold": "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmZ5slBy45EDMId_3S6v7X_bdN_W5beV_W7Vf.ttf",
           "CormorantGaramond-Medium": "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmZ5slBy45EDMId_3S6v7X_bdN_W5beV_W7Vf.ttf", // Fallback to bold if medium not easily found or same
           "CormorantGaramond-SemiBold": "https://fonts.gstatic.com/s/cormorantgaramond/v16/co3bmZ5slBy45EDMId_3S6v7X_bdN_W5beV_W7Vf.ttf",
@@ -78,7 +79,7 @@ export default function App() {
                   </NavigationContainer>
                 </PremiumProvider>
               </I18nProvider>
-              <StatusBar style="light" />
+              <StatusBar style="dark" />
             </KeyboardProvider>
           </GestureHandlerRootView>
         </SafeAreaProvider>

@@ -110,7 +110,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
   return (
     <KeyboardAvoidingView style={styles.background} behavior={Platform.OS === "ios" ? "padding" : undefined}>
       <View style={[styles.header, { paddingTop: insets.top + 24 }]}>
-        <View style={styles.brand}><Feather name="home" size={20} color="#00D4FF" /><Text style={styles.brandName}>BookFlowX</Text></View>
+        <View style={styles.brand}><Feather name="home" size={20} color="#C17F3E" /><Text style={styles.brandName}>BookFlowX</Text></View>
         <View style={styles.progress} accessibilityLabel={`Step ${step + 1} of 3`}>
           {[0, 1, 2].map((index) => <View key={index} style={[styles.progressLine, index <= step && styles.progressActive]} />)}
         </View>
@@ -130,9 +130,9 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
             <View style={styles.chips}>{VIEWING_TYPES.map((type) => {
               const selected = selectedTypes.includes(type.serviceName);
               return <Pressable key={type.serviceName} onPress={() => toggleType(type.serviceName)} disabled={creating} accessibilityRole="checkbox" accessibilityState={{ checked: selected }} style={[styles.chip, selected && styles.chipSelected]}>
-                <Feather name={type.icon} size={16} color={selected ? "#00D4FF" : "#94A3B8"} />
+            <Feather name={type.icon} size={16} color={selected ? "#C17F3E" : "#8B6F47"} />
                 <Text style={[styles.chipLabel, selected && styles.chipLabelSelected]}>{type.label}</Text>
-                {selected ? <Feather name="check" size={14} color="#00D4FF" /> : null}
+                {selected ? <Feather name="check" size={14} color="#C17F3E" /> : null}
               </Pressable>;
             })}</View>
             <Text style={styles.hint}>{selectedTypes.length} selected · Existing agency records are always retained.</Text>
@@ -140,7 +140,7 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
         </> : <>
           <View style={styles.intro}><Text style={styles.title}>Your booking link is ready</Text><Text style={styles.body}>Share your live link or QR code. Buyers and tenants don’t need an app.</Text></View>
           <OwnerGlassCard style={styles.linkCard}>
-            <View style={styles.readyIcon}><Feather name="check" size={24} color="#34D399" /></View>
+            <View style={styles.readyIcon}><Feather name="check" size={24} color="#4A7C59" /></View>
             <Text style={styles.agency}>{agencyName.trim()}</Text>
             <Text style={styles.label}>Customer link preview</Text>
             <Text style={styles.shortLink}>{getCustomerBookingUrl(slug).replace(/^https?:\/\//, "")}</Text>
@@ -152,17 +152,17 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
             <View style={styles.linkActions}>
               <Pressable style={styles.smallAction} accessibilityRole="button" onPress={async () => {
                 try { await Clipboard.setStringAsync(bookingUrl); setCopied(true); } catch { setError("Couldn't copy the link."); }
-              }}><Feather name="copy" size={14} color="#00D4FF" /><Text style={styles.actionText}>{copied ? "Copied" : "Copy live link"}</Text></Pressable>
-              <Pressable style={styles.smallAction} accessibilityRole="button" onPress={() => Linking.openURL(bookingUrl).catch(() => setError("Couldn't open your booking page."))}><Feather name="external-link" size={14} color="#00D4FF" /><Text style={styles.actionText}>Open page</Text></Pressable>
+              }}><Feather name="copy" size={14} color="#C17F3E" /><Text style={styles.actionText}>{copied ? "Copied" : "Copy live link"}</Text></Pressable>
+              <Pressable style={styles.smallAction} accessibilityRole="button" onPress={() => Linking.openURL(bookingUrl).catch(() => setError("Couldn't open your booking page."))}><Feather name="external-link" size={14} color="#C17F3E" /><Text style={styles.actionText}>Open page</Text></Pressable>
             </View>
           </OwnerGlassCard>
         </>}
         {error ? <Text style={styles.error} accessibilityRole="alert">{error}</Text> : null}
       </ScrollView>
       <View style={[styles.footer, { paddingBottom: Math.max(insets.bottom, 20) }]}>
-        {step > 0 ? <Pressable onPress={() => { tap(); setError(""); setStep(step - 1); }} disabled={creating} style={styles.backButton} accessibilityLabel="Previous setup step" accessibilityRole="button"><Feather name="arrow-left" size={20} color="#CBD5E1" /></Pressable> : null}
+        {step > 0 ? <Pressable onPress={() => { tap(); setError(""); setStep(step - 1); }} disabled={creating} style={styles.backButton} accessibilityLabel="Previous setup step" accessibilityRole="button"><Feather name="arrow-left" size={20} color="#6B5744" /></Pressable> : null}
         <Pressable onPress={next} disabled={disabled} style={[styles.primaryButton, disabled && styles.disabled]} accessibilityRole="button">
-          {creating ? <ActivityIndicator color="#0A0A0F" /> : <><Text style={styles.primaryText}>{step === 2 ? "Start Taking Viewings" : step === 1 ? "Create booking link" : "Continue"}</Text><Feather name="arrow-right" size={18} color="#0A0A0F" /></>}
+          {creating ? <ActivityIndicator color="#FFFFFF" /> : <><Text style={styles.primaryText}>{step === 2 ? "Start Taking Viewings" : step === 1 ? "Create booking link" : "Continue"}</Text><Feather name="arrow-right" size={18} color="#FFFFFF" /></>}
         </Pressable>
       </View>
     </KeyboardAvoidingView>
@@ -170,42 +170,42 @@ export default function OnboardingScreen({ onComplete }: { onComplete: () => voi
 }
 
 const styles = StyleSheet.create({
-  background: { flex: 1, backgroundColor: "#0A0A0F" },
+  background: { flex: 1, backgroundColor: "#FAF7F2" },
   header: { paddingHorizontal: 24, gap: 12, width: "100%", maxWidth: 560, alignSelf: "center" },
   brand: { flexDirection: "row", alignItems: "center", gap: 10 },
-  brandName: { color: "#F8FAFC", fontSize: 20, fontWeight: "700" },
+  brandName: { color: "#1C1410", fontSize: 20, fontWeight: "700", fontFamily: "PlayfairDisplay-Bold" },
   progress: { flexDirection: "row", gap: 8, marginTop: 12 },
-  progressLine: { flex: 1, height: 3, borderRadius: 2, backgroundColor: "#1E293B" },
-  progressActive: { backgroundColor: "#00D4FF" },
-  label: { fontSize: 12, color: "#94A3B8", lineHeight: 18 },
+  progressLine: { flex: 1, height: 3, borderRadius: 2, backgroundColor: "#E8DDD0" },
+  progressActive: { backgroundColor: "#C17F3E" },
+  label: { fontSize: 12, color: "#8B6F47", lineHeight: 18 },
   content: { padding: 24, gap: 24, width: "100%", maxWidth: 560, alignSelf: "center" },
   intro: { gap: 8 },
-  title: { color: "#F8FAFC", fontSize: 20, fontWeight: "700", lineHeight: 28 },
-  body: { color: "#94A3B8", fontSize: 14, lineHeight: 21 },
-  fieldLabel: { color: "#CBD5E1", fontSize: 12, marginBottom: 8 },
-  input: { color: "#F8FAFC", fontSize: 14, backgroundColor: "rgba(10,10,15,0.7)", borderWidth: 1, borderColor: "rgba(0,212,255,0.25)", borderRadius: 12, padding: 16, minHeight: 52 },
-  hint: { color: "#94A3B8", fontSize: 12, marginTop: 16, lineHeight: 18 },
+  title: { color: "#1C1410", fontSize: 28, fontWeight: "700", lineHeight: 34, fontFamily: "PlayfairDisplay-Bold" },
+  body: { color: "#6B5744", fontSize: 14, lineHeight: 21 },
+  fieldLabel: { color: "#6B5744", fontSize: 12, marginBottom: 8 },
+  input: { color: "#1C1410", fontSize: 14, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E8DDD0", borderRadius: 12, padding: 16, minHeight: 52 },
+  hint: { color: "#8B6F47", fontSize: 12, marginTop: 16, lineHeight: 18 },
   chips: { flexDirection: "row", flexWrap: "wrap", gap: 12 },
-  chip: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "rgba(148,163,184,0.2)", borderRadius: 99, paddingHorizontal: 14, paddingVertical: 12 },
-  chipSelected: { backgroundColor: "rgba(0,212,255,0.1)", borderColor: "#00D4FF" },
-  chipLabel: { color: "#94A3B8", fontSize: 14 },
-  chipLabelSelected: { color: "#F8FAFC" },
+  chip: { flexDirection: "row", alignItems: "center", gap: 8, borderWidth: 1, borderColor: "#E8DDD0", borderRadius: 99, paddingHorizontal: 14, paddingVertical: 12, backgroundColor: "#FFFFFF" },
+  chipSelected: { backgroundColor: "#F4EEE6", borderColor: "#C17F3E" },
+  chipLabel: { color: "#8B6F47", fontSize: 14 },
+  chipLabelSelected: { color: "#1C1410" },
   linkCard: { alignItems: "center", gap: 8 },
-  readyIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(52,211,153,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 8 },
-  agency: { color: "#F8FAFC", fontSize: 20, fontWeight: "700", textAlign: "center", marginBottom: 8 },
-  shortLink: { color: "#00D4FF", fontSize: 14, textAlign: "center" },
-  liveLabel: { color: "#94A3B8", fontSize: 12, marginTop: 8, textAlign: "center" },
-  liveLink: { color: "#CBD5E1", fontSize: 12, textAlign: "center" },
+  readyIcon: { width: 48, height: 48, borderRadius: 24, backgroundColor: "#EFF5EF", alignItems: "center", justifyContent: "center", marginBottom: 8 },
+  agency: { color: "#1C1410", fontSize: 20, fontWeight: "700", textAlign: "center", marginBottom: 8, fontFamily: "PlayfairDisplay-Bold" },
+  shortLink: { color: "#A8662F", fontSize: 14, textAlign: "center" },
+  liveLabel: { color: "#8B6F47", fontSize: 12, marginTop: 8, textAlign: "center" },
+  liveLink: { color: "#6B5744", fontSize: 12, textAlign: "center" },
   qrFrame: { padding: 8, backgroundColor: "#FFFFFF", borderRadius: 12, marginVertical: 16 },
   qr: { width: 160, height: 160 },
   qrEmpty: { alignItems: "center", paddingVertical: 24 },
   linkActions: { flexDirection: "row", flexWrap: "wrap", justifyContent: "center", gap: 16, marginTop: 8 },
   smallAction: { flexDirection: "row", alignItems: "center", gap: 6, paddingVertical: 10 },
-  actionText: { color: "#00D4FF", fontSize: 12, fontWeight: "600" },
-  footer: { flexDirection: "row", gap: 12, paddingHorizontal: 24, paddingTop: 16, width: "100%", maxWidth: 560, alignSelf: "center", borderTopWidth: 1, borderTopColor: "rgba(148,163,184,0.1)" },
-  backButton: { width: 52, height: 52, borderWidth: 1, borderColor: "#334155", borderRadius: 14, alignItems: "center", justifyContent: "center" },
-  primaryButton: { flex: 1, minHeight: 52, borderRadius: 14, paddingHorizontal: 16, backgroundColor: "#00D4FF", flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
-  primaryText: { fontSize: 14, fontWeight: "700", color: "#0A0A0F" },
+  actionText: { color: "#A8662F", fontSize: 12, fontWeight: "600" },
+  footer: { flexDirection: "row", gap: 12, paddingHorizontal: 24, paddingTop: 16, width: "100%", maxWidth: 560, alignSelf: "center", borderTopWidth: 1, borderTopColor: "#E8DDD0" },
+  backButton: { width: 52, height: 52, borderWidth: 1, borderColor: "#E8DDD0", borderRadius: 14, alignItems: "center", justifyContent: "center" },
+  primaryButton: { flex: 1, minHeight: 52, borderRadius: 14, paddingHorizontal: 16, backgroundColor: "#C17F3E", flexDirection: "row", gap: 8, alignItems: "center", justifyContent: "center" },
+  primaryText: { fontSize: 14, fontWeight: "700", color: "#FFFFFF" },
   disabled: { opacity: 0.4 },
-  error: { color: "#FB7185", fontSize: 14, lineHeight: 20 },
+  error: { color: "#B74E42", fontSize: 14, lineHeight: 20 },
 });

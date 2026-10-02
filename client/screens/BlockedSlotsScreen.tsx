@@ -173,6 +173,7 @@ export default function BlockedSlotsScreen() {
 
   return (
     <ImageBackground source={shadowBackground} style={styles.background} resizeMode="cover">
+      <View pointerEvents="none" style={[StyleSheet.absoluteFillObject, { backgroundColor: "rgba(250,247,242,0.94)" }]} />
       <Animated.View style={[styles.container, containerStyle]}>
         <ScrollView
           style={styles.scrollView}
@@ -272,7 +273,7 @@ export default function BlockedSlotsScreen() {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   container: {
     flex: 1,
@@ -281,7 +282,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   scrollView: {
     flex: 1,
@@ -308,7 +309,7 @@ const styles = StyleSheet.create({
   hugeTitle: {
     fontSize: 28,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     letterSpacing: -2,
     lineHeight: 34,
     textAlign: "center",
@@ -318,7 +319,7 @@ const styles = StyleSheet.create({
   },
   dateSubtitle: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.7)",
+    color: "#6B5744",
     marginTop: 8,
     textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.75)",
@@ -344,40 +345,40 @@ const styles = StyleSheet.create({
   glassPanel: {
     borderRadius: 20,
     borderWidth: 1.5,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
     overflow: "hidden",
   },
   glassPanelBlocked: {
-    backgroundColor: "#0D0D1A",
-    borderColor: "rgba(0,212,255,0.32)",
+    backgroundColor: "#F4EEE6",
+    borderColor: "#C17F3E",
   },
   glassPanelBooked: {
-    backgroundColor: "#111827",
-    borderColor: "rgba(0,212,255,0.16)",
+    backgroundColor: "#FFFFFF",
+    borderColor: "#E8DDD0",
   },
   glassPanelAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   glassPanelBlockedAndroid: {
-    backgroundColor: "#0D0D1A",
+    backgroundColor: "#F4EEE6",
   },
   glassPanelBookedAndroid: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
   },
   slotTime: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 10,
     textShadowColor: "rgba(0,0,0,0.5)",
     textShadowOffset: { width: 0, height: 1 },
     textShadowRadius: 3,
   },
   textBlocked: {
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
   },
   textBooked: {
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
   },
   statusRow: {
     flexDirection: "row",
@@ -386,17 +387,17 @@ const styles = StyleSheet.create({
   },
   statusTextAvailable: {
     fontSize: 13,
-    color: "#fff",
+    color: "#1C1410",
     fontWeight: "600",
   },
   statusTextBlocked: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     fontWeight: "600",
   },
   statusTextBooked: {
     fontSize: 13,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
     fontWeight: "600",
   },
   emptyCard: {
@@ -406,13 +407,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     textAlign: "center",
     marginTop: 16,
   },
   emptySubtext: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     textAlign: "center",
     marginTop: 8,
   },

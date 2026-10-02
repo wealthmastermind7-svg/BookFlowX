@@ -18,14 +18,14 @@ export function WeeklyViewingsChart({ data }: { data: { label: string; value: nu
       <Svg width="100%" height={112} viewBox={`0 0 ${width} ${height}`} preserveAspectRatio="none">
         <Defs>
           <LinearGradient id="viewingFill" x1="0" y1="0" x2="0" y2="1">
-            <Stop offset="0" stopColor="#00D4FF" stopOpacity={0.22} />
-            <Stop offset="1" stopColor="#00D4FF" stopOpacity={0} />
+            <Stop offset="0" stopColor="#C17F3E" stopOpacity={0.22} />
+            <Stop offset="1" stopColor="#C17F3E" stopOpacity={0} />
           </LinearGradient>
         </Defs>
-        <Line x1={12} x2={width - 12} y1={height - 8} y2={height - 8} stroke="rgba(148,163,184,0.2)" />
+        <Line x1={12} x2={width - 12} y1={height - 8} y2={height - 8} stroke="#E8DDD0" />
         <Path d={area} fill="url(#viewingFill)" />
-        <Path d={path} fill="none" stroke="#00D4FF" strokeWidth={2.5} strokeLinejoin="round" />
-        {points.map((p, i) => <Circle key={data[i].label} cx={p.x} cy={p.y} r={3} fill="#00D4FF" />)}
+        <Path d={path} fill="none" stroke="#C17F3E" strokeWidth={2.5} strokeLinejoin="round" />
+        {points.map((p, i) => <Circle key={data[i].label} cx={p.x} cy={p.y} r={3} fill="#C17F3E" />)}
       </Svg>
       <View style={styles.labels}>{data.map((day) => <Text key={day.label} style={styles.day}>{day.label}</Text>)}</View>
     </View>
@@ -34,7 +34,7 @@ export function WeeklyViewingsChart({ data }: { data: { label: string; value: nu
 
 const styles = StyleSheet.create({
   scale: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
-  label: { color: "#94A3B8", fontSize: 12 },
+  label: { color: "#8B6F47", fontSize: 12 },
   labels: { flexDirection: "row", justifyContent: "space-between", paddingTop: 8 },
-  day: { color: "#94A3B8", fontSize: 12, textAlign: "center" },
+  day: { color: "#8B6F47", fontSize: 12, textAlign: "center" },
 });

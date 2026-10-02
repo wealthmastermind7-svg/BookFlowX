@@ -60,7 +60,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xl,
     backgroundColor: "#111827",
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.2)",
+    borderColor: "#E8DDD0",
   },
   iconContainer: {
     width: 52,
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: "rgba(0,212,255,0.12)",
+    backgroundColor: "#F4EEE6",
   },
   textContainer: {
     flex: 1,

@@ -213,7 +213,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   progressTickActive: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
   },
   progressTickInactive: {
     backgroundColor: "rgba(148,163,184,0.12)",

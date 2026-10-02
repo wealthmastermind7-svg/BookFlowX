@@ -142,8 +142,8 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
             Continue assisting customers with a Voice Assistant that answers questions and helps them book.
           </ThemedText>
           <View style={{ height: 16 }} />
-          <View style={{ backgroundColor: 'rgba(255,255,255,0.08)', paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
-            <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.6)', fontStyle: 'italic', textAlign: 'center' }}>
+          <View style={{ backgroundColor: "#F4EEE6", paddingHorizontal: 16, paddingVertical: 8, borderRadius: 12 }}>
+            <ThemedText style={{ fontSize: 12, color: "#6B5744", fontStyle: 'italic', textAlign: 'center' }}>
               Booking Links included free with any voice plan.
             </ThemedText>
           </View>
@@ -167,24 +167,24 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
           </View>
           
           <View style={styles.progressTrack}>
-            <View style={[styles.progressFill, { width: `${Math.min((minutesUsed/minutesLimit) * 100, 100)}%`, backgroundColor: isExhausted ? "#FB7185" : "#00D4FF" }]} />
+            <View style={[styles.progressFill, { width: `${Math.min((minutesUsed/minutesLimit) * 100, 100)}%`, backgroundColor: isExhausted ? "#B74E42" : "#C17F3E" }]} />
           </View>
 
           {isExhausted ? (
             <View>
-              <ThemedText style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', lineHeight: 20, marginBottom: 16 }}>
+              <ThemedText style={{ fontSize: 13, color: "#8B6F47", lineHeight: 20, marginBottom: 16 }}>
                 {currentTier === "free"
                   ? "You've reached your voice limit. Upgrade to continue assisting customers."
                   : `You've reached your voice limit of ${minutesLimit} minutes.${upgradeTo ? ` Upgrade to ${upgradeTo.name} for ${upgradeTo.minutes} minutes.` : ""}`
                 }
               </ThemedText>
               {upgradeTo ? (
-                <View style={{ backgroundColor: 'rgba(255,255,255,0.04)', borderRadius: 16, padding: 16, borderWidth: 1, borderColor: 'rgba(255,255,255,0.08)' }}>
+                <View style={{ backgroundColor: "#FFFFFF", borderRadius: 16, padding: 16, borderWidth: 1, borderColor: "#E8DDD0" }}>
                   <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 }}>
                     <ThemedText style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>{upgradeTo.name}</ThemedText>
                     <ThemedText style={{ fontSize: 16, fontWeight: '700', color: '#fff' }}>{upgradeTo.price}</ThemedText>
                   </View>
-                  <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)', marginBottom: 12 }}>{upgradeTo.minutes} minutes/month</ThemedText>
+                  <ThemedText style={{ fontSize: 12, color: "#8B6F47", marginBottom: 12 }}>{upgradeTo.minutes} minutes/month</ThemedText>
                 </View>
               ) : null}
             </View>
@@ -255,7 +255,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
                 </View>
 
                 <View style={styles.tierMinutes}>
-                  <Feather name="clock" size={16} color="rgba(255,255,255,0.6)" />
+                  <Feather name="clock" size={16} color="#8B6F47" />
                   <ThemedText style={styles.minutesText}>
                     {tier.id === 'voice_business' ? '8 hr 20 min included' : `${formatMinutes(tier.minutes)} included`}
                   </ThemedText>
@@ -286,7 +286,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
 
         <Pressable onPress={handleRestore} style={styles.restoreBtn} disabled={restoreLoading}>
           {restoreLoading ? (
-            <ActivityIndicator size="small" color="rgba(255,255,255,0.6)" />
+            <ActivityIndicator size="small" color="#C17F3E" />
           ) : (
             <ThemedText style={styles.restoreBtnText}>Restore Purchases</ThemedText>
           )}
@@ -303,7 +303,7 @@ export const VoiceAgentPaywall: React.FC<VoiceAgentPaywallProps> = ({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#0A0A0F",
+    backgroundColor: "#FAF7F2",
   },
   header: {
     flexDirection: "row",
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 18,
     fontWeight: "600",
-    color: "#fff",
+    color: "#1C1410",
     marginLeft: 12,
   },
   scrollContent: {
@@ -334,7 +334,7 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#F4EEE6",
     alignItems: "center",
     justifyContent: "center",
     marginBottom: 24,
@@ -342,23 +342,23 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 32,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
     marginBottom: 12,
     textAlign: "center",
   },
   heroSubtitle: {
     fontSize: 16,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     textAlign: "center",
     lineHeight: 24,
     maxWidth: 300,
   },
   trialStatusCard: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     borderRadius: 24,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
   },
   trialInfo: {
     flexDirection: "row",
@@ -369,14 +369,14 @@ const styles = StyleSheet.create({
   trialLabel: {
     fontSize: 10,
     fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     letterSpacing: 1.5,
     marginBottom: 4,
   },
   trialMinutes: {
     fontSize: 18,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   statusBadge: {
     paddingHorizontal: 8,
@@ -390,7 +390,7 @@ const styles = StyleSheet.create({
   },
   progressTrack: {
     height: 6,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#E8DDD0",
     borderRadius: 3,
     marginBottom: 24,
     overflow: "hidden",
@@ -401,7 +401,7 @@ const styles = StyleSheet.create({
   },
   previewBtn: {
     height: 56,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     borderRadius: 16,
     flexDirection: "row",
     alignItems: "center",
@@ -409,18 +409,18 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   disabledBtn: {
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#F4EEE6",
     opacity: 0.5,
   },
   previewBtnText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   sectionLabel: {
     fontSize: 12,
     fontWeight: "800",
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B6F47",
     letterSpacing: 2,
     marginBottom: 16,
     textAlign: "center",
@@ -429,27 +429,27 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   tierCard: {
-    backgroundColor: "#111827",
+    backgroundColor: "#FFFFFF",
     borderRadius: 20,
     padding: 24,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
+    borderColor: "#E8DDD0",
   },
   popularCard: {
-    borderColor: "#00D4FF",
-    backgroundColor: "rgba(0,212,255,0.08)",
+    borderColor: "#C17F3E",
+    backgroundColor: "#F4EEE6",
   },
   popularBadge: {
     position: "absolute",
     top: -12,
     right: 24,
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 12,
   },
   popularBadgeText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
     fontSize: 10,
     fontWeight: "800",
     letterSpacing: 1,
@@ -463,7 +463,7 @@ const styles = StyleSheet.create({
   tierName: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   priceRow: {
     alignItems: "flex-end",
@@ -471,7 +471,7 @@ const styles = StyleSheet.create({
   tierPrice: {
     fontSize: 20,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   tierMinutes: {
     flexDirection: "row",
@@ -481,7 +481,7 @@ const styles = StyleSheet.create({
   },
   minutesText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
+    color: "#6B5744",
     fontWeight: "600",
   },
   featuresList: {
@@ -495,28 +495,28 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
   },
   subscribeBtn: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: "rgba(255,255,255,0.1)",
+    backgroundColor: "#F4EEE6",
     alignItems: "center",
     justifyContent: "center",
   },
   popularBtn: {
-    backgroundColor: "#00D4FF",
+    backgroundColor: "#C17F3E",
   },
   subscribeBtnText: {
     fontSize: 16,
     fontWeight: "700",
-    color: "#fff",
+    color: "#1C1410",
   },
   popularBtnText: {
-    color: "#0A0A0F",
+    color: "#FFFFFF",
   },
   currentTierCard: {
-    borderColor: "#22C55E",
+    borderColor: "#4A7C59",
     opacity: 0.8,
   },
   restoreBtn: {
@@ -527,12 +527,12 @@ const styles = StyleSheet.create({
   },
   restoreBtnText: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#6B5744",
     textDecorationLine: "underline",
   },
   disclaimer: {
     fontSize: 12,
-    color: "rgba(255,255,255,0.3)",
+    color: "#8B6F47",
     textAlign: "center",
     marginTop: 40,
     lineHeight: 18,

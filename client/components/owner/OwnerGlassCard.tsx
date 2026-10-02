@@ -8,7 +8,7 @@ export function OwnerGlassCard({ children, style }: {
 }) {
   return (
     <View style={[styles.card, style]}>
-      {Platform.OS === "ios" ? <BlurView intensity={18} tint="dark" style={StyleSheet.absoluteFill} /> : null}
+      {Platform.OS === "ios" ? <BlurView intensity={18} tint="light" style={StyleSheet.absoluteFill} /> : null}
       {children}
     </View>
   );
@@ -19,8 +19,13 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(148,163,184,0.14)",
-    backgroundColor: "rgba(17,24,39,0.82)",
+    borderColor: "#E8DDD0",
+    backgroundColor: "#FFFFFF",
+    shadowColor: "#6B5744",
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.08,
+    shadowRadius: 12,
+    elevation: 2,
     overflow: "hidden",
   },
 });

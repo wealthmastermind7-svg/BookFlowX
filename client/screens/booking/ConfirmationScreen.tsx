@@ -202,7 +202,7 @@ export default function ConfirmationScreen() {
         ]}
       >
         {isPolling ? (
-          <View style={[styles.checkmarkContainer, { backgroundColor: "rgba(0,212,255,0.12)" }]}>
+          <View style={[styles.checkmarkContainer, { backgroundColor: "#F4EEE6" }]}>
             <ActivityIndicator size="large" color={theme.accent} />
           </View>
         ) : (
@@ -239,7 +239,7 @@ export default function ConfirmationScreen() {
             styles.detailsCard,
             {
               backgroundColor: "#111827",
-              borderColor: "rgba(0,212,255,0.18)",
+              borderColor: "#E8DDD0",
             },
           ]}
         >

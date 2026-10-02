@@ -42,25 +42,25 @@ export function CustomerCard({ name, email, phone, totalBookings, onPress, capti
           <ThemedText style={styles.count}>{totalBookings}</ThemedText>
           <ThemedText style={styles.countLabel}>visits</ThemedText>
         </View>
-        {onPress ? <Feather name="chevron-right" size={17} color="#66758D" /> : null}
+        {onPress ? <Feather name="chevron-right" size={17} color="#8B6F47" /> : null}
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: { minHeight: 88, flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  card: { minHeight: 88, flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 20, backgroundColor: "#FFFFFF", borderWidth: 1, borderColor: "#E8DDD0" },
   pressed: { opacity: 0.88 },
-  avatar: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,212,255,0.12)", borderWidth: 1, borderColor: "rgba(0,212,255,0.28)" },
-  initials: { color: "#00D4FF", fontSize: 14, fontWeight: "800" },
+  avatar: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "#F4EEE6", borderWidth: 1, borderColor: "#E8DDD0" },
+  initials: { color: "#A8662F", fontSize: 14, fontWeight: "800" },
   info: { flex: 1, minWidth: 0, marginLeft: 13, marginRight: 10 },
   nameRow: { flexDirection: "row", alignItems: "center", gap: 7 },
-  name: { flexShrink: 1, color: "#F2F6FC", fontSize: 14, fontWeight: "700" },
-  email: { color: "#9AA8BC", fontSize: 12, marginTop: 3 },
-  caption: { color: "#718097", fontSize: 12, marginTop: 4 },
-  badge: { borderRadius: 7, backgroundColor: "rgba(0,212,255,0.1)", paddingHorizontal: 7, paddingVertical: 3 },
-  badgeText: { color: "#00D4FF", fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
+  name: { flexShrink: 1, color: "#1C1410", fontSize: 14, fontWeight: "700" },
+  email: { color: "#6B5744", fontSize: 12, marginTop: 3 },
+  caption: { color: "#8B6F47", fontSize: 12, marginTop: 4 },
+  badge: { borderRadius: 7, backgroundColor: "#F4EEE6", paddingHorizontal: 7, paddingVertical: 3 },
+  badgeText: { color: "#A8662F", fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
   bookings: { alignItems: "center", minWidth: 34, marginRight: 8 },
-  count: { color: "#EAF1FA", fontSize: 16, fontWeight: "700" },
-  countLabel: { color: "#77859A", fontSize: 12, marginTop: 1 },
+  count: { color: "#1C1410", fontSize: 16, fontWeight: "700" },
+  countLabel: { color: "#8B6F47", fontSize: 12, marginTop: 1 },
 });

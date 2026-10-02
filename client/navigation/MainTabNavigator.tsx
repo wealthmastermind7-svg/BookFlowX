@@ -34,9 +34,9 @@ export default function MainTabNavigator() {
         tabBarInactiveTintColor: theme.tabIconDefault,
         tabBarStyle: {
           position: "absolute",
-          backgroundColor: Platform.OS === "ios" ? "transparent" : theme.backgroundRoot,
+          backgroundColor: Platform.OS === "ios" ? "transparent" : "#FAF7F2",
           borderTopWidth: 1,
-          borderTopColor: "rgba(0,212,255,0.16)",
+          borderTopColor: "#E8DDD0",
           elevation: 0,
           height: 66 + Math.max(insets.bottom, 8),
           paddingTop: 8,
@@ -47,7 +47,7 @@ export default function MainTabNavigator() {
           Platform.OS === "ios" ? (
             <BlurView
               intensity={100}
-              tint="dark"
+              tint="light"
               style={StyleSheet.absoluteFill}
             />
           ) : null,
@@ -87,7 +87,7 @@ export default function MainTabNavigator() {
            title: "New",
            tabBarAccessibilityLabel: "Create a new viewing",
            tabBarIcon: () => (
-             <View style={styles.newButton}><Feather name="plus" size={26} color="#0A0A0F" /></View>
+              <View style={styles.newButton}><Feather name="plus" size={26} color="#FFFFFF" /></View>
           ),
         }}
       />
@@ -118,8 +118,8 @@ export default function MainTabNavigator() {
 
 const styles = StyleSheet.create({
   newButton: {
-    width: 48, height: 48, borderRadius: 24, backgroundColor: "#00D4FF",
+    width: 48, height: 48, borderRadius: 24, backgroundColor: "#C17F3E",
     alignItems: "center", justifyContent: "center", marginTop: -20,
-    borderWidth: 4, borderColor: "#0A0A0F",
+    borderWidth: 4, borderColor: "#FAF7F2",
   },
 });

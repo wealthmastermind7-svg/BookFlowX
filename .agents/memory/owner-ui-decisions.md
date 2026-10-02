@@ -26,3 +26,9 @@ Booking success and notification delivery are separate outcomes. Confirmation sc
 **Why:** Browser verification found a successful booking screen claiming email delivery while the persisted viewing still showed confirmation pending.
 
 **How to apply:** Use neutral booking-success copy until actual delivery evidence is available; never infer separate channel receipts from an overall workflow status.
+
+Customer email confirmations should be attempted immediately after a booking is saved, independently of whether the business has enabled a confirmation workflow.
+
+**Why:** The user explicitly requested: "email confirmations should be activated — customer email confirmations should be immediate."
+
+**How to apply:** Keep immediate delivery independent of workflow configuration. Workflows must check for prior confirmation before sending, reminders must remain separate, and failed or deliberately blocked sends must not be recorded as delivered.

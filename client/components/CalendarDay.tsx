@@ -47,7 +47,7 @@ export function CalendarDay({
 
   const getBackgroundColor = () => {
     if (isSelected) return theme.accent;
-    if (hasBookings) return "rgba(0,212,255,0.10)";
+    if (hasBookings) return "#F4EEE6";
     return "transparent";
   };
 

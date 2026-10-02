@@ -36,13 +36,13 @@ export function SettingsRow({
   const { theme } = useTheme();
 
   const textColor = disabled ? theme.textSecondary : destructive ? theme.error : theme.text;
-  const iconBgColor = destructive ? "rgba(251,113,133,0.12)" : "#182338";
-  const rowBgColor = destructive ? "rgba(251,113,133,0.05)" : "#111827";
+  const iconBgColor = destructive ? "#FAEFED" : "#F4EEE6";
+  const rowBgColor = destructive ? "#FFFDFC" : "#FFFFFF";
 
   const content = (
     <View style={[styles.row, { backgroundColor: rowBgColor }]}>
       <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-        <Feather name={icon} size={18} color={destructive ? theme.error : "#00D4FF"} />
+        <Feather name={icon} size={18} color={destructive ? theme.error : "#A8662F"} />
       </View>
       <View style={styles.content}>
         <ThemedText type="body" style={[styles.title, { color: textColor }]}>
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     padding: 16,
     borderRadius: 20,
     borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.14)",
+    borderColor: "#E8DDD0",
   },
   iconContainer: {
     width: 36,
