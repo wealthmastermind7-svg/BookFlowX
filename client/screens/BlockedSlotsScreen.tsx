@@ -290,7 +290,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   header: {
-    marginBottom: 40,
+    marginBottom: 24,
     alignItems: "center",
     position: "relative",
     width: "100%",
@@ -306,11 +306,11 @@ const styles = StyleSheet.create({
     zIndex: 10,
   },
   hugeTitle: {
-    fontSize: 56,
+    fontSize: 28,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: -2,
-    lineHeight: 60,
+    lineHeight: 34,
     textAlign: "center",
     textShadowColor: "rgba(0,0,0,0.75)",
     textShadowOffset: { width: 0, height: 2 },
@@ -330,25 +330,26 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
-    gap: 16,
+    gap: 12,
   },
   slotButton: {
     width: "47%",
   },
   slotPanel: {
-    paddingVertical: 32,
+    paddingVertical: 20,
+    borderRadius: 20,
     alignItems: "center",
     justifyContent: "center",
   },
   glassPanel: {
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1.5,
     borderColor: "rgba(0,212,255,0.2)",
     overflow: "hidden",
   },
   glassPanelBlocked: {
     backgroundColor: "#0D0D1A",
-    borderColor: "rgba(124,58,237,0.35)",
+    borderColor: "rgba(0,212,255,0.32)",
   },
   glassPanelBooked: {
     backgroundColor: "#111827",
@@ -364,7 +365,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
   slotTime: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 10,

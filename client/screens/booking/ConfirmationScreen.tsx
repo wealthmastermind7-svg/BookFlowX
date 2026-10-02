@@ -159,7 +159,7 @@ export default function ConfirmationScreen() {
       return {
         icon: "check" as const,
         title: t('booking.bookingConfirmed'),
-        message: t('booking.paymentSuccessMessage') || "Your payment was successful and your booking is confirmed. You will receive a confirmation email shortly.",
+        message: "Your payment was successful and your viewing is confirmed. Check your viewing for notification delivery updates.",
         badgeText: t('booking.paymentConfirmed') || "Payment confirmed",
         badgeIcon: "check-circle" as const,
       };
@@ -176,8 +176,8 @@ export default function ConfirmationScreen() {
     return {
       icon: "check" as const,
       title: t('booking.bookingConfirmed'),
-      message: t('booking.confirmationMessage') || "Your booking has been successfully confirmed. You will receive a confirmation email shortly.",
-      badgeText: t('booking.confirmationSentToEmail'),
+      message: "Your viewing has been successfully confirmed. Check Home or Calendar for notification delivery updates.",
+      badgeText: "Booking saved · Notifications tracked separately",
       badgeIcon: "check-circle" as const,
     };
   };
@@ -350,7 +350,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["3xl"],
   },
   title: {
-    fontSize: 40,
+    fontSize: 28,
     fontWeight: "700",
     textAlign: "center",
     marginBottom: Spacing.lg,
@@ -358,7 +358,7 @@ const styles = StyleSheet.create({
     letterSpacing: -1,
   },
   message: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     opacity: 0.6,
     lineHeight: 24,
@@ -367,9 +367,9 @@ const styles = StyleSheet.create({
   },
   detailsCard: {
     width: "100%",
-    borderRadius: BorderRadius.xl,
+    borderRadius: 20,
     borderWidth: 1,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
   },
   detailRow: {
     flexDirection: "row",

@@ -21,6 +21,7 @@ import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { usePremium } from "@/contexts/PremiumContext";
 import { useI18n } from "@/contexts/I18nContext";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 
 const backgroundImage = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
 
@@ -91,6 +92,7 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
     if (lowName.includes('salon') || lowName.includes('hair') || lowName.includes('barber') || lowName.includes('beauty')) return ['ELEVATE', 'YOUR', 'STYLE'];
     if (lowName.includes('spa') || lowName.includes('massage') || lowName.includes('relax')) return ['FIND', 'YOUR', 'CALM'];
     if (lowName.includes('car wash') || lowName.includes('auto') || lowName.includes('detail')) return ['SHINE', 'YOUR', 'RIDE'];
+    if (lowName.includes('property') || lowName.includes('real estate') || lowName.includes('letting') || lowName.includes('viewing')) return ['VIEW', 'YOUR', 'NEXT HOME'];
     if (lowName.includes('contractor') || lowName.includes('repair') || lowName.includes('fix')) return ['BOOK', 'YOUR', 'SERVICE'];
     return ['RESERVE', 'YOUR', 'SPACE'];
   };
@@ -100,7 +102,7 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
   return (
     <View style={styles.cinematicCard}>
       <LinearGradient
-        colors={['#1a1a1a', '#000000', '#0a0a0a']}
+        colors={['#16213E', '#0A0A0F', '#111827']}
         start={{ x: 0, y: 0 }}
         end={{ x: 1, y: 1 }}
         style={styles.cinematicGradient}
@@ -132,7 +134,7 @@ function CinematicLinkPreview({ businessName, domain }: { businessName: string; 
         <View style={styles.footerContent}>
           <View style={styles.footerLeft}>
             <ThemedText style={styles.businessNameText}>{businessName}</ThemedText>
-            <ThemedText style={styles.subtitleText}>BOOK YOUR APPOINTMENT</ThemedText>
+            <ThemedText style={styles.subtitleText}>ARRANGE A PROPERTY VIEWING</ThemedText>
           </View>
           <View style={styles.arrowCircle}>
             <Feather name="arrow-up-right" size={14} color="rgba(255,255,255,0.6)" />
@@ -151,7 +153,8 @@ export default function SharePreviewScreen() {
   const { checkShareAccess } = usePremium();
   const { t } = useI18n();
   
-  const { businessName, bookingUrl, slug } = route.params;
+  const { businessName, slug } = route.params;
+  const bookingUrl = getCustomerBookingUrl(slug);
   const [copied, setCopied] = useState(false);
 
   const handleCopyLink = async () => {
@@ -170,7 +173,7 @@ export default function SharePreviewScreen() {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
     try {
       await Share.share({
-        message: `Book an appointment with ${businessName}:\n${bookingUrl}`,
+        message: `Book a property viewing with ${businessName}: ${bookingUrl}`,
         title: `${businessName} - Book Now`,
       });
     } catch (error) {
@@ -208,7 +211,7 @@ export default function SharePreviewScreen() {
           <View style={styles.messageContainer}>
             <View style={styles.messageBubble}>
               <ThemedText style={styles.messageText}>
-                Hey! Here's my booking link 👇
+                Book a property viewing with {businessName}: {bookingUrl}
               </ThemedText>
             </View>
             
@@ -284,7 +287,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["3xl"],
   },
   heroTitle: {
-    fontSize: 48,
+    fontSize: 28,
     fontWeight: "800",
     color: "#fff",
     letterSpacing: -2,
@@ -292,7 +295,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.sm,
   },
   heroSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: "rgba(255,255,255,0.5)",
     textAlign: "center",
     maxWidth: 300,
@@ -321,8 +324,8 @@ const styles = StyleSheet.create({
     maxWidth: "80%",
   },
   messageText: {
-    color: "#fff",
-    fontSize: 15,
+    color: "#0A0A0F",
+    fontSize: 14,
   },
   linkCardWrapper: {
     width: "100%",
@@ -372,7 +375,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   cinematicTitle: {
-    fontSize: 42,
+    fontSize: 30,
     fontWeight: "800",
     color: "rgba(255,255,255,0.95)",
     letterSpacing: -2,

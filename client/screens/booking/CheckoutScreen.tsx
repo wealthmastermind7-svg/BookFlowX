@@ -18,12 +18,21 @@ import { formatPrice } from "@/lib/currency";
 import { getUpsellSuggestions, UpsellSuggestion } from "@/lib/api";
 import { useI18n } from "@/contexts/I18nContext";
 import { getApiUrl } from "@/lib/query-client";
-import { api } from "@/lib/api";
+import { api, type Service as ApiService } from "@/lib/api";
 import * as WebBrowser from "expo-web-browser";
 
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const toBookingService = (service: ApiService): Service => ({
+  id: service.id,
+  name: service.name,
+  duration: service.duration,
+  price: service.price,
+  description: service.description ?? undefined,
+  upsells: service.upsells ?? undefined,
+});
 
 export default function CheckoutScreen() {
   const insets = useSafeAreaInsets();
@@ -36,6 +45,8 @@ export default function CheckoutScreen() {
   const [customerEmail, setCustomerEmail] = useState("");
   const [customerPhone, setCustomerPhone] = useState("");
   const [service, setService] = useState<Service | null>(null);
+  const [serviceLoading, setServiceLoading] = useState(true);
+  const [serviceUnavailable, setServiceUnavailable] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [upsellSuggestions, setUpsellSuggestions] = useState<UpsellSuggestion[]>([]);
   const [selectedAddons, setSelectedAddons] = useState<Set<number>>(new Set());
@@ -49,11 +60,26 @@ export default function CheckoutScreen() {
   }, [serviceId]);
 
   const loadService = async () => {
-    const services = await StorageService.getServices();
-    const found = services.find((s) => s.id === serviceId);
-    if (found) {
-      setService(found);
-      loadUpsellSuggestions(found);
+    setServiceLoading(true);
+    setServiceUnavailable(false);
+    try {
+      await api.getOrCreateBusiness();
+      const services = await api.getServices();
+      const found = services.find((item) => item.id === serviceId && item.isActive !== false);
+      if (found) {
+        const bookingService = toBookingService(found);
+        setService(bookingService);
+        loadUpsellSuggestions(bookingService);
+      } else {
+        setService(null);
+        setServiceUnavailable(true);
+      }
+    } catch (error) {
+      console.error("Error loading selected booking service:", error);
+      setService(null);
+      setServiceUnavailable(true);
+    } finally {
+      setServiceLoading(false);
     }
   };
 
@@ -239,6 +265,7 @@ export default function CheckoutScreen() {
 
   const getIndustryPhrasePrefix = (serviceName: string): string => {
     const combined = serviceName.toLowerCase();
+    if (combined.includes('viewing') || combined.includes('property') || combined.includes('open house') || combined.includes('inspection')) return "VIEW";
     if (combined.includes('dentist') || combined.includes('dental') || combined.includes('teeth')) return "RESTORE";
     if (combined.includes('consultant') || combined.includes('coach') || combined.includes('advisor')) return "BOOK";
     if (combined.includes('salon') || combined.includes('hair') || combined.includes('barber') || combined.includes('beauty')) return "ELEVATE";
@@ -280,6 +307,16 @@ export default function CheckoutScreen() {
             {t('booking.completeReservation', { service: service?.name || "service" })}
           </ThemedText>
         </Animated.View>
+
+        {(serviceLoading || serviceUnavailable) && (
+          <View style={styles.serviceStatus}>
+            <ThemedText style={styles.serviceStatusText}>
+              {serviceLoading
+                ? "Loading selected service…"
+                : "This service is no longer available. Please go back and choose an active service."}
+            </ThemedText>
+          </View>
+        )}
 
         <Animated.View entering={FadeInUp.delay(150).springify()} style={styles.formSection}>
           <View style={styles.inputGroup}>
@@ -341,7 +378,7 @@ export default function CheckoutScreen() {
         {(loadingUpsells || upsellSuggestions.length > 0) && (
           <Animated.View entering={FadeInUp.delay(175).springify()} style={styles.upsellSection}>
             <View style={styles.upsellHeader}>
-              <Feather name="zap" size={16} color="#7C3AED" />
+              <Feather name="zap" size={16} color="#00D4FF" />
               <ThemedText style={styles.upsellTitle}>{t('booking.enhanceBooking')}</ThemedText>
             </View>
             <ThemedText style={styles.upsellSubtitle}>{t('booking.optionalAddons')}</ThemedText>
@@ -360,17 +397,17 @@ export default function CheckoutScreen() {
                       styles.addonCard,
                       {
                         borderColor: selectedAddons.has(index)
-                          ? "#7C3AED"
+                          ? "#00D4FF"
                           : "rgba(0,212,255,0.16)",
                         backgroundColor: selectedAddons.has(index)
-                          ? "rgba(124,58,237,0.14)"
+                          ? "rgba(0,212,255,0.12)"
                           : "rgba(17,24,39,0.86)",
                       },
                     ]}
                   >
                     <View style={styles.addonCheckbox}>
                       {selectedAddons.has(index) ? (
-                        <Feather name="check-circle" size={20} color="#7C3AED" />
+                        <Feather name="check-circle" size={20} color="#00D4FF" />
                       ) : (
                         <Feather name="circle" size={20} color={theme.textTertiary} />
                       )}
@@ -448,12 +485,12 @@ export default function CheckoutScreen() {
       >
         <Pressable
           onPress={handleBooking}
-          disabled={!customerName.trim() || !customerEmail.trim() || !isValidEmail(customerEmail) || isSubmitting}
+          disabled={!service || serviceLoading || serviceUnavailable || !customerName.trim() || !customerEmail.trim() || !isValidEmail(customerEmail) || isSubmitting}
           style={[
             styles.confirmButton,
             {
               backgroundColor: theme.accent,
-              opacity: customerName.trim() && customerEmail.trim() && isValidEmail(customerEmail) && !isSubmitting ? 1 : 0.4,
+              opacity: service && !serviceLoading && !serviceUnavailable && customerName.trim() && customerEmail.trim() && isValidEmail(customerEmail) && !isSubmitting ? 1 : 0.4,
             },
           ]}
         >
@@ -521,31 +558,44 @@ const styles = StyleSheet.create({
     marginBottom: Spacing["3xl"],
   },
   headerTitle: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: "700",
     fontStyle: "italic",
     marginBottom: Spacing.sm,
     letterSpacing: -1,
   },
   subtitle: {
-    fontSize: 16,
-    opacity: 0.5,
+    fontSize: 14,
+    opacity: 0.7,
     lineHeight: 24,
   },
+  serviceStatus: {
+    padding: Spacing.lg,
+    marginBottom: Spacing["2xl"],
+    borderRadius: BorderRadius.lg,
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.24)",
+    backgroundColor: "rgba(17,24,39,0.94)",
+  },
+  serviceStatusText: {
+    fontSize: 14,
+    lineHeight: 20,
+    opacity: 0.76,
+  },
   formSection: {
-    marginBottom: Spacing["3xl"],
+    marginBottom: Spacing["2xl"],
     gap: Spacing["2xl"],
   },
   inputGroup: {},
   inputLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: "700",
-    letterSpacing: 2,
-    opacity: 0.4,
+    letterSpacing: 0.3,
+    opacity: 0.72,
     marginBottom: Spacing.sm,
   },
   input: {
-    fontSize: 18,
+    fontSize: 14,
     paddingVertical: Spacing.md,
     borderBottomWidth: 1,
   },

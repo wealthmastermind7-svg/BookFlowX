@@ -15,6 +15,7 @@ export function useScreenOptions({
 
   return {
     headerTitleAlign: "center",
+    headerTitleStyle: { fontSize: 20, fontFamily: "Inter-Bold" },
     headerTransparent: transparent,
     headerBlurEffect: isDark ? "dark" : "light",
     headerTintColor: theme.text,

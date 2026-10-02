@@ -12,7 +12,6 @@ import {
   Dimensions,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { BlurView } from "expo-blur";
 import * as Haptics from "expo-haptics";
 import { Feather } from "@expo/vector-icons";
@@ -90,9 +89,9 @@ function LoadingOverlay({ message }: { message: string }) {
 export default function AIAssistantScreen() {
   const { theme } = useTheme();
   const insets = useSafeAreaInsets();
-  const tabBarHeight = useBottomTabBarHeight();
 
   const [businessId, setBusinessId] = useState<string | null>(null);
+  const [businessLoading, setBusinessLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [activeFeature, setActiveFeature] = useState<string | null>(null);
   const [loading, setLoading] = useState<Record<string, boolean>>({});
@@ -113,7 +112,11 @@ export default function AIAssistantScreen() {
         // Force sync business ID in api client to prevent 404s
         await api.setBusinessId(business.id, business.ownerToken || undefined);
       }
-    } catch {}
+    } catch {
+      // Business context is unavailable; the screen renders a clear setup state below.
+    } finally {
+      setBusinessLoading(false);
+    }
   }, []);
 
   React.useEffect(() => { loadBusinessId(); }, [loadBusinessId]);
@@ -202,6 +205,18 @@ export default function AIAssistantScreen() {
     setActiveFeature(activeFeature === feature ? null : feature);
   };
 
+  if (!businessId && businessLoading) {
+    return (
+      <View style={[styles.container, { backgroundColor: theme.backgroundRoot, padding: Spacing.lg }]}>
+        <View style={[styles.glassCard, { marginTop: insets.top + Spacing.lg }]}>
+          <View style={styles.skeletonLine} />
+          <View style={[styles.skeletonLine, { width: "68%" }]} />
+          <View style={[styles.skeletonLine, { width: "42%", marginBottom: 0 }]} />
+        </View>
+      </View>
+    );
+  }
+
   if (!businessId) {
     return (
       <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
@@ -216,7 +231,7 @@ export default function AIAssistantScreen() {
   return (
     <View style={[styles.container, { backgroundColor: theme.backgroundRoot }]}>
       <ScrollView
-        contentContainerStyle={{ paddingTop: insets.top + Spacing.lg, paddingBottom: tabBarHeight + Spacing.xl, paddingHorizontal: Spacing.lg }}
+         contentContainerStyle={{ paddingTop: insets.top + Spacing.lg, paddingBottom: insets.bottom + Spacing.xl, paddingHorizontal: Spacing.lg }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={theme.text} />}
         showsVerticalScrollIndicator={false}
       >
@@ -476,19 +491,26 @@ export default function AIAssistantScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1 },
   header: { marginBottom: Spacing.xl },
-  headerTitle: { fontSize: 36, fontFamily: "Inter-SemiBold", letterSpacing: -1 },
+  headerTitle: { fontSize: 28, fontFamily: "Inter-SemiBold", letterSpacing: -0.4 },
   headerSubtitle: { fontSize: 14, fontFamily: "Inter-Regular", marginTop: 4 },
   glassCard: {
-    borderRadius: BorderRadius.md,
+    borderRadius: 20,
     borderWidth: 1,
-    marginBottom: Spacing.md,
+    marginBottom: Spacing["2xl"],
     padding: Spacing.lg,
     overflow: "hidden",
   },
+  skeletonLine: {
+    height: 12,
+    width: "88%",
+    borderRadius: BorderRadius.full,
+    backgroundColor: "rgba(148,163,184,0.16)",
+    marginBottom: Spacing.md,
+  },
   sectionHeader: { flexDirection: "row", alignItems: "center", gap: Spacing.sm },
   sectionIcon: { width: 36, height: 36, borderRadius: BorderRadius.xs, alignItems: "center", justifyContent: "center" },
-  sectionTitle: { fontSize: 17, fontFamily: "Inter-SemiBold" },
-  sectionSubtitle: { fontSize: 13, fontFamily: "Inter-Regular", marginTop: 2 },
+  sectionTitle: { fontSize: 20, fontFamily: "Inter-SemiBold" },
+  sectionSubtitle: { fontSize: 12, fontFamily: "Inter-Regular", marginTop: 4 },
   expandedContent: { marginTop: Spacing.lg },
   greeting: { fontSize: 18, fontFamily: "Inter-SemiBold", marginBottom: Spacing.sm },
   summaryText: { fontSize: 14, fontFamily: "Inter-Regular", lineHeight: 20, marginBottom: Spacing.md },

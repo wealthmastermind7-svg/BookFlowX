@@ -81,33 +81,33 @@ export const Typography = {
     letterSpacing: -2,
   },
   h1: {
-    fontSize: 48,
+    fontSize: 20,
     fontFamily: "Inter-Bold",
     letterSpacing: -1,
   },
   h2: {
-    fontSize: 40,
+    fontSize: 20,
     fontFamily: "Inter-Bold",
     letterSpacing: -1,
   },
   h3: {
-    fontSize: 32,
-    fontFamily: "Inter-SemiBold",
+    fontSize: 20,
+    fontFamily: "Inter-Bold",
   },
   h4: {
-    fontSize: 24,
-    fontFamily: "Inter-SemiBold",
+    fontSize: 20,
+    fontFamily: "Inter-Bold",
   },
   body: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Inter-Regular",
   },
   bodyLarge: {
-    fontSize: 24,
+    fontSize: 14,
     fontFamily: "Inter-Regular",
   },
   small: {
-    fontSize: 14,
+    fontSize: 12,
     fontFamily: "Inter-Regular",
   },
   caption: {
@@ -117,7 +117,7 @@ export const Typography = {
     textTransform: "uppercase" as const,
   },
   link: {
-    fontSize: 18,
+    fontSize: 14,
     fontFamily: "Inter-SemiBold",
   },
   mono: {

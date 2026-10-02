@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
-  FlatList,
   StyleSheet,
   Pressable,
-  ImageBackground,
-  Dimensions,
   Platform,
   ScrollView,
 } from "react-native";
@@ -26,12 +23,10 @@ import Animated, {
 } from "react-native-reanimated";
 
 import { api, Booking } from "@/lib/api";
+import { VIEWING_CHANNELS } from "@/lib/dashboard-viewings";
 import { useI18n } from "@/contexts/I18nContext";
 import { CalendarStackParamList } from "@/navigation/CalendarStackNavigator";
-import { Spacing, BorderRadius } from "@/constants/theme";
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const shadowBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
+import { CalendarDay } from "@/components/CalendarDay";
 
 function BackgroundOverlay() {
   return (
@@ -46,6 +41,12 @@ function BackgroundOverlay() {
 }
 
 type CalendarScreenNavigationProp = NativeStackNavigationProp<CalendarStackParamList, "CalendarMain">;
+
+function getChannelPresentation(channel: Booking["channel"]) {
+  if (!channel) return null;
+  if (channel === "web") return { label: "Web", icon: "globe" as const, color: "#8291A7" };
+  return VIEWING_CHANNELS.find((source) => source.key === channel) ?? null;
+}
 
 function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
   if (Platform.OS === "ios") {
@@ -194,28 +195,16 @@ export default function CalendarScreen() {
     const hasBookings = bookings.some((b) => b.date === dateStr);
 
     return (
-      <Pressable
-        key={dateStr}
-        onPress={() => setSelectedDate(dateStr)}
-        style={styles.dayCell}
-      >
-        <View
-          style={[
-            styles.dayCircle,
-            isSelected && styles.dayCircleSelected,
-            !isSelected && hasBookings && styles.dayCircleHasBooking,
-          ]}
-        >
-          <Animated.Text
-            style={[
-              styles.dayText,
-              isSelected && styles.dayTextSelected,
-            ]}
-          >
-            {day}
-          </Animated.Text>
-        </View>
-      </Pressable>
+      <View key={dateStr} style={styles.dayCell}>
+        <CalendarDay
+          day={day}
+          isSelected={isSelected}
+          hasBookings={hasBookings}
+          isToday={dateStr === new Date().toISOString().split("T")[0]}
+          isDisabled={false}
+          onPress={() => setSelectedDate(dateStr)}
+        />
+      </View>
     );
   };
 
@@ -289,43 +278,41 @@ export default function CalendarScreen() {
           </View>
 
           <View style={styles.bookingsList}>
-            {bookingsForSelectedDate.map((item) => (
-              <GlassPanel key={item.id} style={styles.bookingCard}>
-                <View style={styles.bookingCardHeader}>
-                  <View>
-                    <Animated.Text style={styles.customerName}>{item.customerName}'s</Animated.Text>
-                    <Animated.Text style={styles.serviceName}>{item.serviceName}</Animated.Text>
+            {bookingsForSelectedDate.map((item) => {
+              const channel = getChannelPresentation(item.channel);
+              return (
+                <GlassPanel key={item.id} style={styles.bookingCard}>
+                  <View style={styles.bookingCardHeader}>
+                    <View>
+                      <Animated.Text style={styles.customerName}>{item.customerName}'s</Animated.Text>
+                      <Animated.Text style={styles.serviceName}>{item.serviceName}</Animated.Text>
+                    </View>
+                    {channel ? (
+                      <View style={[styles.channelBadge, { borderColor: `${channel.color}66`, backgroundColor: `${channel.color}1A` }]}>
+                        <Feather name={channel.icon} size={13} color={channel.color} />
+                        <Animated.Text style={[styles.channelText, { color: channel.color }]}>{channel.label}</Animated.Text>
+                      </View>
+                    ) : null}
                   </View>
-                  <View style={styles.clockIconContainer}>
-                    <Feather name="clock" size={14} color="black" />
+                  <View style={styles.bookingCardDetails}>
+                    <View style={styles.detailItem}>
+                      <Feather name="calendar" size={14} color="rgba(255,255,255,0.6)" />
+                      <Animated.Text style={styles.detailText}>{item.date}</Animated.Text>
+                    </View>
+                    <View style={styles.detailItem}>
+                      <Feather name="clock" size={14} color="rgba(255,255,255,0.6)" />
+                      <Animated.Text style={styles.detailText}>{item.time}</Animated.Text>
+                    </View>
                   </View>
-                </View>
-                <View style={styles.bookingCardDetails}>
-                  <View style={styles.detailItem}>
-                    <Feather name="calendar" size={14} color="rgba(255,255,255,0.6)" />
-                    <Animated.Text style={styles.detailText}>{item.date}</Animated.Text>
+                  <View style={styles.bookingCardFooter}>
+                    <View style={styles.footerItem}>
+                      <Feather name={item.confirmationSentAt ? "check-circle" : "clock"} size={15} color={item.confirmationSentAt ? "#34D399" : "#FBBF24"} />
+                      <Animated.Text style={styles.footerText}>{item.confirmationSentAt ? "Confirmation sent" : "Confirmation pending"}</Animated.Text>
+                    </View>
                   </View>
-                  <View style={styles.detailItem}>
-                    <Feather name="clock" size={14} color="rgba(255,255,255,0.6)" />
-                    <Animated.Text style={styles.detailText}>{item.time}</Animated.Text>
-                  </View>
-                </View>
-                <View style={styles.bookingCardFooter}>
-                  <View style={styles.footerItem}>
-                    <Feather name="check-circle" size={14} color={item.confirmationSentAt ? "white" : "rgba(255,255,255,0.4)"} />
-                    <Animated.Text style={[styles.footerText, item.confirmationSentAt && styles.footerTextActive]}>Confirmation</Animated.Text>
-                  </View>
-                  <View style={styles.footerItem}>
-                    <Feather name="check-circle" size={14} color={item.reminder24hSentAt ? "white" : "rgba(255,255,255,0.4)"} />
-                    <Animated.Text style={[styles.footerText, item.reminder24hSentAt && styles.footerTextActive]}>24-Hour</Animated.Text>
-                  </View>
-                  <View style={styles.footerItem}>
-                    <Feather name="check-circle" size={14} color={item.reminder2hSentAt ? "white" : "rgba(255,255,255,0.4)"} />
-                    <Animated.Text style={[styles.footerText, item.reminder2hSentAt && styles.footerTextActive]}>2-Hour</Animated.Text>
-                  </View>
-                </View>
-              </GlassPanel>
-            ))}
+                </GlassPanel>
+              );
+            })}
             {bookingsForSelectedDate.length === 0 && (
               <GlassPanel style={styles.emptyCard}>
                 <Animated.Text style={styles.emptyText}>{t('calendar.noBookingsForDate')}</Animated.Text>
@@ -350,7 +337,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 20,
   },
   header: {
     marginBottom: 24,
@@ -378,26 +365,20 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   giantMonth: {
-    fontSize: 42,
-    fontWeight: "300",
-    color: "#fff",
-    letterSpacing: -2,
-    lineHeight: 48,
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 4,
+    fontSize: 20,
+    fontWeight: "700",
+    color: "#F2F6FC",
+    letterSpacing: -0.6,
+    lineHeight: 24,
     textTransform: "capitalize",
     textAlign: "center",
   },
   hugeYear: {
-    fontSize: 20,
-    fontWeight: "400",
-    color: "rgba(255,255,255,0.5)",
-    letterSpacing: 2,
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
-    marginTop: 4,
+    fontSize: 12,
+    fontWeight: "600",
+    color: "#8190A5",
+    letterSpacing: 1,
+    marginTop: 2,
   },
   headerControls: {
     flexDirection: "row",
@@ -406,50 +387,39 @@ const styles = StyleSheet.create({
     marginTop: 16,
   },
   setupText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.8)",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
+    fontSize: 12,
+    color: "#8291A7",
   },
   glassButtonSmall: {
     flexDirection: "row",
     alignItems: "center",
     gap: 8,
-    backgroundColor: "rgba(0,0,0,0.6)",
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: "#111827",
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.4)",
-    shadowColor: "#000",
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.5,
-    shadowRadius: 4,
-    elevation: 5,
+    borderColor: "rgba(0,212,255,0.18)",
   },
   buttonTextSmall: {
     fontSize: 12,
     fontWeight: "600",
-    color: "white",
+    color: "#DCE5F1",
   },
   calendarGrid: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   weekDaysHeader: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 16,
+    marginBottom: 10,
   },
   weekDayText: {
     width: "14.28%",
     textAlign: "center",
     fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
+    color: "#718097",
     fontWeight: "600",
-    textShadowColor: "rgba(0, 0, 0, 0.75)",
-    textShadowOffset: { width: 0, height: 1 },
-    textShadowRadius: 2,
   },
   datesGrid: {
     flexDirection: "row",
@@ -457,10 +427,10 @@ const styles = StyleSheet.create({
   },
   dayCell: {
     width: "14.28%",
-    aspectRatio: 1,
+    height: 48,
     justifyContent: "center",
     alignItems: "center",
-    marginBottom: 8,
+    marginBottom: 2,
   },
   dayCircle: {
     width: 40,
@@ -498,21 +468,21 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   bookingsCount: {
-    fontSize: 36,
+    fontSize: 20,
     fontWeight: "700",
-    color: "white",
-    letterSpacing: -1.5,
+    color: "#F2F6FC",
+    letterSpacing: -0.3,
   },
   selectedDateSub: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
+    color: "#8291A7",
     marginTop: 4,
   },
   bookingsList: {
-    gap: 16,
+    gap: 24,
   },
   glassPanel: {
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(0,212,255,0.18)",
     overflow: "hidden",
@@ -521,7 +491,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
   bookingCard: {
-    padding: 20,
+    padding: 16,
   },
   bookingCardHeader: {
     flexDirection: "row",
@@ -531,22 +501,16 @@ const styles = StyleSheet.create({
   },
   customerName: {
     fontSize: 20,
-    fontWeight: "500",
-    color: "white",
+    fontWeight: "700",
+    color: "#F2F6FC",
   },
   serviceName: {
     fontSize: 14,
-    color: "rgba(255,255,255,0.4)",
+    color: "#8B99AE",
     marginTop: 2,
   },
-  clockIconContainer: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "#00D4FF",
-    justifyContent: "center",
-    alignItems: "center",
-  },
+  channelBadge: { flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderRadius: 12, paddingHorizontal: 10, paddingVertical: 7 },
+  channelText: { fontSize: 12, fontWeight: "700" },
   bookingCardDetails: {
     flexDirection: "row",
     gap: 24,
@@ -559,8 +523,8 @@ const styles = StyleSheet.create({
   },
   detailText: {
     fontSize: 14,
-    color: "white",
-    fontWeight: "300",
+    color: "#D9E2EF",
+    fontWeight: "500",
   },
   bookingCardFooter: {
     flexDirection: "row",
@@ -575,14 +539,12 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   footerText: {
-    fontSize: 11,
-    color: "rgba(255,255,255,0.4)",
-  },
-  footerTextActive: {
-    color: "white",
+    fontSize: 14,
+    color: "#DCE5F1",
+    fontWeight: "600",
   },
   emptyCard: {
-    padding: 32,
+    padding: 16,
     alignItems: "center",
   },
   emptyText: {

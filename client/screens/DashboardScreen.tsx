@@ -1,1614 +1,193 @@
-import React, { useEffect, useState } from "react";
-import {
-  View,
-  ScrollView,
-  StyleSheet,
-  Pressable,
-  ImageBackground,
-  Dimensions,
-  Platform,
-  Modal,
-} from "react-native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Pressable, RefreshControl, ScrollView, StyleSheet, Text, View } from "react-native";
 import { useFocusEffect, useNavigation } from "@react-navigation/native";
-import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { BlurView } from "expo-blur";
-import * as Haptics from "expo-haptics";
-import Svg, { Circle, Path, Defs, LinearGradient, Stop, Line } from "react-native-svg";
-import Animated, {
-  useSharedValue,
-  useAnimatedProps,
-  useAnimatedStyle,
-  withTiming,
-  withRepeat,
-  withSequence,
-  Easing,
-  interpolate,
-} from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
-import { api, Booking, DashboardStats, Business, getCustomerInsights, CustomerInsightsResult } from "@/lib/api";
+import * as Haptics from "expo-haptics";
+import { api, type Booking, type Business, type DashboardStats } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
-import { Text } from "react-native";
-import { usePremium } from "@/contexts/PremiumContext";
-import { Spacing, BorderRadius } from "@/constants/theme";
-import { RootStackParamList } from "@/navigation/RootStackNavigator";
+import { viewingOverview } from "@/lib/dashboard-viewings";
 import { useVoiceSubscription } from "@/hooks/useVoiceSubscription";
-import { ThemedText } from "@/components/ThemedText";
-import { useI18n } from "@/contexts/I18nContext";
-
-type DashboardNavigation = NativeStackNavigationProp<RootStackParamList>;
-
-const smokeBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
-
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
-const AnimatedPath = Animated.createAnimatedComponent(Path);
-const CHANNEL_SOURCES = {
-  voice: { icon: "phone", color: "#A78BFA", label: "Voice" },
-  sms: { icon: "message-circle", color: "#00D4FF", label: "SMS" },
-  email: { icon: "mail", color: "#60A5FA", label: "Email" },
-  chat: { icon: "message-square", color: "#34D399", label: "Chat" },
-  web: { icon: "globe", color: "#94A3B8", label: "Web or unrecorded" },
-} as const;
-
-function GlassPanel({ children, style }: { children: React.ReactNode; style?: any }) {
-  if (Platform.OS === "ios") {
-    return (
-      <BlurView intensity={20} tint="dark" style={[styles.glassPanel, style]}>
-        <View style={styles.glassPanelInner}>{children}</View>
-      </BlurView>
-    );
-  }
-  return (
-    <View style={[styles.glassPanel, styles.glassPanelAndroid, style]}>
-      {children}
-    </View>
-  );
-}
-
-function CircularMeterGlass({
-  percentage,
-  label,
-  size = 96,
-}: {
-  percentage: number;
-  label: string;
-  size?: number;
-}) {
-  const progress = useSharedValue(0);
-  const radius = 40;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDashoffset = circumference * (1 - percentage / 100);
-
-  useEffect(() => {
-    progress.value = withTiming(percentage / 100, {
-      duration: 1200,
-      easing: Easing.bezier(0.4, 0.0, 0.2, 1),
-    });
-  }, [percentage]);
-
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: circumference * (1 - progress.value),
-  }));
-
-  return (
-    <View style={styles.meterContainer}>
-      <View style={{ width: size, height: size }}>
-        <Svg width={size} height={size} viewBox="0 0 100 100">
-          <Circle
-            cx="50"
-            cy="50"
-            r={radius}
-            stroke="rgba(255,255,255,0.2)"
-            strokeWidth={3}
-            fill="transparent"
-          />
-          <AnimatedCircle
-            cx="50"
-            cy="50"
-            r={radius}
-            stroke="#00D4FF"
-            strokeWidth={3}
-            fill="transparent"
-            strokeDasharray={circumference}
-            animatedProps={animatedProps}
-            strokeLinecap="round"
-            transform="rotate(-90 50 50)"
-          />
-        </Svg>
-        <View style={styles.meterCenterContent}>
-          <Animated.Text style={styles.meterPercentage}>
-            {Math.round(percentage)}%
-          </Animated.Text>
-          <Animated.Text style={styles.meterLabel}>{label}</Animated.Text>
-        </View>
-      </View>
-    </View>
-  );
-}
-
-function RevenueChart({ data }: { data: { label: string; value: number }[] }) {
-  const progress = useSharedValue(0);
-  const graphWidth = SCREEN_WIDTH - 80;
-  const graphHeight = 100;
-
-  useEffect(() => {
-    progress.value = withTiming(1, {
-      duration: 1500,
-      easing: Easing.bezier(0.4, 0.0, 0.2, 1),
-    });
-  }, []);
-
-  const maxValue = Math.max(...data.map((d) => d.value), 1);
-  const minValue = Math.min(...data.map((d) => d.value));
-  const valueRange = maxValue - minValue || 1;
-
-  const points = data.map((point, index) => {
-    const x = (index / (data.length - 1)) * graphWidth;
-    const y = graphHeight - 20 - ((point.value - minValue) / valueRange) * (graphHeight - 40);
-    return { x, y };
-  });
-
-  const pathData = points
-    .map((point, index) => {
-      if (index === 0) return `M ${point.x} ${point.y}`;
-      const prev = points[index - 1];
-      const cpx1 = prev.x + (point.x - prev.x) / 2;
-      const cpy1 = prev.y;
-      const cpx2 = prev.x + (point.x - prev.x) / 2;
-      const cpy2 = point.y;
-      return `C ${cpx1} ${cpy1} ${cpx2} ${cpy2} ${point.x} ${point.y}`;
-    })
-    .join(" ");
-
-  const areaPath = `${pathData} L ${graphWidth} ${graphHeight} L 0 ${graphHeight} Z`;
-
-  const pathLength = graphWidth * 3;
-
-  const animatedProps = useAnimatedProps(() => ({
-    strokeDashoffset: pathLength * (1 - progress.value),
-  }));
-
-  return (
-    <View style={styles.chartContainer}>
-      <Svg width={graphWidth} height={graphHeight + 10} style={{ overflow: "visible" }}>
-        <Defs>
-          <LinearGradient id="lineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
-            <Stop offset="0%" stopColor="rgba(0,212,255,0.45)" />
-            <Stop offset="50%" stopColor="#00D4FF" />
-            <Stop offset="100%" stopColor="rgba(124,58,237,0.8)" />
-          </LinearGradient>
-          <LinearGradient id="areaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
-            <Stop offset="0%" stopColor="rgba(255,255,255,0.15)" />
-            <Stop offset="100%" stopColor="rgba(255,255,255,0)" />
-          </LinearGradient>
-        </Defs>
-        <Path d={areaPath} fill="url(#areaGrad)" opacity={0.5} />
-        <AnimatedPath
-          d={pathData}
-          fill="none"
-          stroke="#00D4FF"
-          strokeWidth={4}
-          strokeLinecap="round"
-          strokeDasharray={pathLength}
-          animatedProps={animatedProps}
-        />
-      </Svg>
-    </View>
-  );
-}
-
-function BookingCardGlass({
-  customerName,
-  serviceName,
-  date,
-  time,
-  channel,
-  isPremium,
-  status,
-  confirmationSentAt,
-  reminder24hSentAt,
-  reminder2hSentAt,
-  onPress,
-}: {
-  customerName: string;
-  serviceName: string;
-  date: string;
-  time: string;
-  channel?: Booking["channel"];
-  isPremium?: boolean;
-  status: string;
-  confirmationSentAt?: string | null;
-  reminder24hSentAt?: string | null;
-  reminder2hSentAt?: string | null;
-  onPress?: () => void;
-}) {
-  const { theme } = useTheme();
-  const source = CHANNEL_SOURCES[channel ?? "web"] ?? CHANNEL_SOURCES.web;
-  const handlePress = () => {
-    try {
-      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-    } catch {}
-    onPress?.();
-  };
-
-  return (
-    <Pressable onPress={handlePress}>
-      <GlassPanel style={styles.bookingCard}>
-        <View style={styles.bookingHeader}>
-          <View style={styles.bookingAvatarWrap}>
-            <View style={styles.bookingAvatar}>
-              <Feather name="user" size={14} color="white" />
-            </View>
-            <View
-              style={[styles.bookingChannelBadge, { borderColor: source.color, backgroundColor: "#111827" }]}
-              accessible
-              accessibilityLabel={`Booking source: ${source.label}`}
-            >
-              <Feather name={source.icon} size={10} color={source.color} />
-            </View>
-          </View>
-          <View style={styles.bookingInfo}>
-            <Animated.Text style={styles.bookingName}>{customerName}</Animated.Text>
-            <Animated.Text style={styles.bookingService}>{serviceName}</Animated.Text>
-          </View>
-          <View
-            style={[
-              styles.statusBadge,
-              {
-                backgroundColor:
-                  status === "confirmed" || status === "completed"
-                    ? "#22C55E"
-                    : status === "pending"
-                    ? "#F59E0B"
-                    : "#6B7280",
-              },
-            ]}
-          >
-            <Feather
-              name={
-                status === "confirmed"
-                  ? "check-circle"
-                  : status === "pending"
-                  ? "clock"
-                  : status === "completed"
-                  ? "check"
-                  : "x-circle"
-              }
-              size={14}
-              color="white"
-            />
-          </View>
-        </View>
-
-        <View style={styles.bookingDetails}>
-          <View style={styles.bookingDetailItem}>
-            <Feather name="calendar" size={12} color="rgba(255,255,255,0.6)" />
-            <Animated.Text style={styles.bookingDetailText}>{date}</Animated.Text>
-          </View>
-          <View style={styles.bookingDetailItem}>
-            <Feather name="clock" size={12} color="rgba(255,255,255,0.6)" />
-            <Animated.Text style={styles.bookingDetailText}>{time}</Animated.Text>
-          </View>
-        </View>
-
-        <View style={styles.progressRowGlass}>
-          <View style={styles.progressItem}>
-            <View
-              style={[
-                styles.progressTick,
-                confirmationSentAt ? styles.progressTickActive : styles.progressTickInactive,
-              ]}
-            >
-              <Feather
-                name="check"
-                size={8}
-                color={confirmationSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
-              />
-            </View>
-            <Animated.Text
-              style={[styles.progressLabel, confirmationSentAt && styles.progressLabelActive]}
-            >
-              Conf
-            </Animated.Text>
-          </View>
-          <View style={styles.progressItem}>
-            <View
-              style={[
-                styles.progressTick,
-                reminder24hSentAt ? styles.progressTickActive : styles.progressTickInactive,
-              ]}
-            >
-              <Feather
-                name="check"
-                size={8}
-                color={reminder24hSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
-              />
-            </View>
-            <Animated.Text
-              style={[styles.progressLabel, reminder24hSentAt && styles.progressLabelActive]}
-            >
-              24h
-            </Animated.Text>
-          </View>
-          <View style={styles.progressItem}>
-            <View
-              style={[
-                styles.progressTick,
-                reminder2hSentAt ? styles.progressTickActive : styles.progressTickInactive,
-              ]}
-            >
-              <Feather
-                name="check"
-                size={8}
-                color={reminder2hSentAt ? "#fff" : "rgba(255,255,255,0.4)"}
-              />
-            </View>
-            <Animated.Text
-              style={[styles.progressLabel, reminder2hSentAt && styles.progressLabelActive]}
-            >
-              2h
-            </Animated.Text>
-          </View>
-        </View>
-      </GlassPanel>
-    </Pressable>
-  );
-}
+import { OwnerGlassCard } from "@/components/owner/OwnerGlassCard";
+import { WeeklyViewingsChart } from "@/components/owner/WeeklyViewingsChart";
+import { ViewingBookingCard } from "@/components/owner/ViewingBookingCard";
+import { BookingDetailSheet } from "@/components/owner/BookingDetailSheet";
 
 export default function DashboardScreen() {
+  const navigation = useNavigation<NativeStackNavigationProp<any>>();
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation<DashboardNavigation>();
-  const { isPremium, showPaywall } = usePremium();
-  const { t } = useI18n();
-
+  const [business, setBusiness] = useState<Business | null>(null);
+  const [ownerToken, setOwnerToken] = useState("");
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
-  const [showAllBookings, setShowAllBookings] = useState(false);
-  const [business, setBusiness] = useState<Business | null>(null);
-  const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
+  const [now, setNow] = useState(new Date());
+  const voice = useVoiceSubscription(business?.id || "", ownerToken);
+  const overview = useMemo(() => viewingOverview(bookings, now, business?.timezone), [bookings, now, business?.timezone]);
 
-  const fadeIn = useSharedValue(0);
-
-  const [ownerToken, setOwnerToken] = useState<string | null>(null);
-  const { data: voiceSubResult } = useVoiceSubscription(business?.id || "", ownerToken || "");
-  const voiceSub = voiceSubResult;
-  const remainingMinutes = voiceSub?.usage.remaining ?? 5;
-  const isExhausted = voiceSub?.usage.available === false;
-  const percentUsed = voiceSub?.usage.percentUsed || 0;
-
-  useEffect(() => {
-    fadeIn.value = withTiming(1, { duration: 800 });
-    initializeBusiness();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (api.getBusinessId()) {
-        loadData();
-      }
-    }, [])
-  );
-
-  const initializeBusiness = async () => {
-    const maxRetries = 3;
-    for (let attempt = 1; attempt <= maxRetries; attempt++) {
-      try {
-        await api.getOrCreateBusiness();
-        const existingServices = await api.getServices();
-        if (existingServices.length === 0) {
-          await api.initializeDemoData();
-        }
-        loadData();
-        return;
-      } catch (error) {
-        const errorMsg = error instanceof Error ? error.message : String(error);
-        console.error(`Error initializing business (attempt ${attempt}/${maxRetries}): ${errorMsg}`);
-        if (attempt === maxRetries) {
-          loadData();
-          return;
-        }
-        await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
-      }
-    }
-  };
-
-  const loadData = async () => {
-    setLoading(true);
+  const loadData = useCallback(async () => {
+    setError("");
     try {
-      const [statsData, bookingsData, businessData] = await Promise.all([
-        api.getStats(),
-        api.getBookings(),
-        api.getBusiness(),
+      await api.getOrCreateBusiness();
+      const [nextStats, nextBookings, nextBusiness, nextOwnerToken] = await Promise.all([
+        api.getStats(), api.getBookings(), api.getBusiness(), api.getOwnerToken(),
       ]);
-      setStats(statsData);
-      setBookings(bookingsData);
-      if (businessData) {
-        setBusiness(businessData);
-        const token = await api.getOwnerToken();
-        if (token) setOwnerToken(token);
-        const insightsData = await getCustomerInsights(businessData.id);
-        if (insightsData) setInsights(insightsData);
-      }
-    } catch (error) {
-      console.error("Error loading data:", error);
+      setStats(nextStats); setBookings(nextBookings); setBusiness(nextBusiness);
+      setOwnerToken(nextOwnerToken || "");
+      setNow(new Date());
+    } catch {
+      setError("Couldn't load your viewings. Pull down to try again.");
     } finally {
-      setLoading(false);
+      setLoading(false); setRefreshing(false);
     }
+  }, []);
+  useFocusEffect(useCallback(() => { void loadData(); }, [loadData]));
+  useEffect(() => {
+    const timer = setInterval(() => setNow(new Date()), 60000);
+    return () => clearInterval(timer);
+  }, []);
+  const updateBooking = async (updates: Partial<Booking>) => {
+    if (!selectedBooking) return;
+    await api.updateBooking(selectedBooking.id, updates);
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
+    if (updates.status === "confirmed") setSelectedBooking(null);
+    else setSelectedBooking((booking) => booking ? { ...booking, ...updates } : null);
+    await loadData();
   };
-
-  const paidCount = bookings.filter((b) => b.paymentStatus === "paid").length;
-  const unpaidCount = bookings.filter((b) => b.paymentStatus !== "paid").length;
-  const totalBookings = Math.max(paidCount + unpaidCount, 1);
-  const paidPercentage = Math.round((paidCount / totalBookings) * 100);
-  const unpaidPercentage = Math.round((unpaidCount / totalBookings) * 100);
-  const totalRevenue = stats?.totalRevenue || 0;
-
-  const upcomingBookings = bookings
-    .filter((b) => b.status !== "cancelled")
-    .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-    .slice(0, showAllBookings ? undefined : 3);
-
-  const graphData = stats?.weeklyData?.map((d) => ({
-    label: d.day,
-    value: d.revenue * 100,
-  })) || [
-    { label: "Mon", value: 0 },
-    { label: "Tue", value: 0 },
-    { label: "Wed", value: 0 },
-    { label: "Thu", value: 0 },
-    { label: "Fri", value: 0 },
-    { label: "Sat", value: 0 },
-    { label: "Sun", value: 0 },
-  ];
-
-  const containerStyle = useAnimatedStyle(() => ({
-    opacity: fadeIn.value,
-  }));
+  const currency = business?.currency || "USD";
+  const voiceLimited = voice.data?.usage.available === false;
+  const voiceInactive = !!voice.data && !["active", "trialing"].includes(voice.data.subscription.status);
+  const visibleBookings = showAll ? overview.upcoming : overview.upcoming.slice(0, 3);
 
   return (
     <View style={styles.background}>
-      <View style={styles.backgroundOverlay} />
-      <Animated.View style={[styles.container, containerStyle]}>
-        <ScrollView
-          style={styles.scrollView}
-          contentContainerStyle={[
-            styles.scrollContent,
-            {
-              paddingTop: insets.top + 20,
-              paddingBottom: tabBarHeight + 40,
-            },
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={styles.headerRow}>
-            <Animated.Text style={styles.headerTitle}>BookFlow</Animated.Text>
+      <ScrollView showsVerticalScrollIndicator={false}
+        contentContainerStyle={[styles.content, { paddingTop: insets.top + 24, paddingBottom: tabBarHeight + 24 }]}
+        refreshControl={<RefreshControl refreshing={refreshing} tintColor="#00D4FF" onRefresh={() => { setRefreshing(true); void loadData(); }} />}>
+        <View style={styles.header}>
+          <Text style={styles.greeting}>{overview.greeting} 👋</Text>
+          <Text style={styles.businessName}>{business?.name || "Your agency"}</Text>
+          <View style={styles.badge}>
+            <View style={[styles.dot, { backgroundColor: voiceLimited ? "#FBBF24" : business ? "#34D399" : "#64748B" }]} />
+            <Text style={styles.badgeText}>{voiceInactive ? "Omnichannel · Voice not active" : voiceLimited ? "Omnichannel · Voice limit reached" : "Omnichannel Active"}</Text>
           </View>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.channelScroll}
-            contentContainerStyle={styles.channelPills}
-            accessibilityLabel="Booking channels: SMS, Voice, Email and Chat"
-          >
-            {["📱 SMS", "📞 Voice", "📧 Email", "💬 Chat"].map(label => (
-              <View key={label} style={styles.channelPill}>
-                <ThemedText style={styles.channelPillText}>{label}</ThemedText>
-              </View>
-            ))}
-          </ScrollView>
+        </View>
 
-          <GlassPanel style={styles.revenueCard}>
-            <Animated.Text style={styles.revenueLabel}>{t('dashboard.totalRevenue')}</Animated.Text>
-            <Animated.Text style={styles.revenueValue}>
-              {formatPrice(Math.round(totalRevenue * 100), business?.currency || "USD")}
-            </Animated.Text>
-          </GlassPanel>
-
-          {!isPremium && (
-            <Pressable onPress={() => showPaywall("soft_upsell")}>
-              <GlassPanel style={styles.premiumBanner}>
-                <View style={styles.premiumIconContainer}>
-                  <Feather name="zap" size={20} color="#fff" />
-                </View>
-                <View style={styles.premiumContent}>
-                  <Animated.Text style={styles.premiumTitle}>Enhance Your Booking Power</Animated.Text>
-                  <Animated.Text style={styles.premiumSubtitle}>
-                    Grow faster with smart reminders & automated upsells
-                  </Animated.Text>
-                  <View style={styles.premiumPricing}>
-                    <Animated.Text style={styles.premiumPrice}>{t('dashboard.exploreFeatures')}</Animated.Text>
-                    <View style={styles.premiumPriceDot} />
-                    <Animated.Text style={styles.premiumPrice}>{t('dashboard.seePlans')}</Animated.Text>
-                  </View>
-                </View>
-                <Feather name="arrow-right" size={20} color="rgba(255,255,255,0.4)" />
-              </GlassPanel>
-            </Pressable>
-          )}
-
-          {business?.slug && voiceSub?.subscription?.tier !== 'free' && (
-            <Pressable 
-              onPress={() => {
-                if (business?.slug) {
-                  Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-                  navigation.navigate("VoiceBooking", { businessSlug: business.slug });
-                }
-              }}
-            >
-              <GlassPanel style={styles.voiceAspirationalBanner}>
-                <View style={styles.voiceAspirationalHeader}>
-                  <View style={styles.voiceIconStack}>
-                    <Feather name="mic" size={16} color="#00D4FF" />
-                    <ThemedText style={styles.voiceUsageLabel}>
-                      {isExhausted ? "LIMIT REACHED" : `${remainingMinutes} MIN LEFT`}
-                    </ThemedText>
-                  </View>
-                </View>
-                <Animated.Text style={styles.voiceAspirationalTitle}>AI Voice for Property Enquiries</Animated.Text>
-                <Animated.Text style={styles.voiceAspirationalDesc}>
-                  Tenants and buyers call after hours. Your AI voice assistant answers, qualifies, and books viewings automatically.
-                </Animated.Text>
-                <View style={styles.voiceUsageTrack} accessibilityLabel={`${Math.round(percentUsed)} percent of voice minutes used`}>
-                  <View style={[styles.voiceUsageFill, { width: `${Math.min(100, Math.max(0, percentUsed))}%` }]} />
-                </View>
-                <View style={styles.voiceAspirationalAction}>
-                  <Animated.Text style={styles.voiceAspirationalLink}>
-                    {isExhausted ? t('dashboard.upgradeNow') : t('dashboard.previewExperience')}
-                  </Animated.Text>
-                  <Feather name="chevron-right" size={14} color="rgba(255,255,255,0.3)" />
-                </View>
-              </GlassPanel>
-            </Pressable>
-          )}
-
-          <View style={styles.metersRow}>
-            <GlassPanel style={styles.meterCard}>
-              <CircularMeterGlass percentage={paidPercentage} label={t('dashboard.paid')} />
-            </GlassPanel>
-            <GlassPanel style={styles.meterCard}>
-              <CircularMeterGlass percentage={unpaidPercentage} label={t('dashboard.unpaid')} />
-            </GlassPanel>
-          </View>
-
-          <GlassPanel style={styles.chartCard}>
-            <Animated.Text style={styles.chartTitle}>{t('dashboard.revenueThisWeek')}</Animated.Text>
-            <RevenueChart data={graphData} />
-          </GlassPanel>
-
-          <Pressable
-            onPress={() => {
-              Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-              (navigation as any).navigate("AIAssistant");
-            }}
-          >
-            <GlassPanel style={styles.aiAssistantCard}>
-              <View style={styles.aiAssistantRow}>
-                <View style={styles.aiAssistantIcon}>
-                  <Feather name="cpu" size={22} color="#FFFFFF" />
-                </View>
-                <View style={{ flex: 1 }}>
-                  <Animated.Text style={styles.aiAssistantTitle}>AI Assistant</Animated.Text>
-                  <Animated.Text style={styles.aiAssistantSubtitle}>Scheduling, competitors, reviews & more</Animated.Text>
-                </View>
-                <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
-              </View>
-            </GlassPanel>
-          </Pressable>
-
-          <View style={styles.bookingsSection}>
-            <View style={styles.bookingsHeader}>
-              <Animated.Text style={styles.bookingsTitle}>{t('dashboard.bookingsAndReminders')}</Animated.Text>
-              <Pressable
-                onPress={() => setShowAllBookings(!showAllBookings)}
-                style={styles.toggleButton}
-              >
-                <Animated.Text style={styles.toggleText}>
-                  {showAllBookings ? t('common.all') : t('dashboard.thisWeek')}
-                </Animated.Text>
-              </Pressable>
+        {loading ? <ActivityIndicator size="large" color="#00D4FF" style={styles.loading} /> : <>
+          {error ? <OwnerGlassCard><Text style={styles.error} accessibilityRole="alert">{error}</Text></OwnerGlassCard> : null}
+          <OwnerGlassCard>
+            <Text style={styles.title}>Today at a glance</Text>
+            <View style={styles.stats}>
+              {[
+                { label: "Viewings Today", value: String(overview.todayCount) },
+                { label: "This Week", value: String(overview.weekCount) },
+                { label: "Revenue", value: formatPrice(Math.round((stats?.totalRevenue || 0) * 100), currency) },
+              ].map((stat, index) => <View key={stat.label} style={[styles.stat, index > 0 && styles.statDivider]}>
+                <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>{stat.value}</Text>
+                <Text style={styles.label}>{stat.label}</Text>
+              </View>)}
             </View>
+            <Text style={styles.scope}>Revenue across all recorded bookings</Text>
+          </OwnerGlassCard>
 
-            <ScrollView
-              horizontal
-              showsHorizontalScrollIndicator={false}
-              contentContainerStyle={styles.bookingsScroll}
-              snapToInterval={280}
-              decelerationRate="fast"
-            >
-              {upcomingBookings.length > 0 ? (
-                upcomingBookings.map((booking) => (
-                  <BookingCardGlass
-                    key={booking.id}
-                    customerName={booking.customerName || t('dashboard.customer')}
-                    serviceName={booking.serviceName || t('dashboard.service')}
-                    date={booking.date}
-                    time={booking.time}
-                    channel={booking.channel}
-                    status={booking.status}
-                    isPremium={booking.status === "confirmed"}
-                    confirmationSentAt={booking.confirmationSentAt}
-                    reminder24hSentAt={booking.reminder24hSentAt}
-                    reminder2hSentAt={booking.reminder2hSentAt}
-                    onPress={() => {
-                      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
-                      setSelectedBooking(booking);
-                    }}
-                  />
-                ))
-              ) : (
-                <GlassPanel style={styles.emptyBookingCard}>
-                  <Animated.Text style={styles.emptyText}>No upcoming bookings</Animated.Text>
-                </GlassPanel>
-              )}
-            </ScrollView>
+          <View style={styles.statusRow}>
+            {[
+              { label: "Confirmed", count: overview.statuses.confirmed, color: "#34D399" },
+              { label: "Pending", count: overview.statuses.pending, color: "#FBBF24" },
+              { label: "Completed", count: overview.statuses.completed, color: "#60A5FA" },
+            ].map((status) => <View key={status.label} style={styles.statusItem}>
+              <View style={[styles.dot, { backgroundColor: status.color }]} />
+              <Text style={styles.statusText}><Text style={styles.statusNumber}>{status.count}</Text> {status.label}</Text>
+            </View>)}
           </View>
 
-          {insights && (insights.topCustomers.length > 0 || insights.atRiskCustomers.length > 0 || insights.mostFrequentServices.length > 0) && (
-            <View style={styles.insightsSection}>
-              <Animated.Text style={styles.sectionTitle}>{t('dashboard.insights')}</Animated.Text>
-              
-              {insights.topCustomers.length > 0 && (
-                <GlassPanel style={styles.insightCard}>
-                  <View style={styles.insightHeader}>
-                    <View style={[styles.insightIcon, { backgroundColor: "#10B981" }]}>
-                      <Feather name="star" size={14} color="#fff" />
-                    </View>
-                    <Text style={styles.insightTitle}>{t('dashboard.topCustomers')}</Text>
-                  </View>
-                  {insights.topCustomers.slice(0, 3).map((customer, idx) => (
-                    <View key={customer.id} style={styles.insightRow}>
-                      <Text style={styles.insightName}>{customer.name}</Text>
-                      <Text style={styles.insightValue}>
-                        {formatPrice(Math.round(customer.totalSpend * 100), business?.currency || "USD")}
-                      </Text>
-                    </View>
-                  ))}
-                </GlassPanel>
-              )}
+          <OwnerGlassCard>
+            <Text style={styles.title}>Viewings This Week</Text>
+            <Text style={styles.subtitle}>Monday–Sunday · Cancelled viewings excluded</Text>
+            <WeeklyViewingsChart data={overview.weeklyData} />
+          </OwnerGlassCard>
 
-              {insights.atRiskCustomers.length > 0 && (
-                <GlassPanel style={styles.insightCard}>
-                  <View style={styles.insightHeader}>
-                    <View style={[styles.insightIcon, { backgroundColor: "#EF4444" }]}>
-                      <Feather name="alert-circle" size={14} color="#fff" />
-                    </View>
-                    <Text style={styles.insightTitle}>{t('dashboard.atRiskCustomers')}</Text>
-                  </View>
-                  {insights.atRiskCustomers.slice(0, 3).map((customer) => (
-                    <View key={customer.id} style={styles.insightRow}>
-                      <Text style={styles.insightName}>{customer.name}</Text>
-                      <Text style={styles.insightSubtext}>Last: {customer.lastBookingDate || "Never"}</Text>
-                    </View>
-                  ))}
-                </GlassPanel>
-              )}
-
-              {insights.mostFrequentServices.length > 0 && (
-                <GlassPanel style={styles.insightCard}>
-                  <View style={styles.insightHeader}>
-                    <View style={[styles.insightIcon, { backgroundColor: "#8B5CF6" }]}>
-                      <Feather name="trending-up" size={14} color="#fff" />
-                    </View>
-                    <Text style={styles.insightTitle}>{t('dashboard.popularServices')}</Text>
-                  </View>
-                  {insights.mostFrequentServices.slice(0, 3).map((service, idx) => (
-                    <View key={idx} style={styles.insightRow}>
-                      <Text style={styles.insightName}>{service.name}</Text>
-                      <Text style={styles.insightValue}>{service.count} bookings</Text>
-                    </View>
-                  ))}
-                </GlassPanel>
-              )}
-
-              <GlassPanel style={styles.summaryCard}>
-                <View style={styles.summaryRow}>
-                  <View style={styles.summaryItem}>
-                    <Text style={styles.summaryNumber}>{insights.summary.totalCustomers}</Text>
-                    <Text style={styles.summaryLabel}>{t('dashboard.customers')}</Text>
-                  </View>
-                  <View style={styles.summaryItem}>
-                    <Text style={[styles.summaryNumber, { color: "#10B981" }]}>{insights.summary.vipCount}</Text>
-                    <Text style={styles.summaryLabel}>{t('dashboard.vip')}</Text>
-                  </View>
-                  <View style={styles.summaryItem}>
-                    <Text style={[styles.summaryNumber, { color: "#EF4444" }]}>{insights.summary.atRiskCount}</Text>
-                    <Text style={styles.summaryLabel}>{t('dashboard.atRisk')}</Text>
-                  </View>
-                </View>
-              </GlassPanel>
-            </View>
-          )}
-        </ScrollView>
-      </Animated.View>
-
-      <Modal
-        visible={selectedBooking !== null}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedBooking(null)}
-      >
-        <Pressable 
-          style={styles.modalOverlay} 
-          onPress={() => setSelectedBooking(null)}
-        >
-          <Pressable 
-            style={styles.modalContent}
-            onPress={(e) => e.stopPropagation()}
-          >
-            <BlurView intensity={40} tint="dark" style={styles.modalBlur}>
-              <View style={styles.modalHeader}>
-                <Animated.Text style={styles.modalTitle}>{t('dashboard.bookingDetails')}</Animated.Text>
-                <Pressable onPress={() => setSelectedBooking(null)} style={styles.modalCloseButton}>
-                  <Feather name="x" size={20} color="rgba(255,255,255,0.6)" />
-                </Pressable>
+          <OwnerGlassCard>
+            <Text style={styles.eyebrow}>CHANNELS</Text>
+            <Text style={styles.title}>How your viewings are coming in</Text>
+            <Text style={styles.subtitle}>All recorded viewings · Cancelled excluded</Text>
+            {overview.channels.map((channel, index) => <View key={channel.key} style={[styles.channelRow, index > 0 && styles.channelBorder]}>
+              <View style={[styles.channelIcon, { backgroundColor: `${channel.color}18` }]}>
+                <Feather name={channel.icon} size={18} color={channel.color} />
               </View>
+              <View style={styles.channelInfo}>
+                <Text style={styles.body}>{channel.label}</Text>
+                {channel.key === "voice" && voice.data ? <Text style={styles.label}>{voiceInactive ? "Not active" : `${voice.data.usage.remaining} min remaining this period`}</Text> : null}
+                {channel.key === "voice" && voice.isError ? <Text style={styles.label}>Voice usage unavailable</Text> : null}
+              </View>
+              <Text style={[styles.channelCount, { color: channel.color }]}>{channel.count}</Text>
+              <Text style={styles.label}>bookings</Text>
+            </View>)}
+            {overview.unrecordedCount ? <Text style={styles.scope}>{overview.unrecordedCount} additional web / unrecorded-source bookings</Text> : null}
+          </OwnerGlassCard>
 
-              {selectedBooking && (
-                <View style={styles.modalBody}>
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.customer')}</Text>
-                    <Text style={styles.detailValue}>{selectedBooking.customerName || "—"}</Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.service')}</Text>
-                    <Text style={styles.detailValue}>{selectedBooking.serviceName || "—"}</Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.date')}</Text>
-                    <Text style={styles.detailValue}>
-                      {new Date(selectedBooking.date).toLocaleDateString("en-US", {
-                        weekday: "short",
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
-                    </Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.time')}</Text>
-                    <Text style={styles.detailValue}>{selectedBooking.time}</Text>
-                  </View>
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.status')}</Text>
-                    <View style={[
-                      styles.statusBadge,
-                      selectedBooking.status === "confirmed" && styles.statusConfirmed,
-                      selectedBooking.status === "pending" && styles.statusPending,
-                      selectedBooking.status === "completed" && styles.statusCompleted,
-                      selectedBooking.status === "cancelled" && styles.statusCancelled,
-                    ]}>
-                      <Text style={styles.statusText}>
-                        {t(`dashboard.${selectedBooking.status}`)}
-                      </Text>
-                    </View>
-                  </View>
-
-                  {selectedBooking.addons && (() => {
-                    try {
-                      const addonsArray = JSON.parse(selectedBooking.addons);
-                      if (Array.isArray(addonsArray) && addonsArray.length > 0) {
-                        return (
-                          <View style={styles.addonsSection}>
-                            <Text style={styles.addonsSectionTitle}>{t('dashboard.addons')}</Text>
-                            {addonsArray.map((addon: { name: string; price: number }, idx: number) => (
-                              <View key={idx} style={styles.addonItem}>
-                                <Text style={styles.addonName}>{addon.name}</Text>
-                                <Text style={styles.addonPrice}>
-                                  {formatPrice(addon.price * 100, business?.currency || "USD")}
-                                </Text>
-                              </View>
-                            ))}
-                          </View>
-                        );
-                      }
-                      return null;
-                    } catch {
-                      return null;
-                    }
-                  })()}
-
-                  <View style={[styles.detailRow, styles.totalRow]}>
-                    <Text style={styles.totalLabel}>{t('dashboard.total')}</Text>
-                    <Text style={styles.totalValue}>
-                      {formatPrice(selectedBooking.totalPrice, business?.currency || "USD")}
-                    </Text>
-                  </View>
-
-                  {selectedBooking.notes && (
-                    <View style={styles.notesSection}>
-                      <Text style={styles.notesLabel}>{t('dashboard.notes')}</Text>
-                      <Text style={styles.notesText}>{selectedBooking.notes}</Text>
-                    </View>
-                  )}
-
-                  <View style={styles.detailRow}>
-                    <Text style={styles.detailLabel}>{t('dashboard.payment')}</Text>
-                    <View style={[
-                      styles.statusBadge,
-                      selectedBooking.paymentStatus === "paid" ? styles.statusConfirmed : styles.statusPending
-                    ]}>
-                      <Text style={styles.statusText}>
-                        {selectedBooking.paymentStatus === "paid" ? t('dashboard.paid') : t('dashboard.unpaid')}
-                      </Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.paymentActions}>
-                    {selectedBooking.paymentStatus !== "paid" ? (
-                      <Pressable
-                        style={styles.confirmPaidButton}
-                        onPress={async () => {
-                          try {
-                            Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-                            await api.updateBooking(selectedBooking.id, { paymentStatus: "paid" });
-                            setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "paid" } : null);
-                            loadData();
-                          } catch (error) {
-                            console.error("Error confirming payment:", error);
-                          }
-                        }}
-                      >
-                        <Feather name="dollar-sign" size={16} color="#000" />
-                        <Text style={styles.confirmPaidButtonText}>{t('dashboard.markAsPaid')}</Text>
-                      </Pressable>
-                    ) : (
-                      <Pressable
-                        style={styles.revertPaidButton}
-                        onPress={async () => {
-                          try {
-                            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium).catch(() => {});
-                            await api.updateBooking(selectedBooking.id, { paymentStatus: "unpaid" });
-                            setSelectedBooking(prev => prev ? { ...prev, paymentStatus: "unpaid" } : null);
-                            loadData();
-                          } catch (error) {
-                            console.error("Error reverting payment:", error);
-                          }
-                        }}
-                      >
-                        <Feather name="rotate-ccw" size={16} color="rgba(255,255,255,0.6)" />
-                        <Text style={styles.revertPaidButtonText}>{t('dashboard.revertToUnpaid')}</Text>
-                      </Pressable>
-                    )}
-                  </View>
-
-                  {selectedBooking.status === "pending" && (
-                    <Pressable
-                      style={styles.confirmBookingButton}
-                      onPress={async () => {
-                        try {
-                          Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success).catch(() => {});
-                          await api.updateBooking(selectedBooking.id, { status: "confirmed" });
-                          setSelectedBooking(null);
-                          loadData();
-                        } catch (error) {
-                          console.error("Error confirming booking:", error);
-                        }
-                      }}
-                    >
-                      <Feather name="check" size={16} color="#000" />
-                      <Text style={styles.confirmBookingText}>{t('dashboard.confirmBooking')}</Text>
-                    </Pressable>
-                  )}
-                </View>
-              )}
-            </BlurView>
-          </Pressable>
-        </Pressable>
-      </Modal>
+          <View>
+            <View style={styles.sectionHeader}>
+              <Text style={styles.title}>Upcoming viewings</Text>
+              {overview.upcoming.length > 3 ? <Pressable onPress={() => setShowAll(!showAll)} accessibilityRole="button" hitSlop={10}>
+                <Text style={styles.link}>{showAll ? "Show fewer" : "Show all"}</Text>
+              </Pressable> : null}
+            </View>
+            {visibleBookings.length ? <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.bookingStrip}>
+              {visibleBookings.map((booking) => <ViewingBookingCard key={booking.id} booking={booking} onPress={() => setSelectedBooking(booking)} />)}
+            </ScrollView> : <OwnerGlassCard>
+              <Feather name="calendar" size={22} color="#00D4FF" />
+              <Text style={[styles.body, { marginTop: 12 }]}>No upcoming viewings</Text>
+              <Text style={[styles.label, { marginTop: 4 }]}>New bookings will appear here with their source channel.</Text>
+              <Pressable style={styles.emptyAction} onPress={() => navigation.navigate("BookingFlow")} accessibilityRole="button"><Text style={styles.link}>Create a viewing</Text><Feather name="arrow-right" size={16} color="#00D4FF" /></Pressable>
+            </OwnerGlassCard>}
+          </View>
+        </>}
+      </ScrollView>
+      <BookingDetailSheet booking={selectedBooking} currency={currency} onClose={() => setSelectedBooking(null)} onUpdate={updateBooking} />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    backgroundColor: "#0A0A0F",
-  },
-  backgroundImage: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-  },
-  backgroundOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(10,10,15,0.52)",
-  },
-  container: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  scrollContent: {
-    paddingHorizontal: 20,
-    gap: 16,
-  },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
-    marginBottom: 16,
-  },
-  headerVoiceButton: {
-    overflow: "hidden",
-    borderRadius: 20,
-  },
-  headerVoiceButtonGlass: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  headerVoiceButtonText: {
-    color: "white",
-    fontSize: 12,
-    fontWeight: "600",
-    marginLeft: 6,
-    textTransform: "uppercase",
-    letterSpacing: 1,
-  },
-  headerTitle: {
-    fontSize: 36,
-    fontWeight: "700",
-    color: "#fff",
-    textAlign: "center",
-    textShadowColor: "rgba(0,212,255,0.32)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 8,
-    letterSpacing: -1.5,
-  },
-  channelScroll: {
-    marginTop: -10,
-    marginBottom: 4,
-    marginHorizontal: -20,
-  },
-  channelPills: {
-    paddingHorizontal: 20,
-    gap: 8,
-  },
-  channelPill: {
-    paddingHorizontal: 12,
-    paddingVertical: 7,
-    borderRadius: 999,
-    borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.4)",
-    backgroundColor: "rgba(0,212,255,0.08)",
-  },
-  channelPillText: {
-    color: "#D7F8FF",
-    fontSize: 11,
-    fontWeight: "700",
-  },
-  glassPanel: {
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
-    backgroundColor: "rgba(17,24,39,0.82)",
-    overflow: "hidden",
-  },
-  glassPanelInner: {
-    padding: 0,
-  },
-  glassPanelAndroid: {
-    backgroundColor: "#111827",
-  },
-  revenueCard: {
-    padding: 32,
-    alignItems: "center",
-  },
-  revenueLabel: {
-    fontSize: 14,
-    color: "#fff",
-    marginBottom: 8,
-    fontWeight: "600",
-    opacity: 0.9,
-  },
-  revenueValue: {
-    fontSize: 56,
-    fontWeight: "800",
-    color: "#00D4FF",
-    textShadowColor: "rgba(0,212,255,0.38)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 12,
-    letterSpacing: -2,
-  },
-  premiumBanner: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 20,
-    marginBottom: 24,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.08)",
-    backgroundColor: "rgba(255,255,255,0.03)",
-  },
-  premiumIconContainer: {
-    width: 44,
-    height: 44,
-    borderRadius: 14,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-    marginRight: 16,
-  },
-  premiumContent: {
-    flex: 1,
-  },
-  premiumTitle: {
-    fontSize: 17,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 4,
-  },
-  premiumSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.5)",
-    lineHeight: 18,
-    marginBottom: 8,
-  },
-  premiumPricing: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  premiumPrice: {
-    fontSize: 11,
-    fontWeight: "700",
-    color: "rgba(255,255,255,0.4)",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
-  premiumPriceDot: {
-    width: 3,
-    height: 3,
-    borderRadius: 2,
-    backgroundColor: "rgba(255,255,255,0.3)",
-  },
-  aiAssistantCard: {
-    padding: 20,
-    marginBottom: 24,
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-    backgroundColor: "rgba(255,255,255,0.03)",
-  },
-  aiAssistantRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 14,
-  },
-  aiAssistantIcon: {
-    width: 44,
-    height: 44,
-    borderRadius: 12,
-    backgroundColor: "rgba(255,255,255,0.08)",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  aiAssistantTitle: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.9)",
-    letterSpacing: -0.3,
-  },
-  aiAssistantSubtitle: {
-    fontSize: 13,
-    color: "rgba(255,255,255,0.4)",
-    marginTop: 2,
-  },
-  voiceAspirationalBanner: {
-    padding: 24,
-    marginBottom: 24,
-    borderRadius: 24,
-    borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.28)",
-    backgroundColor: "rgba(22,33,62,0.72)",
-  },
-  voiceAspirationalHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginBottom: 12,
-  },
-  voiceIconStack: {
-    flexDirection: "row",
-    alignItems: "center",
-    marginRight: 12,
-  },
-  voiceUsageLabel: {
-    color: "#94A3B8",
-    fontSize: 10,
-    fontWeight: "800",
-    marginLeft: 8,
-  },
-  voiceAspirationalTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#F8FAFC",
-    letterSpacing: -0.5,
-    marginBottom: 8,
-  },
-  voiceAspirationalDesc: {
-    fontSize: 14,
-    color: "#94A3B8",
-    lineHeight: 20,
-    marginBottom: 12,
-  },
-  voiceUsageTrack: {
-    height: 4,
-    borderRadius: 4,
-    backgroundColor: "rgba(148,163,184,0.22)",
-    overflow: "hidden",
-    marginBottom: 16,
-  },
-  voiceUsageFill: {
-    height: "100%",
-    borderRadius: 4,
-    backgroundColor: "#00D4FF",
-  },
-  voiceAspirationalAction: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 6,
-  },
-  voiceAspirationalLink: {
-    fontSize: 10,
-    fontWeight: "800",
-    color: "rgba(255,255,255,0.3)",
-    letterSpacing: 2,
-  },
-  metersRow: {
-    flexDirection: "row",
-    gap: 16,
-  },
-  meterCard: {
-    flex: 1,
-    aspectRatio: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 16,
-  },
-  meterContainer: {
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  meterCenterContent: {
-    position: "absolute",
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  meterPercentage: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  meterLabel: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-    marginTop: 2,
-  },
-  chartCard: {
-    padding: 20,
-  },
-  chartTitle: {
-    fontSize: 18,
-    fontWeight: "600",
-    color: "#fff",
-    marginBottom: 16,
-  },
-  chartContainer: {
-    alignItems: "center",
-  },
-  bookingsSection: {
-    marginTop: 8,
-  },
-  bookingsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 16,
-  },
-  bookingsTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  toggleButton: {
-    paddingVertical: 6,
-    paddingHorizontal: 12,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    borderRadius: 8,
-  },
-  toggleText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.8)",
-  },
-  bookingsScroll: {
-    paddingRight: 20,
-    gap: 16,
-  },
-  bookingCard: {
-    width: 280,
-    padding: 16,
-  },
-  bookingHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    marginBottom: 12,
-  },
-  bookingAvatar: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bookingAvatarWrap: {
-    width: 36,
-    height: 36,
-    justifyContent: "center",
-  },
-  bookingChannelBadge: {
-    position: "absolute",
-    right: -5,
-    bottom: -4,
-    width: 18,
-    height: 18,
-    borderWidth: 1,
-    borderRadius: 9,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  bookingInfo: {
-    flex: 1,
-  },
-  bookingName: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  bookingService: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
-  },
-  statusBadge: {
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  bookingDetails: {
-    flexDirection: "row",
-    gap: 16,
-    marginBottom: 12,
-  },
-  bookingDetailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  bookingDetailText: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.8)",
-  },
-  progressRowGlass: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingTop: 12,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  progressItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 4,
-  },
-  progressTick: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  progressTickActive: {
-    backgroundColor: "#22C55E",
-  },
-  progressTickInactive: {
-    backgroundColor: "rgba(255,255,255,0.1)",
-  },
-  progressLabel: {
-    fontSize: 10,
-    color: "rgba(255,255,255,0.4)",
-  },
-  progressLabelActive: {
-    color: "rgba(255,255,255,0.8)",
-  },
-  emptyBookingCard: {
-    width: 260,
-    padding: 32,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  emptyText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-    textAlign: "center",
-  },
-  insightsSection: {
-    marginTop: 24,
-    gap: 12,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-    marginBottom: 8,
-  },
-  insightCard: {
-    padding: 16,
-  },
-  insightHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 10,
-    marginBottom: 12,
-  },
-  insightIcon: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  insightTitle: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  insightRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.08)",
-  },
-  insightName: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
-    flex: 1,
-  },
-  insightValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  insightSubtext: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.5)",
-  },
-  summaryCard: {
-    padding: 20,
-  },
-  summaryRow: {
-    flexDirection: "row",
-    justifyContent: "space-around",
-  },
-  summaryItem: {
-    alignItems: "center",
-  },
-  summaryNumber: {
-    fontSize: 28,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  summaryLabel: {
-    fontSize: 12,
-    color: "rgba(255,255,255,0.6)",
-    marginTop: 4,
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: "rgba(0,0,0,0.7)",
-    justifyContent: "center",
-    alignItems: "center",
-    padding: 20,
-  },
-  modalContent: {
-    width: "100%",
-    maxWidth: 400,
-    borderRadius: 24,
-    overflow: "hidden",
-  },
-  modalBlur: {
-    padding: 24,
-  },
-  modalHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: 24,
-  },
-  modalTitle: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  modalCloseButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: "rgba(255,255,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  modalBody: {
-    gap: 16,
-  },
-  detailRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  detailLabel: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.5)",
-  },
-  detailValue: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-    textAlign: "right",
-    flex: 1,
-    marginLeft: 16,
-  },
-  statusConfirmed: {
-    backgroundColor: "#22C55E",
-  },
-  statusPending: {
-    backgroundColor: "#F59E0B",
-  },
-  statusCompleted: {
-    backgroundColor: "#3B82F6",
-  },
-  statusCancelled: {
-    backgroundColor: "#EF4444",
-  },
-  statusText: {
-    fontSize: 12,
-    fontWeight: "600",
-    color: "#fff",
-    paddingHorizontal: 8,
-  },
-  addonsSection: {
-    marginTop: 8,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  addonsSectionTitle: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.7)",
-    marginBottom: 12,
-  },
-  addonItem: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingVertical: 8,
-  },
-  addonName: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
-    flex: 1,
-  },
-  addonPrice: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  totalRow: {
-    marginTop: 8,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  totalLabel: {
-    fontSize: 16,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.7)",
-  },
-  totalValue: {
-    fontSize: 24,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  notesSection: {
-    marginTop: 8,
-    paddingTop: 16,
-    borderTopWidth: 1,
-    borderTopColor: "rgba(255,255,255,0.1)",
-  },
-  notesLabel: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.5)",
-    marginBottom: 8,
-  },
-  notesText: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.9)",
-    lineHeight: 20,
-  },
-  confirmBookingButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#00D4FF",
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 16,
-    gap: 8,
-  },
-  confirmBookingText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-  },
-  confirmPaidButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#22C55E",
-    paddingVertical: 14,
-    borderRadius: 12,
-    marginTop: 8,
-    gap: 8,
-  },
-  confirmPaidButtonText: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#000",
-  },
-  paymentActions: {
-    marginTop: 8,
-  },
-  revertPaidButton: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "rgba(255,255,255,0.05)",
-    paddingVertical: 12,
-    borderRadius: 12,
-    gap: 8,
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.1)",
-  },
-  revertPaidButtonText: {
-    fontSize: 14,
-    fontWeight: "600",
-    color: "rgba(255,255,255,0.6)",
-  },
+  background: { flex: 1, backgroundColor: "#0A0A0F" },
+  content: { paddingHorizontal: 20, gap: 24, width: "100%", maxWidth: 900, alignSelf: "center" },
+  header: { gap: 6 },
+  greeting: { color: "#F8FAFC", fontSize: 20, fontWeight: "700" },
+  businessName: { color: "#94A3B8", fontSize: 14 },
+  badge: { alignSelf: "flex-start", flexDirection: "row", alignItems: "center", gap: 6, borderWidth: 1, borderColor: "rgba(52,211,153,0.2)", backgroundColor: "rgba(52,211,153,0.07)", borderRadius: 99, paddingHorizontal: 10, paddingVertical: 6, marginTop: 8 },
+  badgeText: { color: "#CBD5E1", fontSize: 12 },
+  dot: { width: 6, height: 6, borderRadius: 3 },
+  loading: { paddingVertical: 48 },
+  title: { fontSize: 20, fontWeight: "700", color: "#F8FAFC" },
+  stats: { flexDirection: "row", marginTop: 20 },
+  stat: { flex: 1, gap: 6, paddingHorizontal: 8 },
+  statDivider: { borderLeftWidth: 1, borderLeftColor: "rgba(148,163,184,0.16)" },
+  statValue: { fontSize: 20, fontWeight: "700", color: "#00D4FF" },
+  label: { fontSize: 12, color: "#94A3B8", lineHeight: 18 },
+  scope: { fontSize: 12, color: "#64748B", marginTop: 12, lineHeight: 18 },
+  statusRow: { flexDirection: "row", flexWrap: "wrap", gap: 16 },
+  statusItem: { flexDirection: "row", alignItems: "center", gap: 6 },
+  statusText: { color: "#94A3B8", fontSize: 12 },
+  statusNumber: { color: "#F8FAFC", fontWeight: "700" },
+  subtitle: { fontSize: 12, color: "#94A3B8", marginTop: 6, marginBottom: 20, lineHeight: 18 },
+  eyebrow: { color: "#00D4FF", fontSize: 12, fontWeight: "600", letterSpacing: 1, marginBottom: 8 },
+  channelRow: { flexDirection: "row", alignItems: "center", gap: 10, paddingVertical: 12 },
+  channelBorder: { borderTopWidth: 1, borderTopColor: "rgba(148,163,184,0.1)" },
+  channelIcon: { width: 36, height: 36, borderRadius: 12, alignItems: "center", justifyContent: "center" },
+  channelInfo: { flex: 1 },
+  body: { fontSize: 14, color: "#F8FAFC", lineHeight: 20 },
+  channelCount: { fontSize: 20, fontWeight: "700" },
+  sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", gap: 8, marginBottom: 16 },
+  link: { fontSize: 14, color: "#00D4FF", fontWeight: "600" },
+  bookingStrip: { gap: 12, paddingBottom: 2 },
+  emptyAction: { flexDirection: "row", alignItems: "center", gap: 8, marginTop: 16, paddingVertical: 8 },
+  error: { color: "#FB7185", fontSize: 14 },
 });

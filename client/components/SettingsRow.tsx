@@ -36,13 +36,13 @@ export function SettingsRow({
   const { theme } = useTheme();
 
   const textColor = disabled ? theme.textSecondary : destructive ? theme.error : theme.text;
-  const iconBgColor = destructive ? theme.error : theme.backgroundSecondary;
-  const rowBgColor = destructive ? theme.error + "15" : theme.backgroundDefault; // Add slight red tint
+  const iconBgColor = destructive ? "rgba(251,113,133,0.12)" : "#182338";
+  const rowBgColor = destructive ? "rgba(251,113,133,0.05)" : "#111827";
 
   const content = (
     <View style={[styles.row, { backgroundColor: rowBgColor }]}>
       <View style={[styles.iconContainer, { backgroundColor: iconBgColor }]}>
-        <Feather name={icon} size={20} color={destructive ? "white" : textColor} />
+        <Feather name={icon} size={18} color={destructive ? theme.error : "#00D4FF"} />
       </View>
       <View style={styles.content}>
         <ThemedText type="body" style={[styles.title, { color: textColor }]}>
@@ -95,8 +95,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: "row",
     alignItems: "center",
-    padding: Spacing.lg,
-    borderRadius: BorderRadius.md,
+    padding: 16,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.14)",
   },
   iconContainer: {
     width: 36,
@@ -110,13 +112,16 @@ const styles = StyleSheet.create({
     marginLeft: Spacing.lg,
   },
   title: {
+    fontSize: 14,
     fontWeight: "500",
   },
   subtitle: {
     opacity: 0.6,
     marginTop: Spacing.xs,
+    fontSize: 12,
   },
   value: {
     opacity: 0.6,
+    fontSize: 12,
   },
 });

@@ -1,404 +1,193 @@
-import React, { useState, useEffect } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  StyleSheet,
-  Pressable,
-  ImageBackground,
-  Platform,
-  Alert,
-} from "react-native";
-import { useFocusEffect, useNavigation } from "@react-navigation/native";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { View, Text, FlatList, StyleSheet, Pressable, TextInput, Alert, RefreshControl } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
-import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  FadeIn,
-  interpolate,
-  useAnimatedScrollHandler,
-} from "react-native-reanimated";
-
-import { Spacing } from "@/constants/theme";
-import { api, Customer } from "@/lib/api";
+import { api, Customer, CustomerInsightsResult, CustomerInsight, getCustomerInsights } from "@/lib/api";
 import { useI18n } from "@/contexts/I18nContext";
+import { CustomerCard } from "@/components/CustomerCard";
 
-const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
+const money = (amount: number, currency?: string | null) => {
+  try { return new Intl.NumberFormat(undefined, { style: "currency", currency: currency || "USD", maximumFractionDigits: 0 }).format(amount); }
+  catch { return `${amount}`; }
+};
 
-function GlassCustomerCard({ children, style }: { children: React.ReactNode; style?: any }) {
-  if (Platform.OS === "ios") {
-    return (
-      <BlurView intensity={40} tint="light" style={[styles.glassCard, style]}>
-        {children}
-      </BlurView>
-    );
-  }
+function InsightCustomer({ item, currency, onPress }: { item: CustomerInsight; currency: string; onPress: () => void }) {
   return (
-    <View style={[styles.glassCard, styles.glassCardAndroid, style]}>
-      {children}
-    </View>
-  );
-}
-
-function BookingRing({ count, maxCount = 10 }: { count: number; maxCount?: number }) {
-  const percentage = Math.min((count / maxCount) * 100, 100);
-  const strokeDasharray = 2 * Math.PI * 18;
-  const strokeDashoffset = strokeDasharray - (percentage / 100) * strokeDasharray;
-
-  return (
-    <View style={styles.ringContainer}>
-      <View style={styles.ringOuter}>
-        {percentage > 50 ? (
-          <View style={[styles.ringProgress, { 
-            borderTopColor: '#fff',
-            borderRightColor: '#fff',
-            borderBottomColor: percentage > 75 ? '#fff' : 'rgba(255,255,255,0.3)',
-            borderLeftColor: percentage > 75 ? '#fff' : 'rgba(255,255,255,0.3)',
-          }]} />
-        ) : (
-          <View style={[styles.ringProgress, { 
-            borderTopColor: percentage > 0 ? '#fff' : 'rgba(255,255,255,0.3)',
-            borderRightColor: percentage > 25 ? '#fff' : 'rgba(255,255,255,0.3)',
-            borderBottomColor: 'rgba(255,255,255,0.3)',
-            borderLeftColor: 'rgba(255,255,255,0.3)',
-          }]} />
-        )}
-        <Text style={styles.ringCount}>{count}</Text>
+    <Pressable onPress={onPress} style={({ pressed }) => [styles.insightRow, pressed && { opacity: 0.8 }]}>
+      <View style={styles.insightAvatar}><Text style={styles.insightInitial}>{item.name.split(/\s+/).map((s) => s[0]).join("").slice(0, 2).toUpperCase()}</Text></View>
+      <View style={{ flex: 1, minWidth: 0 }}>
+        <Text style={styles.insightName} numberOfLines={1}>{item.name}</Text>
+        <Text style={styles.insightMeta}>{item.totalBookings} viewings · {money(item.totalSpend, currency)}</Text>
       </View>
-    </View>
-  );
-}
-
-function CustomerCardCinematic({
-  name,
-  email,
-  phone,
-  totalBookings,
-  onPress,
-}: {
-  name: string;
-  email: string;
-  phone?: string;
-  totalBookings: number;
-  onPress: () => void;
-}) {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  const getInitials = (n: string) => {
-    const parts = n.trim().split(/\s+/);
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-    }
-    return n.slice(0, 2).toUpperCase();
-  };
-
-  const { t } = useI18n();
-
-  const getSegment = (bookings: number) => {
-    if (bookings >= 10) return { label: t('customers.vip'), color: "#FBBF24" };
-    if (bookings >= 3) return { label: t('customers.regular'), color: "#60A5FA" };
-    if (bookings === 0) return { label: t('customers.new'), color: "#34D399" };
-    return { label: t('customers.atRisk'), color: "#F87171" };
-  };
-
-  const segment = getSegment(totalBookings);
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <GlassCustomerCard>
-          <View style={styles.cardContent}>
-            <View style={styles.initialsCircle}>
-              <Text style={styles.initialsText}>{getInitials(name)}</Text>
-            </View>
-            <View style={styles.cardInfo}>
-              <View style={styles.nameSegmentRow}>
-                <Text style={styles.customerName}>{name}</Text>
-                <View style={[styles.segmentBadge, { backgroundColor: segment.color + '20', borderColor: segment.color }]}>
-                  <Text style={[styles.segmentText, { color: segment.color }]}>{segment.label}</Text>
-                </View>
-              </View>
-              <Text style={styles.customerEmail} numberOfLines={1}>{email}</Text>
-            </View>
-            <BookingRing count={totalBookings} />
-          </View>
-        </GlassCustomerCard>
-      </Pressable>
-    </Animated.View>
+      <Feather name="chevron-right" size={16} color="#65758C" />
+    </Pressable>
   );
 }
 
 export default function CustomersScreen() {
   const insets = useSafeAreaInsets();
   const tabBarHeight = useBottomTabBarHeight();
-  const navigation = useNavigation();
   const { t } = useI18n();
-
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [insights, setInsights] = useState<CustomerInsightsResult | null>(null);
   const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [query, setQuery] = useState("");
+  const [currency, setCurrency] = useState("USD");
 
-  const scrollY = useSharedValue(0);
-
-  const scrollHandler = useAnimatedScrollHandler({
-    onScroll: (event) => {
-      scrollY.value = event.contentOffset.y;
-    },
-  });
-
-  const headerAnimatedStyle = useAnimatedStyle(() => {
-    const translateY = interpolate(scrollY.value, [0, 100], [0, -20], 'clamp');
-    const opacity = interpolate(scrollY.value, [0, 80], [1, 0.8], 'clamp');
-    return {
-      transform: [{ translateY }],
-      opacity,
-    };
-  });
-
-  useEffect(() => {
-    initializeBusiness();
-  }, []);
-
-  useFocusEffect(
-    React.useCallback(() => {
-      if (api.getBusinessId()) {
-        loadCustomers();
-      }
-    }, [])
-  );
-
-  const initializeBusiness = async () => {
+  const loadCustomers = useCallback(async (refresh = false) => {
+    if (refresh) setRefreshing(true);
+    else setLoading(true);
     try {
-      await api.getOrCreateBusiness();
-      loadCustomers();
-    } catch (error) {
-      console.error("Error initializing business:", error);
-    }
-  };
-
-  const loadCustomers = async () => {
-    setLoading(true);
-    try {
-      const data = await api.getCustomers();
+      const business = await api.getOrCreateBusiness();
+      const [data, customerInsights] = await Promise.all([api.getCustomers(), getCustomerInsights(business.id)]);
       setCustomers(data);
+      setCurrency(business.currency || "USD");
+      setInsights(customerInsights);
     } catch (error) {
-      console.error("Error loading customers:", error);
+      console.error("Error loading clients:", error);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
+  }, []);
+
+  useEffect(() => { loadCustomers(); }, [loadCustomers]);
+  useFocusEffect(useCallback(() => {
+    if (api.getBusinessId()) loadCustomers(true);
+  }, [loadCustomers]));
+
+  const filteredCustomers = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    if (!needle) return customers;
+    return customers.filter((client) => client.name.toLowerCase().includes(needle) || client.email.toLowerCase().includes(needle) || (client.phone || "").toLowerCase().includes(needle));
+  }, [customers, query]);
+
+  const openClient = (customer: Customer) => {
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Alert.alert(customer.name, `${t("customers.email")}: ${customer.email}\n${t("customers.phone")}: ${customer.phone || t("common.na")}\n${t("customers.totalBookings")}: ${customer.totalBookings || 0}`, [{ text: t("common.close") }]);
+  };
+  const openInsightClient = (client: CustomerInsight) => {
+    const customer = customers.find((item) => item.id === client.id);
+    if (customer) openClient(customer);
+    else Alert.alert(client.name, `${client.email}\n${client.totalBookings} viewings · ${money(client.totalSpend, currency)}`, [{ text: t("common.close") }]);
   };
 
-  const handleSelectCustomer = (customer: Customer) => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
-    Alert.alert(
-      customer.name,
-      `${t('customers.email')}: ${customer.email}\n${t('customers.phone')}: ${customer.phone || t('common.na')}\n${t('customers.totalBookings')}: ${customer.totalBookings || 0}`,
-      [{ text: t('common.close'), style: "default" }]
-    );
-  };
-
-  const renderItem = ({ item }: { item: unknown }) => {
-    const customer = item as Customer;
-    return (
-      <CustomerCardCinematic
-        name={customer.name}
-        email={customer.email}
-        phone={customer.phone || undefined}
-        totalBookings={customer.totalBookings || 0}
-        onPress={() => handleSelectCustomer(customer)}
-      />
-    );
-  };
-
-  const renderEmptyState = () => (
-    <View style={styles.emptyState}>
-      <Feather name="users" size={48} color="rgba(255,255,255,0.2)" />
-      <Text style={styles.emptyTitle}>{t('customers.noCustomers')}</Text>
-      <Text style={styles.emptyMessage}>
-        {t('customers.noCustomersSubtitle')}
-      </Text>
+  const header = (
+    <View style={[styles.header, { paddingTop: insets.top + 18 }]}>
+      <View style={styles.eyebrow}><View style={styles.liveDot} /><Text style={styles.eyebrowText}>CLIENT DIRECTORY</Text></View>
+      <Text style={styles.title}>Clients</Text>
+      <Text style={styles.subtitle}>Every conversation, ready when you are.</Text>
+      <View style={styles.searchBox}>
+        <Feather name="search" size={18} color="#7C8BA0" />
+        <TextInput value={query} onChangeText={setQuery} placeholder="Search clients" placeholderTextColor="#69788D" style={styles.searchInput} returnKeyType="search" accessibilityLabel="Search clients" />
+        {query ? <Pressable onPress={() => setQuery("")} hitSlop={10}><Feather name="x-circle" size={17} color="#7C8BA0" /></Pressable> : null}
+      </View>
+      {!query && insights ? (
+        <>
+          <Text style={styles.sectionTitle}>Client pulse</Text>
+          <View style={styles.summaryCard}>
+            <View style={styles.summaryCell}><Text style={styles.summaryValue}>{insights.summary.totalCustomers}</Text><Text style={styles.summaryLabel}>TOTAL CLIENTS</Text></View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryCell}><Text style={styles.summaryValue}>{insights.summary.vipCount}</Text><Text style={styles.summaryLabel}>TOP CLIENTS</Text></View>
+            <View style={styles.summaryDivider} />
+            <View style={styles.summaryCell}><Text style={styles.summaryValue}>{insights.summary.atRiskCount}</Text><Text style={styles.summaryLabel}>AT RISK</Text></View>
+          </View>
+          {insights.topCustomers.length > 0 ? (
+            <View style={styles.insightPanel}>
+              <View style={styles.panelHeading}><View><Text style={styles.panelTitle}>Top clients</Text><Text style={styles.panelNote}>By confirmed booking value</Text></View><Feather name="award" size={17} color="#00D4FF" /></View>
+              {insights.topCustomers.slice(0, 3).map((item) => <InsightCustomer key={item.id} item={item} currency={currency} onPress={() => openInsightClient(item)} />)}
+            </View>
+          ) : null}
+          {insights.atRiskCustomers.length > 0 ? (
+            <View style={styles.insightPanel}>
+              <View style={styles.panelHeading}><View><Text style={styles.panelTitle}>Due for a follow-up</Text><Text style={styles.panelNote}>Clients who may need a nudge</Text></View><Feather name="activity" size={17} color="#FBBF24" /></View>
+              {insights.atRiskCustomers.slice(0, 3).map((item) => <InsightCustomer key={item.id} item={item} currency={currency} onPress={() => openInsightClient(item)} />)}
+            </View>
+          ) : null}
+          {insights.mostFrequentServices.length > 0 ? (
+            <View style={styles.insightPanel}>
+              <View style={styles.panelHeading}><View><Text style={styles.panelTitle}>Popular viewing types</Text><Text style={styles.panelNote}>Most requested by your clients</Text></View><Feather name="trending-up" size={17} color="#00D4FF" /></View>
+              {insights.mostFrequentServices.slice(0, 3).map((service) => (
+                <View key={service.name} style={styles.serviceInsight}>
+                  <Text style={styles.serviceInsightName}>{service.name}</Text>
+                  <Text style={styles.serviceInsightCount}>{service.count} bookings</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
+        </>
+      ) : null}
+      <View style={styles.listHeading}>
+        <Text style={styles.sectionTitle}>{query ? "Search results" : "All clients"}</Text>
+        <Text style={styles.resultCount}>{filteredCustomers.length}</Text>
+      </View>
     </View>
   );
 
   return (
-    <View style={styles.background}>
-      <View style={styles.gradientOverlay} />
-      <Animated.View 
-        entering={FadeIn.duration(600)}
-        style={styles.container}
-      >
-        <Animated.View style={[styles.header, { paddingTop: insets.top + 20 }, headerAnimatedStyle]}>
-          <Text style={styles.hugeTitle}>{t('customers.title')}</Text>
-        </Animated.View>
-
-        <AnimatedFlatList
-          onScroll={scrollHandler}
-          scrollEventThrottle={16}
-          contentContainerStyle={{
-            paddingHorizontal: 24,
-            paddingBottom: tabBarHeight + 100,
-            gap: 16,
-          }}
-          data={customers}
-          renderItem={renderItem}
-          keyExtractor={(item) => (item as Customer).id}
-          scrollEnabled={customers.length > 0}
-          ListEmptyComponent={!loading ? renderEmptyState : null}
-          showsVerticalScrollIndicator={false}
-        />
-      </Animated.View>
+    <View style={styles.screen}>
+      <FlatList
+        data={filteredCustomers}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item }) => <CustomerCard name={item.name} email={item.email} phone={item.phone || undefined} totalBookings={item.totalBookings || 0} onPress={() => openClient(item)} />}
+        ListHeaderComponent={header}
+        ListEmptyComponent={!loading ? (
+          <View style={styles.empty}>
+            <View style={styles.emptyIcon}><Feather name={query ? "search" : "users"} size={21} color="#00D4FF" /></View>
+            <Text style={styles.emptyTitle}>{query ? "No matching clients" : "Your client book is clear"}</Text>
+            <Text style={styles.emptyCopy}>{query ? "Try another name, email or number." : "New viewing enquiries will appear here."}</Text>
+          </View>
+        ) : (
+          <View style={styles.skeletonList}>{[1, 2, 3].map((id) => <View key={id} style={styles.skeleton} />)}</View>
+        )}
+        contentContainerStyle={[styles.list, { paddingBottom: tabBarHeight + 28 }]}
+        ItemSeparatorComponent={() => <View style={{ height: 10 }} />}
+        showsVerticalScrollIndicator={false}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => loadCustomers(true)} tintColor="#00D4FF" />}
+      />
     </View>
   );
 }
 
 const styles = StyleSheet.create({
-  background: {
-    flex: 1,
-    backgroundColor: "#0A0A0F",
-  },
-  gradientOverlay: {
-    ...StyleSheet.absoluteFillObject,
-    backgroundColor: "rgba(0,0,0,0.15)",
-  },
-  container: {
-    flex: 1,
-  },
-  header: {
-    paddingHorizontal: 24,
-    marginBottom: 24,
-  },
-  hugeTitle: {
-    fontSize: 44,
-    fontWeight: "700",
-    color: "#fff",
-    letterSpacing: -3,
-    lineHeight: 54,
-    paddingBottom: 8,
-    textShadowColor: "rgba(0,212,255,0.3)",
-    textShadowOffset: { width: 0, height: 0 },
-    textShadowRadius: 30,
-  },
-  glassCard: {
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: "rgba(0,212,255,0.18)",
-    padding: 16,
-    overflow: "hidden",
-  },
-  glassCardAndroid: {
-    backgroundColor: "#111827",
-  },
-  cardContent: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  initialsCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 2,
-    borderColor: "rgba(0,212,255,0.45)",
-    backgroundColor: "rgba(0,212,255,0.1)",
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  initialsText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  cardInfo: {
-    flex: 1,
-    marginLeft: 16,
-    marginRight: 12,
-  },
-  customerName: {
-    fontSize: 17,
-    fontWeight: "600",
-    color: "#fff",
-  },
-  nameSegmentRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-    marginBottom: 2,
-  },
-  segmentBadge: {
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 6,
-    borderWidth: 1,
-  },
-  segmentText: {
-    fontSize: 9,
-    fontWeight: "800",
-    letterSpacing: 0.5,
-  },
-  customerEmail: {
-    fontSize: 14,
-    color: "rgba(255,255,255,0.6)",
-  },
-  ringContainer: {
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  ringOuter: {
-    width: 48,
-    height: 48,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  ringProgress: {
-    position: "absolute",
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    borderWidth: 3,
-  },
-  ringCount: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: "#fff",
-  },
-  emptyState: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    paddingTop: 100,
-  },
-  emptyTitle: {
-    fontSize: 24,
-    fontWeight: "600",
-    color: "#fff",
-    marginTop: 16,
-    marginBottom: 8,
-  },
-  emptyMessage: {
-    fontSize: 16,
-    color: "rgba(255,255,255,0.6)",
-    textAlign: "center",
-  },
+  screen: { flex: 1, backgroundColor: "#0A0A0F" },
+  list: { paddingHorizontal: 20 },
+  header: { paddingBottom: 20 },
+  eyebrow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 10 },
+  liveDot: { width: 6, height: 6, borderRadius: 3, backgroundColor: "#00D4FF" },
+  eyebrowText: { color: "#8291A8", fontSize: 12, fontWeight: "700", letterSpacing: 1.4 },
+  title: { color: "#F2F6FC", fontSize: 20, fontWeight: "700", letterSpacing: -0.2 },
+  subtitle: { color: "#95A3B7", fontSize: 14, marginTop: 5, marginBottom: 20 },
+  searchBox: { height: 50, borderRadius: 15, flexDirection: "row", alignItems: "center", gap: 11, paddingHorizontal: 15, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  searchInput: { flex: 1, color: "#EFF5FC", fontSize: 14, paddingVertical: 0 },
+  sectionTitle: { color: "#F2F6FC", fontSize: 20, fontWeight: "700" },
+  summaryCard: { flexDirection: "row", alignItems: "center", marginTop: 13, padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  summaryCell: { flex: 1, alignItems: "center" },
+  summaryValue: { color: "#F2F6FC", fontSize: 20, fontWeight: "700" },
+  summaryLabel: { color: "#7F8DA2", fontSize: 12, fontWeight: "700", letterSpacing: 0.8, marginTop: 4 },
+  summaryDivider: { width: 1, height: 28, backgroundColor: "rgba(255,255,255,0.08)" },
+  insightPanel: { marginTop: 24, padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.14)" },
+  panelHeading: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 8 },
+  panelTitle: { color: "#EAF1FA", fontSize: 20, fontWeight: "700" },
+  panelNote: { color: "#75849A", fontSize: 12, marginTop: 3 },
+  insightRow: { flexDirection: "row", alignItems: "center", paddingVertical: 9, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.045)" },
+  insightAvatar: { width: 32, height: 32, borderRadius: 11, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,212,255,0.10)", marginRight: 10 },
+  insightInitial: { color: "#00D4FF", fontSize: 12, fontWeight: "800" },
+  insightName: { color: "#EAF1FA", fontSize: 14, fontWeight: "600" },
+  insightMeta: { color: "#8593A8", fontSize: 12, marginTop: 3 },
+  serviceInsight: { flexDirection: "row", justifyContent: "space-between", paddingVertical: 9, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.045)" },
+  serviceInsightName: { color: "#EAF1FA", fontSize: 14, fontWeight: "600" },
+  serviceInsightCount: { color: "#8998AE", fontSize: 12 },
+  listHeading: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginTop: 24, marginBottom: 12 },
+  resultCount: { color: "#00D4FF", fontSize: 12, fontWeight: "700" },
+  empty: { alignItems: "center", padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.12)" },
+  emptyIcon: { width: 46, height: 46, borderRadius: 16, backgroundColor: "rgba(0,212,255,0.10)", alignItems: "center", justifyContent: "center", marginBottom: 12 },
+  emptyTitle: { color: "#EAF1FA", fontSize: 20, fontWeight: "700" },
+  emptyCopy: { color: "#8291A7", fontSize: 14, textAlign: "center", marginTop: 6 },
+  skeletonList: { gap: 10 },
+  skeleton: { height: 88, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.08)" },
 });

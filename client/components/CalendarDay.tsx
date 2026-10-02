@@ -8,7 +8,7 @@ import Animated, {
 } from "react-native-reanimated";
 import { ThemedText } from "@/components/ThemedText";
 import { useTheme } from "@/hooks/useTheme";
-import { Spacing, AnimationConfig } from "@/constants/theme";
+import { AnimationConfig } from "@/constants/theme";
 
 interface CalendarDayProps {
   day: number;
@@ -47,7 +47,7 @@ export function CalendarDay({
 
   const getBackgroundColor = () => {
     if (isSelected) return theme.accent;
-    if (hasBookings) return theme.backgroundSecondary;
+    if (hasBookings) return "rgba(0,212,255,0.10)";
     return "transparent";
   };
 
@@ -90,13 +90,14 @@ export function CalendarDay({
 
 const styles = StyleSheet.create({
   day: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+    width: 42,
+    height: 42,
+    borderRadius: 15,
     justifyContent: "center",
     alignItems: "center",
   },
   dayText: {
-    fontWeight: "500",
+    fontWeight: "600",
+    fontSize: 14,
   },
 });

@@ -3,7 +3,7 @@ import { getApiUrl, apiRequest } from "@/lib/query-client";
 
 interface VoiceSubscription {
   tier: "free" | "starter" | "pro" | "business";
-  status: "active" | "canceled" | "past_due" | "trialing";
+  status: "active" | "canceled" | "past_due" | "trialing" | "inactive";
   minutesLimit: number;
   minutesUsed: number;
   periodStart: string;
@@ -75,7 +75,7 @@ export function useVoiceSubscription(businessId: string, ownerToken: string) {
       const url = new URL(`/api/businesses/${businessId}/voice-subscription`, getApiUrl());
       const response = await fetch(url.toString(), {
         headers: {
-          Authorization: `Bearer ${ownerToken}`,
+          "x-business-token": ownerToken,
         },
       });
       if (!response.ok) {
@@ -114,7 +114,7 @@ export function useVoiceCallLogs(businessId: string, ownerToken: string, limit =
       const url = new URL(`/api/businesses/${businessId}/voice-calls?limit=${limit}`, getApiUrl());
       const response = await fetch(url.toString(), {
         headers: {
-          Authorization: `Bearer ${ownerToken}`,
+          "x-business-token": ownerToken,
         },
       });
       if (!response.ok) {

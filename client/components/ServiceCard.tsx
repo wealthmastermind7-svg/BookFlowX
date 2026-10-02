@@ -1,15 +1,10 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, AnimationConfig } from "@/constants/theme";
+import { AnimationConfig } from "@/constants/theme";
 import { formatPriceSimple } from "@/lib/currency";
 
 interface ServiceCardProps {
@@ -20,142 +15,58 @@ interface ServiceCardProps {
   bookingRate?: number;
   onPress?: () => void;
   compact?: boolean;
+  isActive?: boolean | null;
+  description?: string | null;
 }
 
-export function ServiceCard({
-  name,
-  duration,
-  price,
-  currency = "USD",
-  bookingRate,
-  onPress,
-  compact = false,
-}: ServiceCardProps) {
-  const { theme } = useTheme();
+export function ServiceCard({ name, duration, price, currency = "USD", onPress, compact = false, isActive, description }: ServiceCardProps) {
   const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98, AnimationConfig.spring);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, AnimationConfig.spring);
-  };
-
-  const formatDuration = (mins: number) => {
-    if (mins >= 60) {
-      const hours = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
-    }
-    return `${mins}m`;
-  };
-
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const durationLabel = duration >= 60 ? `${Math.floor(duration / 60)}h${duration % 60 ? ` ${duration % 60}m` : ""}` : `${duration} min`;
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={[
-          styles.card,
-          compact ? styles.cardCompact : null,
-          { backgroundColor: theme.backgroundDefault },
-        ]}
+        onPressIn={() => { scale.value = withSpring(0.985, AnimationConfig.spring); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+        onPressOut={() => { scale.value = withSpring(1, AnimationConfig.spring); }}
+        style={({ pressed }) => [styles.card, compact && styles.compact, pressed && styles.pressed]}
+        accessibilityRole={onPress ? "button" : undefined}
       >
-      <View style={styles.header}>
-        <ThemedText type={compact ? "h4" : "h3"} style={styles.name}>
-          {name}
-        </ThemedText>
-        <Feather name="chevron-right" size={24} color={theme.textSecondary} />
-      </View>
-      <View style={styles.details}>
-        <View style={styles.detailItem}>
-          <Feather name="clock" size={16} color={theme.textSecondary} />
-          <ThemedText type="body" style={styles.detailText}>
-            {formatDuration(duration)}
-          </ThemedText>
-        </View>
-        <ThemedText type={compact ? "h3" : "h2"} style={styles.price}>
-          {formatPriceSimple(price, currency)}
-        </ThemedText>
-      </View>
-      {bookingRate !== undefined && !compact ? (
-        <View style={styles.meterContainer}>
-          <View style={styles.meterBackground}>
-            <View
-              style={[
-                styles.meterFill,
-                {
-                  width: `${bookingRate}%`,
-                  backgroundColor: theme.accent,
-                },
-              ]}
-            />
+        <View style={styles.topRow}>
+          <View style={styles.icon}><Feather name="home" size={17} color="#00D4FF" /></View>
+          <View style={styles.heading}>
+            <ThemedText style={styles.name} numberOfLines={1}>{name}</ThemedText>
+            {description ? <ThemedText style={styles.description} numberOfLines={1}>{description}</ThemedText> : null}
           </View>
-          <ThemedText type="caption" style={styles.meterLabel}>
-            {bookingRate}% booked this week
-          </ThemedText>
+          {isActive !== undefined && isActive !== null ? <View style={[styles.state, isActive ? styles.active : styles.inactive]}><ThemedText style={[styles.stateText, isActive ? styles.activeText : styles.inactiveText]}>{isActive ? "LIVE" : "PAUSED"}</ThemedText></View> : null}
+          {onPress ? <Feather name="chevron-right" size={17} color="#66758D" /> : null}
         </View>
-      ) : null}
+        <View style={styles.footer}>
+          <View style={styles.duration}><Feather name="clock" size={13} color="#92A1B5" /><ThemedText style={styles.durationText}>{durationLabel}</ThemedText></View>
+          <ThemedText style={styles.price}>{formatPriceSimple(price, currency)}</ThemedText>
+        </View>
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: Spacing["2xl"],
-    borderRadius: BorderRadius.xl,
-  },
-  cardCompact: {
-    padding: Spacing.xl,
-  },
-  header: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    marginBottom: Spacing.lg,
-  },
-  name: {
-    flex: 1,
-  },
-  details: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-  },
-  detailItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: Spacing.sm,
-  },
-  detailText: {
-    opacity: 0.7,
-  },
-  price: {
-    fontWeight: "200",
-  },
-  meterContainer: {
-    marginTop: Spacing.lg,
-  },
-  meterBackground: {
-    height: 4,
-    borderRadius: 2,
-    backgroundColor: "rgba(0,0,0,0.1)",
-    overflow: "hidden",
-  },
-  meterFill: {
-    height: "100%",
-    borderRadius: 2,
-  },
-  meterLabel: {
-    marginTop: Spacing.xs,
-    opacity: 0.5,
-  },
+  card: { padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  compact: { padding: 16 },
+  pressed: { opacity: 0.88 },
+  topRow: { flexDirection: "row", alignItems: "center", gap: 11 },
+  icon: { width: 38, height: 38, borderRadius: 12, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,212,255,0.1)" },
+  heading: { flex: 1, minWidth: 0 },
+  name: { color: "#F2F6FC", fontSize: 14, fontWeight: "700" },
+  description: { color: "#8796AC", fontSize: 12, marginTop: 3 },
+  state: { borderRadius: 7, paddingHorizontal: 7, paddingVertical: 4 },
+  active: { backgroundColor: "rgba(52,211,153,0.12)" },
+  inactive: { backgroundColor: "rgba(148,163,184,0.12)" },
+  stateText: { fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
+  activeText: { color: "#34D399" },
+  inactiveText: { color: "#94A3B8" },
+  footer: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginTop: 14, paddingTop: 12, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.06)" },
+  duration: { flexDirection: "row", alignItems: "center", gap: 6 },
+  durationText: { color: "#9AA8BC", fontSize: 12 },
+  price: { color: "#00D4FF", fontSize: 14, fontWeight: "700" },
 });

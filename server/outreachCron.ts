@@ -1,4 +1,5 @@
 import Postmark from "postmark";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 import * as net from "net";
 import * as dns from "dns";
 import { promisify } from "util";
@@ -159,7 +160,7 @@ function renderConfirmationPreview(businessName: string, niche: string = "real-e
 }
 
 function buildOutreachEmail(businessName: string, bookingLink: string, slug: string, niche: string): string {
-  const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}`;
+  const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}?destination=canvas`;
 
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
@@ -280,7 +281,7 @@ async function sendOutreachEmail(lead: ProspectedLead): Promise<boolean> {
   }
 
   const client = new Postmark.ServerClient(token);
-  const bookingLink = `${DOMAIN}/book/${lead.slug}?niche=${encodeURIComponent(lead.niche)}`;
+  const bookingLink = `${getCustomerBookingUrl(lead.slug)}?niche=${encodeURIComponent(lead.niche)}`;
   const emailHtml = buildOutreachEmail(lead.businessName, bookingLink, lead.slug, lead.niche);
 
   try {

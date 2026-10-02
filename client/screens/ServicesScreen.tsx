@@ -5,7 +5,6 @@ import {
   FlatList,
   StyleSheet,
   Pressable,
-  ImageBackground,
   Platform,
   Modal,
   TextInput,
@@ -18,24 +17,16 @@ import { useFocusEffect, useNavigation } from "@react-navigation/native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { BlurView } from "expo-blur";
 import { Feather } from "@expo/vector-icons";
 import * as Haptics from "expo-haptics";
-import { KeyboardAwareScrollView } from "react-native-keyboard-controller";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  FadeIn,
-} from "react-native-reanimated";
-import Svg, { Path, Text as SvgText } from "react-native-svg";
+import Animated, { FadeIn } from "react-native-reanimated";
 
-import { Spacing } from "@/constants/theme";
 import { api, Service, Business } from "@/lib/api";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { formatPriceSimple } from "@/lib/currency";
 import { getApiUrl } from "@/lib/query-client";
 import { useI18n } from "@/contexts/I18nContext";
+import { ServiceCard } from "@/components/ServiceCard";
 
 interface AIGeneratedService {
   name: string;
@@ -51,140 +42,7 @@ interface AIGeneratedAddon {
   price: number;
 }
 
-const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
-
 type Navigation = NativeStackNavigationProp<RootStackParamList>;
-
-function GlassServiceCard({ children, style }: { children: React.ReactNode; style?: any }) {
-  if (Platform.OS === "ios") {
-    return (
-      <BlurView intensity={40} tint="dark" style={[styles.glassCard, style]}>
-        {children}
-      </BlurView>
-    );
-  }
-  return (
-    <View style={[styles.glassCard, styles.glassCardAndroid, style]}>
-      {children}
-    </View>
-  );
-}
-
-function CircularMeter({ percentage }: { percentage: number }) {
-  const radius = 15.9155;
-  const circumference = 2 * Math.PI * radius;
-  const strokeDasharray = `${(percentage / 100) * circumference} ${circumference}`;
-  
-  return (
-    <View style={styles.meterContainer}>
-      <Svg viewBox="0 0 36 36" style={styles.circularChart}>
-        <Path
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          fill="none"
-          stroke="rgba(255, 255, 255, 0.15)"
-          strokeWidth="3.8"
-        />
-        <Path
-          d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-          fill="none"
-          stroke="#fff"
-          strokeWidth="2.8"
-          strokeLinecap="round"
-          strokeDasharray={strokeDasharray}
-        />
-        <SvgText
-          x="18"
-          y="17.5"
-          fill="#fff"
-          fontSize="6"
-          fontWeight="700"
-          textAnchor="middle"
-        >
-          {percentage}%
-        </SvgText>
-        <SvgText
-          x="18"
-          y="23.5"
-          fill="rgba(255, 255, 255, 0.6)"
-          fontSize="2.5"
-          fontWeight="600"
-          textAnchor="middle"
-        >
-          BOOKED
-        </SvgText>
-      </Svg>
-    </View>
-  );
-}
-
-function ServiceCardCinematic({
-  name,
-  duration,
-  price,
-  currency,
-  bookingRate,
-  onPress,
-}: {
-  name: string;
-  duration: number;
-  price: number;
-  currency: string;
-  bookingRate: number;
-  onPress: () => void;
-}) {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98);
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); } catch {}
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1);
-  };
-
-  const formatDuration = (mins: number) => {
-    if (mins >= 60) {
-      const hours = Math.floor(mins / 60);
-      const remainingMins = mins % 60;
-      return remainingMins > 0 ? `${hours}h ${remainingMins}m` : `${hours}h`;
-    }
-    return `${mins}m`;
-  };
-
-  return (
-    <Animated.View style={animatedStyle}>
-      <Pressable
-        onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-      >
-        <GlassServiceCard>
-          <View style={styles.cardContent}>
-            <View style={styles.cardLeft}>
-              <Text style={styles.serviceName}>{name}</Text>
-              <View style={styles.serviceDetails}>
-                <Text style={styles.durationText}>
-                  {formatDuration(duration)}
-                </Text>
-                <View style={styles.dotSeparator} />
-                <Text style={styles.priceText}>
-                  {formatPriceSimple(price, currency)}
-                </Text>
-              </View>
-            </View>
-            <CircularMeter percentage={bookingRate} />
-            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.3)" style={styles.chevron} />
-          </View>
-        </GlassServiceCard>
-      </Pressable>
-    </Animated.View>
-  );
-}
 
 export default function ServicesScreen() {
   const insets = useSafeAreaInsets();
@@ -357,12 +215,13 @@ export default function ServicesScreen() {
   };
 
   const renderItem = ({ item }: { item: Service }) => (
-    <ServiceCardCinematic
+    <ServiceCard
       name={item.name}
       duration={item.duration}
       price={item.price / 100}
       currency={business?.currency || "USD"}
-      bookingRate={Math.floor(Math.random() * 100)}
+      isActive={item.isActive}
+      description={item.description}
       onPress={() => handleSelectService(item.id)}
     />
   );
@@ -407,7 +266,7 @@ export default function ServicesScreen() {
               </Text>
               <TextInput
                 style={styles.aiInput}
-                placeholder="e.g., I offer 30-minute haircuts for $25, color treatments for 2 hours at $150..."
+                placeholder="For example: weekday rental viewings, 30 minutes each; open-home inspections on Saturday..."
                 placeholderTextColor="rgba(255,255,255,0.4)"
                 multiline
                 numberOfLines={4}
@@ -505,7 +364,7 @@ export default function ServicesScreen() {
   );
 
   return (
-    <View style={styles.background}>
+      <View style={styles.background}>
       <View style={styles.gradientOverlay} />
       <Animated.View 
         entering={FadeIn.duration(600)}
@@ -513,7 +372,7 @@ export default function ServicesScreen() {
       >
         <View style={[styles.header, { paddingTop: insets.top + 20 }]}>
           <View style={styles.headerTitleRow}>
-              <Text style={styles.hugeTitle} numberOfLines={1} adjustsFontSizeToFit>{t('services.title')}</Text>
+              <Text style={styles.hugeTitle} numberOfLines={1} adjustsFontSizeToFit>Viewing types</Text>
               <View style={styles.assistantContextContainer}>
                 <Text style={styles.assistantContextText}>Assistant Setup</Text>
                 <Pressable 
@@ -521,9 +380,9 @@ export default function ServicesScreen() {
                   onPress={handleAISetup}
                   hitSlop={8}
                 >
-                  <BlurView intensity={30} tint="light" style={styles.aiHeaderBlur}>
+                  <View style={styles.aiHeaderBlur}>
                     <Feather name="zap" size={18} color="#fff" />
-                  </BlurView>
+                  </View>
                 </Pressable>
               </View>
           </View>
@@ -531,14 +390,14 @@ export default function ServicesScreen() {
 
         <FlatList
           contentContainerStyle={{
-            paddingHorizontal: 24,
+            paddingHorizontal: 20,
             paddingBottom: tabBarHeight + 100,
-            gap: 20,
+            gap: 24,
           }}
           data={services}
           renderItem={renderItem}
           keyExtractor={(item) => item.id}
-          scrollEnabled={services.length > 0}
+          scrollEnabled
           ListEmptyComponent={!loading ? renderEmptyState : null}
           showsVerticalScrollIndicator={false}
         />
@@ -572,17 +431,14 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   header: {
-    paddingHorizontal: 24,
-    marginBottom: 32,
+    paddingHorizontal: 20,
+    marginBottom: 24,
   },
   hugeTitle: {
-    fontSize: 42,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
-    letterSpacing: -1,
-    textShadowColor: "rgba(0,0,0,0.5)",
-    textShadowOffset: { width: 0, height: 2 },
-    textShadowRadius: 10,
+    letterSpacing: -0.4,
     flex: 1,
   },
   headerTitleRow: {
@@ -603,10 +459,10 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.1)",
   },
   glassCard: {
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(0,212,255,0.18)",
-    padding: 24,
+    padding: 16,
     overflow: "hidden",
   },
   glassCardAndroid: {
@@ -621,11 +477,11 @@ const styles = StyleSheet.create({
     paddingRight: 16,
   },
   serviceName: {
-    fontSize: 28,
+    fontSize: 14,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 8,
-    lineHeight: 32,
+    lineHeight: 22,
   },
   serviceDetails: {
     flexDirection: "row",
@@ -633,7 +489,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   durationText: {
-    fontSize: 16,
+    fontSize: 12,
     color: "rgba(255,255,255,0.7)",
     fontWeight: "500",
   },
@@ -644,7 +500,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(255,255,255,0.3)",
   },
   priceText: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#4ade80",
     fontWeight: "500",
   },
@@ -681,14 +537,14 @@ const styles = StyleSheet.create({
     paddingTop: 100,
   },
   emptyTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     marginTop: 16,
     marginBottom: 8,
   },
   emptyMessage: {
-    fontSize: 16,
+    fontSize: 14,
     color: "rgba(255,255,255,0.6)",
     textAlign: "center",
     marginBottom: 24,
@@ -704,7 +560,7 @@ const styles = StyleSheet.create({
   },
   aiSetupText: {
     color: "#0A0A0F",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
   orText: {
@@ -722,9 +578,9 @@ const styles = StyleSheet.create({
   },
   modalContent: {
     backgroundColor: "#111",
-    borderTopLeftRadius: 32,
-    borderTopRightRadius: 32,
-    padding: 24,
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    padding: 16,
     maxHeight: "70%",
   },
   reviewContainer: {
@@ -740,7 +596,7 @@ const styles = StyleSheet.create({
   },
   noServicesText: {
     color: "rgba(255,255,255,0.5)",
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     padding: 24,
   },
@@ -754,7 +610,7 @@ const styles = StyleSheet.create({
     marginBottom: 24,
   },
   modalTitle: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
   },
@@ -775,7 +631,7 @@ const styles = StyleSheet.create({
     fontWeight: "600",
   },
   modalSubtitle: {
-    fontSize: 16,
+    fontSize: 14,
     color: "rgba(255,255,255,0.6)",
     marginBottom: 20,
   },
@@ -784,7 +640,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     padding: 16,
     color: "#fff",
-    fontSize: 16,
+    fontSize: 14,
     minHeight: 180,
     maxHeight: 300,
     borderWidth: 1,
@@ -802,7 +658,7 @@ const styles = StyleSheet.create({
   },
   aiGenerateText: {
     color: "#0A0A0F",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
   buttonDisabled: {
@@ -810,14 +666,14 @@ const styles = StyleSheet.create({
   },
   aiServiceCard: {
     backgroundColor: "rgba(255,255,255,0.05)",
-    borderRadius: 16,
+    borderRadius: 20,
     padding: 16,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.1)",
   },
   aiServiceName: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 4,
@@ -836,7 +692,7 @@ const styles = StyleSheet.create({
     color: "rgba(255,255,255,0.5)",
   },
   aiServicePrice: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: "#4ade80",
   },
@@ -854,7 +710,7 @@ const styles = StyleSheet.create({
   },
   aiBackText: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
   },
   aiConfirmButton: {
@@ -866,7 +722,7 @@ const styles = StyleSheet.create({
   },
   aiConfirmText: {
     color: "#0A0A0F",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
   },
   sectionLabel: {
@@ -885,8 +741,8 @@ const styles = StyleSheet.create({
   },
   aiAddonCard: {
     backgroundColor: "rgba(74, 222, 128, 0.08)",
-    borderRadius: 12,
-    padding: 12,
+    borderRadius: 20,
+    padding: 16,
     marginBottom: 8,
     borderWidth: 1,
     borderColor: "rgba(74, 222, 128, 0.2)",
@@ -897,12 +753,12 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   aiAddonName: {
-    fontSize: 15,
+    fontSize: 14,
     fontWeight: "600",
     color: "#fff",
   },
   aiAddonDesc: {
-    fontSize: 13,
+    fontSize: 12,
     color: "rgba(255,255,255,0.5)",
     marginBottom: 6,
     marginLeft: 22,

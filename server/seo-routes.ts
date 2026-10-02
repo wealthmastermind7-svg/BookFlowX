@@ -1,4 +1,5 @@
 import type { Application, Request, Response } from "express";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 import { initTools, TOOLS_LIST } from "./seo-tools";
 import Postmark from "postmark";
 import QRCode from "qrcode";
@@ -127,7 +128,7 @@ function renderReminderPreview(businessName: string, niche: string = "real-estat
 }
 
 function getEmailTemplate(businessName: string, bookingLink: string, slug: string, niche: string = "real-estate-agents"): string {
-  const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}`;
+  const qrImageUrl = `${DOMAIN}/api/qr/${encodeURIComponent(slug)}?destination=canvas`;
 
   return `
     <div style="background-color: #000; color: #f5f5f7; font-family: 'Inter', sans-serif; padding: 40px; border-radius: 24px; max-width: 600px; margin: 0 auto; border: 1px solid rgba(255,255,255,0.1);">
@@ -1327,7 +1328,7 @@ export function registerSeoRoutes(app: Application): void {
   app.get("/api/qr/:slug", async (req: Request, res: Response) => {
     try {
       const { slug } = req.params;
-      const bookingUrl = `https://confirmbooking.online/book/${slug}`;
+      const bookingUrl = getCustomerBookingUrl(slug);
       const qrBuffer = await QRCode.toBuffer(bookingUrl, {
         width: 400,
         margin: 2,
@@ -1336,7 +1337,7 @@ export function registerSeoRoutes(app: Application): void {
         type: "png" as const
       });
       res.set("Content-Type", "image/png");
-      res.set("Cache-Control", "public, max-age=86400");
+      res.set("Cache-Control", "public, max-age=0, must-revalidate");
       res.send(qrBuffer);
     } catch (e: any) {
       console.error("QR generation error:", e);
@@ -1354,7 +1355,7 @@ export function registerSeoRoutes(app: Application): void {
     
     try {
       const client = new Postmark.ServerClient(process.env.POSTMARK_SERVER_TOKEN!);
-      const bookingLink = niche ? `https://confirmbooking.online/book/${slug}?niche=${encodeURIComponent(niche)}` : `https://confirmbooking.online/book/${slug}`;
+      const bookingLink = `${getCustomerBookingUrl(slug)}${niche ? `?niche=${encodeURIComponent(niche)}` : ""}`;
       const emailHtml = getEmailTemplate(businessName, bookingLink, slug, niche);
       await client.sendEmail({
         From: `BookFlow - ${businessName} <hello@confirmbooking.online>`,

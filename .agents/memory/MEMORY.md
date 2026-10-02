@@ -1,2 +1,4 @@
 - [Property positioning and existing customers](property-positioning.md) — keep the property-first message for new users without rewriting existing businesses' data.
 - [Stripe credential scoping](stripe-credentials.md) — keep connector-managed dev/live credentials separate; development authentication does not establish production readiness.
+- [Owner navigation and booking links](owner-ui-decisions.md) — five owner tabs; Assistant lives in Settings; cosmetic short links must not replace live booking destinations.
+- [Expo preview routing](expo-preview-routing.md) — the Expo web preview origin is distinct from Express; verify same-origin API forwarding rather than assume port 5000.

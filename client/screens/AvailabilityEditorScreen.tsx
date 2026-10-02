@@ -358,11 +358,11 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   hugeTitle: {
-    fontSize: 56,
+    fontSize: 28,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: -2,
-    lineHeight: 60,
+    lineHeight: 34,
     textShadowColor: "rgba(0, 0, 0, 0.75)",
     textShadowOffset: { width: 0, height: 2 },
     textShadowRadius: 10,
@@ -378,8 +378,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
   dayCard: {
-    marginBottom: 20,
-    padding: 24,
+    marginBottom: 16,
+    padding: 16,
   },
   dayHeader: {
     flexDirection: "row",
@@ -387,13 +387,13 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   dayName: {
-    fontSize: 28,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
     letterSpacing: -1,
   },
   timeSection: {
-    marginTop: 24,
+    marginTop: 20,
   },
   timeRow: {
     marginBottom: 20,

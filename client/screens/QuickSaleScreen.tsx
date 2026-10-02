@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.lg,
   },
   headerTitle: {
-    ...Typography.h3,
+    ...Typography.h4,
   },
   headerSubtitle: {
     ...Typography.body,
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
     marginRight: Spacing.xs,
   },
   amountText: {
-    fontSize: 72,
+    fontSize: 48,
     fontWeight: "200",
     letterSpacing: -2,
   },
@@ -680,7 +680,7 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.md,
   },
   successAmount: {
-    fontSize: 48,
+    fontSize: 36,
     fontWeight: "200",
     marginBottom: Spacing.lg,
   },

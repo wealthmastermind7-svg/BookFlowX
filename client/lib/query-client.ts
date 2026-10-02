@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { CUSTOMER_BOOKING_DOMAIN } from "@shared/booking-links";
 
 /**
  * Gets the base URL for the Express API server (e.g., "http://localhost:3000")
@@ -88,64 +89,7 @@ export function getApiUrl(): string {
  * @returns {string} The clean domain (e.g., "confirmbooking.online")
  */
 export function getBookingDomain(): string {
-  // Check if we're in a true browser environment (not React Native)
-  const isRealBrowser = typeof window !== "undefined" && 
-    window.location && 
-    typeof window.location.hostname === "string" && 
-    window.location.hostname.length > 0;
-
-  if (isRealBrowser) {
-    const currentHost = window.location.hostname;
-    
-    // If running on Replit domain, use localhost for development
-    if (currentHost.includes("replit.dev") || currentHost.includes("replit.app")) {
-      return "localhost:5000";
-    }
-    
-    // If running on custom production domain or localhost, use it
-    if (currentHost.includes("confirmbooking.online") || currentHost === "localhost" || currentHost === "127.0.0.1") {
-      // For production domain, just use the domain
-      if (currentHost.includes("confirmbooking.online")) {
-        return currentHost;
-      }
-      // For localhost, include port
-      return currentHost === "localhost" ? "localhost:5000" : currentHost;
-    }
-  }
-
-  // For native apps (Expo Go, TestFlight, etc.)
-  // First try expo-constants (works for TestFlight/production builds)
-  try {
-    const Constants = require("expo-constants").default;
-    // Try multiple paths for different Expo SDK versions
-    const apiDomain = 
-      Constants?.expoConfig?.extra?.apiDomain ||
-      Constants?.manifest?.extra?.apiDomain ||
-      Constants?.manifest2?.extra?.expoClient?.extra?.apiDomain ||
-      "";
-    
-    if (apiDomain && apiDomain.length > 0) {
-      return apiDomain.replace(/^https?:\/\//, "");
-    }
-  } catch (e) {
-    // expo-constants not available
-  }
-
-  // Try EXPO_PUBLIC_DOMAIN environment variable (works for Expo Go dev)
-  let domain = process.env.EXPO_PUBLIC_DOMAIN || "";
-
-  // Handle literal template strings
-  if (domain.includes("$REPLIT_DEV_DOMAIN") || !domain) {
-    const packagerHostname = process.env.REACT_NATIVE_PACKAGER_HOSTNAME;
-    if (packagerHostname && !packagerHostname.includes("$")) {
-      domain = packagerHostname;
-    } else {
-      domain = "localhost:5000";
-    }
-  }
-
-  // Strip any protocol if present
-  return domain.replace(/^https?:\/\//, "");
+  return CUSTOMER_BOOKING_DOMAIN;
 }
 
 async function throwIfResNotOk(res: Response) {

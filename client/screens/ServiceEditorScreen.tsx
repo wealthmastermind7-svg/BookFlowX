@@ -33,7 +33,8 @@ import Animated, {
 import { Spacing, BorderRadius } from "@/constants/theme";
 import { useI18n } from "@/contexts/I18nContext";
 import { api, Service, Business } from "@/lib/api";
-import { getBookingDomain, getApiUrl } from "@/lib/query-client";
+import { getApiUrl } from "@/lib/query-client";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 import { KeyboardAwareScrollViewCompat } from "@/components/KeyboardAwareScrollViewCompat";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { getCurrencySymbol } from "@/lib/currency";
@@ -240,11 +241,9 @@ export default function ServiceEditorScreen() {
 
   const getServiceBookingLink = () => {
     if (!business?.slug || !serviceId) return null;
-    const domain = getBookingDomain();
-    const protocol = domain.includes("localhost") ? "http" : "https";
     const serviceSlug = (service as Service).slug 
       || (service.name ? service.name.toLowerCase().replace(/[^a-z0-9\s-]/g, '').replace(/\s+/g, '-').replace(/-+/g, '-').trim() : serviceId);
-    return `${protocol}://${domain}/book/${business.slug}/${serviceSlug}`;
+    return getCustomerBookingUrl(business.slug, serviceSlug);
   };
 
   const handleCopyServiceLink = async () => {
@@ -428,6 +427,16 @@ export default function ServiceEditorScreen() {
                 {t('services.addonsTab')}
               </Text>
             </Pressable>
+            {serviceId ? (
+              <Pressable onPress={() => setActiveTab("links")}>
+                <Text style={[
+                  styles.carouselItem,
+                  activeTab === "links" ? styles.carouselItemActive : styles.carouselItemInactive
+                ]}>
+                  Links
+                </Text>
+              </Pressable>
+            ) : null}
           </View>
 
           <KeyboardAwareScrollViewCompat
@@ -815,7 +824,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     flex: 1,
-    fontSize: 17,
+    fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     textAlign: "center",
@@ -827,24 +836,24 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "center",
     alignItems: "center",
-    gap: 40,
-    paddingVertical: 24,
+    gap: 32,
+    paddingVertical: 16,
   },
   carouselItem: {
     fontWeight: "600",
   },
   carouselItemActive: {
-    fontSize: 48,
+    fontSize: 16,
     color: "#fff",
     fontWeight: "600",
   },
   carouselItemInactive: {
-    fontSize: 32,
+    fontSize: 14,
     color: "rgba(255,255,255,0.4)",
     fontWeight: "600",
   },
   formContainer: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 16,
   },
   inputGroup: {
     marginBottom: 24,
@@ -864,7 +873,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 17,
+    fontSize: 14,
     fontWeight: "500",
   },
   inputSecondary: {
@@ -875,7 +884,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    fontSize: 17,
+    fontSize: 14,
   },
   textArea: {
     minHeight: 140,
@@ -885,7 +894,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   glassPanel: {
-    borderRadius: 24,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: "rgba(0,212,255,0.18)",
     overflow: "hidden",
@@ -894,11 +903,11 @@ const styles = StyleSheet.create({
     backgroundColor: "#111827",
   },
   linkCard: {
-    padding: 24,
-    marginBottom: 20,
+    padding: 16,
+    marginBottom: 24,
   },
   linkCardTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
     color: "#fff",
     marginBottom: 8,

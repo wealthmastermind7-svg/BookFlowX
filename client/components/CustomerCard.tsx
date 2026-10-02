@@ -1,15 +1,10 @@
 import React from "react";
 import { View, StyleSheet, Pressable } from "react-native";
 import * as Haptics from "expo-haptics";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-} from "react-native-reanimated";
+import Animated, { useSharedValue, useAnimatedStyle, withSpring } from "react-native-reanimated";
 import { Feather } from "@expo/vector-icons";
 import { ThemedText } from "@/components/ThemedText";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius, AnimationConfig } from "@/constants/theme";
+import { AnimationConfig } from "@/constants/theme";
 
 interface CustomerCardProps {
   name: string;
@@ -17,127 +12,55 @@ interface CustomerCardProps {
   phone?: string;
   totalBookings: number;
   onPress?: () => void;
+  caption?: string;
+  badge?: string;
 }
 
-export function CustomerCard({
-  name,
-  email,
-  phone,
-  totalBookings,
-  onPress,
-}: CustomerCardProps) {
-  const { theme } = useTheme();
+export function CustomerCard({ name, email, phone, totalBookings, onPress, caption, badge }: CustomerCardProps) {
   const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: scale.value }],
-  }));
-
-  const handlePressIn = () => {
-    scale.value = withSpring(0.98, AnimationConfig.spring);
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
-  };
-
-  const handlePressOut = () => {
-    scale.value = withSpring(1, AnimationConfig.spring);
-  };
-
-  const getInitials = (fullName: string) => {
-    return fullName
-      .split(" ")
-      .map((n) => n[0])
-      .join("")
-      .toUpperCase()
-      .slice(0, 2);
-  };
-
+  const animatedStyle = useAnimatedStyle(() => ({ transform: [{ scale: scale.value }] }));
+  const initials = name.trim().split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
   return (
     <Animated.View style={animatedStyle}>
       <Pressable
         onPress={onPress}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        style={[
-          styles.card,
-          { backgroundColor: theme.backgroundDefault },
-        ]}
+        onPressIn={() => { scale.value = withSpring(0.985, AnimationConfig.spring); Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light); }}
+        onPressOut={() => { scale.value = withSpring(1, AnimationConfig.spring); }}
+        style={({ pressed }) => [styles.card, pressed && styles.pressed]}
+        accessibilityRole={onPress ? "button" : undefined}
       >
-      <View style={styles.content}>
-        <View style={[styles.avatar, { backgroundColor: theme.accent }]}>
-          <ThemedText
-            type="h4"
-            style={[styles.initials, { color: theme.buttonText }]}
-          >
-            {getInitials(name)}
-          </ThemedText>
-        </View>
+        <View style={styles.avatar}><ThemedText style={styles.initials}>{initials || "—"}</ThemedText></View>
         <View style={styles.info}>
-          <ThemedText type="h4" style={styles.name}>
-            {name}
-          </ThemedText>
-          <ThemedText type="small" style={styles.email}>
-            {email}
-          </ThemedText>
-          {phone ? (
-            <ThemedText type="caption" style={styles.phone}>
-              {phone}
-            </ThemedText>
-          ) : null}
+          <View style={styles.nameRow}>
+            <ThemedText style={styles.name} numberOfLines={1}>{name}</ThemedText>
+            {badge ? <View style={styles.badge}><ThemedText style={styles.badgeText}>{badge}</ThemedText></View> : null}
+          </View>
+          <ThemedText style={styles.email} numberOfLines={1}>{email}</ThemedText>
+          {caption || phone ? <ThemedText style={styles.caption} numberOfLines={1}>{caption || phone}</ThemedText> : null}
         </View>
-        <View style={styles.stats}>
-          <ThemedText type="h3" style={styles.bookingCount}>
-            {totalBookings}
-          </ThemedText>
-          <ThemedText type="caption" style={styles.bookingLabel}>
-            bookings
-          </ThemedText>
+        <View style={styles.bookings}>
+          <ThemedText style={styles.count}>{totalBookings}</ThemedText>
+          <ThemedText style={styles.countLabel}>visits</ThemedText>
         </View>
-      </View>
+        {onPress ? <Feather name="chevron-right" size={17} color="#66758D" /> : null}
       </Pressable>
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
-  card: {
-    padding: Spacing.xl,
-    borderRadius: BorderRadius.lg,
-  },
-  content: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  avatar: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  initials: {
-    fontWeight: "600",
-  },
-  info: {
-    flex: 1,
-    marginLeft: Spacing.lg,
-  },
-  name: {
-    marginBottom: Spacing.xs,
-  },
-  email: {
-    opacity: 0.6,
-  },
-  phone: {
-    opacity: 0.5,
-    marginTop: Spacing.xs,
-  },
-  stats: {
-    alignItems: "center",
-  },
-  bookingCount: {
-    fontWeight: "200",
-  },
-  bookingLabel: {
-    opacity: 0.5,
-  },
+  card: { minHeight: 88, flexDirection: "row", alignItems: "center", padding: 16, borderRadius: 20, backgroundColor: "#111827", borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  pressed: { opacity: 0.88 },
+  avatar: { width: 44, height: 44, borderRadius: 14, alignItems: "center", justifyContent: "center", backgroundColor: "rgba(0,212,255,0.12)", borderWidth: 1, borderColor: "rgba(0,212,255,0.28)" },
+  initials: { color: "#00D4FF", fontSize: 14, fontWeight: "800" },
+  info: { flex: 1, minWidth: 0, marginLeft: 13, marginRight: 10 },
+  nameRow: { flexDirection: "row", alignItems: "center", gap: 7 },
+  name: { flexShrink: 1, color: "#F2F6FC", fontSize: 14, fontWeight: "700" },
+  email: { color: "#9AA8BC", fontSize: 12, marginTop: 3 },
+  caption: { color: "#718097", fontSize: 12, marginTop: 4 },
+  badge: { borderRadius: 7, backgroundColor: "rgba(0,212,255,0.1)", paddingHorizontal: 7, paddingVertical: 3 },
+  badgeText: { color: "#00D4FF", fontSize: 12, fontWeight: "800", letterSpacing: 0.5 },
+  bookings: { alignItems: "center", minWidth: 34, marginRight: 8 },
+  count: { color: "#EAF1FA", fontSize: 16, fontWeight: "700" },
+  countLabel: { color: "#77859A", fontSize: 12, marginTop: 1 },
 });

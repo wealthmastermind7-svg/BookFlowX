@@ -15,7 +15,8 @@ import Animated, {
 import Svg, { Circle } from "react-native-svg";
 import { useTheme } from "@/hooks/useTheme";
 import { Spacing, BorderRadius } from "@/constants/theme";
-import { StorageService, Service } from "@/lib/storage";
+import { Service } from "@/lib/storage";
+import { api, type Service as ApiService } from "@/lib/api";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
@@ -26,6 +27,15 @@ import { useI18n } from "@/contexts/I18nContext";
 type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
+
+const toBookingService = (service: ApiService): Service => ({
+  id: service.id,
+  name: service.name,
+  duration: service.duration,
+  price: service.price,
+  description: service.description ?? undefined,
+  upsells: service.upsells ?? undefined,
+});
 
 const SPRING_CONFIG = {
   damping: 15,
@@ -270,6 +280,7 @@ export default function SelectServiceScreen() {
 
   const [services, setServices] = useState<Service[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
 
   useEffect(() => {
@@ -277,9 +288,15 @@ export default function SelectServiceScreen() {
   }, []);
 
   const loadServices = async () => {
+    setLoading(true);
     try {
-      const data = await StorageService.getServices();
-      setServices(data);
+      await api.getOrCreateBusiness();
+      const data = await api.getServices();
+      setServices(data.filter((service) => service.isActive !== false).map(toBookingService));
+      setLoadError(false);
+    } catch (error) {
+      console.error("Error loading booking services:", error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -319,17 +336,24 @@ export default function SelectServiceScreen() {
         </ThemedText>
 
         <View style={styles.servicesList}>
-          {services.map((service, index) => (
+          {loading ? (
+            <View style={styles.emptyState}>
+              <ThemedText style={styles.emptyText}>Loading available viewing options…</ThemedText>
+            </View>
+          ) : loadError ? (
+            <Pressable style={styles.emptyState} onPress={loadServices}>
+              <ThemedText style={styles.emptyText}>Could not load viewing options. Tap to retry.</ThemedText>
+            </Pressable>
+          ) : services.map((service, index) => (
             <CinematicServiceCard
               key={service.id}
               service={service}
               index={index}
-              isPopular={index === 1}
               onPress={() => handleSelectService(service)}
             />
           ))}
 
-          {services.length === 0 && !loading && (
+          {services.length === 0 && !loading && !loadError && (
             <View style={styles.emptyState}>
               <ThemedText style={styles.emptyText}>
                 {t('booking.noServicesAvailable')}
@@ -397,9 +421,9 @@ const styles = StyleSheet.create({
     marginBottom: Spacing.xs,
   },
   headerTitle: {
-    fontSize: 32,
+    fontSize: 28,
     fontWeight: "800",
-    letterSpacing: -1,
+    letterSpacing: -0.6,
   },
   progressRing: {
     width: 48,
@@ -413,10 +437,10 @@ const styles = StyleSheet.create({
     fontWeight: "700",
   },
   subtitle: {
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: "500",
-    opacity: 0.6,
-    marginBottom: Spacing["3xl"],
+    opacity: 0.72,
+    marginBottom: Spacing["2xl"],
     maxWidth: 250,
     lineHeight: 26,
   },
@@ -424,13 +448,13 @@ const styles = StyleSheet.create({
     gap: Spacing.lg,
   },
   serviceCardWrapper: {
-    borderRadius: BorderRadius["2xl"],
+    borderRadius: 20,
     overflow: "hidden",
   },
   serviceCard: {
-    borderRadius: BorderRadius["2xl"],
+    borderRadius: 20,
     borderWidth: 1,
-    padding: Spacing.xl,
+    padding: Spacing.lg,
     overflow: "hidden",
   },
   popularBadge: {
@@ -470,7 +494,7 @@ const styles = StyleSheet.create({
     opacity: 0.4,
   },
   serviceName: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
     marginBottom: 8,
     letterSpacing: -0.5,
@@ -496,7 +520,7 @@ const styles = StyleSheet.create({
     alignItems: "flex-end",
   },
   servicePrice: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "900",
     marginBottom: Spacing.sm,
     letterSpacing: -0.5,
@@ -534,7 +558,8 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   emptyText: {
-    opacity: 0.5,
+    opacity: 0.7,
+    fontSize: 14,
   },
   voiceFab: {
     position: "absolute",

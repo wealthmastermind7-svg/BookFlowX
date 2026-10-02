@@ -18,6 +18,7 @@ import { Colors, Spacing, BorderRadius, Typography } from "@/constants/theme";
 import { ThemedText } from "@/components/ThemedText";
 import { ThemedView } from "@/components/ThemedView";
 import { useI18n } from "@/contexts/I18nContext";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 
 type AppClipMode = "customer" | "owner" | "loading";
 
@@ -58,7 +59,7 @@ export default function AppClipScreen({
 
   const loadOwnerData = async () => {
     setBusinessName("Your Business");
-    setBookingUrl(`https://book.confirmbooking.online/${businessSlug || "demo"}`);
+    setBookingUrl(getCustomerBookingUrl(businessSlug || "demo"));
     setTodayBookings(3);
   };
 
@@ -72,7 +73,7 @@ export default function AppClipScreen({
     }
     try {
       await Share.share({
-        message: `Book an appointment: ${bookingUrl}`,
+        message: `Book a property viewing: ${bookingUrl}`,
       });
     } catch (error) {
       console.error("Error sharing:", error);
@@ -128,15 +129,6 @@ export default function AppClipScreen({
             </Text>
           </Pressable>
 
-          <Pressable
-            style={[styles.actionButton, { backgroundColor: theme.backgroundSecondary }]}
-            onPress={() => {}}
-          >
-            <Feather name="calendar" size={20} color={theme.text} />
-            <Text style={[styles.actionButtonText, { color: theme.text }]}>
-              {t('appClip.viewTodaysBookings')}
-            </Text>
-          </Pressable>
         </View>
 
         <View style={styles.footer}>

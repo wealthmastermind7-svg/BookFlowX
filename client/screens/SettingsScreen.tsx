@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef } from "react";
-import * as FileSystem from "expo-file-system/legacy";
 import { 
   View, 
   StyleSheet, 
@@ -12,9 +11,7 @@ import {
   TextInput, 
   Linking, 
   ScrollView, 
-  ImageBackground,
   Animated,
-  Dimensions
 } from "react-native";
 import ViewShot from "react-native-view-shot";
 import * as Haptics from "expo-haptics";
@@ -25,10 +22,9 @@ import { useHeaderHeight } from "@react-navigation/elements";
 import { useBottomTabBarHeight } from "@react-navigation/bottom-tabs";
 import { Image } from "expo-image";
 import { Feather } from "@expo/vector-icons";
-import { useTheme } from "@/hooks/useTheme";
-import { Spacing, BorderRadius } from "@/constants/theme";
 import { api, Business, EmbedCode } from "@/lib/api";
-import { getBookingDomain, getApiUrl } from "@/lib/query-client";
+import { getApiUrl } from "@/lib/query-client";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 import { ThemedText } from "@/components/ThemedText";
 import { Button } from "@/components/Button";
 import { usePremium } from "@/contexts/PremiumContext";
@@ -36,54 +32,20 @@ import { restorePurchases } from "@/lib/revenuecat";
 import { SettingsStackParamList } from "@/navigation/SettingsStackNavigator";
 import { RootStackParamList } from "@/navigation/RootStackNavigator";
 import { CURRENCY_OPTIONS } from "@/lib/currency";
-import Svg, { Circle } from "react-native-svg";
-import { useVoiceSubscription, getTierColor, getTierName, formatMinutes } from "@/hooks/useVoiceSubscription";
-import { useGoogleCalendar } from "@/hooks/useGoogleCalendar";
+import { useVoiceSubscription } from "@/hooks/useVoiceSubscription";
 
 import { VoiceAgentPaywall } from "@/components/VoiceAgentPaywall";
 import { useI18n } from "@/contexts/I18nContext";
+import { SettingsRow } from "@/components/SettingsRow";
 
 type EmbedType = "inline" | "popup-button" | "popup-text";
 type CombinedNavigation = NativeStackNavigationProp<SettingsStackParamList & RootStackParamList>;
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const silkBackground = require("../assets/stock_images/abstract_dark_fluid__e119120c.jpg");
-
-const CircularMeter = ({ value, max, size = 80, strokeWidth = 6, label, warningColor }: { value: number; max: number; size?: number; strokeWidth?: number; label: string; warningColor?: string }) => {
-  const radius = (size - strokeWidth) / 2;
-  const circumference = radius * 2 * Math.PI;
-  const progress = Math.min(value / max, 1);
-  const strokeDashoffset = circumference - progress * circumference;
-  const strokeColor = warningColor || (progress >= 1 ? "#EF4444" : progress > 0.95 ? "#EF4444" : progress > 0.8 ? "#F59E0B" : "#fff");
-  const labelColor = warningColor || "rgba(255,255,255,0.4)";
-
+const CircularMeter = ({ value, label }: { value: number; label: string }) => {
   return (
-    <View style={{ alignItems: "center" }}>
-      <Svg width={size} height={size} style={{ transform: [{ rotate: "-90deg" }] }}>
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke="rgba(255,255,255,0.1)"
-          strokeWidth={strokeWidth}
-          fill="transparent"
-        />
-        <Circle
-          cx={size / 2}
-          cy={size / 2}
-          r={radius}
-          stroke={strokeColor}
-          strokeWidth={strokeWidth}
-          fill="transparent"
-          strokeDasharray={circumference}
-          strokeDashoffset={strokeDashoffset}
-          strokeLinecap="round"
-        />
-      </Svg>
-      <View style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, alignItems: "center", justifyContent: "center" }}>
-        <ThemedText style={{ fontSize: 18, fontWeight: "700", color: "#fff" }}>{value}</ThemedText>
-      </View>
-      <ThemedText style={{ fontSize: 10, fontWeight: "700", color: labelColor, letterSpacing: 1, marginTop: 8 }}>{label}</ThemedText>
+    <View style={{ alignItems: "flex-start", flex: 1 }}>
+      <ThemedText style={{ fontSize: 20, fontWeight: "700", color: "#F2F6FC" }}>{value}</ThemedText>
+      <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "#8291A7", letterSpacing: 0.8, marginTop: 5 }}>{label}</ThemedText>
     </View>
   );
 };
@@ -116,9 +78,8 @@ const ParallaxIcon = ({ name, delay = 0 }: { name: any; delay?: number }) => {
 export default function SettingsScreen() {
   const headerHeight = useHeaderHeight();
   const tabBarHeight = useBottomTabBarHeight();
-  const { isDark, theme } = useTheme();
   const navigation = useNavigation<CombinedNavigation>();
-  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, offerings, isTrialActive, trialDaysLeft } = usePremium();
+  const { checkShareAccess, checkQrAccess, checkEmbedAccess, isPremium, showPaywall, isTrialActive } = usePremium();
   const { t, lang, changeLanguage, languages } = useI18n();
 
   const [business, setBusiness] = useState<Business | null>(null);
@@ -155,16 +116,6 @@ export default function SettingsScreen() {
   const voiceSub = voiceSubResult;
   const isVoiceExhausted = voiceSub?.usage.available === false;
   const percentUsed = voiceSub?.usage.percentUsed || 0;
-
-  const { 
-    isConnected: isCalendarConnected, 
-    connectedEmail: calendarEmail, 
-    isLoading: calendarLoading,
-    connectCalendar,
-    disconnect: disconnectCalendar
-  } = useGoogleCalendar(business?.id || "", ownerToken || "");
-
-  const [calendarConnecting, setCalendarConnecting] = useState(false);
 
   const DEMO_TYPES = [
     { id: "property", label: "Property & Real Estate", description: "Viewings, inspections & move-ins" },
@@ -303,7 +254,7 @@ export default function SettingsScreen() {
 
   const handleOpenSharePreview = () => {
     if (!business || !checkShareAccess()) return;
-    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+    const bookingLink = getCustomerBookingUrl(business.slug);
     navigation.navigate("SharePreview", {
       businessName: business.name,
       bookingUrl: bookingLink,
@@ -324,7 +275,7 @@ export default function SettingsScreen() {
     const data = await api.getQRCode();
     if (data) {
       setQrCode(data.qrCode);
-      setBookingUrl(data.bookingUrl);
+      setBookingUrl(business?.slug ? getCustomerBookingUrl(business.slug) : "");
       setQrModalVisible(true);
     }
   };
@@ -372,7 +323,7 @@ export default function SettingsScreen() {
 
   const handleCopyBookingLink = async () => {
     if (!business) return;
-    const bookingLink = business.bookingUrl || `https://${getBookingDomain()}/book/${business.slug}`;
+    const bookingLink = getCustomerBookingUrl(business.slug);
     await Clipboard.setStringAsync(bookingLink);
     Alert.alert("Copied", "Link copied to clipboard.");
   };
@@ -408,8 +359,18 @@ export default function SettingsScreen() {
   ];
 
   const handleVoiceSubscribe = async (tierId: string) => {
-    try { Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium); } catch {}
-    setVoicePaywallVisible(false);
+    if (!business?.id) return;
+    setVoiceCheckoutLoading(true);
+    try {
+      Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Medium);
+      const { url } = await api.createVoiceCheckout(business.id, tierId);
+      await Linking.openURL(url);
+      setVoicePaywallVisible(false);
+    } catch (error) {
+      Alert.alert("Checkout unavailable", "We couldn't open the secure subscription checkout. Please try again.");
+    } finally {
+      setVoiceCheckoutLoading(false);
+    }
   };
 
   const handleSaveBusinessField = async () => {
@@ -453,7 +414,7 @@ export default function SettingsScreen() {
     <View style={styles.sectionTitleRow}>
       <View>
         <ThemedText style={styles.sectionTitle}>{children}</ThemedText>
-        {label && <ThemedText style={{ fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 1.5, marginTop: 4 }}>{label}</ThemedText>}
+        {label && <ThemedText style={{ fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.55)", letterSpacing: 1.2, marginTop: 4 }}>{label}</ThemedText>}
       </View>
     </View>
   );
@@ -512,7 +473,7 @@ export default function SettingsScreen() {
                 <Feather name="zap" size={28} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 20 }}>
-                <ThemedText style={styles.premiumBannerTitle}>
+                 <ThemedText style={styles.premiumBannerTitle}>
                   {isPremium ? "Booking Premium" : "Unlock Booking Premium"}
                 </ThemedText>
                 <ThemedText style={styles.premiumBannerSubtitle}>
@@ -574,7 +535,24 @@ export default function SettingsScreen() {
             {restoreLoading && <ActivityIndicator size="small" color="#fff" />}
           </GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
+          <SectionTitle>Workspace tools</SectionTitle>
+          <View style={{ gap: 10 }}>
+            <SettingsRow
+              icon="home"
+              title="Viewing types"
+              subtitle="Edit services, durations and prices"
+              onPress={() => navigation.navigate("Services")}
+            />
+            <SettingsRow
+              icon="cpu"
+              title="AI Assistant"
+              subtitle="Briefings, scheduling and client follow-ups"
+              onPress={() => navigation.navigate("AIAssistant")}
+            />
+          </View>
+
+          <View style={{ height: 24 }} />
 
           <GlassCard style={styles.voiceCard} onPress={() => setVoicePaywallVisible(true)} highlight>
             <View style={styles.voiceHeader}>
@@ -582,14 +560,14 @@ export default function SettingsScreen() {
                 <Feather name="mic" size={24} color="#fff" />
               </View>
               <View style={{ flex: 1, marginLeft: 16 }}>
-                <ThemedText style={[styles.voiceTitle, { fontSize: 16 }]} numberOfLines={1} adjustsFontSizeToFit>Informational Assistant</ThemedText>
+                 <ThemedText style={styles.voiceTitle} numberOfLines={1} adjustsFontSizeToFit>Informational Assistant</ThemedText>
                 <ThemedText style={styles.voiceSubtitle}>Answers questions about your services</ThemedText>
               </View>
               <Button 
                 onPress={handleOpenAgentTraining}
                 style={{ backgroundColor: 'rgba(255,255,255,0.1)', borderColor: 'rgba(255,255,255,0.2)', height: 36, paddingHorizontal: 12 }}
               >
-                <ThemedText style={{ fontSize: 13, fontWeight: "600", color: "#fff" }}>{t('settings.trainAgent')}</ThemedText>
+                <ThemedText style={{ fontSize: 14, fontWeight: "600", color: "#fff" }}>{t('settings.trainAgent')}</ThemedText>
               </Button>
             </View>
             <View style={styles.voiceIconGroup}>
@@ -606,7 +584,7 @@ export default function SettingsScreen() {
                 <Feather name="play-circle" size={18} color="rgba(255,255,255,0.4)" />
                 <ThemedText style={styles.previewText}>QUICK PREVIEW</ThemedText>
               </Pressable>
-              <ThemedText style={[styles.featureText, { fontSize: 11, marginTop: 12, fontStyle: 'italic', opacity: 0.6 }]}>
+              <ThemedText style={[styles.featureText, { fontSize: 12, marginTop: 12, fontStyle: 'italic', opacity: 0.6 }]}>
                 Booking links and automation plans are separate.
               </ThemedText>
             </View>
@@ -626,38 +604,38 @@ export default function SettingsScreen() {
                 }]} />
               </View>
               {isVoiceExhausted ? (
-                <ThemedText style={{ fontSize: 11, color: '#EF4444', marginTop: 8, fontWeight: '600' }}>
+                <ThemedText style={{ fontSize: 12, color: '#EF4444', marginTop: 8, fontWeight: '600' }}>
                   Limit reached — upgrade to continue assisting customers
                 </ThemedText>
               ) : voiceSub?.subscription.tier === 'free' ? (
-                <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8 }}>
+                <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 8 }}>
                   {voiceSub.usage.remaining} minutes remaining — one-time trial
                 </ThemedText>
               ) : percentUsed > 80 ? (
-                <ThemedText style={{ fontSize: 11, color: '#F59E0B', marginTop: 8 }}>
+                <ThemedText style={{ fontSize: 12, color: '#F59E0B', marginTop: 8 }}>
                   Running low — consider upgrading for more minutes
                 </ThemedText>
               ) : null}
             </View>
           </GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitle>Activity</SectionTitle>
           <GlassCard style={styles.metersCard}>
             <View style={styles.metersRow}>
-              <CircularMeter value={bookingsCount} max={100} label="BOOKINGS" />
-              <CircularMeter value={servicesCount} max={20} label="SERVICES" />
-              <CircularMeter value={customersCount} max={100} label="CLIENTS" />
+              <CircularMeter value={bookingsCount} label="BOOKINGS" />
+              <CircularMeter value={servicesCount} label="VIEWING TYPES" />
+              <CircularMeter value={customersCount} label="CLIENTS" />
             </View>
           </GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitleBadge label="REVENUE & SHARING">Booking Links</SectionTitleBadge>
           <GlassCard style={styles.bookingCard}>
             <View style={styles.bookingHeader}>
               <View style={{ flex: 1 }}>
                 <ThemedText style={styles.bookingTitle}>Share Booking Page</ThemedText>
-                <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{business?.bookingUrl || `https://${getBookingDomain()}/book/${business?.slug}`}</ThemedText>
+                <ThemedText style={styles.bookingLinkText} numberOfLines={1}>{business?.slug ? getCustomerBookingUrl(business.slug) : ""}</ThemedText>
               </View>
               <Pressable onPress={handleCopyBookingLink} style={styles.copyIconBox}><Feather name="copy" size={18} color="rgba(255,255,255,0.6)" /></Pressable>
             </View>
@@ -668,7 +646,7 @@ export default function SettingsScreen() {
             </View>
           </GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitleBadge label="PLAN OVERVIEW">{t('settings.yourPlans')}</SectionTitleBadge>
           <View style={{ gap: 12 }}>
             <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]} onPress={() => showPaywall("soft_upsell")}>
@@ -677,7 +655,7 @@ export default function SettingsScreen() {
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Booking Links</ThemedText>
               </View>
               <View style={{ backgroundColor: isPremium ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isPremium ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
+                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isPremium ? '#22C55E' : 'rgba(255,255,255,0.55)' }}>{isPremium ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
             <GlassCard style={[styles.gridCard, { width: '100%', flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 16 }]}>
@@ -686,12 +664,12 @@ export default function SettingsScreen() {
                 <ThemedText style={[styles.gridLabel, { marginLeft: 12, marginTop: 0 }]}>Voice Agent</ThemedText>
               </View>
               <View style={{ backgroundColor: isVoiceExhausted ? 'rgba(239, 68, 68, 0.2)' : voiceSub?.subscription.tier !== 'free' ? 'rgba(34, 197, 94, 0.2)' : 'rgba(255,255,255,0.1)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSub?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.4)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSub?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
+                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isVoiceExhausted ? '#EF4444' : voiceSub?.subscription.tier !== 'free' ? '#22C55E' : 'rgba(255,255,255,0.55)' }}>{isVoiceExhausted ? "EXHAUSTED" : voiceSub?.subscription.tier !== 'free' ? "ACTIVE" : "BASIC"}</ThemedText>
               </View>
             </GlassCard>
           </View>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           {/* Google Calendar hidden per user request */}
           {/* 
           <SectionTitleBadge label="CALENDAR SYNC">Integrations</SectionTitleBadge>
@@ -732,7 +710,7 @@ export default function SettingsScreen() {
               <View style={{ marginLeft: 12, flex: 1 }}>
                 <ThemedText style={[styles.gridLabel, { marginTop: 0 }]}>Google Calendar</ThemedText>
                 {isCalendarConnected && calendarEmail && (
-                  <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.5)', marginTop: 2 }} numberOfLines={1}>{calendarEmail}</ThemedText>
+                  <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)', marginTop: 2 }} numberOfLines={1}>{calendarEmail}</ThemedText>
                 )}
               </View>
             </View>
@@ -740,18 +718,18 @@ export default function SettingsScreen() {
               <ActivityIndicator size="small" color="#fff" />
             ) : (
               <View style={{ backgroundColor: isCalendarConnected ? 'rgba(34, 197, 94, 0.2)' : 'rgba(59, 130, 246, 0.2)', paddingHorizontal: 12, paddingVertical: 4, borderRadius: 8 }}>
-                <ThemedText style={{ fontSize: 10, fontWeight: '800', color: isCalendarConnected ? '#22C55E' : '#3B82F6' }}>
+                <ThemedText style={{ fontSize: 12, fontWeight: '800', color: isCalendarConnected ? '#22C55E' : '#3B82F6' }}>
                   {isCalendarConnected ? "CONNECTED" : "CONNECT"}
                 </ThemedText>
               </View>
             )}
           </GlassCard>
-          <ThemedText style={{ fontSize: 11, color: 'rgba(255,255,255,0.4)', marginTop: 8, paddingHorizontal: 4 }}>
+          <ThemedText style={{ fontSize: 12, color: 'rgba(255,255,255,0.55)', marginTop: 8, paddingHorizontal: 4 }}>
             Sync bookings to your calendar and prevent double-booking
           </ThemedText>
           */}
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitleBadge label="BUSINESS IDENTITY">{t('settings.businessIdentity')}</SectionTitleBadge>
           <GlassCard style={{ marginBottom: 12 }}>
             <InfoRow 
@@ -777,7 +755,7 @@ export default function SettingsScreen() {
           </GlassCard>
           <GlassCard style={[styles.multiRowCard, { marginTop: 0 }]}><InfoRow icon="globe" label={t('settings.publicWebsite')} value={business?.website || "Not set"} onPress={() => handleEditBusinessField("website")} /><View style={styles.rowDivider} /><InfoRow icon="phone" label={t('settings.publicSupportLine')} value={business?.phone || "Not set"} onPress={() => handleEditBusinessField("phone")} /></GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitle>{t('settings.automationWorkflows')}</SectionTitle>
           <GlassCard style={styles.automationCard} onPress={() => navigation.navigate("Workflows")}>
             <View style={styles.automationHeader}><ParallaxIcon name="cpu" delay={0} /><ParallaxIcon name="zap" delay={300} /><ParallaxIcon name="bell" delay={600} /></View>
@@ -786,14 +764,14 @@ export default function SettingsScreen() {
             <View style={styles.automationActionRow}><ThemedText style={styles.automationAction}>CONFIGURE</ThemedText><Feather name="arrow-right" size={14} color="rgba(255,255,255,0.4)" /></View>
           </GlassCard>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitle>{t('settings.data')}</SectionTitle>
           <View style={styles.gridRow}>
             <GlassCard style={styles.securityGridCard} onPress={() => setDemoTypeModalVisible(true)}><Feather name="download-cloud" size={22} color="#fff" /><ThemedText style={styles.securityTitle}>{t('settings.demoData')}</ThemedText><ThemedText style={styles.securityAction}>LOAD SAMPLES</ThemedText></GlassCard>
             <GlassCard style={styles.securityGridCard} onPress={handleClearAllData}><Feather name="trash-2" size={22} color="#EF4444" style={{ opacity: 0.6 }} /><ThemedText style={[styles.securityTitle, { color: "#EF4444" }]}>Reset Data</ThemedText><ThemedText style={styles.securityAction}>CLEAR ALL DATA</ThemedText></GlassCard>
           </View>
 
-          <View style={{ height: 32 }} />
+          <View style={{ height: 24 }} />
           <SectionTitle>{t('settings.legal')}</SectionTitle>
           <GlassCard><CompactRow icon="shield" title={t('settings.privacyProtocol')} onPress={() => Linking.openURL("https://confirmbooking.online/privacy-policy")} /><View style={styles.rowDivider} /><CompactRow icon="file-text" title={t('settings.termsOfUse')} onPress={() => Linking.openURL("https://confirmbooking.online/terms")} /></GlassCard>
 
@@ -942,74 +920,74 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     backgroundColor: "rgba(10,10,15,0.56)",
   },
-  sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 12, flexWrap: 'wrap', gap: 12 },
-  sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 20, flexWrap: 'wrap', gap: 12 },
-  sectionTitle: { fontSize: 34, fontFamily: "Inter-Bold", fontWeight: "800", color: "#F8FAFC", letterSpacing: -1.2 },
+  sectionTitleRow: { flexDirection: "row", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 24, marginTop: 4, flexWrap: 'wrap', gap: 12 },
+  sectionHeader: { flexDirection: "row", alignItems: "center", justifyContent: "space-between", marginBottom: 24, flexWrap: 'wrap', gap: 12 },
+  sectionTitle: { fontSize: 20, fontWeight: "700", color: "#F2F6FC", letterSpacing: -0.2 },
   badge: { paddingHorizontal: 12, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
-  badgeText: { fontSize: 10, fontWeight: "800", letterSpacing: 1, color: "#fff" },
-  glassCard: { borderRadius: 24, borderWidth: 1, borderColor: "rgba(0,212,255,0.18)", overflow: "hidden", backgroundColor: "#111827" },
-  premiumBanner: { padding: 28, marginBottom: 12 },
+  badgeText: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "#fff" },
+  glassCard: { borderRadius: 20, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)", overflow: "hidden", backgroundColor: "#111827" },
+  premiumBanner: { padding: 16, marginBottom: 12 },
   premiumBannerHeader: { flexDirection: "row", alignItems: "center" },
   premiumIconGlow: { width: 64, height: 64, borderRadius: 20, backgroundColor: "rgba(0,212,255,0.12)", alignItems: "center", justifyContent: "center" },
-  premiumBannerTitle: { fontSize: 22, fontWeight: "700", color: "#fff", marginBottom: 4 },
+  premiumBannerTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 4 },
   premiumBannerSubtitle: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
   premiumFeatures: { marginTop: 24, marginBottom: 20 },
   featureRow: { flexDirection: "row", alignItems: "center", marginBottom: 12, gap: 12 },
-  featureText: { fontSize: 15, color: "rgba(255,255,255,0.7)" },
+  featureText: { fontSize: 14, color: "rgba(255,255,255,0.7)" },
   pricingRow: { flexDirection: "row", alignItems: "center", justifyContent: "space-around", paddingTop: 20, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.08)" },
   priceOption: { alignItems: "center" },
-  priceAmount: { fontSize: 22, fontWeight: "800", color: "#fff" },
+  priceAmount: { fontSize: 20, fontWeight: "800", color: "#fff" },
   pricePeriod: { fontSize: 12, color: "rgba(255,255,255,0.4)", marginTop: 2 },
   priceDivider: { width: 1, height: 36, backgroundColor: "rgba(255,255,255,0.1)" },
-  restoreRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 18, gap: 10 },
+  restoreRow: { flexDirection: "row", alignItems: "center", justifyContent: "center", padding: 16, gap: 10 },
   restoreText: { fontSize: 14, color: "rgba(255,255,255,0.5)" },
-  metersCard: { padding: 32 },
+  metersCard: { padding: 16 },
   metersRow: { flexDirection: "row", justifyContent: "space-around", alignItems: "center" },
   gridRow: { flexDirection: "row", gap: 12 },
-  gridCard: { flex: 1, padding: 24, alignItems: "center", justifyContent: "center" },
+  gridCard: { flex: 1, padding: 16, alignItems: "center", justifyContent: "center" },
   gridIconCircle: { width: 48, height: 48, borderRadius: 24, backgroundColor: "rgba(255,255,255,0.1)", alignItems: "center", justifyContent: "center", marginBottom: 24 },
-  gridLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5, marginBottom: 4 },
-  gridValue: { fontSize: 18, fontWeight: "700", color: "#fff" },
+  gridLabel: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.6)", letterSpacing: 1.2, marginBottom: 4 },
+  gridValue: { fontSize: 14, fontWeight: "700", color: "#fff" },
   multiRowCard: { paddingVertical: 8 },
-  infoRow: { flexDirection: "row", alignItems: "center", padding: 24 },
+  infoRow: { flexDirection: "row", alignItems: "center", padding: 16 },
   rowDivider: { height: 1, backgroundColor: "rgba(255,255,255,0.05)", marginHorizontal: 24 },
-  infoLabel: { fontSize: 10, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 2.5 },
-  infoValue: { fontSize: 15, fontWeight: "600", color: "#fff", marginTop: 2 },
+  infoLabel: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.6)", letterSpacing: 1.2 },
+  infoValue: { fontSize: 14, fontWeight: "600", color: "#fff", marginTop: 2 },
   parallaxIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  automationCard: { padding: 32 },
+  automationCard: { padding: 16 },
   automationHeader: { flexDirection: "row", gap: 16, marginBottom: 28 },
-  automationTitle: { fontSize: 28, fontWeight: "700", color: "#fff", marginBottom: 12 },
-  automationDesc: { fontSize: 16, color: "rgba(255,255,255,0.4)", lineHeight: 24, marginBottom: 24 },
+  automationTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 12 },
+  automationDesc: { fontSize: 14, color: "#92A0B4", lineHeight: 21, marginBottom: 24 },
   automationActionRow: { flexDirection: "row", alignItems: "center", gap: 8 },
-  automationAction: { fontSize: 11, fontWeight: "800", letterSpacing: 3, color: "rgba(255,255,255,0.4)" },
-  bookingCard: { padding: 24 },
+  automationAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1.4, color: "rgba(255,255,255,0.55)" },
+  bookingCard: { padding: 16 },
   bookingHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
-  bookingTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginBottom: 4 },
+  bookingTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 4 },
   bookingLinkText: { fontSize: 12, color: "rgba(255,255,255,0.3)" },
   qrPlacementHint: { fontSize: 12, color: "rgba(255,255,255,0.3)", marginBottom: 20, fontStyle: "italic" },
   copyIconBox: { width: 40, height: 40, borderRadius: 12, backgroundColor: "rgba(255,255,255,0.05)", alignItems: "center", justifyContent: "center" },
   bookingActions: { flexDirection: "row", gap: 12 },
   shareLinkBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#000", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
   shareQrBtn: { flex: 1, height: 56, borderRadius: 16, backgroundColor: "#00D4FF", flexDirection: "row", alignItems: "center", justifyContent: "center", gap: 8 },
-  shareBtnText: { fontSize: 15, fontWeight: "700", color: "#fff" },
-  shareQrText: { fontSize: 15, fontWeight: "700", color: "#0A0A0F" },
-  voiceCard: { padding: 32, marginTop: 12, borderRadius: 32 },
+  shareBtnText: { fontSize: 14, fontWeight: "700", color: "#fff" },
+  shareQrText: { fontSize: 14, fontWeight: "700", color: "#0A0A0F" },
+  voiceCard: { padding: 16, marginTop: 12, borderRadius: 20 },
   voiceIconGroup: { flexDirection: "row", gap: 12 },
   voiceIconBox: { width: 56, height: 56, borderRadius: 16, backgroundColor: "rgba(255,255,255,0.08)", alignItems: "center", justifyContent: "center", borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  voiceCardTitle: { fontSize: 42, fontWeight: "500", color: "#fff", letterSpacing: -1, marginBottom: 16 },
-  voiceCardDesc: { fontSize: 18, color: "rgba(255,255,255,0.4)", lineHeight: 28, fontWeight: "400" },
-  previewContainer: { marginTop: 32 },
+  voiceCardTitle: { fontSize: 20, fontWeight: "700", color: "#F2F6FC", letterSpacing: -0.2, marginBottom: 10 },
+  voiceCardDesc: { fontSize: 14, color: "#92A0B4", lineHeight: 21, fontWeight: "400" },
+  previewContainer: { marginTop: 24 },
   previewLink: { flexDirection: "row", alignItems: "center", gap: 12 },
-  previewText: { fontSize: 13, fontWeight: "700", color: "rgba(255,255,255,0.4)", letterSpacing: 3 },
-  usageContainer: { marginTop: 32, paddingTop: 24, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
+  previewText: { fontSize: 12, fontWeight: "700", color: "rgba(255,255,255,0.55)", letterSpacing: 1.4 },
+  usageContainer: { marginTop: 24, paddingTop: 24, borderTopWidth: 1, borderTopColor: "rgba(255,255,255,0.05)" },
   usageHeader: { flexDirection: "row", justifyContent: "space-between", marginBottom: 8 },
   usageLabel: { fontSize: 12, color: "rgba(255,255,255,0.4)" },
   usageValue: { fontSize: 12, color: "#fff", fontWeight: "600" },
   progressBarBg: { height: 6, backgroundColor: "rgba(255,255,255,0.1)", borderRadius: 3, overflow: "hidden" },
   progressBarFill: { height: "100%", backgroundColor: "#00D4FF", borderRadius: 3 },
-  securityGridCard: { flex: 1, padding: 24, alignItems: "flex-start" },
-  securityTitle: { fontSize: 18, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
-  securityAction: { fontSize: 9, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.4)" },
+  securityGridCard: { flex: 1, padding: 16, alignItems: "flex-start" },
+  securityTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginTop: 16, marginBottom: 4 },
+  securityAction: { fontSize: 12, fontWeight: "800", letterSpacing: 1, color: "rgba(255,255,255,0.55)" },
   voiceHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -1027,16 +1005,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   footer: { marginTop: 56, alignItems: "center" },
-  footerText: { fontSize: 10, fontWeight: "800", letterSpacing: 4, color: "rgba(255,255,255,0.15)" },
-  footerVersion: { fontSize: 10, fontWeight: "600", color: "rgba(255,255,255,0.1)", marginTop: 4 },
+  footerText: { fontSize: 12, fontWeight: "800", letterSpacing: 2, color: "rgba(255,255,255,0.28)" },
+  footerVersion: { fontSize: 12, fontWeight: "600", color: "rgba(255,255,255,0.28)", marginTop: 4 },
   modalOverlay: { flex: 1, backgroundColor: "rgba(0,0,0,0.85)", justifyContent: "center", alignItems: "center", padding: 20 },
-  modalContent: { width: "100%", borderRadius: 32, padding: 24, borderWidth: 1, borderColor: "rgba(255,255,255,0.1)" },
-  modalTitle: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 24 },
+  modalContent: { width: "100%", borderRadius: 20, padding: 16, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)" },
+  modalTitle: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 24 },
   qrImage: { width: 200, height: 200, backgroundColor: "#fff", borderRadius: 16, padding: 16, alignSelf: "center" },
   qrPressable: {
     padding: 16,
     backgroundColor: "rgba(255,255,255,0.03)",
-    borderRadius: 24,
+    borderRadius: 20,
     marginBottom: 24,
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.08)",
@@ -1060,7 +1038,7 @@ const styles = StyleSheet.create({
     maxWidth: 80,
   },
   qrCenterText: {
-    fontSize: 10,
+    fontSize: 12,
     fontWeight: '900',
     color: '#000',
     textAlign: 'center',
@@ -1073,7 +1051,7 @@ const styles = StyleSheet.create({
     marginTop: 12,
   },
   qrHint: {
-    fontSize: 11,
+    fontSize: 12,
     color: "rgba(255,255,255,0.4)",
     fontWeight: "600",
     letterSpacing: 0.5,
@@ -1089,20 +1067,20 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 20,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.05)',
     backgroundColor: 'rgba(255,255,255,0.02)',
   },
   timezoneOptionText: {
-    fontSize: 16,
+    fontSize: 14,
     color: 'rgba(255,255,255,0.6)',
   },
   editInput: {
     height: 56,
     borderRadius: 16,
     paddingHorizontal: 16,
-    fontSize: 16,
+    fontSize: 14,
     borderWidth: 1,
     marginBottom: 24,
     color: "#fff",
@@ -1114,7 +1092,7 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   compactRowTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "600",
     color: "#fff",
   },
@@ -1131,7 +1109,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   demoTypeLabel: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "700",
     color: "#fff",
   },
@@ -1140,7 +1118,7 @@ const styles = StyleSheet.create({
     borderRadius: 16,
   },
   currencyLabel: {
-    fontSize: 16,
+    fontSize: 14,
     color: "#fff",
   },
 });

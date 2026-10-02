@@ -47,6 +47,7 @@ export default function AgentTrainingScreen() {
   
   const [trainingData, setTrainingData] = useState<TrainingDataType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [crawlUrl, setCrawlUrl] = useState("");
   const [crawling, setCrawling] = useState(false);
   const [qaModalVisible, setQaModalVisible] = useState(false);
@@ -69,8 +70,10 @@ export default function AgentTrainingScreen() {
     try {
       const data = await api.apiRequest<TrainingDataType[]>('GET', `/api/businesses/${businessId}/training`);
       setTrainingData(data);
+      setLoadError(false);
     } catch (error) {
       console.error("Error loading training data:", error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -206,7 +209,7 @@ export default function AgentTrainingScreen() {
         <View style={styles.section}>
           <ThemedText style={styles.sectionTitle}>{t('training.customContent')}</ThemedText>
           <ThemedText style={styles.cardInfo}>
-            Paste information about your company (services, policies, hours) for the assistant to learn.
+              Add property details, viewing arrangements, buyer and tenant requirements, or policies for the assistant to use.
           </ThemedText>
           <View style={[styles.glassCard, styles.qaInputCard]}>
             <TextInput
@@ -262,6 +265,11 @@ export default function AgentTrainingScreen() {
 
           {loading ? (
             <ActivityIndicator style={{ marginTop: 20 }} color="#fff" />
+          ) : loadError ? (
+            <Pressable onPress={loadTrainingData} style={[styles.glassCard, styles.emptyCard]}>
+              <Feather name="refresh-cw" size={24} color="#00D4FF" />
+              <ThemedText style={styles.emptyText}>Could not load training data. Tap to try again.</ThemedText>
+            </Pressable>
           ) : trainingData.length === 0 ? (
             <View style={[styles.glassCard, styles.emptyCard]}>
               <Feather name="inbox" size={32} color="rgba(255,255,255,0.2)" />
@@ -293,17 +301,17 @@ const styles = StyleSheet.create({
   },
   glassCard: {
     backgroundColor: "#111827",
-    borderRadius: BorderRadius.xl,
-    padding: 20,
+    borderRadius: 20,
+    padding: 16,
     borderWidth: 1,
     borderColor: "rgba(0,212,255,0.16)",
   },
   headerCard: {
-    marginBottom: 32,
+    marginBottom: 24,
     backgroundColor: "#16213E",
   },
   headerTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
     marginBottom: 8,
@@ -314,7 +322,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   section: {
-    marginBottom: 32,
+    marginBottom: 24,
   },
   sectionHeader: {
     flexDirection: "row",
@@ -323,7 +331,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   sectionTitle: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: "700",
     color: "#fff",
   },

@@ -42,6 +42,7 @@ const TRIGGER_LABEL_KEYS: Record<string, string> = {
 };
 
 const INDUSTRY_LABELS: Record<string, { label: string; icon: keyof typeof Feather.glyphMap }> = {
+  property: { label: "Property & Viewings", icon: "home" },
   salon: { label: "Salon & Beauty", icon: "scissors" },
   fitness: { label: "Fitness & Wellness", icon: "activity" },
   consulting: { label: "Consulting", icon: "briefcase" },
@@ -59,6 +60,7 @@ export default function WorkflowsScreen() {
   const [workflows, setWorkflows] = useState<Workflow[]>([]);
   const [blueprints, setBlueprints] = useState<BlueprintSummary[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [initializing, setInitializing] = useState(false);
   const [blueprintModalVisible, setBlueprintModalVisible] = useState(false);
   const [selectedIndustry, setSelectedIndustry] = useState<string | null>(null);
@@ -86,9 +88,13 @@ export default function WorkflowsScreen() {
       if (response.ok) {
         const data = await response.json();
         setWorkflows(data);
+        setLoadError(false);
+      } else {
+        setLoadError(true);
       }
     } catch (error) {
       console.error("Error loading workflows:", error);
+      setLoadError(true);
     } finally {
       setLoading(false);
     }
@@ -211,13 +217,13 @@ export default function WorkflowsScreen() {
     const isBefore = minutes < 0;
     if (absMinutes >= 1440 && absMinutes % 1440 === 0) {
       const days = absMinutes / 1440;
-      return `${days} day${days > 1 ? "s" : ""} ${isBefore ? "before" : "after"} appointment`;
+      return `${days} day${days > 1 ? "s" : ""} ${isBefore ? "before" : "after"} viewing`;
     }
     if (absMinutes >= 60 && absMinutes % 60 === 0) {
       const hours = absMinutes / 60;
-      return `${hours} hour${hours > 1 ? "s" : ""} ${isBefore ? "before" : "after"} appointment`;
+      return `${hours} hour${hours > 1 ? "s" : ""} ${isBefore ? "before" : "after"} viewing`;
     }
-    return `${absMinutes} min ${isBefore ? "before" : "after"} appointment`;
+    return `${absMinutes} min ${isBefore ? "before" : "after"} viewing`;
   };
 
   const GlassCard = ({ children, style }: any) => (
@@ -269,8 +275,8 @@ export default function WorkflowsScreen() {
               Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
             }}
           >
-            <Feather name="mail" size={12} color="rgba(255,255,255,0.4)" />
-            <ThemedText style={[styles.metaText, { textDecorationLine: "underline" }]}>Email (Preview)</ThemedText>
+            <Feather name="message-square" size={12} color="rgba(255,255,255,0.4)" />
+            <ThemedText style={[styles.metaText, { textDecorationLine: "underline" }]}>{workflow.actionType} preview</ThemedText>
           </Pressable>
           <View style={styles.metaItem}>
             <Feather name="shield" size={12} color="rgba(255,255,255,0.4)" />
@@ -294,11 +300,9 @@ export default function WorkflowsScreen() {
   const renderPreviewModal = () => {
     if (!previewWorkflow) return null;
     
-    const isReminder = previewWorkflow.triggerType !== 'booking_created';
-    const businessName = business?.name || "Black Edition";
-    const statusLabel = isReminder ? `${businessName} • Appointment` : "Booking Status";
-    const title = isReminder ? "Reminder" : "CONFIRMED";
-    const formattedDate = "Jan 19, 2026";
+    const businessName = business?.name || "Your business";
+    const statusLabel = "PROPERTY WORKFLOW MESSAGE";
+    const title = previewWorkflow.name;
 
     return (
       <Modal
@@ -318,46 +322,27 @@ export default function WorkflowsScreen() {
             </View>
 
             <ScrollView style={styles.previewBody} showsVerticalScrollIndicator={false}>
-              <ThemedText style={styles.previewGreeting}>Hi <ThemedText style={{ fontWeight: "700" }}>Adam Mupinda</ThemedText>,</ThemedText>
+              <ThemedText style={styles.previewGreeting}>Hello,</ThemedText>
               <ThemedText style={styles.previewIntro}>
-                {isReminder 
-                  ? `Your appointment with ${businessName} is coming up soon.`
-                  : `Your appointment with ${businessName} has been successfully secured.`}
+                {previewWorkflow.description || `A property viewing update from ${businessName}.`}
               </ThemedText>
 
               <GlassCard style={styles.previewCard}>
                 <View style={styles.previewInfoRow}>
-                  <ThemedText style={styles.previewInfoLabel}>Confirmation</ThemedText>
-                  <ThemedText style={styles.previewInfoValue}>BA5971E2</ThemedText>
+                  <ThemedText style={styles.previewInfoLabel}>Workflow</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>{previewWorkflow.name}</ThemedText>
                 </View>
                 <View style={styles.previewInfoRow}>
-                  <ThemedText style={styles.previewInfoLabel}>Service</ThemedText>
-                  <ThemedText style={styles.previewInfoValue}>Premium Service</ThemedText>
-                </View>
-                <View style={styles.previewInfoRow}>
-                  <ThemedText style={styles.previewInfoLabel}>Date</ThemedText>
-                  <ThemedText style={styles.previewInfoValue}>{formattedDate}</ThemedText>
-                </View>
-                <View style={styles.previewInfoRow}>
-                  <ThemedText style={styles.previewInfoLabel}>Time</ThemedText>
-                  <ThemedText style={styles.previewInfoValue}>2:00 PM</ThemedText>
-                </View>
-                <View style={[styles.divider, { marginVertical: 12 }]} />
-                <View style={styles.previewInfoRow}>
-                  <ThemedText style={styles.previewInfoLabel}>Total</ThemedText>
-                  <ThemedText style={[styles.previewInfoValue, { fontSize: 20, fontWeight: "800" }]}>$40.00</ThemedText>
+                  <ThemedText style={styles.previewInfoLabel}>Next step</ThemedText>
+                  <ThemedText style={styles.previewInfoValue}>{formatDelay(previewWorkflow.delayMinutes)}</ThemedText>
                 </View>
               </GlassCard>
-
-              <View style={styles.previewButton}>
-                <ThemedText style={styles.previewButtonText}>View Appointment</ThemedText>
-              </View>
 
               <ThemedText style={styles.previewFooterNote}>
                 If you need to make any changes, please{"\n"}contact the business directly.
               </ThemedText>
 
-              <ThemedText style={styles.previewBranding}>Sent via BookFlow</ThemedText>
+              <ThemedText style={styles.previewBranding}>BookFlowX workflow preview</ThemedText>
             </ScrollView>
 
             <Pressable style={styles.previewClose} onPress={() => setPreviewModalVisible(false)}>
@@ -397,7 +382,13 @@ export default function WorkflowsScreen() {
               </Pressable>
             </View>
 
-            {workflows.length === 0 ? (
+            {loadError ? (
+              <Pressable style={styles.emptyState} onPress={loadWorkflows}>
+                <Feather name="refresh-cw" size={32} color="#00D4FF" />
+                <ThemedText style={styles.emptyTitle}>Could not load workflows</ThemedText>
+                <ThemedText style={styles.emptyDesc}>Check your connection and tap to try again.</ThemedText>
+              </Pressable>
+            ) : workflows.length === 0 ? (
               <View style={styles.emptyState}>
                 <Feather name="zap" size={64} color="rgba(255,255,255,0.1)" />
                 <ThemedText style={styles.emptyTitle}>{t('workflows.intelligentTriggers')}</ThemedText>
@@ -446,17 +437,17 @@ const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: "#0A0A0F" },
   overlay: { flex: 1 },
   headerRow: { flexDirection: "column", gap: 16, marginBottom: 40 },
-  title: { fontSize: 40, fontWeight: "800", color: "#fff", letterSpacing: -2 },
+  title: { fontSize: 28, fontWeight: "800", color: "#fff", letterSpacing: -0.5 },
   addBtn: { flexDirection: "row", alignItems: "center", alignSelf: "flex-start", backgroundColor: "#00D4FF", paddingHorizontal: 16, paddingVertical: 10, borderRadius: 24, gap: 8 },
   addBtnText: { color: "#0A0A0F", fontWeight: "700", fontSize: 14 },
-  glassCard: { backgroundColor: "#111827", borderRadius: 24, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)", marginBottom: 16, overflow: "hidden" },
-  workflowCard: { padding: 24 },
+  glassCard: { backgroundColor: "#111827", borderRadius: 20, borderWidth: 1, borderColor: "rgba(0,212,255,0.16)", marginBottom: 24, overflow: "hidden" },
+  workflowCard: { padding: 16 },
   cardHeader: { flexDirection: "row", justifyContent: "space-between", alignItems: "center", marginBottom: 20 },
   triggerBadge: { backgroundColor: "rgba(255,255,255,0.1)", paddingHorizontal: 12, paddingVertical: 6, borderRadius: 12 },
   triggerBadgeText: { fontSize: 11, fontWeight: "700", color: "rgba(255,255,255,0.6)", letterSpacing: 0.5 },
   activeToggleRow: { flexDirection: "row", alignItems: "center", gap: 8 },
   activeText: { fontSize: 11, fontWeight: "700", color: "#fff" },
-  workflowName: { fontSize: 24, fontWeight: "700", color: "#fff", marginBottom: 8 },
+  workflowName: { fontSize: 20, fontWeight: "700", color: "#fff", marginBottom: 8 },
   timingRow: { flexDirection: "row", alignItems: "center", gap: 8, marginBottom: 12 },
   timingText: { fontSize: 15, color: "rgba(255,255,255,0.8)", fontWeight: "600" },
   workflowDescription: { fontSize: 14, color: "rgba(255,255,255,0.4)", lineHeight: 20, marginBottom: 20 },

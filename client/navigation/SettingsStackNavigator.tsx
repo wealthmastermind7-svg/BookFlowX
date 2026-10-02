@@ -3,6 +3,8 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import SettingsScreen from "@/screens/SettingsScreen";
 import SharePreviewScreen from "@/screens/SharePreviewScreen";
 import WorkflowsScreen from "@/screens/WorkflowsScreen";
+import AIAssistantScreen from "@/screens/AIAssistantScreen";
+import ServicesScreen from "@/screens/ServicesScreen";
 import { useScreenOptions } from "@/hooks/useScreenOptions";
 
 export type SettingsStackParamList = {
@@ -13,6 +15,8 @@ export type SettingsStackParamList = {
     slug: string;
   };
   Workflows: undefined;
+  AIAssistant: undefined;
+  Services: undefined;
 };
 
 const Stack = createNativeStackNavigator<SettingsStackParamList>();
@@ -43,6 +47,8 @@ export default function SettingsStackNavigator() {
           headerTitle: "Workflows",
         }}
       />
+      <Stack.Screen name="AIAssistant" component={AIAssistantScreen} options={{ headerTitle: "AI Assistant" }} />
+      <Stack.Screen name="Services" component={ServicesScreen} options={{ headerTitle: "Viewing types" }} />
     </Stack.Navigator>
   );
 }

@@ -18,7 +18,8 @@ import { Spacing, BorderRadius } from "@/constants/theme";
 import { ThemedView } from "@/components/ThemedView";
 import { ThemedText } from "@/components/ThemedText";
 import { BookingFlowParamList } from "@/navigation/BookingFlowNavigator";
-import { StorageService, Service } from "@/lib/storage";
+import { Service } from "@/lib/storage";
+import { api, type Service as ApiService, type TimeSlot } from "@/lib/api";
 import { formatPrice } from "@/lib/currency";
 import { useI18n } from "@/contexts/I18nContext";
 
@@ -26,20 +27,21 @@ type Navigation = NativeStackNavigationProp<BookingFlowParamList>;
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
 
+const toBookingService = (service: ApiService): Service => ({
+  id: service.id,
+  name: service.name,
+  duration: service.duration,
+  price: service.price,
+  description: service.description ?? undefined,
+  upsells: service.upsells ?? undefined,
+});
+
 const SPRING_CONFIG = {
   damping: 15,
   mass: 0.3,
   stiffness: 150,
   overshootClamping: true,
 };
-
-  const TIME_SLOTS = [
-    "09:00 AM", "09:30 AM", "10:00 AM",
-    "10:30 AM", "11:00 AM", "11:30 AM",
-    "12:00 PM", "12:30 PM", "01:00 PM",
-    "01:30 PM", "02:00 PM", "02:30 PM",
-    "03:00 PM", "03:30 PM", "04:00 PM",
-  ];
 
 function ProgressRing({ step, total }: { step: number; total: number }) {
   const { theme, isDark } = useTheme();
@@ -283,15 +285,72 @@ export default function SelectTimeScreen() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [service, setService] = useState<Service | null>(null);
+  const [serviceLoading, setServiceLoading] = useState(true);
+  const [serviceLoadError, setServiceLoadError] = useState(false);
+  const [serviceUnavailable, setServiceUnavailable] = useState(false);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
+  const [slotsLoading, setSlotsLoading] = useState(true);
+  const [slotsError, setSlotsError] = useState(false);
 
   useEffect(() => {
     loadService();
   }, [serviceId]);
 
+  useEffect(() => {
+    let active = true;
+    const loadSlots = async () => {
+      if (!serviceId || !service) {
+        setAvailableSlots([]);
+        setSlotsLoading(false);
+        return;
+      }
+      setSlotsLoading(true);
+      setSlotsError(false);
+      setSelectedTime(null);
+      try {
+        const day = selectedDate.toISOString().split("T")[0];
+        const slots = await api.getTimeSlots(day, serviceId);
+        if (active) setAvailableSlots(slots.filter(slot => slot.available && !slot.isBlocked));
+      } catch (error) {
+        console.error("Error loading viewing times:", error);
+        if (active) {
+          setAvailableSlots([]);
+          setSlotsError(true);
+        }
+      } finally {
+        if (active) setSlotsLoading(false);
+      }
+    };
+    loadSlots();
+    return () => { active = false; };
+  }, [selectedDate, serviceId, service?.id]);
+
+  const displayTime = (rawTime: string) => {
+    if (/\b(AM|PM)\b/i.test(rawTime)) return rawTime;
+    const [hourText, minuteText = "00"] = rawTime.split(":");
+    const hour = Number(hourText);
+    if (!Number.isFinite(hour)) return rawTime;
+    const period = hour >= 12 ? "PM" : "AM";
+    return `${String(hour % 12 || 12).padStart(2, "0")}:${minuteText} ${period}`;
+  };
+
   const loadService = async () => {
-    const services = await StorageService.getServices();
-    const found = services.find((s) => s.id === serviceId);
-    if (found) setService(found);
+    setServiceLoading(true);
+    setServiceLoadError(false);
+    setServiceUnavailable(false);
+    try {
+      await api.getOrCreateBusiness();
+      const services = await api.getServices();
+      const found = services.find((item) => item.id === serviceId && item.isActive !== false);
+      setService(found ? toBookingService(found) : null);
+      setServiceUnavailable(!found);
+    } catch (error) {
+      console.error("Error loading selected booking service:", error);
+      setService(null);
+      setServiceLoadError(true);
+    } finally {
+      setServiceLoading(false);
+    }
   };
 
   const dates = useMemo(() => {
@@ -359,11 +418,25 @@ export default function SelectTimeScreen() {
           <ThemedText style={styles.heroSubtitle}>{t('booking.premiumBooking')}</ThemedText>
         </View>
 
+        {(serviceLoading || serviceLoadError || serviceUnavailable) && (
+          <View style={styles.slotsMessage}>
+            <ThemedText style={styles.slotsMessageText}>
+              {serviceLoading
+                ? "Loading selected service…"
+                : serviceLoadError
+                  ? "Unable to load this service. Please go back and try again."
+                  : "This service is no longer available. Please go back and choose an active service."}
+            </ThemedText>
+          </View>
+        )}
+
         <View style={styles.datePickerSection}>
-          <Pressable style={styles.dateSelectorButton}>
+          <View style={styles.dateSelectorButton}>
             <ThemedText style={styles.dateSelectorLabel}>{t('booking.selectDate')}</ThemedText>
-            <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.6)" />
-          </Pressable>
+            <ThemedText style={styles.selectedDateLabel}>
+              {selectedDate.toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+            </ThemedText>
+          </View>
           <DateScrollPicker
             dates={dates}
             selectedDate={selectedDate}
@@ -372,16 +445,30 @@ export default function SelectTimeScreen() {
         </View>
 
         <View style={styles.timesSection}>
-          <View style={styles.timesGrid}>
-            {TIME_SLOTS.map((time) => (
-              <TimeSlotButton
-                key={time}
-                time={time}
-                isSelected={selectedTime === time}
-                onPress={() => setSelectedTime(time)}
-              />
-            ))}
-          </View>
+          {serviceLoading || serviceLoadError || serviceUnavailable ? null : slotsLoading ? (
+            <View style={styles.slotsMessage}>
+              <ThemedText style={styles.slotsMessageText}>Checking available viewing times…</ThemedText>
+            </View>
+          ) : slotsError ? (
+            <View style={styles.slotsMessage}>
+              <ThemedText style={styles.slotsMessageText}>Unable to load times for this date. Please try another date.</ThemedText>
+            </View>
+          ) : availableSlots.length === 0 ? (
+            <View style={styles.slotsMessage}>
+              <ThemedText style={styles.slotsMessageText}>No viewing times available on this date. Choose another day.</ThemedText>
+            </View>
+          ) : (
+            <View style={styles.timesGrid}>
+              {availableSlots.map((slot) => (
+                <TimeSlotButton
+                  key={slot.time}
+                  time={displayTime(slot.time)}
+                  isSelected={selectedTime === slot.time}
+                  onPress={() => setSelectedTime(slot.time)}
+                />
+              ))}
+            </View>
+          )}
         </View>
       </ScrollView>
 
@@ -464,30 +551,30 @@ const styles = StyleSheet.create({
   },
   heroSection: {
     alignItems: "center",
-    marginBottom: 40,
+    marginBottom: 24,
   },
   heroTitle: {
     fontFamily: "Inter-SemiBold",
-    fontSize: 72,
+    fontSize: 26,
     letterSpacing: -2,
     textAlign: "center",
     color: "#FFF",
   },
   heroSubtitle: {
     fontFamily: "Inter-SemiBold",
-    fontSize: 12,
-    letterSpacing: 4,
+    fontSize: 14,
+    letterSpacing: 0.3,
     color: "rgba(255,255,255,0.6)",
-    marginTop: -10,
+    marginTop: 6,
   },
   datePickerSection: {
     paddingHorizontal: Spacing.lg,
-    marginBottom: 40,
+    marginBottom: Spacing["2xl"],
   },
   dateSelectorButton: {
-    height: 56,
-    borderRadius: BorderRadius.md,
-    backgroundColor: "rgba(255,255,255,0.08)",
+    height: 52,
+    borderRadius: 20,
+    backgroundColor: "#111827",
     borderWidth: 1,
     borderColor: "rgba(255,255,255,0.2)",
     flexDirection: "row",
@@ -496,14 +583,19 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.xl, // Increased from Spacing.lg
     marginBottom: Spacing.lg,
     marginHorizontal: Spacing.lg, // Moves it in from the edges
-    width: SCREEN_WIDTH * 0.7, // Controlled width instead of full width
+    width: "100%",
     alignSelf: 'center', // Centers it horizontally
   },
   dateSelectorLabel: {
     fontFamily: "Inter-Light",
-    fontSize: 14,
-    letterSpacing: 2,
+    fontSize: 12,
+    letterSpacing: 0.2,
     color: "rgba(255,255,255,0.8)",
+  },
+  selectedDateLabel: {
+    fontFamily: "Inter-SemiBold",
+    fontSize: 14,
+    color: "#00D4FF",
   },
   datePickerContainer: {
     height: 90,
@@ -547,17 +639,30 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     gap: 12,
   },
+  slotsMessage: {
+    padding: Spacing.lg,
+    marginTop: Spacing.md,
+    borderRadius: 20,
+    borderWidth: 1,
+    borderColor: "rgba(0,212,255,0.18)",
+    backgroundColor: "#111827",
+  },
+  slotsMessageText: {
+    fontSize: 14,
+    textAlign: "center",
+    opacity: 0.72,
+  },
   timeSlotWrapper: {
     width: (SCREEN_WIDTH - Spacing.lg * 2 - 24) / 3,
   },
   timeSlot: {
-    aspectRatio: 1,
-    borderRadius: BorderRadius.md,
+    minHeight: 64,
+    borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
   },
   timeSlotText: {
-    fontSize: 22,
+    fontSize: 16,
     fontFamily: "Inter-Light",
   },
   timeSlotAmPm: {

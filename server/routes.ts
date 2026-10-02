@@ -1,4 +1,5 @@
 import type { Express, Request, Response } from "express";
+import { getCustomerBookingUrl } from "@shared/booking-links";
 import { createServer, type Server } from "node:http";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
@@ -219,17 +220,8 @@ function getEmbedOrigin(req: Request): string {
 }
 
 // Helper function to generate booking URL
-function getBookingUrlForBusiness(business: any, req: Request): string {
-  // API_DOMAIN is set at runtime for production deployments
-  const domain = process.env.API_DOMAIN || process.env.EXPO_PUBLIC_DOMAIN;
-  if (domain && !domain.includes('localhost')) {
-    const cleanDomain = domain.replace(/^https?:\/\//, '');
-    return `https://${cleanDomain}/book/${business.slug}`;
-  } else {
-    const host = req.get('host') || 'localhost:5000';
-    const protocol = req.protocol;
-    return `${protocol}://${host}/book/${business.slug}`;
-  }
+function getBookingUrlForBusiness(business: { slug: string }, _req: Request): string {
+  return getCustomerBookingUrl(business.slug);
 }
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -1715,9 +1707,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       ? `${baseUrl}/og/${business.slug}/${service.slug || service.id}.png`
       : `${baseUrl}/og/${business.slug}.png`;
     
-    const ogUrl = service 
-      ? `${baseUrl}/book/${business.slug}/${service.slug || service.id}`
-      : `${baseUrl}/book/${business.slug}`;
+    const ogUrl = getCustomerBookingUrl(business.slug, service ? service.slug || service.id : undefined);
     
     // Apple-style meta tags with secure_url for maximum compatibility
     return `

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, Pressable, ViewStyle } from "react-native";
+import { StyleSheet, Pressable, View, ViewStyle } from "react-native";
 import Animated, {
   useAnimatedStyle,
   useSharedValue,
@@ -69,42 +69,37 @@ export function Card({
     scale.value = withSpring(1, springConfig);
   };
 
+  const content = (
+    <>
+      {title ? <ThemedText type="h4" style={styles.cardTitle}>{title}</ThemedText> : null}
+      {description ? <ThemedText type="small" style={styles.cardDescription}>{description}</ThemedText> : null}
+      {children}
+    </>
+  );
+  const cardStyle = [
+    styles.card,
+    { backgroundColor: cardBackgroundColor, borderWidth: 1, borderColor: theme.borderLight },
+    style,
+  ];
   return (
     <Animated.View style={animatedStyle}>
-      <Pressable
+      {onPress ? <Pressable
         onPress={onPress}
+        accessibilityRole="button"
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-        style={[
-          styles.card,
-          {
-            backgroundColor: cardBackgroundColor,
-            borderWidth: 1,
-            borderColor: theme.borderLight,
-          },
-          style,
-        ]}
+        style={cardStyle}
       >
-        {title ? (
-          <ThemedText type="h4" style={styles.cardTitle}>
-            {title}
-          </ThemedText>
-        ) : null}
-        {description ? (
-          <ThemedText type="small" style={styles.cardDescription}>
-            {description}
-          </ThemedText>
-        ) : null}
-        {children}
-      </Pressable>
+        {content}
+      </Pressable> : <View style={cardStyle}>{content}</View>}
     </Animated.View>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    padding: Spacing.xl,
-    borderRadius: BorderRadius["2xl"],
+    padding: Spacing.lg,
+    borderRadius: BorderRadius.lg,
     shadowColor: "#00D4FF",
     shadowOffset: { width: 0, height: 5 },
     shadowOpacity: 0.06,

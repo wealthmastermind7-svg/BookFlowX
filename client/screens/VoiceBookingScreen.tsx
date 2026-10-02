@@ -137,7 +137,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     marginTop: Spacing.lg,
-    fontSize: 16,
+    fontSize: 14,
   },
   errorContainer: {
     flex: 1,
@@ -146,7 +146,7 @@ const styles = StyleSheet.create({
     padding: Spacing["2xl"],
   },
   errorTitle: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: "600",
     marginTop: Spacing.xl,
     marginBottom: Spacing.sm,
@@ -175,12 +175,12 @@ const styles = StyleSheet.create({
     padding: Spacing["2xl"],
   },
   title: {
-    fontSize: 36,
+    fontSize: 28,
     fontWeight: "700",
     marginBottom: Spacing.md,
   },
   subtitle: {
-    fontSize: 16,
+    fontSize: 14,
     textAlign: "center",
     marginBottom: Spacing["2xl"],
   },
