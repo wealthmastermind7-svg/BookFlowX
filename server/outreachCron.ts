@@ -330,7 +330,7 @@ export async function runKimiProspecting(niche: string, city: string, verify = t
   }
 }
 
-export async function runDailyOutreach(): Promise<{ sent: number; failed: number; niche: string; city: string }> {
+export async function runDailyOutreach(): Promise<{ sent: number; failed: number; niche: string; city: string; leads?: Array<ProspectedLead & { _sent: boolean }> }> {
   const { niche, city } = getNextNicheCity();
   console.log(`[OutreachCron] === Daily Outreach Starting === Niche: ${niche}, City: ${city}`);
 

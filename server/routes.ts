@@ -1901,22 +1901,24 @@ document.getElementById('modal').addEventListener('click', function(e) {
       // Monetization Gate: Check if business is premium or has active voice subscription
       // DISABLED: Bypassing expiration check to fix "Booking link expired" issue for all users.
       if (false) {
-        const voiceSub = await storage.getVoiceSubscription(business.id);
-        const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
+        // The handler has already checked business; unreachable code is not flow-narrowed.
+        const bookingBusiness = business!;
+        const voiceSub = await storage.getVoiceSubscription(bookingBusiness.id);
+        const hasActiveVoiceSub = voiceSub?.status === "active" && voiceSub?.tier !== "free";
 
         if (!hasActiveVoiceSub) {
-          const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+          const trialExpiry = bookingBusiness.premiumExpiresAt ? new Date(bookingBusiness.premiumExpiresAt!) : null;
           const now = new Date();
-          const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+          const createdAt = bookingBusiness.createdAt ? new Date(bookingBusiness.createdAt!) : now;
           
           {
             const trialDays = 7;
             const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
             const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
 
-            if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
+            if (!isWithinTrial && (!trialExpiry || trialExpiry! < now)) {
               if (expiredHtmlContent) {
-                return res.type("text/html").send(expiredHtmlContent.replace(/{{businessName}}/g, business.name));
+                return res.type("text/html").send(expiredHtmlContent.replace(/{{businessName}}/g, bookingBusiness.name));
               }
               return res.status(403).send(`
                 <!DOCTYPE html>
@@ -1936,7 +1938,7 @@ document.getElementById('modal').addEventListener('click', function(e) {
                   <div class="card">
                     <span class="logo">BookFlow</span>
                     <h1>Booking link expired</h1>
-                    <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
+                    <p>The booking link for <strong>${bookingBusiness.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
                   </div>
                 </body>
                 </html>
@@ -1999,18 +2001,20 @@ document.getElementById('modal').addEventListener('click', function(e) {
       // Monetization Gate: Check if business is premium or has active voice subscription
       // DISABLED: Bypassing expiration check to fix "Booking link expired" issue for all users.
       if (false) {
-        const voiceSub = await storage.getVoiceSubscription(business.id);
-        const hasActiveVoiceSub = !!voiceSub && voiceSub.status === "active" && voiceSub.tier !== "free";
+        // The handler has already checked business; unreachable code is not flow-narrowed.
+        const bookingBusiness = business!;
+        const voiceSub = await storage.getVoiceSubscription(bookingBusiness.id);
+        const hasActiveVoiceSub = voiceSub?.status === "active" && voiceSub?.tier !== "free";
 
         if (!hasActiveVoiceSub) {
-          const trialExpiry = business.premiumExpiresAt ? new Date(business.premiumExpiresAt) : null;
+          const trialExpiry = bookingBusiness.premiumExpiresAt ? new Date(bookingBusiness.premiumExpiresAt!) : null;
           const now = new Date();
-          const createdAt = business.createdAt ? new Date(business.createdAt) : now;
+          const createdAt = bookingBusiness.createdAt ? new Date(bookingBusiness.createdAt!) : now;
           const trialDays = process.env.NODE_ENV === 'development' ? 30 : 7;
           const trialPeriodMs = trialDays * 24 * 60 * 60 * 1000;
           const isWithinTrial = (now.getTime() - createdAt.getTime()) < trialPeriodMs;
 
-          if (!isWithinTrial && (!trialExpiry || trialExpiry < now)) {
+          if (!isWithinTrial && (!trialExpiry || trialExpiry! < now)) {
             return res.status(402).send(`
               <!DOCTYPE html>
               <html>
@@ -2029,7 +2033,7 @@ document.getElementById('modal').addEventListener('click', function(e) {
               <div class="card">
                 <span class="logo">BookFlow</span>
                 <h1>Booking link expired</h1>
-                <p>The booking link for <strong>${business.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
+                <p>The booking link for <strong>${bookingBusiness.name}</strong> has expired. Please contact the business owner directly to book your appointment.</p>
               </div>
             </body>
             </html>
@@ -2422,7 +2426,7 @@ document.getElementById('modal').addEventListener('click', function(e) {
     try {
       const { businessId } = req.params;
       const limit = parseInt(req.query.limit as string) || 50;
-      const calls = await storage.getVoiceCallLogs(businessId, limit);
+      const calls = await storage.getVoiceCallLogs(businessId);
       
       res.json({ calls });
     } catch (error) {
@@ -2614,6 +2618,8 @@ document.getElementById('modal').addEventListener('click', function(e) {
       const subscription = voiceSub || { tier: 'free', status: 'inactive', minutesLimit: 0, minutesUsed: 0 };
       const usage = voiceSub ? await storage.checkVoiceMinutesAvailable(businessId) : { available: false, remaining: 0, percentUsed: 0, limit: 0, used: 0 };
       const stats = voiceSub ? await storage.getVoiceUsageStats(businessId) : { totalCalls: 0, bookingsCreated: 0, conversionRate: 0 };
+      const remainingMinutes = "remaining" in usage ? usage.remaining : usage.remainingMinutes;
+      const callStats = "totalCalls" in stats ? stats : undefined;
       
       const html = `<!DOCTYPE html>
 <html lang="en">
@@ -2673,29 +2679,29 @@ document.getElementById('modal').addEventListener('click', function(e) {
       <p style="color: rgba(255,255,255,0.5); font-size: 13px;">${subscription.minutesLimit} minutes/month</p>
       
       <div class="usage-bar">
-        <div class="usage-fill ${usage.remaining < 10 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
+        <div class="usage-fill ${remainingMinutes < 10 ? 'warning' : ''}" style="width: ${Math.min((subscription.minutesUsed / subscription.minutesLimit) * 100, 100)}%"></div>
       </div>
       <div style="display: flex; justify-content: space-between; font-size: 12px; color: rgba(255,255,255,0.5);">
         <span>${subscription.minutesUsed} min used</span>
-        <span>${usage.remaining} min remaining</span>
+        <span>${remainingMinutes} min remaining</span>
       </div>
 
       <div class="stats-row">
         <div class="stat">
-          <div class="stat-value">${stats.totalCalls}</div>
+          <div class="stat-value">${callStats?.totalCalls}</div>
           <div class="stat-label">CALLS</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${stats.bookingsCreated}</div>
+          <div class="stat-value">${callStats?.bookingsCreated}</div>
           <div class="stat-label">BOOKINGS</div>
         </div>
         <div class="stat">
-          <div class="stat-value">${stats.totalCalls > 0 ? Math.round((stats.bookingsCreated / stats.totalCalls) * 100) : 0}%</div>
+          <div class="stat-value">${callStats && callStats.totalCalls > 0 ? Math.round((callStats.bookingsCreated / callStats.totalCalls) * 100) : 0}%</div>
           <div class="stat-label">CONVERSION</div>
         </div>
       </div>
 
-      ${subscription.stripeSubscriptionId ? `<button class="btn btn-secondary" onclick="openBillingPortal()">Manage Subscription</button>` : ''}
+      ${"stripeSubscriptionId" in subscription && subscription.stripeSubscriptionId ? `<button class="btn btn-secondary" onclick="openBillingPortal()">Manage Subscription</button>` : ''}
     </div>
 
     <h3 style="font-size: 14px; color: rgba(255,255,255,0.5); margin-bottom: 16px; letter-spacing: 1px;">AVAILABLE PLANS</h3>
