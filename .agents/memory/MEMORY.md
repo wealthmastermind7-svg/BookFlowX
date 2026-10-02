@@ -1,1 +1,2 @@
 - [Property positioning and existing customers](property-positioning.md) — keep the property-first message for new users without rewriting existing businesses' data.
+- [Stripe credential scoping](stripe-credentials.md) — keep connector-managed dev/live credentials separate; development authentication does not establish production readiness.

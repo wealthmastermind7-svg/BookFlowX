@@ -282,11 +282,11 @@ async function initStripe() {
     const webhookBaseUrl = `https://${process.env.REPLIT_DOMAINS?.split(",")[0]}`;
     
     try {
-      const result = await stripeSync.findOrCreateManagedWebhook(
+      const webhook = await stripeSync.findOrCreateManagedWebhook(
         `${webhookBaseUrl}/api/stripe/webhook`
       );
-      if (result?.webhook?.url) {
-        log(`Webhook configured: ${result.webhook.url}`);
+      if (webhook?.url) {
+        log(`Webhook configured: ${webhook.url}`);
       } else {
         log("Webhook setup skipped - no URL returned");
       }
