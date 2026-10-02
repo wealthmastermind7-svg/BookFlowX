@@ -6,7 +6,7 @@
   <title>Book a Property Viewing</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
     
@@ -335,7 +335,7 @@
 </head>
 <body>
   <div id="loading" class="loading-overlay">
-    <div class="loading-text">BookFlow</div>
+      <div class="loading-text">BOOKFLOW</div>
     <div class="loading-bar"></div>
   </div>
 
@@ -354,7 +354,7 @@
           <span>Voice Assistant</span>
         </a>
       </div>
-      <p>Property Viewing · <span id="business-tagline">Premium Booking</span></p>
+      <p><span id="business-tagline">Property Viewing Bookings</span></p>
       <a href="#" id="voice-link" class="voice-link">
         <div class="voice-content">
           <div class="voice-icon">
@@ -376,7 +376,9 @@
       </a>
     </div>
 
-    <div class="trust-strip">Confirmation sent via 📱 SMS · 📧 Email · 📞 Call</div>
+    <div style="display:flex;align-items:center;gap:6px;background:rgba(193,127,62,0.08);border:1px solid rgba(193,127,62,0.2);border-radius:100px;padding:8px 16px;margin-bottom:24px;width:fit-content">
+      <span style="font-size:12px;color:#C17F3E;font-weight:500">Confirmation sent via 📱 SMS · 📧 Email · 📞 Call</span>
+    </div>
 
     <!-- Screen 1: Services -->
     <div id="screen-1" class="screen active">
@@ -448,7 +450,10 @@
       </div>
 
       <div class="confirmation-channels">
-        <div class="channel-icons">📱 SMS · 📞 Call · 📧 Email · 💬 Chat</div>
+        <div class="channel-pill">📱 SMS</div>
+        <div class="channel-pill">📞 Call</div>
+        <div class="channel-pill">📧 Email</div>
+        <div class="channel-pill">💬 Chat</div>
         <div class="channel-caption">We'll confirm your viewing across all channels</div>
       </div>
       
@@ -456,6 +461,17 @@
         <div class="summary-item"><span class="summary-label">Booking ID</span><span id="confirm-id">-</span></div>
         <div class="summary-item"><span class="summary-label">Service</span><span id="confirm-service">-</span></div>
         <div class="summary-item"><span class="summary-label">Date & Time</span><span id="confirm-datetime">-</span></div>
+      </div>
+
+      <div style="margin-top:24px;background:#FFF8F0;border:1px solid rgba(193,127,62,0.2);border-radius:20px;padding:24px;text-align:center">
+        <div style="font-size:13px;font-weight:600;color:#C17F3E;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Track your viewing</div>
+        <div style="font-family:'Playfair Display',Georgia,serif;font-size:20px;font-weight:700;color:#1C1410;margin-bottom:8px">Download the BookFlow app</div>
+        <div style="font-size:13px;color:#6B5744;line-height:1.6;margin-bottom:20px">Get reminders, track your viewing status, and rebook easily — all from your phone.</div>
+        <a href="https://apps.apple.com/app/bookflow" style="display:inline-flex;align-items:center;gap:10px;background:#1C1410;color:#FFFFFF;text-decoration:none;padding:13px 24px;border-radius:100px;font-size:14px;font-weight:600">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          Download on the App Store
+        </a>
+        <div style="font-size:11px;color:#8B6F47;margin-top:10px">Free · iOS · Android coming soon</div>
       </div>
       
       <button class="btn" id="btn-new-booking">Book Another Viewing</button>
